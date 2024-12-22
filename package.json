@@ -1,0 +1,15 @@
+{
+  "name": "@gamecenter/root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "lerna exec --scope @gamecenter/game-center -- yarn start"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "craco": "^0.0.3",
+    "lerna": "^8.1.9"
+  }
+}

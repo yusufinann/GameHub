@@ -1,0 +1,7 @@
+{
+  "packages": ["packages/game-center", "packages/tombala-game"],
+   "version": "independent",
+   "npmClient":"yarn",
+   "useWorksapaces":true
+ }
+ 
