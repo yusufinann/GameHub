@@ -1,13 +1,35 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+   margin: 0; 
+  padding: 0;  
+  /* height: 100vh; /* Ekranın tamamını kapsar */
+  background-image: url('./assets/bg-green.png'); 
+  /* background-color: #f3eae8;   */
+  background-size: cover; /* Resmi ekranın tamamına yayar */
+  background-position: center; /* Resmi ortalar */
+  background-repeat: no-repeat; /* Resmin tekrarlanmasını engeller */
+  /* overflow: hidden; /* Sayfada kaydırma çubuğunu devre dışı bırakır */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px; /* Kaydırma çubuğunun genişliği */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(225, 8, 8, 0.1); /* Kaydırma çubuğunun arka planı */
+  border-radius: 10px; /* Köşeleri yuvarlatır */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4CAF50; /* Kaydırma çubuğunun rengi */
+  /*border-radius: 10px;  Köşeleri yuvarlatır */
+  /*transition: background 0.3s ease; /* Geçiş efekti ekler */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #45a049; /* Hover durumunda renk değişir */
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #388e3c; /* Tıklanma durumunda renk değişir */
 }
