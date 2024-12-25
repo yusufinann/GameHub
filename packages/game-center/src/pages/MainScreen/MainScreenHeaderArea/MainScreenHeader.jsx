@@ -8,9 +8,9 @@ function MainScreenHeader() {
       flexDirection: 'row',
       width: '100%',
       height: '30vh',
-      border: '1px solid red',
+      border: '2px solid rgb(26, 139, 121)',
       borderRadius: '10px',
-      backgroundColor: '#f0f0f0',
+    //backgroundColor: '#f0f0f0',
       position: 'relative',
       overflow: 'hidden', // Prevent overflow for animation
     }}>

@@ -21,7 +21,7 @@ const StyledSidebar = styled(Box, {
   transition: "width 0.3s ease",
   width: isExpanded ? "13vw" : "70px",
   [theme.breakpoints.down("md")]: {
-    width: isExpanded ? "25vw" : "70px",
+    width: isExpanded ? "20vw" : "70px",
   },
   [theme.breakpoints.down("sm")]: {
     width: "70px",

@@ -43,7 +43,7 @@ function MainScreenBottomArea() {
   }
 
   return (
-    <Box sx={{ width: '100%', padding: '20px' }}>
+    <Box sx={{ width: '100%', padding: '10px' }}>
       <Header />
       <Box
         sx={{
@@ -52,7 +52,7 @@ function MainScreenBottomArea() {
           justifyContent: 'center',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '15px',
+          gap: '10px',
         }}
       >
         {games.map((game) => (

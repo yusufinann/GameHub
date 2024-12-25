@@ -7,14 +7,13 @@ import {
   ListItemText,
   Avatar,
   Tooltip,
-  Tabs,
-  Tab,
   useMediaQuery,
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EventIcon from '@mui/icons-material/Event';
 import LockIcon from '@mui/icons-material/Lock';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 function RoomsSidebar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -22,7 +21,6 @@ function RoomsSidebar() {
   const isSmallScreen = useMediaQuery('(max-width: 1000px)');
 
   useEffect(() => {
-    // Küçük ekranlarda yan paneli otomatik olarak kapalı yap
     if (isSmallScreen) {
       setIsOpen(false);
     }
@@ -30,7 +28,6 @@ function RoomsSidebar() {
 
   const toggleSidebar = () => {
     setIsOpen((prevState) => {
-      // Yan panel kapandığında "All" sekmesini seçili yap
       if (prevState) {
         setSelectedTab('all');
       }
@@ -38,12 +35,12 @@ function RoomsSidebar() {
     });
   };
 
-  const handleTabChange = (event, newValue) => setSelectedTab(newValue);
+  const handleTabChange = (newValue) => setSelectedTab(newValue);
 
   const colors = {
-    private: '#FFD700', // Altın rengi
-    event: '#FF69B4', // Pembe
-    default: '#87CEEB', // Açık mavi
+    private: '#FFD700',
+    event: '#FF69B4',
+    default: '#87CEEB',
   };
 
   const rooms = [
@@ -57,6 +54,12 @@ function RoomsSidebar() {
     ? rooms
     : rooms.filter((room) => room.type === selectedTab);
 
+  const tabs = [
+    { label: 'All', value: 'all', icon: <ListAltIcon /> },
+    { label: 'Private', value: 'private', icon: <LockIcon /> },
+    { label: 'Event', value: 'event', icon: <EventIcon /> },
+  ];
+
   return (
     <Box
       sx={{
@@ -64,11 +67,13 @@ function RoomsSidebar() {
         margin: '10px',
         position: 'relative',
         height: '100%',
-        width: isOpen ? '20vw' : '50px',
+        width: isOpen ? '15vw' : '50px',
         transition: 'width 0.3s ease',
         borderRadius: '15px',
         overflow: 'auto',
         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <Box
@@ -98,21 +103,45 @@ function RoomsSidebar() {
       </Box>
 
       {isOpen && (
-        <Tabs
-          value={selectedTab}
-          onChange={handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          centered
+        <Box
           sx={{
-            backgroundColor: '#E0E0E0',
-            borderBottom: '1px solid #ccc',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            padding: '10px',
           }}
         >
-          <Tab label="All" value="all" />
-          <Tab label="Private" value="private" />
-          <Tab label="Event" value="event" />
-        </Tabs>
+          {tabs.map((tab) => (
+            <Tooltip key={tab.value} title={tab.label} placement="right" arrow>
+              <ListItem
+                button
+                selected={selectedTab === tab.value}
+                onClick={() => handleTabChange(tab.value)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  backgroundColor: selectedTab === tab.value ? '#E0E0E0' : '#FFF',
+                  '&:hover': {
+                    backgroundColor: '#D3D3D3',
+                  },
+                }}
+              >
+                <Avatar>{tab.icon}</Avatar>
+                {isOpen && (
+                  <ListItemText
+                    primary={tab.label}
+                    primaryTypographyProps={{
+                      fontWeight: '500',
+                    }}
+                  />
+                )}
+              </ListItem>
+            </Tooltip>
+          ))}
+        </Box>
       )}
 
       <Box
@@ -131,7 +160,7 @@ function RoomsSidebar() {
                 borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent:"center",
+                justifyContent: 'center',
                 gap: '12px',
                 backgroundColor: isOpen ? colors[room.type] : '#FFF',
                 color: isOpen ? '#FFF' : '#333',
