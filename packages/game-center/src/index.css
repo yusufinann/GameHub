@@ -1,14 +1,15 @@
 body {
-   margin: 0; 
-  padding: 0;  
-  /* height: 100vh; /* Ekranın tamamını kapsar */
-  background-image: url('./assets/bg-green.png'); 
-  /* background-color: #f3eae8;   */
-  background-size: cover; /* Resmi ekranın tamamına yayar */
-  background-position: center; /* Resmi ortalar */
-  background-repeat: no-repeat; /* Resmin tekrarlanmasını engeller */
-  /* overflow: hidden; /* Sayfada kaydırma çubuğunu devre dışı bırakır */
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  min-height: 100vh;  /* Sayfa içerik büyüdükçe daha fazla alan kaplar */
+  background-image: url('./assets/bg-green.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow-x: hidden;
 }
+
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {

@@ -1,32 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense } from 'react';
 import { Box, Typography } from '@mui/material';
 import LoadingSpinner from './components/LoadingSpinner';
 import Header from './components/Header';
-import GameCard from './components/GameCard';
 import { fetchGiveaways } from './api';
+import useMainScreenBottomArea from './useMainScreenBottomArea';
+
+// Lazy loading GameCard component
+const GameCard = React.lazy(() => import('./components/GameCard'));
 
 function MainScreenBottomArea() {
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const loadGames = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchGiveaways();
-        setGames(data);
-      } catch (error) {
-        setError('Failed to load games. Please try again later.');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadGames();
-  }, []);
+  const { games, loading, error } = useMainScreenBottomArea(fetchGiveaways);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -55,13 +38,15 @@ function MainScreenBottomArea() {
           gap: '10px',
         }}
       >
-        {games.map((game) => (
-          <GameCard
-            key={game.id}
-            thumbnail={game.thumbnail}
-            openGiveawayUrl={game.open_giveaway_url}
-          />
-        ))}
+        <Suspense fallback={<LoadingSpinner />}>
+          {games.map((game) => (
+            <GameCard
+              key={game.id}
+              thumbnail={game.thumbnail || '/default-thumbnail.png'}  // Default thumbnail if not available
+              openGiveawayUrl={game.open_giveaway_url}
+            />
+          ))}
+        </Suspense>
       </Box>
     </Box>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -7,19 +7,19 @@ import SidebarHeader from './components/SidebarHeader';
 import SidebarMenu from './components/SidebarMenu';
 import SidebarFooter from './components/SidebarFooter';
 
-// Modify StyledSidebar to handle collapse
+// StyledSidebar to handle collapse
 const StyledSidebar = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isExpanded'
 })(({ theme, isExpanded }) => ({
   height: "100vh",
-  position: 'sticky', // Important for absolute positioning of child elements
+  position: 'sticky',
   top: 0,
   backgroundColor: "#caecd5",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   transition: "width 0.3s ease",
-  width: isExpanded ? "13vw" : "70px",
+  width: isExpanded ? "13vw" : "70px", // Width based on isExpanded state
   [theme.breakpoints.down("md")]: {
     width: isExpanded ? "20vw" : "70px",
   },
@@ -28,14 +28,13 @@ const StyledSidebar = styled(Box, {
   },
 }));
 
-
-// Modify Header Component
+// Collapsible Header Component
 const CollapsibleHeader = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isExpanded'
 })(({ theme, isExpanded }) => ({
   position: 'relative',
   '.MuiTypography-root': {
-    display: isExpanded ? 'block' : 'none',
+    display: isExpanded ? 'block' : 'none', // Show text when expanded
   },
   '.MuiAvatar-root': {
     width: isExpanded ? '8vw' : '40px',
@@ -44,39 +43,49 @@ const CollapsibleHeader = styled(Box, {
   },
 }));
 
+// Expand Icon Button Styled
+const ExpandIconButton = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  right: '5px',
+  top: '5px',
+  zIndex: 1,
+  '&:hover': { 
+    backgroundColor: '#269366', 
+    color: 'white' 
+  },
+  [theme.breakpoints.down("sm")]: {
+    right: '10px', // Adjust position on small screens if necessary
+    top: '10px',
+  },
+}));
+
 function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  // Auto-collapse on mobile
+  const [isExpanded, setIsExpanded] = useState(false);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Check if the screen is small
+
+  // Auto-collapse on small or medium screens
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 600) {
-        setIsExpanded(false);
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (isSmallScreen) {
+      setIsExpanded(false); // Collapse the sidebar on small and medium screens
+    }
+  }, [isSmallScreen]);
 
   return (
-    <StyledSidebar isExpanded={isExpanded}>
-      <IconButton
-        onClick={() => setIsExpanded(!isExpanded)}
-        sx={{
-          position: 'absolute',
-          right: 5,
-          top: 5,
-          zIndex: 1,
-          '&:hover': { bgcolor: '#269366', color: 'white' }
-        }}
-      >
-        {isExpanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-      </IconButton>
+    <StyledSidebar 
+      isExpanded={isExpanded}
+    >
+      {/* Only show the expand icon on larger screens */}
+      {!isSmallScreen && (
+        <ExpandIconButton
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </ExpandIconButton>
+      )}
 
       <CollapsibleHeader isExpanded={isExpanded}>
-        <SidebarHeader />
+        <SidebarHeader isExpanded={isExpanded} />
       </CollapsibleHeader>
 
       <Box sx={{ 

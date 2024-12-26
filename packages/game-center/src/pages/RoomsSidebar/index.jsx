@@ -44,10 +44,10 @@ function RoomsSidebar() {
   };
 
   const rooms = [
-    { id: 1, name: 'Private Room 1', type: 'private', description: 'Confidential discussions.' },
-    { id: 2, name: 'Private Room 2', type: 'private', description: 'Personal space.' },
-    { id: 3, name: 'Event Room 1', type: 'event', description: 'Upcoming event discussions.' },
-    { id: 4, name: 'Event Room 2', type: 'event', description: 'Live event planning.' },
+    { id: 1, name: 'Private Room 1', type: 'private', description: 'Play private game' },
+    { id: 2, name: 'Private Room 2', type: 'private', description: 'Private game' },
+    { id: 3, name: 'Event Room 1', type: 'event', description: 'Lets event' },
+    { id: 4, name: 'Event Room 2', type: 'event', description: 'Play event game with us' },
   ];
 
   const filteredRooms = selectedTab === 'all'
