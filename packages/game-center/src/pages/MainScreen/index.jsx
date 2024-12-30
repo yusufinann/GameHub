@@ -1,9 +1,8 @@
 import { Box } from '@mui/material';
 import React from 'react';
 import MainScreenHeader from './MainScreenHeaderArea/MainScreenHeader';
-import MainScreenMiddleArea from './MainScreenMiddleArea';
-import MainScreenBottomArea from './MainScreenBottomArea';
-
+import MainScreenMiddleArea from './MainScreenMiddleArea/index';
+import MainScreenBottomArea from './MainScreenBottomArea/index';
 function MainScreen() {
    // Access theme for breakpoints
 

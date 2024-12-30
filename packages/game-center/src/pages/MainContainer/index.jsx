@@ -3,6 +3,7 @@ import Sidebar from "../Sidebar";
 import { Box, useTheme } from "@mui/material";
 import RoomsSidebar from "../RoomsSidebar";
 import { Outlet } from "react-router-dom";
+import { LobbyProvider } from "../MainScreen/MainScreenMiddleArea/LobbyContext";
 
 function MainContainer() {
   const theme = useTheme();
@@ -11,6 +12,8 @@ function MainContainer() {
       {/* Left Sidebar */}
         <Sidebar />    
       {/*Content Section */}
+      
+            <LobbyProvider>
       <Box    sx={{
         display: 'flex',
         height: '100%',
@@ -36,6 +39,7 @@ function MainContainer() {
      
       {/* Right Sidebar (Rooms Sidebar) */}
       <RoomsSidebar />
+      </LobbyProvider>
     </Box>
   );
 }

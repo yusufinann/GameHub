@@ -5,6 +5,7 @@ import MainScreen from "../pages/MainScreen";
 import SettingsPage from "../pages/SettingsPage";
 import LoginPage from "../pages/LoginPage";
 import ProtectedRoute from "./protectRoute";
+import LobbyPage from "../pages/GameLobbyPage";
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,7 @@ const AppRouter = () => {
         >
           <Route index element={<MainScreen />} /> {/* Default middle */}
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="lobby/:link" element={<LobbyPage />} />
         </Route>
       </Routes>
     </Router>
