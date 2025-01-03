@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, useMediaQuery } from '@mui/material';
 import { SidebarHeader } from './components/SidebarHeader';
 import { TabList } from './components/TabList';
-import { RoomList } from './components/RoomList';
+import { LobbyList } from './components/LobbyList';
 import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/LobbyContext';
 
-const RoomsSidebar = () => {
+const LobbiesSidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [selectedTab, setSelectedTab] = useState('all');
   const isSmallScreen = useMediaQuery('(max-width: 1000px)');
@@ -57,7 +57,7 @@ const RoomsSidebar = () => {
           onTabChange={setSelectedTab}
         />
       )}
-      <RoomList
+      <LobbyList
         lobbies={lobbies}
         isOpen={isOpen}
         colors={colors}
@@ -67,4 +67,4 @@ const RoomsSidebar = () => {
   );
 };
 
-export default RoomsSidebar;
+export default LobbiesSidebar;

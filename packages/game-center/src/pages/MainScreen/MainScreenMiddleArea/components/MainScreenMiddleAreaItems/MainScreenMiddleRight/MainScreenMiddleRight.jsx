@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Grid, Container } from '@mui/material';
+import { Box, Button, Typography, Grid, Container, useTheme } from '@mui/material';
 import React, { useState } from 'react';
 import { Gamepad, Star, Timer } from '@mui/icons-material';
 
@@ -35,11 +35,16 @@ const games = [
 
 function MainScreenMiddleRight() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-
+  const theme=useTheme();
   return (
     <Box
       sx={{
-        width: '40%',
+        [theme.breakpoints.up('md')]: {
+          width: '40%',
+        },
+        [theme.breakpoints.down('md')]: {
+          width: '100%',
+        },
         height: '60vh',
         background: 'linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%)',
         borderRadius: '25px',

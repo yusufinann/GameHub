@@ -1,16 +1,17 @@
-import { Box } from "@mui/material";
 import React from "react";
+import { Box} from "@mui/material";
 import MainScreenMiddleLeft from "./components/MainScreenMiddleAreaItems/MainScreenMiddleLeft";
 import MainScreenMiddleRight from "./components/MainScreenMiddleAreaItems/MainScreenMiddleRight/MainScreenMiddleRight";
+
 function MainScreenMiddleArea() {
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: {
-          xs: "column", // Küçük ekranlarda alt alta
-          sm: "column", // Orta küçük ekranlarda da alt alta
-          md: "row",    // Daha büyük ekranlarda yan yana
+          xs: "column", // Küçük ekranlarda dikey düzen
+          md: "row",    // Daha büyük ekranlarda yatay düzen
         },
         marginTop: "20px",
         gap: "10px",
@@ -18,8 +19,7 @@ function MainScreenMiddleArea() {
         width: "100%",
       }}
     >
-        <MainScreenMiddleLeft />
-      
+      <MainScreenMiddleLeft />
       <MainScreenMiddleRight />
     </Box>
   );

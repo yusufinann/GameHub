@@ -1,39 +1,27 @@
-export const mainScreenStyles = {
-    container: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
+import { Margin } from "@mui/icons-material";
+
+export const mainScreenStyles = (theme) => ({
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    [theme.breakpoints.up('md')]: {
       width: '60%',
-      height: '60vh',
-      borderRadius: '20px',
-      boxShadow: '0px 10px 30px rgba(0,0,0,0.1)',
-      overflow: 'hidden',
-      position: 'relative',
-      transition: 'transform 0.3s ease-in-out',
-      padding: { xs: '15px', sm: '20px' },
     },
-    overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
+    [theme.breakpoints.down('md')]: {
       width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex: -1,
     },
-    bottomBar: {
-      position: 'absolute',
-      bottom: '10px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '100%',
-      height: '5px',
-      backgroundColor: '#fff',
-      borderRadius: '10px',
-    },
-  };
-  
+    height: '60vh',
+    borderRadius: '20px',
+    boxShadow: '0px 10px 30px rgba(0,0,0,0.1)',
+    overflow: 'hidden',
+    position: 'relative',
+    transition: 'transform 0.3s ease-in-out',
+    padding: { xs: '15px', sm: '20px' },
+  },
+});
+
   export const sliderStyles = {
     imageContainer: {
       position: 'absolute',

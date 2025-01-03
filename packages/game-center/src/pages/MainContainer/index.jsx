@@ -1,9 +1,9 @@
 import React from "react";
 import Sidebar from "../Sidebar";
 import { Box, useTheme } from "@mui/material";
-import RoomsSidebar from "../RoomsSidebar";
 import { Outlet } from "react-router-dom";
 import { LobbyProvider } from "../MainScreen/MainScreenMiddleArea/LobbyContext";
+import LobbiesSidebar from "../LobbiesSidebar";
 
 function MainContainer() {
   const theme = useTheme();
@@ -37,8 +37,8 @@ function MainContainer() {
         },
       }}> <Outlet/></Box>
      
-      {/* Right Sidebar (Rooms Sidebar) */}
-      <RoomsSidebar />
+      {/* Right Sidebar (Lobbies Sidebar) */}
+      <LobbiesSidebar />
       </LobbyProvider>
     </Box>
   );
