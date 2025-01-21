@@ -42,7 +42,7 @@ const GameArea = ({ lobbyInfo, link, onDelete, members }) => {
           alignItems: 'center',
           gap: 1
         }}>
-          <GameIcon /> lobbyInfo.name
+          <GameIcon /> {lobbyInfo.lobbyName}
           <Typography variant="caption" sx={{
             bgcolor: '#1a237e',
             color: 'white',

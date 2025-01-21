@@ -7,7 +7,9 @@
   "scripts": {
     "start": "lerna exec --scope @gamecenter/game-center -- yarn start"
   },
-  "dependencies": {},
+  "dependencies": {
+    "is-plain-object": "^5.0.0"
+  },
   "devDependencies": {
     "craco": "^0.0.3",
     "lerna": "^8.1.9"

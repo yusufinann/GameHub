@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Avatar, Box, Typography, IconButton, Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../../shared/context/AuthContext';
+import { getUserData, logout } from '../api';
 
 const StyledHeader = styled(Box)(({ theme }) => ({
   height: '25vh',
@@ -20,6 +22,9 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   marginBottom: '5px',
   marginTop: '2rem',
   border: '2px solid #d5fdcd',
+  backgroundColor: '#3f51b5', // Avatar arka plan rengi
+  fontSize: '4rem', // Harfin boyutu
+  fontWeight: 'bold', // Harfin kalınlığı
 }));
 
 const UserInfoContainer = styled(Box)(({ theme }) => ({
@@ -43,24 +48,50 @@ const StyledLogoutButton = styled(IconButton, {
 
 function SidebarHeader({ isExpanded }) {
   const navigate = useNavigate();
+  const { logout: authLogout } = useAuthContext(); // AuthContext'ten logout fonksiyonunu al
+  const [user, setUser] = useState({ email: '', name: '' });
 
-  const handleLogout = () => {
-    // localStorage'dan belirli öğeleri kaldır
-    localStorage.removeItem('token');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await getUserData(); // api.js'den kullanıcı bilgilerini getir
+        setUser(userData);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
-    // Kullanıcıyı giriş sayfasına yönlendir
-    navigate('/login');
+    fetchUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // Oturum kapatma isteği gönder
+      await logout(); // api.js'den oturumu kapat
+    } catch (error) {
+      console.error('Error logging out:', error);
+      // Token geçersizse veya başka bir hata oluşursa, kullanıcıyı otomatik olarak çıkış yapmaya yönlendir
+      if (error.response && error.response.status === 401) {
+        console.log('Token geçersiz. Oturum sonlandırılıyor...');
+      }
+    } finally {
+      // Her durumda localStorage'ı temizle ve kullanıcıyı giriş sayfasına yönlendir
+      authLogout(); // AuthContext'teki logout fonksiyonunu çağır
+      navigate('/login'); // Kullanıcıyı giriş sayfasına yönlendir
+    }
   };
+
+  // Kullanıcının adının ilk harfini al
+  const initial = user.name ? user.name.charAt(0).toUpperCase() : '';
 
   return (
     <StyledHeader>
-      <StyledAvatar
-        src="/path/to/avatar.jpg"
-        alt="User"
-      />
+      <StyledAvatar>
+        {initial}
+      </StyledAvatar>
       <UserInfoContainer>
         <Typography variant="h6" fontWeight="bold">
-          X User
+          {user.name}
         </Typography>
         <Tooltip title="Logout" placement="top">
           <StyledLogoutButton isExpanded={isExpanded} onClick={handleLogout}>

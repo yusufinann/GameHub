@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useLobbyContext } from '../../LobbyContext';
+import { useLobbyContext } from '../../LobbyContext'; 
+import { useAuthContext } from '../../../../../shared/context/AuthContext';
 
 export const useLobbyForm = () => {
-  const { setExistingLobby,createLobby } = useLobbyContext();
+  const { createLobby } = useLobbyContext();
+  const { currentUser } = useAuthContext(); // Mevcut kullanıcı bilgilerini al
+
   const [formData, setFormData] = useState({
     lobbyName: '',
     eventType: 'normal',
@@ -12,15 +15,13 @@ export const useLobbyForm = () => {
     endTime: '',
     password: '',
     gameId: '',
+    maxMembers: 4, // Varsayılan değer olarak 4 kişi
   });
 
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [lobbyCode, setLobbyCode] = useState('');
-  const [lobbyLink, setLobbyLink] = useState('');
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success'
+    severity: 'success',
   });
 
   const handleChange = (event) => {
@@ -33,38 +34,34 @@ export const useLobbyForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const generatedLink = `${window.location.origin}/lobby/${generatedCode}`;
-
+      // Lobi verilerini hazırla
       const lobbyData = {
         lobbyName: formData.lobbyName,
-        eventType: formData.eventType,
-        startDate: formData.startDate,
-        startTime: formData.startTime,
-        endDate: formData.endDate,
-        endTime: formData.endTime,
+        lobbyType: formData.eventType,
+        startTime: formData.eventType === 'event' ? `${formData.startDate}T${formData.startTime}` : null,
+        endTime: formData.eventType === 'event' ? `${formData.endDate}T${formData.endTime}` : null,
         password: formData.password,
-        gameId: formData.gameId,
-        lobbyCode: generatedCode,
-        lobbyLink: generatedLink,
+        game: formData.gameId,
+        maxMembers: formData.maxMembers,
+        createdBy: currentUser.id, // Mevcut kullanıcının kimliği (ID)
       };
-
-      // Save to localStorage and context
-      localStorage.setItem('userLobby', JSON.stringify(lobbyData));
-      setExistingLobby(lobbyData);
-
-      setLobbyCode(generatedCode);
-      setLobbyLink(generatedLink);
-      setShowSuccess(true);
-      createLobby(lobbyData);
-      console.log(lobbyData);
-    } catch (error) {
+  
+      // Lobi oluştur
+      await createLobby(lobbyData);
+  
+      // Başarılı mesajı göster
       setSnackbar({
         open: true,
-        message: 'Lobi oluşturulurken bir hata oluştu',
+        message: 'Lobi başarıyla oluşturuldu!',
+        severity: 'success',
+      });
+    } catch (error) {
+      // Hata mesajı göster
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Lobi oluşturulurken bir hata oluştu.',
         severity: 'error',
       });
     }
@@ -72,13 +69,9 @@ export const useLobbyForm = () => {
 
   return {
     formData,
-    showSuccess,
-    lobbyCode,
-    lobbyLink,
     snackbar,
     setSnackbar,
     handleChange,
     handleSubmit,
-    setShowSuccess
   };
 };

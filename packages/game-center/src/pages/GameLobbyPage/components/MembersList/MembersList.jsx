@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Paper, List, Avatar, Tooltip, IconButton, Stack } from '@mui/material';
-import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, Person as PersonIcon } from '@mui/icons-material';
+import { Paper, List, Avatar, Tooltip,Stack } from '@mui/material';
+import {Person as PersonIcon } from '@mui/icons-material';
 import Header from './Header';
 import MemberItem from './MemberItem';
 

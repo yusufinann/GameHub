@@ -1,7 +1,19 @@
 import React from "react";
-import { Box, TextField, Button, Typography, IconButton, InputAdornment, FormControlLabel, Checkbox, Link, CircularProgress } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+  InputAdornment,
+  FormControlLabel,
+  Checkbox,
+  Link,
+  CircularProgress,
+} from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import useLoginForm from "../useLoginForm"; // Import the custom hook
+import QuickLoginSection from "./QuickLoginSection";
 
 function LoginForm() {
   const {
@@ -11,11 +23,14 @@ function LoginForm() {
     rememberMe,
     loading,
     error,
+    savedUser,
     handleEmailChange,
     handlePasswordChange,
     handleRememberMeChange,
     handleClickShowPassword,
     handleSubmit,
+    quickLogin,
+    handleUseDifferentAccount
   } = useLoginForm();
 
   const formStyles = {
@@ -65,80 +80,109 @@ function LoginForm() {
   };
 
   return (
-    <Box sx={{ maxWidth: "400px", width: "100%" }}>
-      <Typography
-        variant="h4"
-        sx={{
-          marginBottom: 4,
-          color: "black",
-          textAlign: "center",
-          fontWeight: "bold",
-          textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
-        }}
-      >
-        Login
-      </Typography>
-      <Box component="form" sx={formStyles} onSubmit={handleSubmit}>
-        <TextField
-          type="email"
-          label="Email Address"
-          name="email"
-          value={email}
-          onChange={handleEmailChange}
-          required
-          fullWidth
-          sx={textFieldStyles}
-          InputProps={{
-            sx: { height: "56px" },
-          }}
+    <Box sx={{ maxWidth: "400px", width: "100%", mx: "auto" }}>
+      {savedUser ? (
+        <QuickLoginSection
+          savedUser={savedUser}
+          quickLogin={quickLogin}
+          password={password}
+          handlePasswordChange={handlePasswordChange}
+          showPassword={showPassword}
+          handleClickShowPassword={handleClickShowPassword}
+          handleUseDifferentAccount={ handleUseDifferentAccount}
+          loading={loading}
         />
-        <TextField
-          type={showPassword ? "text" : "password"}
-          label="Password"
-          name="password"
-          value={password}
-          onChange={handlePasswordChange}
-          required
-          fullWidth
-          sx={textFieldStyles}
-          InputProps={{
-            sx: { height: "56px" },
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleClickShowPassword} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={rememberMe}
-              onChange={handleRememberMeChange}
-              color="primary"
+      ) : (
+        <>
+          <Typography
+            variant="h4"
+            sx={{
+              marginBottom: 4,
+              color: "black",
+              textAlign: "center",
+              fontWeight: "bold",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
+            }}
+          >
+            Login
+          </Typography>
+          <Box component="form" sx={formStyles} onSubmit={handleSubmit}>
+            <TextField
+              type="email"
+              label="Email Address"
+              name="email"
+              value={email}
+              onChange={handleEmailChange}
+              required
+              fullWidth
+              sx={textFieldStyles}
+              InputProps={{
+                sx: { height: "56px" },
+              }}
             />
-          }
-          label="Remember me"
-          sx={{ color: "black", marginY: 1 }}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          sx={buttonStyles}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
-        </Button>
-        {error && <Typography color="error" sx={{ textAlign: "center", marginTop: 2 }}>{error}</Typography>}
-        <Box sx={{ textAlign: "center", marginTop: 2 }}>
-          <Link href="#" sx={{ color: "black", textDecoration: "none", textShadow: "2px 2px 4px rgba(0,0,0,0.2)" }}>
-            Forgot password?
-          </Link>
-        </Box>
-      </Box>
+            <TextField
+              type={showPassword ? "text" : "password"}
+              label="Password"
+              name="password"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+              fullWidth
+              sx={textFieldStyles}
+              InputProps={{
+                sx: { height: "56px" },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={handleRememberMeChange}
+                  color="primary"
+                />
+              }
+              label="Remember me"
+              sx={{ color: "black", marginY: 1 }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={buttonStyles}
+              disabled={loading}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Login"
+              )}
+            </Button>
+            {error && (
+              <Typography
+                color="error"
+                sx={{ marginTop: 2, textAlign: "center" }}
+              >
+                {error}
+              </Typography>
+            )}
+            <Box sx={{ textAlign: "center", marginTop: 2 }}>
+              <Link href="#" sx={{ color: "black", fontSize: "0.9rem" }}>
+                Forgot password?
+              </Link>
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   );
 }

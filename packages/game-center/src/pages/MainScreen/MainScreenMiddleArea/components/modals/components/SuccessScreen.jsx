@@ -9,9 +9,22 @@ import {
   Celebration as CelebrationIcon,
 } from '@mui/icons-material';
 import { handleCopy, handleShare } from '../utils/handleShare';
-export const SuccessScreen = ({ lobbyCode, lobbyLink,setSnackbar,onClose}) => {
+import { useLobbyContext } from '../../../LobbyContext';
+
+export const SuccessScreen = ({ setSnackbar, onClose }) => {
   const navigate = useNavigate();
+  const { lobbyCode, lobbyLink } = useLobbyContext();
+
   const handleLinkClick = () => {
+    if (!lobbyLink) {
+      setSnackbar({
+        open: true,
+        message: 'Lobi linki bulunamadı.',
+        severity: 'error',
+      });
+      return;
+    }
+
     const path = new URL(lobbyLink).pathname;
     navigate(path);
   };
@@ -107,9 +120,9 @@ export const SuccessScreen = ({ lobbyCode, lobbyLink,setSnackbar,onClose}) => {
             }}
             onClick={handleLinkClick}
           >
-            {lobbyLink}
+            {lobbyLink || 'Link bulunamadı'}
           </Typography>
-          <IconButton onClick={() => handleCopy(lobbyCode, setSnackbar)}
+          <IconButton onClick={() => handleCopy(lobbyLink, setSnackbar)}
             sx={{ 
               color: 'rgba(253,187,45,1)',
               '&:hover': {
@@ -135,7 +148,7 @@ export const SuccessScreen = ({ lobbyCode, lobbyLink,setSnackbar,onClose}) => {
         }
       }}>
         <IconButton 
-          onClick={() => handleShare('twitter')} 
+          onClick={() => handleShare('twitter', lobbyLink)} 
           sx={{ 
             backgroundColor: 'rgba(34,193,195,0.1)',
             color: 'rgba(34,193,195,1)',
@@ -147,7 +160,7 @@ export const SuccessScreen = ({ lobbyCode, lobbyLink,setSnackbar,onClose}) => {
           <TwitterIcon />
         </IconButton>
         <IconButton 
-          onClick={() => handleShare('facebook')} 
+          onClick={() => handleShare('facebook', lobbyLink)} 
           sx={{ 
             backgroundColor: 'rgba(34,193,195,0.1)',
             color: 'rgba(34,193,195,1)',
@@ -159,7 +172,7 @@ export const SuccessScreen = ({ lobbyCode, lobbyLink,setSnackbar,onClose}) => {
           <FacebookIcon />
         </IconButton>
         <IconButton 
-          onClick={() => handleShare('whatsapp')} 
+          onClick={() => handleShare('whatsapp', lobbyLink)} 
           sx={{ 
             backgroundColor: 'rgb(165, 249, 190, 0.2)',
             color: 'rgb(165, 249, 190)',

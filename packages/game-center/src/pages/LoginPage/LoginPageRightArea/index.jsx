@@ -2,7 +2,7 @@ import { Box} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 
-const LoginPageRightArea = ({ isSignup }) => {
+const LoginPageRightArea = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
