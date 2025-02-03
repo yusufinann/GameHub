@@ -6,9 +6,15 @@ import memorystore from 'memorystore';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-
+import { createServer } from 'http';
+import setupWebSocket from './websocket/webSocketServer.js';
 const MemoryStore = memorystore(session);
 const app = express();
+const server = createServer(app); // HTTP sunucusu oluştur
+
+// WebSocket sunucusunu başlat
+const { broadcastLobbyEvent } = setupWebSocket(server);
+
 const SECRET_KEY = 'your_secret_key'; // Güçlü bir anahtar seçin
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -18,6 +24,7 @@ const corsOptions = {
   credentials: true, // Kimlik bilgilerini (cookies, authorization headers) gönder
 };
 
+// Middleware'ler
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -33,15 +40,16 @@ app.use(
 
 // Kullanıcı verileri
 const users = [
-  { id: 1, email: 'user1@example.com', password: bcrypt.hashSync('password1', 10), name: 'John Doe' },
-  { id: 2, email: 'user2@example.com', password: bcrypt.hashSync('password2', 10), name: 'Jane Smith' },
-  { id: 3, email: 'user3@example.com', password: bcrypt.hashSync('password3', 10), name: 'Alice Johnson' },
-  { id: 4, email: 'user4@example.com', password: bcrypt.hashSync('password4', 10), name: 'Bob Brown' },
-  { id: 5, email: 'user5@example.com', password: bcrypt.hashSync('password5', 10), name: 'Charlie Davis' },
+  { id: 1, email: 'user1@example.com', password: bcrypt.hashSync('password1', 10), name: 'John Doe', avatar: 'https://example.com/avatar1.jpg' },
+  { id: 2, email: 'user2@example.com', password: bcrypt.hashSync('password2', 10), name: 'Jane Smith', avatar: 'https://example.com/avatar2.jpg' },
+  { id: 3, email: 'user3@example.com', password: bcrypt.hashSync('password3', 10), name: 'Alice Johnson', avatar: 'https://example.com/avatar3.jpg' },
+  { id: 4, email: 'user4@example.com', password: bcrypt.hashSync('password4', 10), name: 'Bob Brown', avatar: 'https://example.com/avatar4.jpg' },
+  { id: 5, email: 'user5@example.com', password: bcrypt.hashSync('password5', 10), name: 'Charlie Davis', avatar: 'https://example.com/avatar5.jpg' },
 ];
 
 // Lobi verilerini saklamak için geçici bir dizi
 let lobbies = [];
+const lobbyTimers = new Map();
 
 // Lobi ID'si ve kodu oluşturma fonksiyonları
 const generateLobbyId = () => {
@@ -78,79 +86,133 @@ app.post('/login', (req, res) => {
   const user = users.find((u) => u.email === email);
 
   if (user && bcrypt.compareSync(password, user.password)) {
-    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '24h' });
 
     if (rememberMe) {
       res.cookie('authToken', token, { maxAge: 86400000, httpOnly: true }); // 1 gün
     }
 
-    // Kullanıcının id'sini de yanıta ekleyin
     return res.json({ message: 'Login successful', token, user: { id: user.id, email: user.email } });
   }
 
   return res.status(401).json({ message: 'Invalid credentials' });
 });
 
+// Çıkış endpoint'i
 app.post('/logout', authenticateUser, (req, res) => {
-  try {
-    // Kullanıcının token'ını geçersiz kılma işlemi (örneğin, bir blacklist'e ekleme)
-    // Bu örnekte token'ı sadece kaldırıyoruz.
-    res.clearCookie('authToken'); // Eğer cookie kullanıyorsanız, temizleyin
-    return res.status(200).json({ message: 'Logout successful' });
-  } catch (error) {
-    console.error('Error logging out:', error);
-    return res.status(500).json({ message: 'Logout failed' });
-  }
+  res.clearCookie('authToken');
+  return res.status(200).json({ message: 'Logout successful' });
 });
+
 // Kullanıcı bilgilerini getirme endpoint'i
 app.get('/user', authenticateUser, (req, res) => {
   const user = req.user;
-  return res.json({ email: user.email, name: user.name });
+  return res.json({ email: user.email, name: user.name, avatar: user.avatar });
 });
 
 // Lobi oluşturma endpoint'i
 app.post('/api/lobbies/create', authenticateUser, (req, res) => {
-  const { lobbyName, lobbyType, startTime, endTime, password, game, maxMembers} = req.body;
+  const { lobbyName, lobbyType, startTime, endTime, password, game, maxMembers } = req.body;
   const user = req.user;
 
+   // Kullanıcının zaten bir lobisi olup olmadığını kontrol et
+  const existingLobby = lobbies.find(lobby => lobby.createdBy === user.id);
+  if (existingLobby) {
+    return res.status(400).json({ message: 'You already have one lobby. You cannot create more than one lobby.' });
+  }
+
   // Gerekli alanların kontrolü
-  if (!lobbyName || !lobbyType || !game || !maxMembers) {
-    return res.status(400).json({ message: 'Lobi adı, türü, oyun ve maksimum oyuncu sayısı zorunludur.' });
+  if (!lobbyName.trim() || !lobbyType || !game || !maxMembers || maxMembers <= 0) {
+    return res.status(400).json({ message: 'Lobby name, type, game and max members are mandatory. Max members must be at least 1.' });
   }
 
   // Etkinlik lobisi için başlangıç ve bitiş zamanı kontrolü
   if (lobbyType === 'event' && (!startTime || !endTime)) {
-    return res.status(400).json({ message: 'Etkinlik lobisi için başlangıç ve bitiş zamanı zorunludur.' });
+    return res.status(400).json({ message: 'The start and end time for the event lobby is mandatory.' });
   }
 
   if (lobbyType === 'event' && new Date(startTime) >= new Date(endTime)) {
-    return res.status(400).json({ message: 'Başlangıç zamanı bitiş zamanından önce olmalıdır.' });
+    return res.status(400).json({ message: 'The start time must be before the end time.' });
   }
+
+  // Şifreyi hash'le
+  const hashedPassword = password ? bcrypt.hashSync(password, 10) : null;
 
   // Yeni lobi oluştur
   const newLobby = {
     id: generateLobbyId(),
-    createdBy: user.id, // Lobi oluşturan kullanıcının ID'si
+    createdBy: user.id,
     lobbyName,
     lobbyType,
     startTime: lobbyType === 'event' ? startTime : null,
     endTime: lobbyType === 'event' ? endTime : null,
-    password: password || null,
+    password: hashedPassword, // Hash'lenmiş şifreyi kaydet
     game,
     maxMembers,
     createdAt: new Date(),
-    members: [user.id], // Lobi oluşturan kullanıcıyı oyuncu listesine ekle
+    members: [
+      {
+        id: user.id,
+        name: user.name,
+        avatar: user.avatar,
+        isHost: true,
+      },
+    ],
     lobbyCode: generateLobbyCode(),
+    isActive: true, // Lobi aktif mi?
+    expiryTime: lobbyType === 'event' ? null : new Date(Date.now() + 8 * 60 * 60 * 1000), // Normal lobi için 8 saat sonra
   };
-
   // Lobiye ekle
+  if (lobbyType === 'event') {
+    const startTimeMs = new Date(startTime).getTime();
+    const endTimeMs = new Date(endTime).getTime();
+    const now = Date.now();
+  
+    // Event başlangıç zamanı için timer
+    if (startTimeMs > now) {
+      const startTimer = setTimeout(() => {
+        broadcastLobbyEvent(newLobby.lobbyCode, 'EVENT_STATUS', { 
+          status: 'started',
+          lobbyCode: newLobby.lobbyCode 
+        });
+      }, startTimeMs - now);
+      lobbyTimers.set(`start_${newLobby.id}`, startTimer);
+    }
+  
+    // Event bitiş zamanı için timer
+    const endTimer = setTimeout(() => {
+      broadcastLobbyEvent(newLobby.lobbyCode, 'EVENT_STATUS', { 
+        status: 'ended',
+        lobbyCode: newLobby.lobbyCode 
+      });
+      
+      // Lobi silme işlemi
+      setTimeout(() => {
+        const index = lobbies.findIndex(l => l.id === newLobby.id);
+        if (index !== -1) {
+          lobbies.splice(index, 1);
+          broadcastLobbyEvent(newLobby.lobbyCode, 'LOBBY_EXPIRED', {
+            lobbyCode: newLobby.lobbyCode,
+            reason: 'Event time expired',
+          });
+        }
+      }, 5000); // 5 saniye gecikmeli silme
+    }, endTimeMs - now);
+  
+    lobbyTimers.set(`end_${newLobby.id}`, endTimer);
+  }
+  
   lobbies.push(newLobby);
+
+  // WebSocket üzerinden lobi oluşturma olayını yayınla
+  broadcastLobbyEvent(newLobby.lobbyCode, 'LOBBY_CREATED', newLobby);
 
   // Başarılı yanıt
   res.status(201).json({
     message: 'Lobi başarıyla oluşturuldu.',
     lobby: newLobby,
-    lobbyLink: `${FRONTEND_URL}/lobby/${newLobby.lobbyCode}`, // Lobiye bağlanma linki
+    lobbyLink: `${FRONTEND_URL}/lobby/${newLobby.lobbyCode}`,
+    members: newLobby.members,
   });
 });
 
@@ -167,14 +229,9 @@ app.post('/api/lobbies/join/:lobbyCode', authenticateUser, (req, res) => {
     return res.status(404).json({ message: 'Lobi bulunamadı.' });
   }
 
-  // Şifre kontrolü
-  if (lobby.password && lobby.password !== password) {
+  // Şifre kontrolü (hash'lenmiş şifre için)
+  if (lobby.password && !bcrypt.compareSync(password, lobby.password)) {
     return res.status(401).json({ message: 'Geçersiz şifre.' });
-  }
-
-  // members dizisini başlat (eğer yoksa)
-  if (!lobby.members) {
-    lobby.members = [];
   }
 
   // Lobi dolu mu?
@@ -183,15 +240,25 @@ app.post('/api/lobbies/join/:lobbyCode', authenticateUser, (req, res) => {
   }
 
   // Kullanıcı zaten lobide mi?
-  if (lobby.members.includes(user.id)) {
+  const isUserAlreadyInLobby = lobby.members.some((member) => member.id === user.id);
+  if (isUserAlreadyInLobby) {
     return res.status(400).json({ message: 'Zaten bu lobidesiniz.' });
   }
 
   // Kullanıcıyı lobiye ekle
-  lobby.members.push(user.id);
+  lobby.members.push({
+    id: user.id,
+    name: user.name,
+    avatar: user.avatar,
+    isHost: false,
+  });
 
-  // Lobi bilgisini güncelle (örneğin, veritabanına kaydet)
-  // await updateLobbyInDatabase(lobby); // Eğer veritabanı kullanıyorsanız
+  // WebSocket üzerinden yeni üye olayını yayınla
+  broadcastLobbyEvent(lobbyCode, 'USER_JOINED', {
+    userId: user.id,
+    userName: user.name,
+    avatar: user.avatar,
+  });
 
   // Başarılı yanıt
   res.status(200).json({
@@ -209,13 +276,13 @@ app.get('/api/lobbies/:lobbyCode', authenticateUser, (req, res) => {
     return res.status(404).json({ message: 'Lobi bulunamadı.' });
   }
 
-  // Üyelerin bilgilerini dahil et
-  const membersWithDetails = lobby.members.map((memberId) => {
-    const user = users.find((u) => u.id === memberId);
+  // Üyelerin bilgilerini dahil et (şifre gibi hassas bilgileri hariç tut)
+  const membersWithDetails = lobby.members.map((member) => {
     return {
-      id: memberId,
-      name: user ? user.name : `Player ${memberId}`,
-      isHost: memberId === lobby.createdBy,
+      id: member.id,
+      name: member.name,
+      avatar: member.avatar,
+      isHost: member.id === lobby.createdBy,
     };
   });
 
@@ -225,6 +292,7 @@ app.get('/api/lobbies/:lobbyCode', authenticateUser, (req, res) => {
     lobby: {
       ...lobby,
       members: membersWithDetails,
+      password: undefined, // Şifreyi göndermeyin
     },
   });
 });
@@ -246,6 +314,17 @@ app.get('/api/lobbies', authenticateUser, (req, res) => {
     filteredLobbies = filteredLobbies.filter((lobby) => lobby.password === null);
   }
 
+  // Aktif lobileri filtrele
+  filteredLobbies = filteredLobbies.filter((lobby) => {
+    if (lobby.lobbyType === 'event') {
+      // Etkinlik lobileri bitiş zamanına kadar aktif
+      return new Date(lobby.endTime) > new Date();
+    } else {
+      // Normal lobiler expiryTime'a kadar aktif
+      return lobby.isActive && new Date(lobby.expiryTime) > new Date();
+    }
+  });
+
   // Başarılı yanıt
   res.status(200).json({
     message: 'Lobiler başarıyla getirildi.',
@@ -255,8 +334,8 @@ app.get('/api/lobbies', authenticateUser, (req, res) => {
 
 // Lobi çıkma endpoint'i
 app.post('/api/lobbies/leave/:lobbyCode', authenticateUser, (req, res) => {
-  const { lobbyCode } = req.params; // Lobi kodu
-  const user = req.user; // Kimlik doğrulaması yapılmış kullanıcı
+  const { lobbyCode } = req.params;
+  const user = req.user;
 
   // Lobi bul
   const lobby = lobbies.find((lobby) => lobby.lobbyCode === lobbyCode);
@@ -266,7 +345,7 @@ app.post('/api/lobbies/leave/:lobbyCode', authenticateUser, (req, res) => {
   }
 
   // Kullanıcı lobide mi?
-  const userIndex = lobby.members.indexOf(user.id);
+  const userIndex = lobby.members.findIndex((member) => member.id === user.id);
   if (userIndex === -1) {
     return res.status(400).json({ message: 'Bu lobide değilsiniz.' });
   }
@@ -274,16 +353,43 @@ app.post('/api/lobbies/leave/:lobbyCode', authenticateUser, (req, res) => {
   // Kullanıcıyı lobiden çıkar
   lobby.members.splice(userIndex, 1);
 
-  // Eğer lobi boşsa, lobiyi sil
-  if (lobby.members.length === 0) {
-    const lobbyIndex = lobbies.findIndex((l) => l.lobbyCode === lobbyCode);
-    lobbies.splice(lobbyIndex, 1);
-    return res.status(200).json({ message: 'Lobiden çıkıldı ve lobi silindi.' });
-  }
+  // WebSocket üzerinden üye çıkış olayını yayınla
+  broadcastLobbyEvent(lobbyCode, 'USER_LEFT', {
+    userId: user.id,
+    userName: user.name,
+  });
 
+// Eğer çıkan kullanıcı host ise ve normal lobi ise süre sonu ayarla
+  if (user.id === lobby.createdBy && lobby.lobbyType !== 'event') {
+    const existingTimerKey = `expiry_${lobby.id}`;
+    const existingTimer = lobbyTimers.get(existingTimerKey);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      lobbyTimers.delete(existingTimerKey);
+    }
+
+    // 8 saat sonra sil
+    const deletionTimer = setTimeout(() => {
+      const index = lobbies.findIndex((l) => l.lobbyCode === lobbyCode);
+      if (index !== -1) {
+        lobbies.splice(index, 1);
+        broadcastLobbyEvent(lobbyCode, 'LOBBY_EXPIRED', {
+          reason: 'Host ayrıldıktan sonra lobi süresi doldu.',
+        });
+      }
+    }, 8 * 60 * 60 * 1000); // 8 saat
+
+    lobby.expiryTime = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    lobby.isActive = false;
+    lobbyTimers.set(existingTimerKey, deletionTimer);
+  }
   // Başarılı yanıt
-  res.status(200).json({ message: 'Lobiden başarıyla çıkıldı.', lobby });
+  res.status(200).json({
+    message: 'Lobiden başarıyla çıkıldı.',
+    lobby,
+  });
 });
+
 // Lobi silme endpoint'i
 app.delete('/api/lobbies/delete/:lobbyCode', authenticateUser, (req, res) => {
   const { lobbyCode } = req.params;
@@ -296,18 +402,40 @@ app.delete('/api/lobbies/delete/:lobbyCode', authenticateUser, (req, res) => {
     return res.status(404).json({ message: 'Lobi bulunamadı.' });
   }
 
+  const lobby = lobbies[lobbyIndex];
+
   // Lobiyi silme yetkisi kontrolü
-  if (lobbies[lobbyIndex].createdBy !== user.id) {
+  if (lobby.createdBy !== user.id) {
     return res.status(403).json({ message: 'Bu lobiyi silme yetkiniz yok.' });
   }
 
   // Lobiyi diziden sil
   lobbies.splice(lobbyIndex, 1);
 
+  // WebSocket üzerinden lobi silme olayını yayınla
+  broadcastLobbyEvent(lobbyCode, 'LOBBY_DELETED', null);
+
   // Başarılı yanıt
-  res.status(200).json({ message: 'Lobi başarıyla silindi.' });
+  res.status(200).json({
+    message: 'Lobi başarıyla silindi.',
+    deletedLobby: lobby,
+  });
 });
+
+// Süresi dolan lobileri temizleme
+setInterval(() => {
+  const now = new Date();
+  lobbies = lobbies.filter((lobby) => {
+    if (lobby.lobbyType === 'event') {
+      return new Date(lobby.endTime) > now;
+    } else {
+      return lobby.isActive && new Date(lobby.expiryTime) > now;
+    }
+  });
+}, 60 * 60 * 1000); // Her saat başı kontrol et
+
 // Sunucuyu başlat
-app.listen(3001, () => {
-  console.log('Server is running on http://localhost:3001');
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda çalışıyor.`);
 });

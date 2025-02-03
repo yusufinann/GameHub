@@ -19,7 +19,7 @@ import {
   SportsEsports as GameIcon,
   Stars as StarsIcon,
 } from '@mui/icons-material';
-import { GAMES } from '../utils/constants';
+import { GAMES } from '../../../../../../../utils/constants';
 import { EventFields } from './EventFields';
 
 const LobbyForm = ({ formData, handleChange, handleSubmit, onClose }) => (

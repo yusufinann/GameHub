@@ -1,7 +1,7 @@
 import React from "react";
 import { Box} from "@mui/material";
-import MainScreenMiddleLeft from "./components/MainScreenMiddleAreaItems/MainScreenMiddleLeft";
-import MainScreenMiddleRight from "./components/MainScreenMiddleAreaItems/MainScreenMiddleRight/MainScreenMiddleRight";
+import MainScreenMiddleLeft from "./MainScreenMiddleAreaItems/MainScreenMiddleLeft";
+import MainScreenMiddleRight from "./MainScreenMiddleAreaItems/MainScreenMiddleRight/MainScreenMiddleRight";
 
 function MainScreenMiddleArea() {
 

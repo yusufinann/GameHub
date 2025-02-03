@@ -1,134 +1,185 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Typography, Button } from "@mui/material";
+import { 
+  Box, 
+  CircularProgress, 
+  Typography, 
+  Button,
+  IconButton,
+  Tooltip
+} from "@mui/material";
+import { 
+  Fullscreen as FullscreenIcon,
+  FullscreenExit as FullscreenExitIcon 
+} from '@mui/icons-material';
 import MembersList from "./components/MembersList/MembersList";
 import GameArea from "./components/GameArea";
-import { useLobbyDeletion } from "../LobbiesSidebar/hooks/useLobbyDeletion";
-import axios from "axios";
-import config from "../../config";
+import { useGameLobbyPage } from "./useGameLobbyPage";
+import { useLobbyContext } from "../MainScreen/MainScreenMiddleArea/context";
+import LobbyPasswordModal from "../../shared/LobbyPasswordModal";
 
 const GameLobbyPage = () => {
   const { link } = useParams();
   const navigate = useNavigate();
-  const { handleDelete } = useLobbyDeletion();
-  const [members, setMembers] = useState([
-    { id: 1, name: "Host Player", isHost: true, isReady: true },
-    { id: 2, name: "Player 2", isReady: false },
-    { id: 3, name: "Player 3", isReady: true },
-  ]);
-  const [lobbyDetails, setLobbyDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { deleteLobby, leaveLobby } = useLobbyContext();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const {
+    lobbyDetails,
+    loading,
+    error,
+    setError,
+    members,
+    userId,
+    isPasswordModalOpen,
+    setIsPasswordModalOpen,
+    handleJoin
+  } = useGameLobbyPage();
 
-  // localStorage'dan kullanıcı bilgilerini al
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const userId = currentUser?.id;
-
+  // Tam ekran durumunu yönet
   useEffect(() => {
-    const fetchLobbyDetails = async () => {
-      try {
-        const response = await axios.get(
-          `${config.apiBaseUrl}${config.apiEndpoints.lobbies}/${link}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-  
-        if (response.status === 200) {
-          const lobby = response.data.lobby;
-  
-          // Kullanıcının lobiye üye olup olmadığını kontrol et
-          const userIsMember = lobby.members?.some((member) => member.id === userId);
-  
-          // Eğer lobi şifreli ise ve kullanıcı üye değilse, erişim engelle
-          if (lobby.password && !userIsMember) {
-            setError("Bu lobiye erişim izniniz yok.");
-            return;
-          }
-  
-          // Lobi detaylarını state'e kaydet
-          setLobbyDetails(lobby);
-  
-          // members state'ini doldur
-          const membersList = lobby.members.map((member) => ({
-            id: member.id,
-            name: member.name,
-            isHost: member.id === lobby.createdBy,
-            isReady: false, // Varsayılan olarak hazır olma durumu false
-          }));
-  
-          setMembers(membersList);
-        } else {
-          setError("Lobi bilgileri alınamadı.");
-        }
-      } catch (error) {
-        setError(
-          error.response?.data?.message || "Lobi bilgileri alınırken hata oluştu."
-        );
-      } finally {
-        setLoading(false);
-      }
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
     };
-  
-    fetchLobbyDetails();
-  }, [link, userId]);
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    const gameLobbyElement = document.getElementById('gameLobbyPage');
+    
+    if (!document.fullscreenElement) {
+      gameLobbyElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  const handleDeleteLobby = async () => {
+    try {
+      await deleteLobby(lobbyDetails.lobbyCode);
+      navigate("/");
+    } catch (err) {
+      setError("Lobi silinirken bir hata oluştu.");
+    }
+  };
+
+  const handleLeaveLobby = async () => {
+    try {
+      await leaveLobby(lobbyDetails.lobbyCode, userId);
+      navigate("/");
+    } catch (err) {
+      setError("Lobiden ayrılırken bir hata oluştu.");
+    }
+  };
 
   if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingScreen />;
+  }
+
+  if (isPasswordModalOpen) {
+    return <LobbyPasswordModal 
+      open={isPasswordModalOpen}
+      onClose={() => setIsPasswordModalOpen(false)}
+      onSubmit={handleJoin}
+    />;
   }
 
   if (error) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-        <Button variant="contained" onClick={() => navigate("/")}>
-          Anasayfaya Dön
-        </Button>
-      </Box>
-    );
+    return <ErrorScreen error={error} navigate={navigate} />;
   }
 
   if (!lobbyDetails) {
     return null;
   }
 
-  return (
-    <Box
-      sx={{ p: 1, minHeight: "calc(100vh - 100px)", display: "flex", gap: 1 }}
-    >
-      <MembersList members={members} />
-      <GameArea
-        lobbyInfo={lobbyDetails}
-        link={link}
-        onDelete={(e) => handleDelete(lobbyDetails.lobbyCode, e)}
-        members={members}
-      />
-    </Box>
-  );
+  const isHost = lobbyDetails.createdBy === userId;
+  if (!isPasswordModalOpen) {
+    return (
+      <Box 
+        id="gameLobbyPage"
+        sx={{ 
+          p: 1, 
+          minHeight: "calc(100vh - 100px)", 
+          display: "flex", 
+          gap: 1,
+          position: 'relative',
+          ...(isFullscreen && {
+            minHeight: '100vh',
+            p: 2,
+            bgcolor: '#f5f5f5'
+          })
+        }}
+      >
+        <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
+          <IconButton 
+            onClick={toggleFullscreen}
+            sx={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              zIndex: 1000,
+              bgcolor: 'white',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.9)'
+              }
+            }}
+          >
+            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Tooltip>
+        <MembersList members={members} />
+        <GameArea
+          lobbyInfo={lobbyDetails}
+          link={link}
+          members={members}
+          isHost={isHost}
+          onDelete={handleDeleteLobby}
+          onLeave={handleLeaveLobby}
+        />
+      </Box>
+    );
+  }
+
+  return null;
 };
+
+const LoadingScreen = () => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
+
+const ErrorScreen = ({ error, navigate }) => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      flexDirection: "column",
+      gap: 2,
+    }}
+  >
+    <Typography variant="h6" color="error">
+      {error}
+    </Typography>
+    <Button variant="contained" onClick={() => navigate("/")}>
+      Go Main Screen
+    </Button>
+  </Box>
+);
 
 export default GameLobbyPage;

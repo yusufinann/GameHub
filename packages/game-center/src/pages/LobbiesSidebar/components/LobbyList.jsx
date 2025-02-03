@@ -1,29 +1,30 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box } from '@mui/material';
-import { LobbyItem } from './LobbyItem';
+import LobbyItem from './LobbyItem/LobbyItem';
 
-export const LobbyList = ({ lobbies = [], isOpen, colors, selectedTab }) => {
-  const sortLobbies = (lobbyArray) => {
-    return [...lobbyArray].sort((a, b) => {
-      // First sort by event type (events first)
-      if (a.eventType === 'event' && b.eventType !== 'event') return -1;
-      if (a.eventType !== 'event' && b.eventType === 'event') return 1;
+export const LobbyList = ({ lobbies = [], isOpen }) => {
+  // Lobileri sıralama fonksiyonu
+  const sortedLobbies = useMemo(() => {
+    return [...lobbies].sort((a, b) => {
+      // First priority: Event type lobbies always come first
+      if (a.lobbyType === 'event' && b.lobbyType !== 'event') return -1;
+      if (a.lobbyType !== 'event' && b.lobbyType === 'event') return 1;
       
-      // Then sort events by start date/time
-      if (a.eventType === 'event' && b.eventType === 'event') {
+      // Second priority: For event lobbies, sort by start time
+      if (a.lobbyType === 'event' && b.lobbyType === 'event') {
         const dateA = new Date(`${a.startDate}T${a.startTime}`);
         const dateB = new Date(`${b.startDate}T${b.startTime}`);
         return dateA - dateB;
       }
       
-      // Keep original order for non-event lobbies
+      // Third priority: For non-event lobbies, sort by creation time (if available)
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      
       return 0;
     });
-  };
-
-  const filteredLobbies = selectedTab === 'all'
-    ? sortLobbies(lobbies)
-    : sortLobbies(lobbies.filter((lobby) => lobby.eventType === selectedTab));
+  }, [lobbies]);
 
   return (
     <Box
@@ -36,12 +37,11 @@ export const LobbyList = ({ lobbies = [], isOpen, colors, selectedTab }) => {
         overflowY: 'auto'
       }}
     >
-      {filteredLobbies.map((lobby, index) => (
+      {sortedLobbies.map((lobby, index) => (
         <LobbyItem
           key={lobby.lobbyCode || index}
           lobby={lobby}
           isOpen={isOpen}
-          colors={colors}
         />
       ))}
     </Box>

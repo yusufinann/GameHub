@@ -8,7 +8,7 @@ function MainScreenHeader() {
       flexDirection: 'row',
       width: '100%',
       height: '30vh',
-      border: '2px solid rgb(26, 139, 121)',
+    //border: '2px solid rgb(26, 139, 121)',
       borderRadius: '10px',
     //backgroundColor: '#f0f0f0',
       position: 'relative',

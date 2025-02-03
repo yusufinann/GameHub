@@ -9,6 +9,7 @@ const config = {
     createLobby: '/api/lobbies/create', // Lobi oluşturma endpoint'i
     deleteLobby: '/api/lobbies/delete', // Lobi silme endpoint'i
     joinLobby: '/api/lobbies/join', // Lobiye katılma endpoint'i
+    leaveLobby:'/api/lobbies/leave'
   },
 };
 

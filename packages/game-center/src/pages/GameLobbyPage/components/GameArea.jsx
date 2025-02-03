@@ -11,7 +11,7 @@ import {
   PlayArrow as PlayIcon,
 } from '@mui/icons-material';
 
-const GameArea = ({ lobbyInfo, link, onDelete, members }) => {
+const GameArea = ({ lobbyInfo, link, members, isHost, onDelete, onLeave }) => {
   return (
     <Paper 
       elevation={8}
@@ -54,32 +54,50 @@ const GameArea = ({ lobbyInfo, link, onDelete, members }) => {
             Code: {link}
           </Typography>
         </Typography>
-        <Button 
-          variant="contained"
-          color="error"
-          onClick={onDelete}
-          startIcon={<ExitIcon />}
-          sx={{
-            borderRadius: '12px',
-            textTransform: 'none',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            '&:hover': {
-              boxShadow: '0 6px 8px rgba(0,0,0,0.2)',
-            }
-          }}
-        >
-          Delete Lobby
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 ,marginRight:'50px'}}>
+          {isHost && (
+            <Button 
+              variant="contained"
+              color="error"
+              onClick={onDelete}
+              startIcon={<ExitIcon />}
+              sx={{
+                borderRadius: '12px',
+                textTransform: 'none',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  boxShadow: '0 6px 8px rgba(0,0,0,0.2)',
+                }
+              }}
+            >
+              Delete Lobby
+            </Button>
+          )}
+          <Button 
+            color="error"
+            startIcon={<ExitIcon />}
+            sx={{
+              borderRadius: '12px',
+              textTransform: 'none',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              '&:hover': {
+                boxShadow: '0 6px 8px rgba(0,0,0,0.2)',
+              }
+            }} 
+            onClick={onLeave}
+          >
+            Leave Lobby
+          </Button>
+        </Box>
       </Box>
       <GameStatus 
-        //status={lobbyInfo.status} 
         members={members} 
       />
     </Paper>
   );
 };
 
-const GameStatus = ({ status, members }) => {
+const GameStatus = ({ members }) => {
   return (
     <Paper 
       elevation={4}
@@ -115,7 +133,7 @@ const GameStatus = ({ status, members }) => {
           fontWeight: 'bold',
           mb: 3
         }}>
-          {status}
+          Game Status
         </Typography>
         <GameControls members={members} />
       </Box>

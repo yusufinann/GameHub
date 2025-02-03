@@ -1,59 +1,79 @@
 import axios from 'axios';
+import config from '../../config';
 
 // Axios instance oluşturma
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api', // API'nin base URL'i
+  baseURL: config.apiBaseUrl, // API'nin base URL'i
 });
 
 // Her istek öncesi token'ı header'a ekleme
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 // Hata yönetimi için interceptor
-api.interceptors.response.use((response) => {
-  return response;
-}, (error) => {
-  if (error.response) {
-    console.error('API Hatası:', error.response.data.message || error.message);
-  } else {
-    console.error('API Hatası:', error.message);
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      console.error('API Hatası:', error.response.data.message || error.message);
+    } else {
+      console.error('API Hatası:', error.message);
+    }
+    return Promise.reject(error);
   }
-  return Promise.reject(error);
-});
+);
 
-// Lobi ile ilgili API çağrıları
-export const fetchLobbies = async () => {
-  try {
-    const response = await api.get('/lobbies');
-    return response.data.lobbies;
-  } catch (error) {
-    throw error;
-  }
+// Lobby Api Calls
+export const lobbyApi = {
+  // Fetch All Lobbies
+  fetchLobbies: async () => {
+    try {
+      const response = await api.get(config.apiEndpoints.lobbies);
+      return response.data.lobbies;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  //Create Lobby
+  createLobbyApi: async (lobbyData) => {
+    try {
+      const response = await api.post(config.apiEndpoints.createLobby, lobbyData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete Lobby
+  deleteLobbyApi: async (lobbyCode) => {
+    try {
+      await api.delete(`${config.apiEndpoints.deleteLobby}/${lobbyCode}`);
+    } catch (error) {
+      throw error;
+    }
+  },
+  // Leave Lobby
+  leaveLobbyApi: async (lobbyCode, userId) => {
+    try {
+      const response = await api.post(`${config.apiEndpoints.leaveLobby}/${lobbyCode}`, { userId });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
-
-export const createLobby = async (lobbyData) => {
-  try {
-    const response = await api.post('/lobbies/create', lobbyData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const deleteLobby = async (lobbyCode) => {
-  try {
-    await api.delete(`/lobbies/delete/${lobbyCode}`);
-  } catch (error) {
-    throw error;
-  }
-};
-
 
 export default api;

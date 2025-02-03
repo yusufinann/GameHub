@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 import { SidebarHeader } from './components/SidebarHeader';
-import { TabList } from './components/TabList';
+import TabList  from './components/TabList';
 import { LobbyList } from './components/LobbyList';
-import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/LobbyContext';
+import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/context';
 
-const LobbiesSidebar = () => {
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const updateMatch = (e) => setMatches(e.matches);
+
+    setMatches(media.matches);
+    media.addEventListener('change', updateMatch);
+
+    return () => media.removeEventListener('change', updateMatch);
+  }, [query]);
+
+  return matches;
+};
+
+function LobbiesSidebar (){
   const [isOpen, setIsOpen] = useState(true);
   const [selectedTab, setSelectedTab] = useState('all');
-  const isSmallScreen = useMediaQuery('(max-width: 1000px)');
-  const {lobbies}=useLobbyContext();
-  const colors = {
-    private: '#FFD700',
-    event: '#FF69B4',
-    default: '#87CEEB',
-  };
-
- 
+  const isSmallScreen = useMediaQuery('(max-width: 1000px)'); // useMediaQuery direkt kullanıldı
+  const { lobbies } = useLobbyContext();
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -50,19 +59,14 @@ const LobbiesSidebar = () => {
       }}
     >
       <SidebarHeader isOpen={isOpen} toggleSidebar={toggleSidebar} />
-      {isOpen && (
+      {/* {isOpen && (
         <TabList
           isOpen={isOpen}
           selectedTab={selectedTab}
           onTabChange={setSelectedTab}
         />
-      )}
-      <LobbyList
-        lobbies={lobbies}
-        isOpen={isOpen}
-        colors={colors}
-        selectedTab={selectedTab}
-      />
+      )} */}
+      <LobbyList lobbies={lobbies} isOpen={isOpen} selectedTab={selectedTab} />
     </Box>
   );
 };

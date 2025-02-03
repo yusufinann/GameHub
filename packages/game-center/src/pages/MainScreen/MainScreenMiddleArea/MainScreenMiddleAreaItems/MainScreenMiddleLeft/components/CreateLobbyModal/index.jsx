@@ -1,18 +1,15 @@
 import React from 'react';
 import { Dialog, Slide, Snackbar, Alert, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import LobbyForm from './components/LobbyForm';
-import { SuccessScreen } from './components/SuccessScreen';
-import { useLobbyContext } from '../../LobbyContext';
 import { useLobbyForm } from './useLobbyForm';
+import { useLobbyContext } from '../../../../context';
+import LobbyForm from './LobbyForm';
+import { SuccessScreen } from './SuccessScreen';
 
 const CreateLobbyModal = ({ open, onClose }) => {
   const { existingLobby } = useLobbyContext();
   const {
     formData,
-    showSuccess,
-    lobbyCode,
-    lobbyLink,
     snackbar,
     setSnackbar,
     handleChange,
@@ -29,7 +26,7 @@ const CreateLobbyModal = ({ open, onClose }) => {
         maxWidth="sm"
         fullWidth
       >
-        {!showSuccess && !existingLobby && (
+        {!existingLobby && (
           <IconButton
             onClick={onClose}
             size="small"
@@ -46,18 +43,11 @@ const CreateLobbyModal = ({ open, onClose }) => {
             setSnackbar={setSnackbar}
             onClose={onClose}
           />
-        ) : !showSuccess ? (
+        ) : (
           <LobbyForm
             formData={formData}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
-            onClose={onClose}
-          />
-        ) : (
-          <SuccessScreen
-            lobbyCode={lobbyCode}
-            lobbyLink={lobbyLink}
-            setSnackbar={setSnackbar}
             onClose={onClose}
           />
         )}

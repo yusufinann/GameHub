@@ -2,10 +2,10 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token"); // Token'ı localStorage'dan al
+  const token = localStorage.getItem("token");
 
+  // Token yoksa, login sayfasına yönlendir
   if (!token) {
-    // Eğer token yoksa login sayfasına yönlendir
     return <Navigate to="/login" replace />;
   }
 
