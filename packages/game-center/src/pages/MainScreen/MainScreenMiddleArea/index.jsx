@@ -1,8 +1,8 @@
 import React from "react";
 import { Box} from "@mui/material";
-import MainScreenMiddleLeft from "./MainScreenMiddleAreaItems/MainScreenMiddleLeft";
-import MainScreenMiddleRight from "./MainScreenMiddleAreaItems/MainScreenMiddleRight/MainScreenMiddleRight";
-
+import CreateLobbyArea from "./CreateLobbyArea";
+import ActiveGamesArea from "./ActiveGamesArea";
+import LobbiesArea from "./LobbiesArea";
 function MainScreenMiddleArea() {
 
   return (
@@ -19,8 +19,9 @@ function MainScreenMiddleArea() {
         width: "100%",
       }}
     >
-      <MainScreenMiddleLeft />
-      <MainScreenMiddleRight />
+      <CreateLobbyArea />
+      <ActiveGamesArea/>
+      <LobbiesArea />
     </Box>
   );
 }

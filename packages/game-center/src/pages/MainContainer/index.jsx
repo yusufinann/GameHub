@@ -2,11 +2,11 @@ import React from "react";
 import Sidebar from "../Sidebar";
 import {Box} from "@mui/material";
 import { Outlet } from "react-router-dom";
-import LobbiesSidebar from "../LobbiesSidebar";
 import { SnackbarProvider } from "../../shared/context/SnackbarContext";
 import { LobbyProvider } from "../MainScreen/MainScreenMiddleArea/context";
 import { WebSocketProvider } from "../../shared/context/WebSocketContext/context";
-
+import FriendsSidebar from "../FriendsSidebar";
+import { FriendsProvider } from "../Profile/context";
 function MainContainer() {
 //  const theme = useTheme();
 
@@ -17,7 +17,7 @@ function MainContainer() {
 
       {/* Content Section */}
       <WebSocketProvider>
-        <LobbyProvider>
+        <LobbyProvider>  <FriendsProvider>
           <SnackbarProvider>
             <Box
               sx={{
@@ -30,15 +30,15 @@ function MainContainer() {
                 overflow: "hidden",
                 borderRadius: "10px", // Rounded corners
               //border: `2px solid ${theme.palette.primary.main}`, // Theme-based accent border
-                marginLeft: "10px", // Consistent margin
               }}
             >
               <Outlet />
             </Box>
 
-            {/* Right Sidebar (Lobbies Sidebar) */}
-            <LobbiesSidebar />
+            {/* Right Sidebar  */}
+           <FriendsSidebar/>   {/* for now, just to try it out */}
           </SnackbarProvider>
+          </FriendsProvider>
         </LobbyProvider>
       </WebSocketProvider>
     </Box>

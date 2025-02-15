@@ -1,27 +1,10 @@
-import express from "express";
-import { loginUser } from "../controllers/auth.controller.js";
-import { sessionAuth } from "../middleware/sessionAuth.js";
+import express from 'express'
+import { userLogin, userLogout } from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
-// Login işlemi
-router.post("/login", loginUser);
+router.post("/login",userLogin);
 
-router.get("/profile", sessionAuth, (req, res) => {
-  res.status(200).json({ message: "Welcome", user: req.session.user });
-});
-
-
-
-router.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Error logging out" });
-    }
-    res
-      .status(200)
-      .json({ message: "Logged out successfully" });
-  });
-});
+router.post("/logout", userLogout);
 
 export default router;

@@ -1,35 +1,44 @@
 import React from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button} from '@mui/material';
 
-const GameCard = ({ thumbnail, openGiveawayUrl }) => (
+const GameCard = ({ title, thumbnail, openGiveawayUrl }) => (
   <Box
     sx={{
-      width: '150px',
-      height: '150px',
+      width: '100%', // Konteynerin tam genişliğini kapla
+      height: '30vh', // Yüksekliği sabit tut
       backgroundImage: `url(${thumbnail})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      borderRadius: '20px', // Rounded corners to soften the effect
+      borderRadius: '15px',
       display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
       position: 'relative',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-      cursor: 'pointer',   
-      overflow: 'hidden', // Ensures the corners stay clean
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+      cursor: 'pointer',
+      overflow: 'hidden',
+      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+      '&:hover': {
+        transform: 'scale(1.03)', // Daha küçük hover efekti
+        boxShadow: '0 12px 24px rgba(14, 153, 69, 0.5)',
+      },
     }}
   >
     <Box
       sx={{
         position: 'absolute',
-        top: '0',
-        left: '0',
+        top: 0,
+        left: 0,
         width: '100%',
         height: '100%',
-        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))', // Gradient overlay for depth
-        zIndex: 1,
+        '&:hover': {
+          background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8))',
+        },
+       // background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8))',
       }}
     />
+   
     <Button
       variant="contained"
       sx={{
@@ -37,12 +46,16 @@ const GameCard = ({ thumbnail, openGiveawayUrl }) => (
         bottom: '15px',
         left: '50%',
         transform: 'translateX(-50%)',
-        backgroundColor: 'rgba(255, 99, 71, 0.8)',
+        backgroundColor: "#2E7D32",
         color: '#fff',
-        fontSize: '8px',
-        zIndex: 2, // Ensures button stays above gradient overlay
+        fontSize: '10px',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        borderRadius: '20px',
+        padding: '6px 12px',
+        zIndex: 2,
         '&:hover': {
-          backgroundColor: 'rgba(255, 99, 71, 1)',
+          backgroundColor: '#81C784',
         },
       }}
       onClick={() => window.open(openGiveawayUrl, '_blank')}

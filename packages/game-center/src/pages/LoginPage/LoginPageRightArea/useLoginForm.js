@@ -58,7 +58,7 @@ const useLoginForm = () => {
       const { token, user } = response.data;
 
       localStorage.setItem("token", token);
-      authLogin({ id: user.id, email: user.email, token });
+      authLogin({ id: user.id, email: user.email,name: user.name, token });
 
       if (rememberMe) {
         const userInfo = { email: user.email, id: user.id };

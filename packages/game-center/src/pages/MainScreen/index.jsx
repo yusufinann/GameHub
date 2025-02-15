@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import React from 'react';
-import MainScreenHeader from './MainScreenHeaderArea/MainScreenHeader';
+import MainScreenHeader from './MainScreenHeaderArea/index';
 import MainScreenMiddleArea from './MainScreenMiddleArea/index';
 import MainScreenBottomArea from './MainScreenBottomArea/index';
 function MainScreen() {

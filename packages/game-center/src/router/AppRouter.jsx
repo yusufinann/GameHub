@@ -6,6 +6,8 @@ import SettingsPage from "../pages/SettingsPage";
 import LoginPage from "../pages/LoginPage";
 import ProtectedRoute from "./protectRoute";
 import LobbyPage from "../pages/GameLobbyPage";
+import GameDetail from "../pages/GameDetail";
+import Profile from "../pages/Profile";
 
 const AppRouter = () => {
   return (
@@ -24,6 +26,8 @@ const AppRouter = () => {
           <Route index element={<MainScreen />} /> {/* Default middle */}
           <Route path="settings" element={<SettingsPage />} />
           <Route path="lobby/:link" element={<LobbyPage />} />
+          <Route path="game-detail/:gameId" element={<GameDetail />} /> 
+          <Route path="/profile/:userId" element={<Profile />} /> 
         </Route>
       </Routes>
     </Router>

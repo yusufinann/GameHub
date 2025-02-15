@@ -1,43 +1,79 @@
-import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+  useRef,
+} from 'react';
+import { useAuthContext } from '../AuthContext';
 
 const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
+  const socketRef = useRef(null);
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-
+  const reconnectAttemptsRef = useRef(0);
+  const {currentUser}=useAuthContext();
   const connectWebSocket = useCallback(() => {
-    const ws = new WebSocket('ws://localhost:3001');
+    if (socketRef.current) return;
+
+    if (!currentUser?.id) {
+      console.log(
+        'Kullanıcı ID bulunamadı, WebSocket bağlantısı kurulamıyor. 1 saniye sonra tekrar denenecek.'
+      );
+      setTimeout(connectWebSocket, 1000);
+      return;
+    }
+
+    // URL'e userId parametresini ekle
+    const ws = new WebSocket(`ws://localhost:3001?userId=${currentUser.id}`);
 
     ws.onopen = () => {
       console.log('WebSocket bağlantısı kuruldu');
+      socketRef.current = ws;
       setSocket(ws);
       setIsConnected(true);
+      reconnectAttemptsRef.current = 0;
     };
 
     ws.onclose = () => {
       console.log('WebSocket bağlantısı kapatıldı');
+      socketRef.current = null;
       setSocket(null);
       setIsConnected(false);
 
-      setTimeout(() => {
-        console.log('WebSocket yeniden bağlanıyor...');
-        connectWebSocket();
-      }, 5000);
+      // Yeniden bağlanma mantığı
+      const delay = Math.min(5000, 1000 * 2 ** reconnectAttemptsRef.current);
+      reconnectAttemptsRef.current += 1;
+
+      console.log(`WebSocket ${delay / 1000} saniye sonra yeniden bağlanıyor...`);
+      setTimeout(connectWebSocket, delay);
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket hatası:', error);
     };
 
-    return ws;
-  }, []);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket mesajı alındı:', data);
+      } catch (error) {
+        console.error('WebSocket mesajı işlenirken hata:', error);
+      }
+    };
+
+    socketRef.current = ws;
+  }, [currentUser]);
 
   useEffect(() => {
-    const ws = connectWebSocket();
+    connectWebSocket();
+
     return () => {
-      if (ws) {
-        ws.close();
+      if (socketRef.current) {
+        socketRef.current.close();
       }
     };
   }, [connectWebSocket]);
@@ -52,7 +88,7 @@ export const WebSocketProvider = ({ children }) => {
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
+    throw new Error('useWebSocket, WebSocketProvider içinde kullanılmalıdır');
   }
   return context;
 };
