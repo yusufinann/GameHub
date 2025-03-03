@@ -1,17 +1,13 @@
 // routes/user.routes.js
-import express from 'express';
-import { getCurrentUser, searchUsers, getUserById } from '../controllers/user.controller.js';
-import authenticateUser from '../middleware/authenticateUser.js';
+import express from "express";
+import { getCurrentUser, searchUsers, getUserById, createUser } from "../controllers/user.controller.js";
+import authenticateUser from "../middleware/authenticateUser.js";
 
 const router = express.Router();
 
-// Get current user's profile
+router.post("/", createUser); // Yeni kullanıcı ekleme
 router.get("/profile", authenticateUser, getCurrentUser);
-
-// Search users
 router.get("/search", authenticateUser, searchUsers);
-
-// Get user by ID
 router.get("/:id", authenticateUser, getUserById);
 
 export default router;

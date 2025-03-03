@@ -5,15 +5,12 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import memorystore from "memorystore";
 import cors from "cors";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import connectToMongoDB from './db/connectToMongoDB.js';
 import { createServer } from "http";
 import setupWebSocket from "./websocket/webSocketServer.js";
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
-//import friendRoutes from './routes/friend.routes.js'
-import  { users} from './datas/users.js';
 import authenticateUser from "./middleware/authenticateUser.js";
 import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
@@ -145,5 +142,6 @@ app.get('/api/games', authenticateUser, (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
+  connectToMongoDB();
   console.log(`Sunucu ${PORT} portunda çalışıyor.`);
 });

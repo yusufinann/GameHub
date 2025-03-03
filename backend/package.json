@@ -21,7 +21,8 @@
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
-    "memorystore": "^1.6.7"
+    "memorystore": "^1.6.7",
+    "mongoose": "^8.11.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

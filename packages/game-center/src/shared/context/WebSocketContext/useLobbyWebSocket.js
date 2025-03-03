@@ -53,6 +53,9 @@ const useLobbyWebSocket = (
             case "LOBBY_REMOVED": // NEW CASE HANDLING LOBBY_REMOVED
             handleLobbyRemoved(data.lobbyCode);
             break;
+            case "LOBBY_UPDATED": // NEW CASE HANDLING LOBBY_UPDATED
+            handleLobbyUpdated(data.data);
+            break;
           default:
            // console.warn("Bilinmeyen WebSocket mesaj türü:", data.type);
             break;
@@ -321,6 +324,13 @@ const useLobbyWebSocket = (
           },
         });
       }
+    };
+    const handleLobbyUpdated = (lobbyData) => {
+      setLobbies((prev) =>
+        prev.map((lobby) =>
+          lobby.lobbyCode === lobbyData.lobbyCode ? lobbyData : lobby
+        )
+      );
     };
     socket.addEventListener("message", handleWebSocketMessage);
     return () => socket.removeEventListener("message", handleWebSocketMessage);

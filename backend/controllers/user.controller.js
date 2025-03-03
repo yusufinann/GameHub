@@ -1,64 +1,82 @@
-// controllers/user.controller.js
-import { users } from "../datas/users.js";
 
-export const getCurrentUser = (req, res) => {
+
+// controllers/user.controller.js
+import User from "../models/user.model.js";
+import bcrypt from "bcrypt";
+
+// Yeni kullanıcı ekleme (Postman'dan test için)
+export const createUser = async (req, res) => {
   try {
-    const user = req.user;
-    return res.json({ 
-      email: user.email, 
-      name: user.name, 
-      avatar: user.avatar 
+    const { email, password, name, username, avatar } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "Email already exists" });    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      name,
+      username,
+      avatar,
+      friends: [],
+      friendRequests: [],
+      outgoingRequests: [],
     });
+
+    await newUser.save();
+    res.status(201).json({ message: "User created successfully" });
+
   } catch (error) {
-    console.error("Error fetching current user:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Error creating user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export const searchUsers = (req, res) => {
+
+export const searchUsers = async (req, res) => {
   try {
     const { username } = req.query;
-
     if (!username || username.length < 2) {
       return res.json([]);
     }
 
-    const filteredUsers = users
-      .filter(user => 
-        user.username.toLowerCase().includes(username.toLowerCase()) &&
-        user.id !== req.user.id
-      )
-      .slice(0, 10); // Maximum 10 results
+    const users = await User.find({
+      username: { $regex: username, $options: "i" },
+      _id: { $ne: req.user._id }
+    }).select("id username name avatar").limit(10);
 
-    return res.json(filteredUsers);
-    
+    res.json(users);
   } catch (error) {
-    console.error('Error searching users:', error);
-    return res.status(500).json([]);
+    console.error("Error searching users:", error);
+    res.status(500).json([]);
   }
 };
 
-export const getUserById = (req, res) => {
+export const getCurrentUser = async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const user = users.find(user => user.id === id);
+    const user = await User.findById(req.user._id).select("email name avatar");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      avatar: user.avatar,
-      friends: user.friends, 
-    friendRequests: user.friendRequests, 
-    });
-
+    res.json(user);
   } catch (error) {
     console.error("Error fetching user:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };

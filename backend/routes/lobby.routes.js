@@ -1,6 +1,7 @@
 import express from 'express';
 import {
-  createLobby,joinLobby,getLobbyByCode,getLobbies,deleteLobby,leaveLobby
+  createLobby,joinLobby,getLobbyByCode,getLobbies,deleteLobby,leaveLobby,
+  updateLobby
 } from '../controllers/lobby.controller.js';
 import authenticateUser from '../middleware/authenticateUser.js';
 
@@ -25,8 +26,8 @@ router.post('/leave/:lobbyCode', authenticateUser, leaveLobby);
 // Delete lobby (only for host)
 router.delete('/delete/:lobbyCode', authenticateUser, deleteLobby);
 
-// // Update lobby settings (only for host)
-// router.put('/:lobbyCode', authenticateUser, updateLobby);
+// Update lobby settings (only for host)
+router.put('/update/:lobbyCode', authenticateUser, updateLobby);
 
 
 export default router;

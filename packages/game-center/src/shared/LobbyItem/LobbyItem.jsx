@@ -17,15 +17,12 @@ import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";
 import { useWebSocket } from "../context/WebSocketContext/context";
 import { Event, Group, People } from "@mui/icons-material";
+import ErrorModal from "../ErrorModal";
+import LobbyEditModal from "./LobbyEditModal";
 
-const COLORS = {
-  normal: "rgb(25,118,210)",
-  event: "rgb(156,39,176)",
-  default: "#87CEEB",
-};
 
 function LobbyItem({ lobby}) {
-  const { existingLobby, setMembersByLobby,membersByLobby } = useLobbyContext();
+  const { existingLobby, setMembersByLobby} = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -33,7 +30,9 @@ function LobbyItem({ lobby}) {
     useLobbyItem(lobby, currentUser);
   const { socket } = useWebSocket();
   const [isHostLeft, setIsHostLeft] = useState(false);
-
+  const [isLobbyFull, setIsLobbyFull] = useState(false); // New state for lobby full
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); // For ErrorModal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for Edit Modal
   const handleWebSocketMessage = useCallback(
     (event) => {
       const data = JSON.parse(event.data);
@@ -55,6 +54,7 @@ function LobbyItem({ lobby}) {
     },
     [lobby.lobbyCode, currentUser, setMembersByLobby]
   );
+  console.log(lobby)
   useEffect(() => {
     if (!socket) return;
     const handleWebSocketMessage = (event) => {
@@ -76,19 +76,41 @@ function LobbyItem({ lobby}) {
     return () => socket.removeEventListener("message", handleWebSocketMessage);
   }, [socket, handleWebSocketMessage, lobby.lobbyCode]);
 
-  const getBackgroundColor = () => {
-    if (eventStatus === "host_left" || isHostLeft) return "#808080";
-    if (lobby.lobbyType === "event") return COLORS.event;
-    if (lobby.lobbyType === "normal") return COLORS.normal;
-    return COLORS[lobby.eventType] || COLORS.default;
-  };
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
   const [endDate, endTime] = lobby.endTime?.split("T") || [null, null];
 
   const isCreator = currentUser?.id === lobby.createdBy;
-  const handleJoinClick = () =>
-    lobby.password ? setIsPasswordModalOpen(true) : handleJoin();
+  const handleJoinClick = async () => {
+    try {
+      if (lobby.maxMembers && lobby.members.length >= lobby.maxMembers) {
+        setIsLobbyFull(true); // Set lobby full state
+        setIsErrorModalOpen(true); // Open ErrorModal directly
+        return; // Stop further execution
+      }
+
+      if (lobby.password) {
+        setIsPasswordModalOpen(true);
+      } else {
+        await handleJoin(); // Call handleJoin if no password and not full
+      }
+    } catch (error) {
+      console.error("Error joining lobby:", error);
+      setIsErrorModalOpen(true); // Open error modal on any join error
+    }
+  };
+
+
+  const handleErrorModalClose = useCallback(() => {
+    setIsErrorModalOpen(false);
+    setIsLobbyFull(false); // Reset the lobby full state when modal is closed
+  }, []);
+  const handleEditClick = () => {
+    setIsEditModalOpen(true); // Open edit modal
+  };
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false); // Close edit modal
+  };
   const handleNavigate = () => navigate(`/lobby/${lobby.lobbyCode}`);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -209,6 +231,7 @@ function LobbyItem({ lobby}) {
                   onJoin={handleJoinClick}
                   onNavigate={handleNavigate}
                   isMobile={isMobile}
+                  onEdit={isCreator ? handleEditClick : undefined} // Conditionally pass onEdit
                 />
               </Box>
             </Box>
@@ -226,6 +249,16 @@ function LobbyItem({ lobby}) {
         open={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
         onSubmit={handleJoin}
+      />
+       <ErrorModal
+        open={isErrorModalOpen} 
+        onClose={handleErrorModalClose} 
+        errorMessage={isLobbyFull ? "Lobi Full!" : "There was an error joining the lobby."} // Dynamic message
+      />
+       <LobbyEditModal
+        open={isEditModalOpen}
+        onClose={handleEditModalClose}
+        lobby={lobby} // Pass lobby data to the edit modal
       />
     </>
   );

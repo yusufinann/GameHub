@@ -1,43 +1,51 @@
 import React from 'react';
 import { Box, TextField } from '@mui/material';
 
-export const EventFields= ({ formData, handleChange }) => (
+export const EventFields = ({ formData, handleChange }) => (
   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
     <TextField
-      label="Başlangıç Tarihi"
-      type="date"
-      name="startDate"
-      value={formData.startDate}
-      onChange={handleChange}
+      fullWidth
+      label="Başlangıç Zamanı" // Updated label
+      type="datetime-local" // Changed to datetime-local
+      name="startTime"      // Correct name: startTime
+      value={formData.startTime} // Correct value from formData.startTime
+      onChange={handleChange}   // Correct handleChange
       InputLabelProps={{ shrink: true }}
       required
+      InputProps={{
+        sx: {
+          '& .MuiOutlinedInput-root': {
+            '&:hover fieldset': {
+              borderColor: 'rgba(34,193,195,0.8)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'rgba(34,193,195,1)',
+            },
+          },
+        },
+      }}
     />
     <TextField
-      label="Başlangıç Saati"
-      type="time"
-      name="startTime"
-      value={formData.startTime}
-      onChange={handleChange}
+      fullWidth
+      label="Bitiş Zamanı"   // Updated label
+      type="datetime-local" // Changed to datetime-local
+      name="endTime"        // Correct name: endTime
+      value={formData.endTime}   // Correct value from formData.endTime
+      onChange={handleChange}     // Correct handleChange
       InputLabelProps={{ shrink: true }}
       required
-    />
-    <TextField
-      label="Bitiş Tarihi"
-      type="date"
-      name="endDate"
-      value={formData.endDate}
-      onChange={handleChange}
-      InputLabelProps={{ shrink: true }}
-      required
-    />
-    <TextField
-      label="Bitiş Saati"
-      type="time"
-      name="endTime"
-      value={formData.endTime}
-      onChange={handleChange}
-      InputLabelProps={{ shrink: true }}
-      required
+      InputProps={{
+        sx: {
+          '& .MuiOutlinedInput-root': {
+            '&:hover fieldset': {
+              borderColor: 'rgba(253,187,45,0.8)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'rgba(253,187,45,1)',
+            },
+          },
+        },
+      }}
     />
   </Box>
 );

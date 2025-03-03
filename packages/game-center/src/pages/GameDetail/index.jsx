@@ -16,9 +16,8 @@ const GameDetail = () => {
 
   useEffect(() => {
     if (lobbies) {
-      const parsedGameId = parseInt(gameId, 10);
       // URL'deki gameId ile eşleşen lobileri filtrele
-      const activeLobbies = lobbies.filter((lobby) => lobby.game === parsedGameId);
+      const activeLobbies = lobbies.filter((lobby) => lobby.game === gameId);
       setFilteredLobbies(activeLobbies);
     }
   }, [lobbies, gameId]);
