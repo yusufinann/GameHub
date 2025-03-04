@@ -1,0 +1,3 @@
+[submodule "packages/bingo-game"]
+	path = packages/bingo-game
+	url = https://github.com/yusufinann/bingo-game
