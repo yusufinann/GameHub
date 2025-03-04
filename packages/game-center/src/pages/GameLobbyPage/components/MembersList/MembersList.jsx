@@ -5,7 +5,7 @@ import Header from './Header';
 import MemberItem from './MemberItem';
 
 function MembersList({ members }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const handleToggle = () => setIsCollapsed(!isCollapsed);
 
@@ -56,8 +56,8 @@ function MembersList({ members }) {
         </Stack>
       ) : (
         <List sx={{ p: 0 }}>
-          {members.map((member) => (
-            <MemberItem key={member.id} member={member} />
+          {members.map((member,index) => (
+            <MemberItem key={member.id} member={member} index={index}/>
           ))}
         </List>
       )}

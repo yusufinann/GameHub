@@ -5,16 +5,17 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import memorystore from "memorystore";
 import cors from "cors";
-import connectToMongoDB from './db/connectToMongoDB.js';
 import { createServer } from "http";
 import setupWebSocket from "./websocket/webSocketServer.js";
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
+import connectToMongoDB from './db/connectToMongoDB.js';
 import authenticateUser from "./middleware/authenticateUser.js";
 import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import lobbyRoutes from './routes/lobby.routes.js'
+import bingoRoutes from './routes/bingo.routes.js'
 import { initializeWebSocket as initializeLobbyWebSocket } from "./controllers/lobby.controller.js";
 import { initializeFriendWebSocket } from "./controllers/friend.controller.js";
 const MemoryStore = memorystore(session);
@@ -57,6 +58,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
 app.use("/api/lobbies",lobbyRoutes)
+app.use("/api/bingo",bingoRoutes)
 
 //Games endpoint with authentication
 const __filename = fileURLToPath(import.meta.url);

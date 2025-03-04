@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/game-center", "packages/tombala-game"],
+  "packages": ["packages/game-center", "packages/bingo-game"],
    "version": "independent",
    "npmClient":"yarn",
    "useWorksapaces":true

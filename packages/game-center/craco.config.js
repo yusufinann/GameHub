@@ -7,7 +7,7 @@ module.exports = {
       // `components` dizinine alias ekleyerek çözüm sağlıyoruz
       webpackConfig.resolve.alias = {
         ...webpackConfig.resolve.alias,
-        '@components': path.resolve(__dirname, '../tombala-game/src'),
+        '@components': path.resolve(__dirname, '../bingo-game/src'),
       };
 
       // `babel-loader`'ı, dış bileşenlerin doğru şekilde işlenmesi için yapılandırma
@@ -16,7 +16,7 @@ module.exports = {
 
       if (isFound) {
         const include = Array.isArray(match.loader.include) ? match.loader.include : [match.loader.include];
-        include.push(path.resolve(__dirname, '../tombala-game/src'));  // concat yerine push kullanıyoruz
+        include.push(path.resolve(__dirname, '../bingo-game/src'));  // concat yerine push kullanıyoruz
         match.loader.include = include;
       }
 

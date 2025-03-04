@@ -1,6 +1,7 @@
 //lobby.controller.js
 import bcrypt from 'bcrypt';
 import Lobby from '../models/lobby.model.js'; // Lobby modelini import et
+import { bingoGames } from "./bingo.game.controller.js";
 const lobbyTimers = new Map();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -461,12 +462,12 @@ export const leaveLobby = async (req, res) => {
   }
 };
 
+
 export const deleteLobby = async (req, res) => {
   const { lobbyCode } = req.params;
   const user = req.user;
 
   try {
-    // Lobiyi MongoDB'den bul
     const lobby = await Lobby.findOne({ lobbyCode: lobbyCode });
 
     if (!lobby) {
@@ -478,8 +479,11 @@ export const deleteLobby = async (req, res) => {
       return res.status(403).json({ message: "Bu lobiyi silme yetkiniz yok." });
     }
 
-    // Event timer'larını temizle eğer varsa
-    if (lobby.lobbyType === "event") {
+    // Eğer bu lobiye ait aktif bir oyun varsa, oyunun ilerleyişini ve timer’ları temizle
+    if (bingoGames[lobbyCode]) {
+      const game = bingoGames[lobbyCode];
+
+      // Temizlenecek başlangıç ve bitiş zamanlayıcıları varsa
       if (lobbyTimers.get(`start_${lobby.id}`)) {
         clearTimeout(lobbyTimers.get(`start_${lobby.id}`));
         lobbyTimers.delete(`start_${lobby.id}`);
@@ -488,31 +492,42 @@ export const deleteLobby = async (req, res) => {
         clearTimeout(lobbyTimers.get(`end_${lobby.id}`));
         lobbyTimers.delete(`end_${lobby.id}`);
       }
-    }
-    // Host leave timer'ını temizle eğer varsa
-    if (lobbyTimers.get(`host_leave_${lobby.id}`)) {
-        clearTimeout(lobbyTimers.get(`host_leave_${lobby.id}`));
-        lobbyTimers.delete(`host_leave_${lobby.id}`);
+
+      // Eğer otomatik sayı çekim interval'ı varsa temizle
+      if (game.autoDrawInterval) {
+        clearInterval(game.autoDrawInterval);
+      }
+
+      // Aktif oyunu sonlandırın ve kullanıcılara oyun iptali bildirimi gönderin.
+      broadcastLobbyEvent(lobby.lobbyCode, "GAME_TERMINATED", {
+        lobbyCode: lobby.lobbyCode,
+        message: "Oyun iptal edildi."
+      }, lobby.members.map(member => member.id));
+
+      // İlgili oyunu sistemden kaldırın.
+      delete bingoGames[lobbyCode];
+    } else {
+      // Eğer aktif bir oyun yoksa da lobi silindiğini tüm kullanıcılara bildiriyoruz.
+      broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", {
+        lobbyCode: lobby.lobbyCode,
+        message: "Lobi silindi."
+      });
     }
 
-
-    // Lobiyi MongoDB'den sil
+    // Lobiyi veritabanından sil
     await Lobby.deleteOne({ lobbyCode: lobbyCode });
-
-    // WebSocket üzerinden lobi silme olayını yayınla
-    broadcastLobbyEvent(lobbyCode, "LOBBY_DELETED", { lobbyId: lobby.id });
 
     // Başarılı yanıt
     res.status(200).json({
       message: "Lobi başarıyla silindi.",
       deletedLobby: lobby.toObject(),
     });
-
   } catch (error) {
     console.error("Lobi silme hatası:", error);
     res.status(500).json({ message: "Lobi silinirken bir hata oluştu.", error: error.message });
   }
 };
+
 
 // Lobi güncelleme fonksiyonu (eş zamanlı güncelleme için)
 export const updateLobby = async (req, res) => {

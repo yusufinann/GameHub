@@ -1,43 +1,61 @@
 import React from 'react';
-import { ListItem, Avatar, ListItemText, Tooltip } from '@mui/material';
-import { Person as PersonIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { ListItem, Avatar, ListItemText,Typography, Box } from '@mui/material';
 
-function MemberItem({ member }) {
+function MemberItem({ member, index }) {
   return (
     <ListItem
       sx={{
         mb: 0.5,
-        bgcolor: member.isHost ? 'rgba(25, 118, 210, 0.1)' : 'transparent',
+        bgcolor: member.isHost ? 'rgba(255, 215, 0, 0.15)' : 'transparent',
         borderRadius: '10px',
         '&:hover': {
-          bgcolor: 'rgba(25, 118, 210, 0.2)',
+          bgcolor: member.isHost ? 'rgba(255, 215, 0, 0.3)' : 'rgba(25, 118, 210, 0.2)',
         },
+        position: 'relative',
       }}
-      secondaryAction={
-        member.isHost && (
-          <Tooltip title="Host">
-            <SettingsIcon sx={{ color: '#1a237e', fontSize: '1rem' }} />
-          </Tooltip>
-        )
-      }
     >
       <Avatar
         sx={{
-          width: 30,
-          height: 30,
+          width: 35,
+          height: 35,
           fontSize: '0.9rem',
-          bgcolor: member.isHost ? '#1a237e' : '#2196f3',
+          bgcolor: member.isHost ? '#ffb300' : '#2196f3',
+          border: member.isHost ? '2px solid gold' : 'none',
+          boxShadow: member.isHost ? '0 0 8px rgba(255, 215, 0, 0.6)' : 'none',
         }}
       >
-        <PersonIcon fontSize="small" />
+        {member.name?.[0] || `P${index + 1}`}
       </Avatar>
+
       <ListItemText
-        primary={member.name}
-        primaryTypographyProps={{
-          fontSize: '0.85rem',
-          fontWeight: 'bold',
-          color: '#1a237e',
-        }}
+        primary={
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography
+              sx={{
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+                color: '#1a237e',
+              }}
+            >
+              {member.name || `Player ${index + 1}`}
+            </Typography>
+            {member.isHost && (
+              <Typography
+                sx={{
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  color: 'gold',
+                  bgcolor: 'rgba(255, 215, 0, 0.2)',
+                  px: 1,
+                  py: 0.3,
+                  borderRadius: '5px',
+                }}
+              >
+                Host
+              </Typography>
+            )}
+          </Box>
+        }
       />
     </ListItem>
   );

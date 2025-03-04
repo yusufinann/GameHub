@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { handleFriendRemove, handleFriendRequest, handleFriendRequestAccept, handleFriendRequestReject, handleGetFriendList, handleGetFriendRequests } from '../controllers/friend.controller.js';
-
+import * as bingoGameController from '../controllers/bingo.game.controller.js';
 // Aktif bağlantıları kullanıcı ID'siyle saklamak için Map kullanıyoruz
 const connectedClients = new Map();
 
@@ -120,6 +120,29 @@ const setupWebSocket = (server) => {
         case 'USER_STATUS':
           broadcastToAll({ type: 'USER_STATUS', status: data.status, userId: data.userId });
           break;
+
+           // Tombala (Bingo) ile ilgili mesajlar:
+      case 'BINGO_JOIN':
+        // Kullanıcı oyuna katılmak istiyor
+        bingoGameController.joinGame(ws, data);
+        break;
+      case 'BINGO_START':
+        // Oyunu başlatmak istiyor (host tarafından)
+        bingoGameController.startGame(ws, data);
+        break;
+      case 'BINGO_DRAW':
+        // Yeni numara çekme isteği
+        bingoGameController.drawNumber(ws, data);
+        break;
+      case 'BINGO_CALL':
+        // Kullanıcı bingo dediğinde kontrol et
+        bingoGameController.checkBingo(ws, data);
+        break;
+        case 'BINGO_MARK_NUMBER':
+  // Kullanıcının işaretlediği numarayı kaydet
+  bingoGameController.markNumber(ws, data);
+  break;
+
         default:
           console.log('Bilinmeyen mesaj tipi:', data.type);
       }
