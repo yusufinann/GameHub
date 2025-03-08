@@ -22,14 +22,12 @@ const MemoryStore = memorystore(session);
 const app = express();
 const server = createServer(app); // HTTP sunucusu oluştur
 
-// WebSocket sunucusunu başlat
-// WebSocket sunucusunu başlat
-const { broadcastLobbyEvent, broadcastFriendEvent } = setupWebSocket(server);
+const { broadcastLobbyEvent, broadcastFriendEvent} = setupWebSocket(server);
 
-// Lobi ve arkadaş modülleri için farklı broadcast fonksiyonlarını kullanıyoruz
+// Lobi ve arkadaş modülleri için farklı broadcast fonksiyonlarını kullanıyorum
 initializeLobbyWebSocket(broadcastLobbyEvent);
 initializeFriendWebSocket(broadcastFriendEvent);
-const SECRET_KEY = "your_secret_key"; // Güçlü bir anahtar seçin
+const SECRET_KEY = "your_secret_key"; 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 const corsOptions = {

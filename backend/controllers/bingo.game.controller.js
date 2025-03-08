@@ -501,7 +501,6 @@ export const startGame = (ws, data) => {
 async function saveGameStatsToDB(game) {
   try {
     const rankings = getGameRankings(game);
-    console.log("Rankings before saving:", rankings); // Log rankings
 
     rankings.forEach((rankInfo, index) => {
       const player = game.players[rankInfo.playerId];
@@ -511,7 +510,6 @@ async function saveGameStatsToDB(game) {
     });
 
     const winnerRankInfo = rankings.find(rankInfo => rankInfo.rank === 1);
-    console.log("Winner Rank Info:", winnerRankInfo); // Log winnerRankInfo
 
     let winner = null;
     if (winnerRankInfo) {
@@ -526,7 +524,6 @@ async function saveGameStatsToDB(game) {
         console.warn("Winner player not found in game.players:", winnerRankInfo.playerId); // Warn if player not found
       }
     }
-    console.log("Winner object:", winner); // Log winner object
     game.winner = winner;
 
     const playersForDB = Object.values(game.players).map(player => ({
@@ -551,7 +548,6 @@ async function saveGameStatsToDB(game) {
     });
 
     await newBingoGame.save();
-    console.log(`Oyun istatistikleri veritabanına kaydedildi. Game ID: ${game.gameId}`);
   } catch (error) {
     console.error("Oyun istatistikleri kaydedilirken hata oluştu:", error);
   }
@@ -693,8 +689,6 @@ export const getUserBingoStats = async (req, res) => {
     // Kullanıcının katıldığı tüm oyun kayıtlarını çekiyoruz ve playerId'si userId olan oyuncuları filtreliyoruz.
     const games = await BingoGame.find({ "players.playerId": userId });
 
-    console.log("Games for user stats: ",games) // Log games directly
-
     let totalGames = games.length; // Directly use games.length
     let wins = 0;
     let totalScore = 0;
@@ -742,7 +736,6 @@ export const getPlayerStats = async (req, res) => {
     // Get all games where this user was a player
     const games = await BingoGame.find({ "players.playerId": userId });
 
-    console.log("Games for player stats: ",games) // Log games directly
 
     let totalGames = games.length; // Directly use games.length
     let wins = 0;
@@ -787,7 +780,6 @@ export const getAllPlayerBingoStats = async (req, res) => {
     // Tüm oyunları çekiyoruz.
     const games = await BingoGame.find({});
 
-    console.log("Games for all players stats: ",games) // Log games directly
 
     // Oyunları oynanma tarihine göre artan sıralıyoruz.
     games.sort((a, b) => new Date(a.startedAt) - new Date(b.startedAt)); // Directly sort games

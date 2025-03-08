@@ -80,3 +80,12 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); 
+    res.json({ users }); // Kullanıcıları bir obje içinde döndür
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

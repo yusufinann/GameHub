@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   outgoingRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  isOnline: { type: Boolean, default: false }, // Yeni eklenen alan
 });
 
 const User = mongoose.model("User", userSchema);

@@ -30,6 +30,7 @@ import { useFriendsContext } from './context';
 import { StatCard, ProfileSection } from './components/profileComponents';
 import { profileTheme, colorScheme } from './profileTheme';
 import RemoveFriendConfirm from './components/RemoveFriendConfirm';
+import BingoPlayerStats from './components/BingoPlayerStats';
 
 const Profile = () => {
   const { userId } = useParams();
@@ -287,7 +288,6 @@ const Profile = () => {
           </Box>
         ))}
       </Box>
-
       <Box
         sx={{
           background: 'rgba(255,255,255,0.9)',
@@ -318,12 +318,15 @@ const Profile = () => {
       </Box>
 
       <Box sx={{ mt: 2 }}>
-        {activeTab === 0 && (
-          <ProfileSection.Achievements
-            achievements={user.achievements}
-            theme={profileTheme}
-          />
-        )}
+      {activeTab === 0 && (
+    <>
+      <ProfileSection.Achievements
+        achievements={user.achievements}
+        theme={profileTheme}
+      />
+      <BingoPlayerStats />
+    </>
+  )}
 
         {activeTab === 1 && (
           <ProfileSection.RecentGames recentGames={user.recentGames} />

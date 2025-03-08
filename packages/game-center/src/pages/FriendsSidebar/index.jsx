@@ -1,5 +1,6 @@
+// FriendsSidebar.js
 import React, { memo, useEffect, useState } from 'react';
-import { Box, Avatar, Typography, Tooltip, Paper, SvgIcon } from '@mui/material';
+import { Box, Avatar, Typography, Tooltip} from '@mui/material';
 import { useFriendsContext } from '../Profile/context';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
 import UnifiedNotifications from '../MainScreen/MainScreenHeaderArea/components/UnifiedNotifications';
@@ -32,45 +33,48 @@ const LampBase = memo(() => (
   />
 ));
 
-const FriendAvatar = memo(({ friend }) => (
-  <Tooltip title={`${friend.name} (${friend.status})`} placement="right">
-    <Box
-      sx={{
-        position: 'relative',
-        mb: 2,
-        p: '3px',
-        borderRadius: '50%',
-        background: 'linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%)',
-      }}
-    >
-      <Avatar
-        alt={friend.name}
-        src={friend.avatar}
-        sx={{
-          width: 50,
-          height: 50,
-          border: '2px solid rgba(255, 255, 255, 0.8)',
-          transition: 'all 0.3s ease',
-        }}
-      />
+const FriendAvatar = memo(({ friend }) => {
+  const status = friend.isOnline ? 'online' : 'offline';
+  return (
+    <Tooltip title={`${friend.name} (${status})`} placement="right">
       <Box
         sx={{
-          position: 'absolute',
-          bottom: 1,
-          right: 1,
-          width: 3,
-          height: 3,
+          position: 'relative',
+          mb: 2,
+          p: '3px',
           borderRadius: '50%',
-          backgroundColor: friend.status === 'online' 
-            ? 'rgb(46, 213, 115)' 
-            : 'rgb(255, 71, 87)',
-          border: '2px solid rgba(255, 255, 255, 0.8)',
-          boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
+          background: 'linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%)',
         }}
-      />
-    </Box>
-  </Tooltip>
-));
+      >
+        <Avatar
+          alt={friend.name}
+          src={friend.avatar}
+          sx={{
+            width: 50,
+            height: 50,
+            border: '2px solid rgba(255, 255, 255, 0.8)',
+            transition: 'all 0.3s ease',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 1,
+            right: 1,
+            width: 3,
+            height: 3,
+            borderRadius: '50%',
+            backgroundColor: status === 'online'
+              ? 'rgb(46, 213, 115)'
+              : 'rgb(255, 71, 87)',
+            border: '2px solid rgba(255, 255, 255, 0.8)',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
+          }}
+        />
+      </Box>
+    </Tooltip>
+  );
+});
 
 const EmptyFriendsList = memo(() => (
   <Typography
@@ -159,22 +163,53 @@ const FriendsSidebar = () => {
     }
   }, [socket, requestFriendList]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUserStatus = (event) => { // Changed handler name for clarity
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'USER_STATUS') { // Listen for USER_STATUS messages
+          const userId = message.userId;
+          const isOnline = message.isOnline;
+
+          setLocalFriends(prevFriends => {
+            return prevFriends.map(friend => {
+              if (friend.id.toString() === userId.toString()) {
+                return { ...friend, isOnline: isOnline };
+              }
+              return friend;
+            });
+          });
+        }
+      } catch (error) {
+        console.error("FriendsSidebar: Error parsing user status message", error); // Updated error message
+      }
+    };
+
+    socket.addEventListener('message', handleUserStatus); // Updated listener function name
+    return () => {
+      socket.removeEventListener('message', handleUserStatus); // Updated remove listener function name
+    };
+  }, [socket]);
+
+
   return (
     <Box sx={sidebarStyles}>
       {/* Street lamp notification area at the top */}
-      <Box sx={{ 
-        mb: 4, 
-        mt: 2, 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        mb: 4,
+        mt: 2,
+        display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         position: 'relative',
       }}>
         {/* Glow effect */}
         <LampGlowEffect />
-        
+
         {/* Lamp housing for notifications */}
-        <Box sx={{ 
+        <Box sx={{
           position: 'relative',
           display: 'flex',
           justifyContent: 'center',
@@ -193,22 +228,22 @@ const FriendsSidebar = () => {
         }}>
           <UnifiedNotifications />
         </Box>
-        
+
         {/* Lamp base */}
         <LampBase />
-        
+
         {/* Lamp post */}
         <StreetLampPost />
-        
+
         {/* Decorative line separator */}
-        <Box 
-          sx={{ 
-            width: '50px', 
-            height: '2px', 
+        <Box
+          sx={{
+            width: '50px',
+            height: '2px',
             background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)',
             mt: 2,
             mb: 2
-          }} 
+          }}
         />
       </Box>
 

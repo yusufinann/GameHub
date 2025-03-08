@@ -1,3 +1,4 @@
+// FriendsContext.js
 import React, {
   createContext,
   useContext,
@@ -100,7 +101,7 @@ export const FriendsProvider = ({ children }) => {
 
   const requestFriendRequests = useCallback(() => {
     sendMessage({ type: "GET_FRIEND_REQUESTS" });
- 
+
   }, [sendMessage]);
 
   // WebSocket mesajlarını dinleyerek state güncellemesi yapıyoruz
@@ -214,7 +215,6 @@ export const FriendsProvider = ({ children }) => {
               );
             }
             break;
-            
           default:
             break;
         }

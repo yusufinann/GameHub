@@ -201,7 +201,7 @@ export const handleFriendRemove = async (ws, data) => {
 export const handleGetFriendList = async (ws) => {
   try {
     const userId = ws.userId;
-    const user = await User.findById(userId).populate('friends', 'id name username avatar');
+    const user = await User.findById(userId).populate('friends', 'id name username avatar isOnline');
 
     if (!user) {
       return ws.send(JSON.stringify({ type: 'ERROR', message: 'Kullanıcı bulunamadı.' }));
@@ -211,9 +211,9 @@ export const handleGetFriendList = async (ws) => {
       id: friend._id,
       name: friend.name,
       username: friend.username,
-      avatar: friend.avatar
+      avatar: friend.avatar,
+      isOnline: friend.isOnline
     }));
-
     ws.send(JSON.stringify({ type: 'GET_FRIEND_LIST', friends: friendList }));
   } catch (error) {
     console.error('Get friend list error:', error);
