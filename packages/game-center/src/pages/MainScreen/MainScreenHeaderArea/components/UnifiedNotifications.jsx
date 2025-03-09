@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react"; 
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   IconButton,
   Badge,
@@ -16,6 +16,7 @@ import {
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import EventIcon from "@mui/icons-material/Event";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import GroupsIcon from '@mui/icons-material/Groups'; // Lobby Name Icon for lobby invitations
 import { useNavigate } from "react-router-dom";
 import notificationSound from "../../../../assets/notification-sound.mp3";
 import { useWebSocket } from "../../../../shared/context/WebSocketContext/context";
@@ -52,7 +53,7 @@ const UnifiedNotifications = () => {
       case "EVENT_START_NOTIFICATION":
         const eventData = data.data;
         setNotifications((prev) => {
-          if (prev.some((notif) => notif.lobbyId === eventData.lobbyId)) {
+          if (prev.some((notif) => notif.lobbyId === eventData.lobbyId && notif.type === 'event')) {
             return prev;
           }
 
@@ -82,7 +83,7 @@ const UnifiedNotifications = () => {
       case "EVENT_STATUS":
         if (data.status === "ended") {
           setNotifications((prev) =>
-            prev.filter((notif) => notif.lobbyCode !== data.lobbyCode)
+            prev.filter((notif) => notif.lobbyCode !== data.lobbyCode && notif.type === 'event')
           );
         }
         break;
@@ -95,8 +96,39 @@ const UnifiedNotifications = () => {
       case "FRIEND_REQUEST_ACCEPTED":
         setSnackbarMessage(`${data.acceptedBy.username} accepted your friend request`);
         setSnackbarOpen(true);
-        requestFriendList(); // Arkadaş listesini güncelle
+        requestFriendList();
         break;
+      case "LOBBY_INVITATION_RECEIVED":
+        const invitationData = data;
+        setNotifications((prev) => {
+          if (prev.some((notif) => notif.lobbyId === invitationData.lobby.lobbyId && notif.type === 'lobby-invite')) {
+            return prev;
+          }
+
+          if (document.hasFocus()) {
+            setSnackbarMessage(`Lobby invitation received from ${invitationData.sender.username} for lobby ${invitationData.lobby.lobbyName}`);
+            setSnackbarOpen(true);
+          } else {
+            const audio = new Audio(notificationSound);
+            audio.play().catch((error) => console.log("Audio play failed:", error));
+          }
+
+          return [
+            ...prev,
+            {
+              type: "lobby-invite",
+              lobbyId: invitationData.lobby.lobbyId,
+              lobbyName: invitationData.lobby.lobbyName,
+              lobbyCode: invitationData.lobby.lobbyCode,
+              senderUsername: invitationData.sender.username,
+              senderAvatar: invitationData.sender.avatar,
+              message: `Lobby invitation from ${invitationData.sender.username} for lobby ${invitationData.lobby.lobbyName}`,
+              timestamp: new Date().toISOString(),
+            },
+          ];
+        });
+        break;
+
 
       default:
         break;
@@ -110,7 +142,6 @@ const UnifiedNotifications = () => {
   }, [socket, currentUser, handleMessage]);
 
   useEffect(() => {
-    // Sayfa açıldığında arkadaş listesini güncelle
     requestFriendList();
   }, [requestFriendList]);
 
@@ -156,7 +187,8 @@ const UnifiedNotifications = () => {
   const menuItems = useMemo(() => {
     const items = [];
 
-    if (notifications.length > 0) {
+    const eventNotifications = notifications.filter(notif => notif.type === 'event');
+    if (eventNotifications.length > 0) {
       items.push(
         <MenuItem key="events-header" disabled>
           <Typography variant="subtitle2" color="primary">
@@ -165,7 +197,7 @@ const UnifiedNotifications = () => {
         </MenuItem>
       );
 
-      notifications.forEach((notification) => {
+      eventNotifications.forEach((notification) => {
         items.push(
           <MenuItem key={notification.lobbyId} sx={{ py: 2 }}>
             <ListItemIcon>
@@ -182,7 +214,9 @@ const UnifiedNotifications = () => {
               <Button
                 size="small"
                 variant="contained"
-                onClick={() => handleJoinEvent(notification.lobbyCode)}
+                onClick={() => {
+                  handleJoinEvent(notification.lobbyCode);
+                }}
               >
                 Join
               </Button>
@@ -198,7 +232,7 @@ const UnifiedNotifications = () => {
         );
       });
 
-      if (incomingRequests.length > 0) {
+      if (incomingRequests.length > 0 || notifications.filter(notif => notif.type === 'lobby-invite').length > 0) {
         items.push(<Divider key="divider" />);
       }
     }
@@ -245,9 +279,59 @@ const UnifiedNotifications = () => {
           </MenuItem>
         );
       });
+       if (notifications.filter(notif => notif.type === 'lobby-invite').length > 0) {
+          items.push(<Divider key="divider-friends" />);
+        }
     }
 
-    if (notifications.length === 0 && incomingRequests.length === 0) {
+     const lobbyInviteNotifications = notifications.filter(notif => notif.type === 'lobby-invite');
+    if (lobbyInviteNotifications.length > 0) {
+      items.push(
+        <MenuItem key="lobby-invites-header" disabled>
+          <Typography variant="subtitle2" color="primary">
+            Lobby Invitations
+          </Typography>
+        </MenuItem>
+      );
+      lobbyInviteNotifications.forEach((notification) => {
+        items.push(
+          <MenuItem key={`lobby-invite-${notification.lobbyId}`} sx={{ py: 2 }}>
+            <ListItemIcon>
+              <Avatar sx={{ bgcolor: "secondary.light" }}>
+                <GroupsIcon />
+              </Avatar>
+            </ListItemIcon>
+            <ListItemText
+              primary={notification.lobbyName}
+              secondary={`Invitation from ${notification.senderUsername}`}
+              sx={{ mr: 2 }}
+            />
+            <Stack direction="row" spacing={1}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  handleJoinEvent(notification.lobbyCode);
+                  removeNotification(notification.lobbyId); // Remove notification after joining
+                }}
+              >
+                Join
+              </Button>
+              <Button
+                size="small"
+                color="error"
+                onClick={() => removeNotification(notification.lobbyId)}
+              >
+                Dismiss
+              </Button>
+            </Stack>
+          </MenuItem>
+        );
+      });
+    }
+
+
+    if (eventNotifications.length === 0 && incomingRequests.length === 0 && lobbyInviteNotifications.length === 0) {
       items.push(
         <MenuItem key="no-notifications" disabled>
           <Typography variant="body2" color="text.secondary" align="center">
@@ -280,12 +364,12 @@ const UnifiedNotifications = () => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
         PaperProps={{
-          sx: { 
-            width: 320, 
-            maxHeight: 500, 
-            backgroundColor: "white", 
+          sx: {
+            width: 320,
+            maxHeight: 500,
+            backgroundColor: "white",
             color: "black",
-            mt: 1 
+            mt: 1
           },
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}

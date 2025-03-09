@@ -11,7 +11,7 @@ import {
 import * as bingoGameController from "../controllers/bingo.game.controller.js";
 import * as lobbyController from "../controllers/lobby.controller.js";
 import * as authController from "../controllers/auth.controller.js";
-
+import * as lobbyChatController from "../controllers/lobbyChat.controller.js";
 // Aktif bağlantıları kullanıcı ID'siyle saklamak için Map kullanıyoruz
 const connectedClients = new Map();
 const setupWebSocket = (server) => {
@@ -135,10 +135,14 @@ const setupWebSocket = (server) => {
           });
           break;
         case "LOBBY_DELETED":
-          broadcastToOthers(ws, {
-            type: "LOBBY_DELETED",
-            lobbyCode: data.lobbyCode,
-          });
+          if(data.lobbyCode){
+            lobbyChatController.clearChatHistory(data.lobbyCode);
+            broadcastToAll({
+              type: "LOBBY_DELETED",
+              lobbyCode: data.lobbyCode,
+            });
+          }
+        
           break;
         case "LOBBY_REMOVED":
           broadcastToAll({
@@ -218,6 +222,47 @@ const setupWebSocket = (server) => {
           // Kullanıcının işaretlediği numarayı kaydet
           bingoGameController.markNumber(ws, data);
           break;
+
+          case "LOBBY_INVITATION":
+            const { recipientId, lobby, sender } = data;
+            if (recipientId) {
+              broadcastFriendEvent(recipientId, {
+                type: "LOBBY_INVITATION_RECEIVED",
+                lobby: lobby,
+                sender: sender,
+              });
+            } else {
+              console.error("Recipient ID is missing for lobby invitation.");
+            }
+            break;
+
+            case "SEND_EXPRESSION":
+              // İfade mesajını al ve tüm lobidekilere yayınla (gönderen dahil)
+              const { lobbyCode, expression,senderName, senderUsername, senderId } = data;
+               // Lobby Chat Controller kullanarak mesajı sakla
+          lobbyChatController.storeMessage(lobbyCode, { senderName, senderUsername, senderId, expression });
+
+              broadcastToAll({ // broadcastToAll kullanılıyor
+                type: "RECEIVE_EXPRESSION",
+                data: {
+                  lobbyCode: lobbyCode,
+                  expression: expression,
+                  senderName: senderName,
+                  senderUsername: senderUsername,
+                  senderId: senderId,
+                },
+              });
+              break;
+              case "GET_CHAT_HISTORY": // Yeni mesaj tipi: Chat geçmişini isteme
+              const requestedLobbyCode = data.lobbyCode;
+              // Lobby Chat Controller kullanarak chat geçmişini al
+              const historyToSend = lobbyChatController.getChatHistory(requestedLobbyCode);
+              ws.send(JSON.stringify({
+                type: "CHAT_HISTORY", // Yeni mesaj tipi: Chat geçmişini gönderme
+                lobbyCode: requestedLobbyCode,
+                history: historyToSend,
+              }));
+              break;
 
         default:
           console.log("Bilinmeyen mesaj tipi:", data.type);

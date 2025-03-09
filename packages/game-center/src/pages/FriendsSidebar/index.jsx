@@ -1,9 +1,13 @@
 // FriendsSidebar.js
 import React, { memo, useEffect, useState } from 'react';
-import { Box, Avatar, Typography, Tooltip} from '@mui/material';
+import { Box,Typography} from '@mui/material';
 import { useFriendsContext } from '../Profile/context';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
 import UnifiedNotifications from '../MainScreen/MainScreenHeaderArea/components/UnifiedNotifications';
+import FriendAvatar from './components/FriendAvatar';
+import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/context';
+import InviteDialog from './components/InviteDialog';
+import MessageDialog from './components/MessageDialog';
 
 // Create a street lamp post component
 const StreetLampPost = memo(() => (
@@ -33,48 +37,28 @@ const LampBase = memo(() => (
   />
 ));
 
-const FriendAvatar = memo(({ friend }) => {
-  const status = friend.isOnline ? 'online' : 'offline';
-  return (
-    <Tooltip title={`${friend.name} (${status})`} placement="right">
-      <Box
-        sx={{
-          position: 'relative',
-          mb: 2,
-          p: '3px',
-          borderRadius: '50%',
-          background: 'linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%)',
-        }}
-      >
-        <Avatar
-          alt={friend.name}
-          src={friend.avatar}
-          sx={{
-            width: 50,
-            height: 50,
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            transition: 'all 0.3s ease',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 1,
-            right: 1,
-            width: 3,
-            height: 3,
-            borderRadius: '50%',
-            backgroundColor: status === 'online'
-              ? 'rgb(46, 213, 115)'
-              : 'rgb(255, 71, 87)',
-            border: '2px solid rgba(255, 255, 255, 0.8)',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
-          }}
-        />
-      </Box>
-    </Tooltip>
-  );
-});
+// Lamp glow effect component
+const LampGlowEffect = memo(() => (
+  <Box
+    sx={{
+      position: 'absolute',
+      top: 0,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
+      opacity: 0.7,
+      filter: 'blur(5px)',
+      animation: 'pulse 2s infinite alternate',
+      '@keyframes pulse': {
+        '0%': { opacity: 0.5, transform: 'translateX(-50%) scale(0.9)' },
+        '100%': { opacity: 0.8, transform: 'translateX(-50%) scale(1.1)' }
+      }
+    }}
+  />
+));
 
 const EmptyFriendsList = memo(() => (
   <Typography
@@ -124,34 +108,15 @@ const sidebarStyles = {
   },
 };
 
-// Lamp glow effect component
-const LampGlowEffect = memo(() => (
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '40px',
-      height: '40px',
-      borderRadius: '50%',
-      background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
-      opacity: 0.7,
-      filter: 'blur(5px)',
-      animation: 'pulse 2s infinite alternate',
-      '@keyframes pulse': {
-        '0%': { opacity: 0.5, transform: 'translateX(-50%) scale(0.9)' },
-        '100%': { opacity: 0.8, transform: 'translateX(-50%) scale(1.1)' }
-      }
-    }}
-  />
-));
-
 const FriendsSidebar = () => {
-  const { friends, requestFriendList } = useFriendsContext();
+  const { friends, requestFriendList} = useFriendsContext();
+  const{existingLobby,userLobby }=useLobbyContext();
   const hasFriends = friends?.length > 0;
   const { socket } = useWebSocket();
   const [localFriends, setLocalFriends] = useState(friends);
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
   useEffect(() => {
     setLocalFriends(friends);
@@ -166,10 +131,10 @@ const FriendsSidebar = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleUserStatus = (event) => { // Changed handler name for clarity
+    const handleUserStatus = (event) => {
       try {
         const message = JSON.parse(event.data);
-        if (message.type === 'USER_STATUS') { // Listen for USER_STATUS messages
+        if (message.type === 'USER_STATUS') {
           const userId = message.userId;
           const isOnline = message.isOnline;
 
@@ -181,81 +146,142 @@ const FriendsSidebar = () => {
               return friend;
             });
           });
+        } else if (message.type === 'NEW_MESSAGE') {
+          // Handle new message notifications
+          const { fromUserId } = message;
+          
+          setLocalFriends(prevFriends => {
+            return prevFriends.map(friend => {
+              if (friend.id.toString() === fromUserId.toString()) {
+                return { ...friend, hasNewMessages: true };
+              }
+              return friend;
+            });
+          });
         }
       } catch (error) {
-        console.error("FriendsSidebar: Error parsing user status message", error); // Updated error message
+        console.error("FriendsSidebar: Error parsing user status message", error);
       }
     };
 
-    socket.addEventListener('message', handleUserStatus); // Updated listener function name
+    socket.addEventListener('message', handleUserStatus);
     return () => {
-      socket.removeEventListener('message', handleUserStatus); // Updated remove listener function name
+      socket.removeEventListener('message', handleUserStatus);
     };
   }, [socket]);
 
+  const handleOpenMessageDialog = (friend) => {
+    setSelectedFriend(friend);
+    setMessageDialogOpen(true);
+    
+    // Clear new message indicator when opening messages
+    setLocalFriends(prevFriends => {
+      return prevFriends.map(f => {
+        if (f.id === friend.id) {
+          return { ...f, hasNewMessages: false };
+        }
+        return f;
+      });
+    });
+  };
+
+  const handleCloseMessageDialog = () => {
+    setMessageDialogOpen(false);
+  };
+
+  const handleOpenInviteDialog = (friend) => {
+    setSelectedFriend(friend);
+    setInviteDialogOpen(true);
+  };
+
+  const handleCloseInviteDialog = () => {
+    setInviteDialogOpen(false);
+  };
 
   return (
-    <Box sx={sidebarStyles}>
-      {/* Street lamp notification area at the top */}
-      <Box sx={{
-        mb: 4,
-        mt: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        position: 'relative',
-      }}>
-        {/* Glow effect */}
-        <LampGlowEffect />
-
-        {/* Lamp housing for notifications */}
+    <>
+      <Box sx={sidebarStyles}>
+        {/* Street lamp notification area at the top */}
         <Box sx={{
-          position: 'relative',
+          mb: 4,
+          mt: 2,
           display: 'flex',
-          justifyContent: 'center',
+          flexDirection: 'column',
           alignItems: 'center',
-          width: '45px',
-          height: '45px',
-          borderRadius: '50% 50% 5px 5px',
-          background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
-          boxShadow: '0 2px 15px rgba(58, 123, 213, 0.8)',
-          '&:hover': {
-            filter: 'brightness(1.2)',
-            transform: 'scale(1.05)',
-          },
-          transition: 'all 0.3s ease',
-          zIndex: 2,
+          position: 'relative',
         }}>
-          <UnifiedNotifications />
+          {/* Glow effect */}
+          <LampGlowEffect />
+
+          {/* Lamp housing for notifications */}
+          <Box sx={{
+            position: 'relative',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '45px',
+            height: '45px',
+            borderRadius: '50% 50% 5px 5px',
+            background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
+            boxShadow: '0 2px 15px rgba(58, 123, 213, 0.8)',
+            '&:hover': {
+              filter: 'brightness(1.2)',
+              transform: 'scale(1.05)',
+            },
+            transition: 'all 0.3s ease',
+            zIndex: 2,
+          }}>
+            <UnifiedNotifications />
+          </Box>
+
+          {/* Lamp base */}
+          <LampBase />
+
+          {/* Lamp post */}
+          <StreetLampPost />
+
+          {/* Decorative line separator */}
+          <Box
+            sx={{
+              width: '50px',
+              height: '2px',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)',
+              mt: 2,
+              mb: 2
+            }}
+          />
         </Box>
 
-        {/* Lamp base */}
-        <LampBase />
-
-        {/* Lamp post */}
-        <StreetLampPost />
-
-        {/* Decorative line separator */}
-        <Box
-          sx={{
-            width: '50px',
-            height: '2px',
-            background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)',
-            mt: 2,
-            mb: 2
-          }}
-        />
+        {/* Friends list */}
+        {hasFriends ? (
+          localFriends.map((friend) => (
+            <FriendAvatar 
+              key={friend.id} 
+              friend={friend} 
+              onMessage={handleOpenMessageDialog}
+              onInvite={handleOpenInviteDialog}
+              existingLobby={existingLobby}
+            />
+          ))
+        ) : (
+          <EmptyFriendsList />
+        )}
       </Box>
 
-      {/* Friends list */}
-      {hasFriends ? (
-        localFriends.map((friend) => (
-          <FriendAvatar key={friend.id} friend={friend} />
-        ))
-      ) : (
-        <EmptyFriendsList />
-      )}
-    </Box>
+      {/* Message dialog */}
+      <MessageDialog 
+        open={messageDialogOpen} 
+        handleClose={handleCloseMessageDialog} 
+        friend={selectedFriend} 
+      />
+      {/* Invite dialog */}
+      <InviteDialog 
+        open={inviteDialogOpen} 
+        handleClose={handleCloseInviteDialog} 
+        friend={selectedFriend}         
+        existingLobby={existingLobby}
+      />
+    </>
   );
 };
 

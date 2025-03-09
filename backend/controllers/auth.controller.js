@@ -39,7 +39,7 @@ export const userLogin = async (req, res) => {
             return res.json({
                 message: "Login successful",
                 token,
-                user: { id: user._id, email: user.email, name: user.name }
+                user: { id: user._id, email: user.email, name: user.name ,username:user.username}
             });
         }
 
