@@ -22,6 +22,7 @@ import notificationSound from "../../../../assets/notification-sound.mp3";
 import { useWebSocket } from "../../../../shared/context/WebSocketContext/context";
 import { useAuthContext } from "../../../../shared/context/AuthContext";
 import { useFriendsContext } from "../../../Profile/context";
+import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'; 
 
 const UnifiedNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -129,7 +130,38 @@ const UnifiedNotifications = () => {
         });
         break;
 
+        case "FRIEND_GROUP_INVITATION_RECEIVED":
+          const friendGroupInvitationData = data;
+          setNotifications((prev) => {
+            if (prev.some((notif) => notif.groupId === friendGroupInvitationData.groupId && notif.type === 'friend-group-invite')) {
+              return prev;
+            }
 
+            if (document.hasFocus()) {
+              setSnackbarMessage(`Friend group invitation received for ${friendGroupInvitationData.groupName}`);
+              setSnackbarOpen(true);
+            } else {
+              const audio = new Audio(notificationSound);
+              audio.play().catch((error) => console.log("Audio play failed:", error));
+            }
+
+            return [
+              ...prev,
+              {
+                type: "friend-group-invite",
+                groupId: friendGroupInvitationData.groupId,
+                groupName: friendGroupInvitationData.groupName,
+                inviterUsername: friendGroupInvitationData.inviterUsername,
+                inviterAvatar: null,
+                message: `Friend group invitation from ${friendGroupInvitationData.inviterUsername} for group ${friendGroupInvitationData.groupName}`,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+          });
+          break;
+          case "FRIEND_GROUP_UPDATED":
+    console.log("FRIEND_GROUP_UPDATED event received in notifications :", data);
+    break;
       default:
         break;
     }
@@ -162,9 +194,15 @@ const UnifiedNotifications = () => {
     [navigate, handleClose]
   );
 
-  const removeNotification = useCallback((lobbyId) => {
+  const removeNotification = useCallback((notificationId) => {
     setNotifications((prev) =>
-      prev.filter((notif) => notif.lobbyId !== lobbyId)
+      prev.filter((notif) => {
+        if (notif.type === 'friend-group-invite') {
+          return notif.groupId !== notificationId;
+        } else {
+          return notif.lobbyId !== notificationId;
+        }
+      })
     );
   }, []);
 
@@ -182,6 +220,12 @@ const UnifiedNotifications = () => {
     [rejectFriendRequest]
   );
 
+
+const handleViewFriendGroup = useCallback((groupId) => {
+  navigate(`/conversation/all/friend-group/${groupId}`);
+  removeNotification(groupId);
+  handleClose();
+}, [navigate, handleClose]);
   const totalNotifications = notifications.length + incomingRequests.length;
 
   const menuItems = useMemo(() => {
@@ -312,7 +356,7 @@ const UnifiedNotifications = () => {
                 variant="contained"
                 onClick={() => {
                   handleJoinEvent(notification.lobbyCode);
-                  removeNotification(notification.lobbyId); // Remove notification after joining
+                  removeNotification(notification.lobbyId); 
                 }}
               >
                 Join
@@ -330,8 +374,52 @@ const UnifiedNotifications = () => {
       });
     }
 
+    const friendGroupInviteNotifications = notifications.filter(notif => notif.type === 'friend-group-invite');
+    if (friendGroupInviteNotifications.length > 0) {
+      items.push(
+        <MenuItem key="friend-group-invites-header" disabled>
+          <Typography variant="subtitle2" color="primary">
+            Friend Group Invitations
+          </Typography>
+        </MenuItem>
+      );
+      friendGroupInviteNotifications.forEach((notification) => {
+        items.push(
+          <MenuItem key={`friend-group-invite-${notification.groupId}`} sx={{ py: 2 }}>
+            <ListItemIcon>
+              <Avatar sx={{ bgcolor: "secondary.light" }}>
+              <GroupsRoundedIcon />
+              </Avatar>
+            </ListItemIcon>
+            <ListItemText
+              primary={notification.groupName}
+              secondary={`Invitation from ${notification.inviterUsername}`}
+              sx={{ mr: 2 }}
+            />
+            <Stack direction="row" spacing={1}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  handleViewFriendGroup(notification.groupId);
+                }}
+              >
+                View
+              </Button>
+              <Button
+                size="small"
+                color="error"
+                onClick={() => removeNotification(notification.groupId)}
+              >
+                Dismiss
+              </Button>
+            </Stack>
+          </MenuItem>
+        );
+      });
+    }
 
-    if (eventNotifications.length === 0 && incomingRequests.length === 0 && lobbyInviteNotifications.length === 0) {
+    if (eventNotifications.length === 0 && incomingRequests.length === 0 && lobbyInviteNotifications.length === 0 && friendGroupInviteNotifications.length === 0) {
       items.push(
         <MenuItem key="no-notifications" disabled>
           <Typography variant="body2" color="text.secondary" align="center">
@@ -349,6 +437,7 @@ const UnifiedNotifications = () => {
     removeNotification,
     handleAcceptFriendRequest,
     handleRejectFriendRequest,
+    handleViewFriendGroup
   ]);
 
   return (

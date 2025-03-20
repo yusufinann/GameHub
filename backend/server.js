@@ -16,6 +16,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import lobbyRoutes from './routes/lobby.routes.js'
 import bingoRoutes from './routes/bingo.routes.js'
+import friendGroupRoutes from './routes/friendGroup.routes.js'
 import { initializeWebSocket as initializeLobbyWebSocket } from "./controllers/lobby.controller.js";
 import { initializeFriendWebSocket } from "./controllers/friend.controller.js";
 const MemoryStore = memorystore(session);
@@ -27,6 +28,9 @@ const { broadcastLobbyEvent, broadcastFriendEvent} = setupWebSocket(server);
 // Lobi ve arkadaş modülleri için farklı broadcast fonksiyonlarını kullanıyorum
 initializeLobbyWebSocket(broadcastLobbyEvent);
 initializeFriendWebSocket(broadcastFriendEvent);
+
+// friendGroupRoutes'a broadcastFriendEvent fonksiyonunu ata
+friendGroupRoutes.broadcastFriendEvent = broadcastFriendEvent;
 const SECRET_KEY = "your_secret_key"; 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -49,14 +53,12 @@ app.use(
     cookie: { secure: false, maxAge: 86400000 }, // 24 saat
   })
 );
-//app.use("/api/friends", friendRoutes);
 
 app.use("/api/auth", authRoutes);
-
 app.use("/api/users", userRoutes);
-
 app.use("/api/lobbies",lobbyRoutes)
 app.use("/api/bingo",bingoRoutes)
+app.use("/api/friend",friendGroupRoutes)
 
 //Games endpoint with authentication
 const __filename = fileURLToPath(import.meta.url);
@@ -110,34 +112,6 @@ app.get('/api/games', authenticateUser, (req, res) => {
     return res.status(500).json({ message: "Failed to load games", details: error.message });
   }
 });
-
-// // Ortak lobi silme fonksiyonu
-// function deleteLobby(lobbyCode, reason) {
-//   const lobbyIndex = lobbies.findIndex((l) => l.lobbyCode === lobbyCode);
-//   if (lobbyIndex === -1) return;
-
-//   // Tüm zamanlayıcıları temizle
-//   const lobby = lobbies[lobbyIndex];
-//   const timerKey = `host_leave_${lobby.id}`;
-//   const existingTimer = lobbyTimers.get(timerKey);
-//   if (existingTimer) {
-//     clearTimeout(existingTimer);
-//     lobbyTimers.delete(timerKey);
-//   }
-
-//   // Lobi silme işlemi
-//   lobbies.splice(lobbyIndex, 1);
-
-//   // Tek tip silme bildirimi
-//   broadcastLobbyEvent(lobbyCode, "LOBBY_DELETED", {
-//     reason,
-//     lobbyCode,
-//     deletedAt: new Date().toISOString(),
-//   });
-// }
-
-
-
 // Sunucuyu başlat
 
 const PORT = process.env.PORT || 3001;

@@ -38,14 +38,14 @@ function MainContainer() {
                   flexGrow: 1,
                   padding: "10px",
                   overflow: "hidden",
-                  borderRadius: "10px", // Rounded corners
+                  borderRadius: "10px",
                   //border: `2px solid ${theme.palette.primary.main}`, // Theme-based accent border
                 }}
               >
                 <Outlet />
               </Box>
               {/* Right Sidebar  */}
-              <FriendsSidebar /> {/* for now, just to try it out */}
+              <FriendsSidebar /> 
             </SnackbarProvider>
           </FriendsProvider>
         </LobbyProvider>

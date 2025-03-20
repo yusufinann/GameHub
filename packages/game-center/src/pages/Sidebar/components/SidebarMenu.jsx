@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { List, ListItem, ListItemIcon } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import HomeIcon from '@mui/icons-material/Home';
-import WeekendIcon from '@mui/icons-material/Weekend';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import GroupIcon from '@mui/icons-material/Group';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate } from 'react-router-dom';
-
+import ForumIcon from '@mui/icons-material/Forum';
 const StyledList = styled(List)(({ theme }) => ({
   flexGrow: 1,
   marginTop: '1rem',
   color: '#6e7f71',
 }));
 
-// "button" prop'unu DOM'a geçirmemek için shouldForwardProp kullanıyoruz.
 const StyledListItem = styled(ListItem, {
   shouldForwardProp: (prop) => prop !== 'button'
 })(({ theme, selected }) => ({
@@ -42,8 +40,8 @@ function SidebarMenu() {
 
   const menuItems = [
     { name: 'Home', icon: <HomeIcon />, to: '/' },
-    { name: 'Lobbies', icon: <WeekendIcon />, to: '/lobbies' },
-    { name: 'Games', icon: <SportsEsportsIcon />, to: '/games' },
+    { name: 'Community', icon: <ForumIcon />, to: '/community' },
+    { name: 'Conversation', icon: <GroupIcon />, to: '/conversation/all' },
     { name: 'Settings', icon: <SettingsIcon />, to: '/settings' },
   ];
 
