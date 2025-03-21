@@ -1,24 +1,41 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 const SnackbarContext = createContext();
 
 export const SnackbarProvider = ({ children }) => {
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info", // success, error, warning, info
-  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info"); // info, success, warning, error
 
-  const showSnackbar = ({ message, severity }) => {
-    setSnackbar({ open: true, message, severity });
-  };
+  // useCallback kullanarak showSnackbar fonksiyonunu optimize ediyoruz.
+  // Bağımlılık dizisi boş olduğu için fonksiyon referansı sabit kalacak.
+  const showSnackbar = useCallback(
+    ({ message, severity = "info" }) => {
+      setSnackbarMessage(message);
+      setSnackbarSeverity(severity);
+      setSnackbarOpen(true);
+    },
+    []
+  );
 
-  const hideSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+  // useCallback kullanarak handleSnackbarClose fonksiyonunu optimize ediyoruz.
+  const handleSnackbarClose = useCallback((event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  }, []);
+
+  const contextValue = {
+    snackbarOpen,
+    snackbarMessage,
+    snackbarSeverity,
+    showSnackbar,
+    handleSnackbarClose,
   };
 
   return (
-    <SnackbarContext.Provider value={{ snackbar, showSnackbar, hideSnackbar }}>
+    <SnackbarContext.Provider value={contextValue}>
       {children}
     </SnackbarContext.Provider>
   );

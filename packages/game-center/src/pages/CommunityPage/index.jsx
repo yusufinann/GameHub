@@ -3,13 +3,12 @@ import React from "react";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
 import { Forum as ForumIcon } from "@mui/icons-material";
 import ChatBox from "../../shared/ChatBox/ChatBox";
-import CommunityList from "./components/CommunityList";
-import { CreateGroupDialog, JoinGroupDialog } from "./Dialogs";
-import { useSnackbar } from "./useSnackbar";
+import CommunityList from "./components/CommunityList/CommunityList";
+import { CreateGroupDialog, JoinGroupDialog } from "./components/Dialogs";
 import { useCommunityPage } from "./useCommunityPage";
 import { useGroupDialog } from "./components/useGroupDialog";
-import { formatTimestamp } from "./theme";
 import { useAuthContext } from "../../shared/context/AuthContext";
+import { useSnackbar } from "../../shared/context/SnackbarContext";
 
 function CommunityPage() {
   // Snackbar state
@@ -17,7 +16,6 @@ function CommunityPage() {
     snackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    showSnackbar,
     handleSnackbarClose,
   } = useSnackbar();
 
@@ -37,14 +35,16 @@ function CommunityPage() {
     newGroupMessage,
     isGroupMessagingLoading,
     isLoadingGroupChat,
+    isGroupDeleting,
     handleSendCommunityMessage,
     handleSendGroupMessage,
     handleGroupSelect,
     fetchCommunityChatHistory,
     handleLeaveGroup,
+    handleDeleteGroup,
     setNewCommunityMessage,
     setNewGroupMessage,
-  } = useCommunityPage(showSnackbar);
+  } = useCommunityPage();
 
   // Group dialog state and handlers (for community groups - lobby groups)
   const {
@@ -66,7 +66,7 @@ function CommunityPage() {
     setIsPasswordProtected,
     setNewGroupPassword,
     setJoinPassword,
-  } = useGroupDialog(showSnackbar);
+  } = useGroupDialog();
 
   return (
     <Box
@@ -164,7 +164,10 @@ function CommunityPage() {
             onCreateGroupDialogOpen={handleCreateGroupDialogOpen}
             onJoinGroupDialogOpen={handleJoinGroupDialogOpen}
             onLeaveGroup={handleLeaveGroup}
+            onDeleteGroup={handleDeleteGroup}
             isGroupListLoading={isGroupListLoading}
+            isGroupDeleting={isGroupDeleting} 
+            currentUser={currentUser}
           />
           <ChatBox
             chatType={selectedGroup ? "group" : "community"}
@@ -190,7 +193,6 @@ function CommunityPage() {
             isLoadingHistory={
               selectedGroup ? isLoadingGroupChat : isLoadingCommunityChat
             }
-            formatTimestamp={formatTimestamp}
             currentUser={currentUser}
           />
         </Box>

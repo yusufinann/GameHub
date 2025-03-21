@@ -5,21 +5,19 @@ import { Group as GroupIcon } from "@mui/icons-material";
 import ConversationList from "./components/ConversationList";
 import ChatBox from "../../shared/ChatBox/ChatBox";
 import CreateFriendGroupDialog from "./components/CreateFriendGroupDialog";
-import { useSnackbar } from "../CommunityPage/useSnackbar";
-import { formatTimestamp } from "../CommunityPage/theme";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendGroupDialog } from "./components/useFriendGroupDialog";
 import { useConversationsPage } from "./useConversationPage";
 import { useParams } from "react-router-dom";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context"; 
+import { useSnackbar } from "../../shared/context/SnackbarContext";
 
 function ConversationPage() {
   const {
     snackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    showSnackbar,
-    handleSnackbarClose,
+    handleSnackbarClose,showSnackbar
   } = useSnackbar();
 
   const { currentUser } = useAuthContext();
@@ -44,7 +42,7 @@ function ConversationPage() {
     setFriends,
     friends,
     incomingRequests,
-  } = useFriendGroupDialog(showSnackbar, friendGroups, setFriendGroups);
+  } = useFriendGroupDialog(friendGroups, setFriendGroups);
 
   const {
     messages,
@@ -58,7 +56,7 @@ function ConversationPage() {
     handleFriendGroupSelection,
     handleDeleteFriendGroup,
     handleLeaveFriendGroup,
-  } = useConversationsPage(setFriendGroups, showSnackbar, selectedConversation, setSelectedConversation);
+  } = useConversationsPage(setFriendGroups,selectedConversation, setSelectedConversation);
 
 
   useEffect(() => {
@@ -275,7 +273,6 @@ function ConversationPage() {
             isMessagingLoading={isMessagingLoading}
             selectedFriend={selectedFriend}
             isLoadingHistory={isLoadingPrivateChat}
-            formatTimestamp={formatTimestamp}
             currentUser={currentUser}
             setFriendGroups={setFriendGroups}
           />

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '../../shared/context/AuthContext';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
+import { useSnackbar } from '../../shared/context/SnackbarContext';
 
-export const useCommunityPage = (showSnackbar) => {
+export const useCommunityPage = () => { 
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
-
+  const { showSnackbar } = useSnackbar();
   // Community message states
   const [communityMessages, setCommunityMessages] = useState([]);
   const [newCommunityMessage, setNewCommunityMessage] = useState("");
@@ -15,14 +16,14 @@ export const useCommunityPage = (showSnackbar) => {
   const [allGroups, setAllGroups] = useState([]);
   const [isGroupListLoading, setIsGroupListLoading] = useState(true);
 
-  // Group Community State 
+  // Group Community State
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupMessages, setGroupMessages] = useState([]);
   const [newGroupMessage, setNewGroupMessage] = useState('');
   const [isGroupMessagingLoading, setIsGroupMessagingLoading] = useState(false);
   const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(false);
+  const [isGroupDeleting, setIsGroupDeleting] = useState(false); 
 
-  // WebSocket functions for groups
   const fetchAllGroups = useCallback(() => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       setIsGroupListLoading(true);
@@ -78,7 +79,6 @@ export const useCommunityPage = (showSnackbar) => {
     }
   }, [socket, fetchAllGroups, fetchUserGroups, fetchCommunityChatHistory]);
 
-  // Socket message handler for community tab
   useEffect(() => {
     if (!socket) return;
 
@@ -110,12 +110,12 @@ export const useCommunityPage = (showSnackbar) => {
           break;
         case "GROUP_CREATED":
           setAllGroups(prevAllGroups => [...prevAllGroups, message.group]);
-          showSnackbar("Grup başarıyla oluşturuldu!", 'success');
+          showSnackbar({ message: "Grup başarıyla oluşturuldu!", severity: 'success' }); 
           fetchUserGroups();
           break;
         case "GROUP_JOINED_SUCCESS":
           setCommunityGroups(prevGroups => [...prevGroups, message.group]);
-          showSnackbar("Gruba başarıyla katıldınız!", 'success');
+          showSnackbar({ message: "Gruba başarıyla katıldınız!", severity: 'success' }); 
           break;
         case "GROUP_LEFT_SUCCESS":
           setCommunityGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
@@ -123,7 +123,7 @@ export const useCommunityPage = (showSnackbar) => {
             setSelectedGroup(null);
             setGroupMessages([]);
           }
-          showSnackbar("Gruptan başarıyla ayrıldınız!", 'success');
+          showSnackbar({ message: "Gruptan başarıyla ayrıldınız!", severity: 'success' }); 
           break;
         case "GROUP_UPDATED_SUCCESS":
           setCommunityGroups(prevGroups =>
@@ -132,7 +132,7 @@ export const useCommunityPage = (showSnackbar) => {
           setAllGroups(prevAllGroups =>
             prevAllGroups.map(group => group._id === message.group._id ? message.group : group)
           );
-          showSnackbar("Grup başarıyla güncellendi!", 'success');
+          showSnackbar({ message: "Grup başarıyla güncellendi!", severity: 'success' }); 
           break;
         case "GROUP_UPDATED":
           setAllGroups(prevAllGroups =>
@@ -143,13 +143,14 @@ export const useCommunityPage = (showSnackbar) => {
           );
           break;
         case "GROUP_DELETED_SUCCESS":
+          setIsGroupDeleting(false);
           setCommunityGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
           setAllGroups(prevAllGroups => prevAllGroups.filter(group => group._id !== message.groupId));
           if (selectedGroup && selectedGroup._id === message.groupId) {
             setSelectedGroup(null);
             setGroupMessages([]);
           }
-          showSnackbar("Grup başarıyla silindi!", 'success');
+          showSnackbar({ message: "Grup başarıyla silindi!", severity: 'success' }); 
           break;
         case "GROUP_JOINED":
           setAllGroups(prevAllGroups =>
@@ -176,7 +177,7 @@ export const useCommunityPage = (showSnackbar) => {
               return group;
             })
           );
-          
+
           setCommunityGroups(prevGroups => {
             return prevGroups.map(group => {
               if (group._id === message.groupId) {
@@ -191,6 +192,7 @@ export const useCommunityPage = (showSnackbar) => {
           }
           break;
         case "GROUP_DELETED":
+          setIsGroupDeleting(false);
           setCommunityGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
           setAllGroups(prevAllGroups => prevAllGroups.filter(group => group._id !== message.groupId));
           if (selectedGroup && selectedGroup._id === message.groupId) {
@@ -198,11 +200,12 @@ export const useCommunityPage = (showSnackbar) => {
             setGroupMessages([]);
           }
           break;
-        case "ERROR":
-          showSnackbar(message.message, 'error');
+          case "ERROR":
+          setIsGroupDeleting(false); 
+          showSnackbar({ message: message.message, severity: 'error' });
           break;
-          default:
-            break;
+        default:
+          break;
       }
     };
 
@@ -266,9 +269,25 @@ export const useCommunityPage = (showSnackbar) => {
       socket.send(JSON.stringify(leaveData));
     } else {
       console.error("WebSocket bağlantısı açık değil, gruptan ayrılamıyor.");
-      showSnackbar("Gruptan ayrılamadı, WebSocket bağlantısı kapalı.", 'error');
+      showSnackbar({ message: "Gruptan ayrılamadı, WebSocket bağlantısı kapalı.", severity: 'error' });
     }
   };
+
+  const handleDeleteGroup = (groupId) => {
+    setIsGroupDeleting(true);
+    const deleteData = {
+      type: "DELETE_GROUP",
+      groupId: groupId,
+    };
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(deleteData));
+    } else {
+      setIsGroupDeleting(false); 
+      console.error("WebSocket bağlantısı açık değil, grup silinemiyor.");
+      showSnackbar({ message: "Grup silinemedi, WebSocket bağlantısı kapalı.", severity: 'error' });
+    }
+  };
+
 
   return {
     // Community states
@@ -287,6 +306,7 @@ export const useCommunityPage = (showSnackbar) => {
     setNewGroupMessage,
     isGroupMessagingLoading,
     isLoadingGroupChat,
+    isGroupDeleting,
     // Functions
     handleSendCommunityMessage,
     handleSendGroupMessage,
@@ -295,6 +315,7 @@ export const useCommunityPage = (showSnackbar) => {
     fetchAllGroups,
     fetchUserGroups,
     handleLeaveGroup,
+    handleDeleteGroup,
     currentUser
   };
 };

@@ -1,10 +1,10 @@
-// hooks/useGroupDialog.js
 import { useState, useCallback } from 'react';
 import { useWebSocket } from '../../../shared/context/WebSocketContext/context';
+import { useSnackbar } from '../../../shared/context/SnackbarContext';
 
-export const useGroupDialog = (showSnackbar) => {
+export const useGroupDialog = () => {
   const { socket } = useWebSocket();
-  
+  const { showSnackbar } = useSnackbar(); 
   // Group dialog states
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false);
   const [joinGroupDialogOpen, setJoinGroupDialogOpen] = useState(false);

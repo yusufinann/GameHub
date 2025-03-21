@@ -1,14 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 import { useFriendsContext } from "../../Profile/context";
+import { useSnackbar } from "../../../shared/context/SnackbarContext";
 
-export const useFriendGroupDialog = (showSnackbar, friendGroups, setFriendGroups) => {
+export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
   const { friends: contextFriends, incomingRequests } = useFriendsContext();
   const [createFriendGroupDialogOpen, setCreateFriendGroupDialogOpen] = useState(false);
   const [newFriendGroupName, setNewFriendGroupName] = useState("");
   const [newFriendGroupDescription, setNewFriendGroupDescription] = useState("");
   const [friendGroupPassword, setFriendGroupPassword] = useState("");
-
+  const {showSnackbar}=useSnackbar();
  
   const [friends, setFriends] = useState(contextFriends);
   const [friendGroupsLoading, setFriendGroupsLoading] = useState(true);
@@ -65,7 +66,7 @@ export const useFriendGroupDialog = (showSnackbar, friendGroups, setFriendGroups
         }
       );
       if (response.status === 201) {
-        showSnackbar("Friend Group created successfully!", "success");
+        showSnackbar({message:"Friend Group created successfully!", severity:"success"});
         handleCreateFriendGroupDialogClose();
         fetchFriendGroups();
       } else {
@@ -73,7 +74,7 @@ export const useFriendGroupDialog = (showSnackbar, friendGroups, setFriendGroups
       }
     } catch (error) {
       console.error("Friend Group creation error:", error);
-      showSnackbar("Error creating Friend Group.", "error");
+      showSnackbar({message:"Error creating Friend Group.",severity: "error"});
     }
   };
 

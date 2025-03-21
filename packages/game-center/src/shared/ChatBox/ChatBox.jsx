@@ -16,7 +16,6 @@ const ChatBox = ({
   chatTitle,
   selectedConversation,
   messages,
-  formatTimestamp,
   newMessage,
   handleSendMessage,
   setNewMessage,
@@ -125,7 +124,6 @@ const ChatBox = ({
           />
           <ChatMessageList
             messages={messages}
-            formatTimestamp={formatTimestamp}
             currentUser={currentUser}
             isLoadingHistory={isLoadingHistory}
             selectedConversation={selectedConversation}

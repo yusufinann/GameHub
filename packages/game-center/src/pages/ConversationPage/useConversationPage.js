@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuthContext } from '../../shared/context/AuthContext';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
+import { useSnackbar } from '../../shared/context/SnackbarContext'; 
 
-export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConversation, setSelectedConversation) => {
+export const useConversationsPage = (setFriendGroups,selectedConversation, setSelectedConversation) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
-
+ const { showSnackbar } = useSnackbar(); 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isMessagingLoading, setIsMessagingLoading] = useState(false);
@@ -39,7 +40,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
         setMessages(response.data.history);
       } catch (error) {
         console.error("Friend Group chat history yüklenirken hata:", error);
-        showSnackbar('Friend Group chat geçmişi yüklenirken hata oluştu.', 'error');
+        showSnackbar({ message: 'Friend Group chat geçmişi yüklenirken hata oluştu.', severity: 'error' }); 
       } finally {
         setIsLoadingPrivateChat(false);
       }
@@ -79,7 +80,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
           }
           break;
           case "USER_LEFT_FRIEND_GROUP":
-          showSnackbar(`User "${message.data.userId}" left Friend Group "${message.groupId}".`, 'info');
+          showSnackbar({ message: `User "${message.data.userId}" left Friend Group "${message.groupId}".`, severity: 'info' }); // Snackbar çağrısı
           console.log("USER_LEFT_FRIEND_GROUP : ", message);
           setFriendGroups(prevGroups => {
             return prevGroups.map(group => {
@@ -94,7 +95,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
           }
           break;
         case "FRIEND_GROUP_DELETED":
-          showSnackbar(`Friend Group "${message.groupId}" has been deleted by the host.`, 'info');
+          showSnackbar({ message: `Friend Group "${message.groupId}" has been deleted by the host.`, severity: 'info' });
           console.log("FRIEND_GROUP_DELETED : ", message);
           setFriendGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
           setSelectedConversation(null);
@@ -109,7 +110,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
     return () => {
       socket.removeEventListener('message', handleMessage);
     };
-  }, [socket, selectedConversation, showSnackbar, setFriendGroups, setSelectedConversation]);
+  }, [socket, selectedConversation, showSnackbar, setFriendGroups, setSelectedConversation]); 
 
   const handleSendFriendMessage = () => {
     if (newMessage.trim()) {
@@ -143,7 +144,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
 
   const handleFriendSelection = useCallback((friend) => {
     setSelectedFriend(friend);
-    setSelectedConversation(null); 
+    setSelectedConversation(null);
     setIsLoadingPrivateChat(true);
     if (friend) {
       setSelectedConversation({ type: 'private', friendId: friend.id });
@@ -176,7 +177,7 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
       socket.send(JSON.stringify(deletePayload));
     } else {
       console.error("WebSocket bağlantısı açık değil, Friend Group silinemiyor.");
-      showSnackbar('WebSocket bağlantısı kurulamadı. Friend Group silinemiyor.', 'error');
+      showSnackbar({ message: 'WebSocket bağlantısı kurulamadı. Friend Group silinemiyor.', severity: 'error' }); 
     }
   };
 
@@ -187,13 +188,13 @@ export const useConversationsPage = (setFriendGroups, showSnackbar,selectedConve
         groupId: groupId,
       };
       socket.send(JSON.stringify(leavePayload));
-      setSelectedConversation(null); 
+      setSelectedConversation(null);
       setMessages([]);
-      setFriendGroups(prevGroups => prevGroups.filter(group => group._id !== groupId)); 
-      showSnackbar('Friend Group left successfully.', 'success');
+      setFriendGroups(prevGroups => prevGroups.filter(group => group._id !== groupId));
+      showSnackbar({ message: 'Friend Group left successfully.', severity: 'success' }); 
     } else {
       console.error("WebSocket bağlantısı açık değil, Friend Group dan ayrılamıyor.");
-      showSnackbar('WebSocket bağlantısı kurulamadı. Friend Group dan ayrılamıyor.', 'error');
+      showSnackbar({ message: 'WebSocket bağlantısı kurulamadı. Friend Group dan ayrılamıyor.', severity: 'error' }); 
     }
   };
 
