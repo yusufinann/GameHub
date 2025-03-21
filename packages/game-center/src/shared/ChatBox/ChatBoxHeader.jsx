@@ -28,7 +28,6 @@ const ChatBoxHeader = ({ chatType, chatTitle, selectedFriend, selectedConversati
   const [inviteMenuAnchor, setInviteMenuAnchor] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [appBaseUrl, setAppBaseUrl] = useState(''); 
-
   useEffect(() => {
     setAppBaseUrl(window.location.origin);
   }, []);

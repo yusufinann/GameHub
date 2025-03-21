@@ -33,13 +33,31 @@ export const FriendsProvider = ({ children }) => {
     [socket]
   );
 
+  // HTTP üzerinden arkadaş listesini çekme fonksiyonu
+  const fetchFriendListHTTP = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3001/api/friendlist', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setFriends(data.friends || []);
+    } catch (error) {
+      console.error("Arkadaş listesi alınırken hata oluştu (HTTP):", error);
+    }
+  }, []);
+
+
   // Arkadaşlık isteği gönderme
   const sendFriendRequest = (targetUserId) => {
     setOutgoingRequests((prev) => {
-      // Eğer outgoingRequests obje array'i ise:
       const newRequest = {
         id: targetUserId.toString(),
-        // Diğer bilgiler mevcut değilse boş bırakılabilir
       };
       if (!prev.some((req) => req.id?.toString() === targetUserId.toString())) {
         return [...prev, newRequest];
@@ -80,28 +98,20 @@ export const FriendsProvider = ({ children }) => {
     setFriends((prev) =>
       prev.filter((friend) => friend.id.toString() !== friendId.toString())
     );
-    // Also clear this user ID from outgoing requests to ensure clean state
     setOutgoingRequests((prev) =>
       prev.filter((request) => {
-        // Eğer request bir obje ise
         if (typeof request === "object") {
           return request.id.toString() !== friendId.toString();
         }
-        // Eğer request direkt ID ise
         return request.toString() !== friendId.toString();
       })
     );
     sendMessage({ type: "FRIEND_REMOVE", friendId: friendId.toString() });
   };
 
-  // Sunucudan arkadaş listesini ve gelen istekleri talep etme
-  const requestFriendList = useCallback(() => {
-    sendMessage({ type: "GET_FRIEND_LIST" });
-  }, [sendMessage]);
 
   const requestFriendRequests = useCallback(() => {
     sendMessage({ type: "GET_FRIEND_REQUESTS" });
-
   }, [sendMessage]);
 
   // WebSocket mesajlarını dinleyerek state güncellemesi yapıyoruz
@@ -114,7 +124,6 @@ export const FriendsProvider = ({ children }) => {
         switch (data.type) {
           case "FRIEND_REQUEST":
             if (data.status === "success") {
-              // İstek başarılı olduğunda state'i güncelle
               setOutgoingRequests((prev) => {
                 const newRequest = {
                   id: data.targetUserId.toString(),
@@ -131,7 +140,6 @@ export const FriendsProvider = ({ children }) => {
             }
             break;
           case "FRIEND_REQUEST_RECEIVED":
-            // Yalnızca currentUser için gönderildiyse (receiverId eşleşiyorsa) ekle
             if (
               data.receiverId &&
               currentUser.id.toString() === data.receiverId.toString()
@@ -149,7 +157,6 @@ export const FriendsProvider = ({ children }) => {
             }
             break;
           case "FRIEND_REQUEST_ACCEPTED":
-            // İstek gönderenin (currentUser) alacağı mesaj; receiverId currentUser.id olmalı
             if (
               data.receiverId &&
               currentUser.id.toString() === data.receiverId.toString()
@@ -172,7 +179,6 @@ export const FriendsProvider = ({ children }) => {
             }
             break;
           case "FRIEND_REQUEST_REJECTED":
-            // İstek gönderenin (currentUser) alacağı mesaj; userId karşı tarafın ID'si olmalı
             if (
               data.requesterId &&
               currentUser.id.toString() === data.requesterId.toString()
@@ -184,15 +190,11 @@ export const FriendsProvider = ({ children }) => {
               );
             }
             break;
-          case "GET_FRIEND_LIST":
-            setFriends(data.friends || []);
-            break;
           case "FRIEND_REQUESTS_LIST":
             setIncomingRequests(data.incoming || []);
-            setOutgoingRequests(data.outgoing || []); // Giden istekleri kaydet
+            setOutgoingRequests(data.outgoing || []);
             break;
           case "FRIEND_REMOVED":
-            // Alıcıya gönderilen mesaj; currentUser arkadaşlıktan çıkarılan tarafsa
             if (
               data.receiverId &&
               currentUser.id.toString() === data.receiverId.toString()
@@ -202,20 +204,29 @@ export const FriendsProvider = ({ children }) => {
                   (friend) => friend.id.toString() !== data.removedBy.toString()
                 )
               );
-              // Arkadaşlıktan çıkarıldığında outgoingRequests'ten de temizle
               setOutgoingRequests((prev) =>
                 prev.filter((request) => {
-                  // Eğer request bir obje ise
                   if (typeof request === "object") {
                     return request.id.toString() !== data.removedBy.toString();
                   }
-                  // Eğer request direkt ID ise
                   return request.toString() !== data.removedBy.toString();
                 })
               );
             }
             break;
-          default:
+            case "FRIEND_STATUS_UPDATE":
+              if (data.userId) {
+                setFriends((prevFriends) => {
+                  return prevFriends.map((friend) => {
+                    if (friend.id.toString() === data.userId.toString()) {
+                      return { ...friend, isOnline: data.isOnline };
+                    }
+                    return friend;
+                  });
+                });
+              }
+              break;
+            default:
             break;
         }
       } catch (error) {
@@ -230,38 +241,38 @@ export const FriendsProvider = ({ children }) => {
 
     socket.addEventListener("message", handleSocketMessage);
     const handleOpen = () => {
-      requestFriendList();
-      requestFriendRequests();
+      fetchFriendListHTTP(); 
+      requestFriendRequests(); 
     };
 
-     socket.addEventListener("open", handleOpen);
-    // Sayfa yüklendiğinde (veya socket değiştiğinde) istekleri gönder
+    socket.addEventListener("open", handleOpen);
+
     if (socket.readyState === WebSocket.OPEN) {
-        requestFriendList(); // <--- This is also called immediately if socket is already open!
-        requestFriendRequests(); // <--- And this too!
+      handleOpen(); 
     }
 
     return () => {
       socket.removeEventListener("message", handleSocketMessage);
       socket.removeEventListener("open", handleOpen);
     };
-  }, [socket, handleSocketMessage, requestFriendList, requestFriendRequests]);
+  }, [socket, handleSocketMessage, requestFriendRequests, fetchFriendListHTTP]);
 
   const isFriend = friends.some((friend) => friend.id.toString() === userId);
   const isRequestSent = outgoingRequests
-    .map((request) => request.id?.toString()) // Obje ise ID'yi al
-    .includes(userId?.toString()); // Mevcut profil ID'si gönderilenlerde var mı?
+    .map((request) => request.id?.toString())
+    .includes(userId?.toString());
   return (
     <FriendsContext.Provider
       value={{
         incomingRequests,
         outgoingRequests,
         friends,
+        setFriends, 
+        fetchFriendListHTTP, 
         sendFriendRequest,
         acceptFriendRequest,
         rejectFriendRequest,
         removeFriend,
-        requestFriendList,
         isFriend,
         isRequestSent,
       }}

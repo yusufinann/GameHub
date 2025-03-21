@@ -198,13 +198,13 @@ export const handleFriendRemove = async (ws, data) => {
   }
 };
 
-export const handleGetFriendList = async (ws) => {
+export const getFriendList = async (req, res) => {
   try {
-    const userId = ws.userId;
+    const userId = req.user._id; 
     const user = await User.findById(userId).populate('friends', 'id name username avatar isOnline');
 
     if (!user) {
-      return ws.send(JSON.stringify({ type: 'ERROR', message: 'Kullanıcı bulunamadı.' }));
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
     }
 
     const friendList = user.friends.map(friend => ({
@@ -214,10 +214,10 @@ export const handleGetFriendList = async (ws) => {
       avatar: friend.avatar,
       isOnline: friend.isOnline
     }));
-    ws.send(JSON.stringify({ type: 'GET_FRIEND_LIST', friends: friendList }));
+    res.status(200).json({ friends: friendList });
   } catch (error) {
-    console.error('Get friend list error:', error);
-    ws.send(JSON.stringify({ type: 'ERROR', message: 'İşlem sırasında bir hata oluştu.' }));
+    console.error('Arkadaş listesi alınırken hata:', error);
+    res.status(500).json({ message: 'Arkadaş listesi alınırken bir hata oluştu.' });
   }
 };
 

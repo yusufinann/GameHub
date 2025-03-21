@@ -19,6 +19,8 @@ import bingoRoutes from './routes/bingo.routes.js'
 import friendGroupRoutes from './routes/friendGroup.routes.js'
 import communityChatRoutes from './routes/community.routes.js'
 import groupChatRoutes from './routes/groupChat.routes.js'
+import friendRoutes from './routes/friend.routes.js'
+import privateChatRoutes from './routes/privateChat.routes.js'
 import { initializeWebSocket as initializeLobbyWebSocket } from "./controllers/lobby.controller.js";
 import { initializeFriendWebSocket } from "./controllers/friend.controller.js";
 const MemoryStore = memorystore(session);
@@ -63,6 +65,8 @@ app.use("/api/bingo",bingoRoutes)
 app.use("/api/friend",friendGroupRoutes)
 app.use('/api/community-chat', communityChatRoutes);
 app.use('/api/groups', groupChatRoutes); 
+app.use('/api/friendlist', friendRoutes); 
+app.use('/api/private-chat', privateChatRoutes);
 
 //Games endpoint with authentication
 const __filename = fileURLToPath(import.meta.url);

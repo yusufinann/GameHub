@@ -109,24 +109,20 @@ const sidebarStyles = {
 };
 
 const FriendsSidebar = () => {
-  const { friends, requestFriendList} = useFriendsContext();
-  const{existingLobby,userLobby }=useLobbyContext();
+  const { friends, fetchFriendListHTTP, setFriends} = useFriendsContext(); // fetchFriendListHTTP context'ten alındı
+  const{existingLobby}=useLobbyContext();
   const hasFriends = friends?.length > 0;
   const { socket } = useWebSocket();
-  const [localFriends, setLocalFriends] = useState(friends);
+  // const [localFriends, setLocalFriends] = useState(friends); // localFriends kaldırıldı
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
 
-  useEffect(() => {
-    setLocalFriends(friends);
-  }, [friends]);
 
+  // HTTP ile arkadaş listesini al - şimdi context fonksiyonunu kullanıyor
   useEffect(() => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      requestFriendList();
-    }
-  }, [socket, requestFriendList]);
+    fetchFriendListHTTP();
+  }, [fetchFriendListHTTP]);
 
   useEffect(() => {
     if (!socket) return;
@@ -138,7 +134,7 @@ const FriendsSidebar = () => {
           const userId = message.userId;
           const isOnline = message.isOnline;
 
-          setLocalFriends(prevFriends => {
+          setFriends(prevFriends => { // Context'teki setFriends kullanılıyor
             return prevFriends.map(friend => {
               if (friend.id.toString() === userId.toString()) {
                 return { ...friend, isOnline: isOnline };
@@ -147,10 +143,9 @@ const FriendsSidebar = () => {
             });
           });
         } else if (message.type === 'NEW_MESSAGE') {
-          // Handle new message notifications
           const { fromUserId } = message;
-          
-          setLocalFriends(prevFriends => {
+
+          setFriends(prevFriends => { // Context'teki setFriends kullanılıyor
             return prevFriends.map(friend => {
               if (friend.id.toString() === fromUserId.toString()) {
                 return { ...friend, hasNewMessages: true };
@@ -168,14 +163,13 @@ const FriendsSidebar = () => {
     return () => {
       socket.removeEventListener('message', handleUserStatus);
     };
-  }, [socket]);
+  }, [socket, setFriends]); 
 
   const handleOpenMessageDialog = (friend) => {
     setSelectedFriend(friend);
     setMessageDialogOpen(true);
-    
-    // Clear new message indicator when opening messages
-    setLocalFriends(prevFriends => {
+
+    setFriends(prevFriends => { 
       return prevFriends.map(f => {
         if (f.id === friend.id) {
           return { ...f, hasNewMessages: false };
@@ -254,10 +248,10 @@ const FriendsSidebar = () => {
 
         {/* Friends list */}
         {hasFriends ? (
-          localFriends.map((friend) => (
-            <FriendAvatar 
-              key={friend.id} 
-              friend={friend} 
+          friends.map((friend) => ( // Direkt context'ten gelen friends kullanılıyor
+            <FriendAvatar
+              key={friend.id}
+              friend={friend}
               onMessage={handleOpenMessageDialog}
               onInvite={handleOpenInviteDialog}
               existingLobby={existingLobby}
@@ -269,16 +263,16 @@ const FriendsSidebar = () => {
       </Box>
 
       {/* Message dialog */}
-      <MessageDialog 
-        open={messageDialogOpen} 
-        handleClose={handleCloseMessageDialog} 
-        friend={selectedFriend} 
+      <MessageDialog
+        open={messageDialogOpen}
+        handleClose={handleCloseMessageDialog}
+        friend={selectedFriend}
       />
       {/* Invite dialog */}
-      <InviteDialog 
-        open={inviteDialogOpen} 
-        handleClose={handleCloseInviteDialog} 
-        friend={selectedFriend}         
+      <InviteDialog
+        open={inviteDialogOpen}
+        handleClose={handleCloseInviteDialog}
+        friend={selectedFriend}
         existingLobby={existingLobby}
       />
     </>

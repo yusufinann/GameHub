@@ -1,13 +1,12 @@
-// auth.controller.js
 import bcrypt from 'bcrypt';
 import config from "../config/config.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
-let broadcastUserStatusEvent;
+let broadcastFriendEvent = null;
 
-export const initializeAuthWebSocket = (wsHandlers) => {
-    broadcastUserStatusEvent = wsHandlers.broadcastUserStatusEvent;
+export const initializeFriendWebSocket = (wsHandler) => {
+  broadcastFriendEvent = wsHandler;
 };
 
 export const userLogin = async (req, res) => {
@@ -19,13 +18,18 @@ export const userLogin = async (req, res) => {
 
             user.isOnline = true;
             await user.save();
-
-            if (broadcastUserStatusEvent) {
-                broadcastUserStatusEvent(user._id.toString(), true); // userId ve isOnline: true
-            } else {
-                console.warn("broadcastUserStatusEvent fonksiyonu tanımlanmamış!");
+            const userWithFriends = await User.findById(user._id).populate('friends', '_id');
+            if (userWithFriends && userWithFriends.friends) {
+                userWithFriends.friends.forEach(friend => {
+                    if (broadcastFriendEvent) {
+                        broadcastFriendEvent(friend._id, {
+                            type: 'FRIEND_STATUS_UPDATE',
+                            userId: user._id.toString(),
+                            isOnline: true
+                        });
+                    }
+                });
             }
-
 
             const token = jwt.sign({ id: user._id }, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
 
@@ -60,12 +64,17 @@ export const userLogout = async (req, res) => {
             if (user) {
                 user.isOnline = false;
                 await user.save();
-
-                // Kullanıcı offline durumunu WebSocket üzerinden yayınla
-                if (broadcastUserStatusEvent) {
-                    broadcastUserStatusEvent(user._id.toString(), false); // userId ve isOnline: false
-                } else {
-                    console.warn("broadcastUserStatusEvent fonksiyonu tanımlanmamış!");
+                const userWithFriends = await User.findById(req.user._id).populate('friends', '_id');
+                if (userWithFriends && userWithFriends.friends) {
+                    userWithFriends.friends.forEach(friend => {
+                        if (broadcastFriendEvent) {
+                            broadcastFriendEvent(friend._id, {
+                                type: 'FRIEND_STATUS_UPDATE',
+                                userId: req.user._id.toString(),
+                                isOnline: false
+                            });
+                        }
+                    });
                 }
             }
         } catch (error) {
@@ -75,3 +84,5 @@ export const userLogout = async (req, res) => {
     res.clearCookie("authToken");
     return res.status(200).json({ message: "Logout successful" });
 };
+
+export { broadcastFriendEvent }; 

@@ -36,7 +36,6 @@ const UnifiedNotifications = () => {
     incomingRequests,
     acceptFriendRequest,
     rejectFriendRequest,
-    requestFriendList,
   } = useFriendsContext();
 
   const handleSnackbarClose = useCallback(() => setSnackbarOpen(false), []);
@@ -97,7 +96,6 @@ const UnifiedNotifications = () => {
       case "FRIEND_REQUEST_ACCEPTED":
         setSnackbarMessage(`${data.acceptedBy.username} accepted your friend request`);
         setSnackbarOpen(true);
-        requestFriendList();
         break;
       case "LOBBY_INVITATION_RECEIVED":
         const invitationData = data;
@@ -165,17 +163,13 @@ const UnifiedNotifications = () => {
       default:
         break;
     }
-  }, [requestFriendList]);
+  }, []);
 
   useEffect(() => {
     if (!socket || !currentUser) return;
     socket.addEventListener("message", handleMessage);
     return () => socket.removeEventListener("message", handleMessage);
   }, [socket, currentUser, handleMessage]);
-
-  useEffect(() => {
-    requestFriendList();
-  }, [requestFriendList]);
 
   const handleClick = useCallback(
     (event) => {

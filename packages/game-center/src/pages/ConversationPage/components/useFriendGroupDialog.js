@@ -1,17 +1,16 @@
+// useFriendGroupDialog.js
 import { useState } from "react";
 import axios from "axios";
-import { useFriendsContext } from "../../Profile/context";
 import { useSnackbar } from "../../../shared/context/SnackbarContext";
 
-export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
-  const { friends: contextFriends, incomingRequests } = useFriendsContext();
+export const useFriendGroupDialog = (friendGroups, setFriendGroups) => { 
+  
   const [createFriendGroupDialogOpen, setCreateFriendGroupDialogOpen] = useState(false);
   const [newFriendGroupName, setNewFriendGroupName] = useState("");
   const [newFriendGroupDescription, setNewFriendGroupDescription] = useState("");
   const [friendGroupPassword, setFriendGroupPassword] = useState("");
-  const {showSnackbar}=useSnackbar();
- 
-  const [friends, setFriends] = useState(contextFriends);
+  const { showSnackbar } = useSnackbar();
+
   const [friendGroupsLoading, setFriendGroupsLoading] = useState(true);
 
   const handleCreateFriendGroupDialogOpen = () => {
@@ -59,14 +58,14 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
           description,
           password,
           maxMembers: 50,
-          invitedFriends,
+          invitedFriends, 
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       if (response.status === 201) {
-        showSnackbar({message:"Friend Group created successfully!", severity:"success"});
+        showSnackbar({ message: "Friend Group created successfully!", severity: "success" });
         handleCreateFriendGroupDialogClose();
         fetchFriendGroups();
       } else {
@@ -74,7 +73,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
       }
     } catch (error) {
       console.error("Friend Group creation error:", error);
-      showSnackbar({message:"Error creating Friend Group.",severity: "error"});
+      showSnackbar({ message: "Error creating Friend Group.", severity: "error" });
     }
   };
 
@@ -91,9 +90,6 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
     setFriendGroupPassword,
     friendGroupsLoading,
     friendGroups,
-    setFriends,
-    friends,
-    incomingRequests,
     setFriendGroupsLoading,
     fetchFriendGroups,
   };

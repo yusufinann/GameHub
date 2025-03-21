@@ -26,82 +26,45 @@ import {
   FiberManualRecord as StatusIcon,
   People as PeopleIcon,
 } from "@mui/icons-material";
-import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
-import FriendGroupList from "./FriendGroupList"; 
+import FriendGroupList from "./FriendGroupList";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ConversationList = ({
   onFriendSelect,
-  onCreateFriendGroupDialogOpen,fetchFriendGroups,selectedConversation,onDeleteFriendGroup,setFriends,handleLeaveFriendGroup,setFriendGroups,friends,incomingRequests,friendGroupsLoading,friendGroups
+  onCreateFriendGroupDialogOpen, fetchFriendGroups, selectedConversation, onDeleteFriendGroup, handleLeaveFriendGroup, friends, incomingRequests, friendGroupsLoading, friendGroups
 }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(2);
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const { socket } = useWebSocket();
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    setFriends(friends);
-  }, [friends,setFriends]);
-  useEffect(() => {
     if (tabValue === 2) {
       fetchFriendGroups();
     }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabValue]);
-  
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleUserStatus = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        if (message.type === 'USER_STATUS') {
-          const userId = message.userId;
-          const isOnline = message.isOnline;
-
-          setFriends(prevFriends => {
-            return prevFriends.map(friend => {
-              if (friend.id.toString() === userId.toString()) {
-                return { ...friend, isOnline };
-              }
-              return friend;
-            });
-          });
-        }
-      } catch (error) {
-        console.error("GroupList: Error parsing user status message", error);
-      }
-    };
-
-    socket.addEventListener('message', handleUserStatus);
-    return () => {
-      socket.removeEventListener('message', handleUserStatus);
-    };
-  }, [socket,setFriends]);
-
- 
 
   const handleTabChange = (event, newValue) => {
     console.log('Tab Value Changed:', newValue);
     setTabValue(newValue);
-  
+
     let path = '/conversation/all';
     if (newValue === 1) {
       path += '/friend';
     } else if (newValue === 2) {
-      path += '/friend-group'; 
+      path += '/friend-group';
     }
-  
-    navigate(path); 
-  
-  
+
+    navigate(path);
+
+
     setSelectedFriend(null);
     onFriendSelect(null);
   };
-  
+
   useEffect(() => {
     const path = location.pathname;
     if (path.endsWith('/conversation/all')) {
@@ -110,8 +73,8 @@ const ConversationList = ({
       setTabValue(1);
     } else if (path.endsWith('/conversation/friend-group')) {
       setTabValue(2);
-    } else if (path.endsWith('/conversation')) { 
-      setTabValue(2); 
+    } else if (path.endsWith('/conversation')) {
+      setTabValue(2);
     }
   }, [location.pathname]);
   const handleFriendSelect = (friend) => {
@@ -119,13 +82,13 @@ const ConversationList = ({
     onFriendSelect(friend);
     navigate(`/conversation/all/friend/${friend.id}`);
   };
-  
+
   const handleFriendGroupSelect = (friendGroup) => {
     onFriendSelect({
       ...friendGroup,
       type: 'friendGroup',
     });
-    console.log("selected friend-group : ",friendGroup)
+    console.log("selected friend-group : ", friendGroup)
     navigate(`/conversation/all/friend-group/${friendGroup._id}`);
   };
 
@@ -178,7 +141,7 @@ const ConversationList = ({
             {tabValue === 2 && "Friend Groups"}
           </Typography>
 
-          {tabValue === 2 ? ( 
+          {tabValue === 2 ? (
             <Button
               variant="contained"
               color="warning"
@@ -299,7 +262,7 @@ const ConversationList = ({
               friendGroupsLoading={friendGroupsLoading}
               selectedConversation={selectedConversation}
               onFriendGroupSelect={handleFriendGroupSelect}
-              onDeleteFriendGroup={onDeleteFriendGroup}  
+              onDeleteFriendGroup={onDeleteFriendGroup}
               onLeaveFriendGroup={handleLeaveFriendGroup}
             />
           )}
@@ -394,9 +357,9 @@ const ConversationList = ({
               ))}
               {friends.length === 0 && (
                 <Box sx={{ pl: 3, pb: 2, color: theme.palette.text.secondary }}>
-                    <Typography variant="body2" align="left">
-                        No friends yet.
-                    </Typography>
+                  <Typography variant="body2" align="left">
+                    No friends yet.
+                  </Typography>
                 </Box>
               )}
             </List>
@@ -439,7 +402,7 @@ const ConversationList = ({
                 transition: "all 0.3s",
               }}
             />
-             <Tab
+            <Tab
               icon={<PeopleIcon sx={{ color: tabColors.friendGroups }} />}
               label="Friend Groups"
               sx={{

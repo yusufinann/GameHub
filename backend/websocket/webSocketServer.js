@@ -5,7 +5,6 @@ import {
   handleFriendRequest,
   handleFriendRequestAccept,
   handleFriendRequestReject,
-  handleGetFriendList,
   handleGetFriendRequests,
 } from "../controllers/friend.controller.js";
 import User from "../models/user.model.js";
@@ -43,7 +42,7 @@ const setupWebSocket = (server) => {
     clearInterval(pingInterval);
   });
 
-  wss.on("connection", (ws, request) => {
+  wss.on("connection", async (ws, request) => {
     console.log("Yeni bir istemci bağlandı.");
     ws.isAlive = true;
 
@@ -56,18 +55,19 @@ const setupWebSocket = (server) => {
         connectedClients.set(userId, ws);
         console.log(`Client connected with userId: ${userId}`);
 
-        ws.on("close", () => {
+
+        ws.on("close", async () => {
           for (const [id, client] of connectedClients.entries()) {
             if (client === ws) {
               connectedClients.delete(id);
               console.log(`Client disconnected: ${id}`);
-              broadcastUserStatusEvent(id, false); // Offline status when disconnected
+              // Offline bildirimi artık burada gönderilmiyor.
+              // Sadece userLogout fonksiyonu tarafından gönderilecek.
               break;
             }
           }
           console.log("İstemci bağlantısı kesildi.");
         });
-        broadcastUserStatusEvent(userId, true); // Online status when connected
       } else {
         console.log("No userId provided in connection");
         ws.close();
@@ -87,9 +87,6 @@ const setupWebSocket = (server) => {
     ws.on("error", (error) => {
       console.error("WebSocket hatası:", error);
 
-      if (ws.userId) {
-        broadcastUserStatusEvent(ws.userId, false);
-      }
       for (const [userId, client] of connectedClients.entries()) {
         if (client === ws) {
           connectedClients.delete(userId);
@@ -118,13 +115,9 @@ const setupWebSocket = (server) => {
         case "FRIEND_REMOVE":
           handleFriendRemove(ws, data);
           break;
-        case "GET_FRIEND_LIST":
-          handleGetFriendList(ws);
-          break;
         case "GET_FRIEND_REQUESTS":
           handleGetFriendRequests(ws);
           break;
-
         case "LOBBY_CREATED":
           broadcastToOthers(ws, { type: "LOBBY_CREATED", data: data.data });
           break;
@@ -365,42 +358,6 @@ const setupWebSocket = (server) => {
             );
           }
           break;
-
-        case "GET_PRIVATE_CHAT_HISTORY":
-          if (!ws.userId) {
-            console.error(
-              "Kullanıcı ID'si bulunamadı, özel sohbet geçmişi alınamaz."
-            );
-            return;
-          }
-          const { targetUserId } = data;
-          if (!targetUserId) {
-            console.error("Hedef kullanıcı ID'si eksik.");
-            return;
-          }
-          try {
-            const history = await privateChatController.getPrivateChatHistory(
-              ws.userId,
-              targetUserId
-            );
-            ws.send(
-              JSON.stringify({
-                type: "PRIVATE_CHAT_HISTORY",
-                history: history,
-                targetUserId: targetUserId,
-              })
-            );
-          } catch (error) {
-            console.error("Özel sohbet geçmişi alınırken hata:", error);
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Özel sohbet geçmişi alınırken bir hata oluştu.",
-              })
-            );
-          }
-          break;
-          
         // Grup Sohbeti Mesajları
         case "CREATE_GROUP":
           groupChatController.createGroup(ws, data, broadcastToAll);
@@ -681,15 +638,6 @@ const setupWebSocket = (server) => {
       console.log("Kullanıcı çevrimdışı veya bağlantı kapalı:", targetUserId);
     }
   };
-  const broadcastUserStatusEvent = (userId, isOnline) => {
-    const message = {
-      type: "USER_STATUS",
-      userId: userId,
-      isOnline: isOnline,
-    };
-    console.log("User status broadcast:", message);
-    broadcastToAll(message);
-  };
 
   console.log("WebSocket sunucusu başlatıldı.");
 
@@ -698,7 +646,6 @@ const setupWebSocket = (server) => {
     broadcastToAll,
     broadcastToSpecificUsers,
   });
-  authController.initializeAuthWebSocket({ broadcastUserStatusEvent });
   friendGroupChatController.initializeFriendGroupChatWebSocket({
     broadcastFriendGroupEvent,
     broadcastToAll,
@@ -712,11 +659,11 @@ const setupWebSocket = (server) => {
     sendToSpecificUser,
     broadcastGroupMessage,
   });
+  authController.initializeFriendWebSocket(broadcastFriendEvent); // Initialize for friend status updates
   return {
     broadcastLobbyEvent,
     broadcastFriendEvent,
     broadcastToAll,
-    broadcastUserStatusEvent,
     getConnectedClientsCount: () => connectedClients.size,
     sendToSpecificUser,
   };

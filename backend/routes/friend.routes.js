@@ -1,16 +1,8 @@
-// import express from 'express'
-// import { sendFriendRequest ,acceptFriendRequest,rejectFriendRequest,deleteFriendRequest,getFriendList,getFriendRequest, getOutgoingFriendRequests, getFriendStatus} from "../controllers/friend.controller.js";
-// import authenticateUser from "../middleware/authenticateUser.js";
+import express from 'express'
+import { getFriendList} from "../controllers/friend.controller.js";
+import authenticateUser from "../middleware/authenticateUser.js";
 
-// const router = express.Router();
+const router = express.Router();
+router.get('/',authenticateUser, getFriendList); // GET /api/friendlist
 
-// router.post("/request",authenticateUser, sendFriendRequest);
-// router.post("/accept",authenticateUser, acceptFriendRequest);
-// router.post("/reject", authenticateUser,rejectFriendRequest);
-// router.delete("/:friendId",authenticateUser, deleteFriendRequest);
-// router.get("/",authenticateUser, getFriendList);
-// router.get("/request",authenticateUser,getFriendRequest)
-// router.get("/outgoing",authenticateUser, getOutgoingFriendRequests);
-// router.get("/status", authenticateUser, getFriendStatus);
-
-// export default router;
+export default router;

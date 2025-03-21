@@ -1,3 +1,4 @@
+// ConversationPage.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
@@ -9,22 +10,25 @@ import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendGroupDialog } from "./components/useFriendGroupDialog";
 import { useConversationsPage } from "./useConversationPage";
 import { useParams } from "react-router-dom";
-import { useWebSocket } from "../../shared/context/WebSocketContext/context"; 
+import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
+import { useFriendsContext } from "../Profile/context";
 
 function ConversationPage() {
   const {
     snackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    handleSnackbarClose,showSnackbar
+    handleSnackbarClose, showSnackbar
   } = useSnackbar();
 
   const { currentUser } = useAuthContext();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [friendGroups, setFriendGroups] = useState([]);
   const { friendId, groupId } = useParams();
-  const { socket } = useWebSocket(); 
+  const { socket } = useWebSocket();
+  const { friends, incomingRequests } = useFriendsContext();
+
 
   const {
     createFriendGroupDialogOpen,
@@ -39,9 +43,6 @@ function ConversationPage() {
     setFriendGroupPassword,
     fetchFriendGroups,
     friendGroupsLoading,
-    setFriends,
-    friends,
-    incomingRequests,
   } = useFriendGroupDialog(friendGroups, setFriendGroups);
 
   const {
@@ -49,6 +50,7 @@ function ConversationPage() {
     newMessage,
     isMessagingLoading,
     selectedFriend,
+    setSelectedFriend,
     isLoadingPrivateChat,
     handleSendFriendMessage,
     handleFriendSelection,
@@ -56,7 +58,7 @@ function ConversationPage() {
     handleFriendGroupSelection,
     handleDeleteFriendGroup,
     handleLeaveFriendGroup,
-  } = useConversationsPage(setFriendGroups,selectedConversation, setSelectedConversation);
+  } = useConversationsPage(setFriendGroups, selectedConversation, setSelectedConversation);
 
 
   useEffect(() => {
@@ -72,11 +74,11 @@ function ConversationPage() {
       }
 
       if (data.type === "USER_JOINED_FRIEND_GROUP") {
-        const {groupId: joinedGroupId, group } = data.data;
+        const { groupId: joinedGroupId, group } = data.data;
 
         setFriendGroups((prevGroups) => {
           const existingGroups = prevGroups.filter(g => g._id !== joinedGroupId);
-          return [...existingGroups, group]; 
+          return [...existingGroups, group];
         });
         showSnackbar(`Gruba başarıyla katıldınız: ${group.groupName}`, "success");
       }
@@ -149,6 +151,14 @@ function ConversationPage() {
     }
   }, [friendId, groupId, friendGroups, friends, setSelectedConversation]);
 
+  useEffect(() => {
+    if (selectedFriend) {
+      const updatedFriend = friends.find(f => f.id === selectedFriend.id);
+      if (updatedFriend) {
+        setSelectedFriend(updatedFriend); 
+      }
+    }
+  }, [friends, selectedFriend, setSelectedFriend]); 
   return (
     <Box
       sx={{
@@ -186,7 +196,7 @@ function ConversationPage() {
         friendGroupPassword={friendGroupPassword}
         setFriendGroupPassword={setFriendGroupPassword}
         handleCreateFriendGroup={handleCreateFriendGroup}
-        friends={friends}
+        friends={friends} 
       />
 
       {/* Main Content */}
@@ -237,15 +247,13 @@ function ConversationPage() {
               }
             }}
             onCreateFriendGroupDialogOpen={handleCreateFriendGroupDialogOpen}
-            setFriends={setFriends}
-            setFriendGroups={setFriendGroups}
-            friends={friends}
-            incomingRequests={incomingRequests}
             friendGroupsLoading={friendGroupsLoading}
             friendGroups={friendGroups}
             fetchFriendGroups={fetchFriendGroups}
             onDeleteFriendGroup={handleDeleteFriendGroup}
             handleLeaveFriendGroup={handleLeaveFriendGroup}
+            friends={friends} 
+            incomingRequests={incomingRequests} 
           />
 
           <ChatBox
@@ -262,8 +270,8 @@ function ConversationPage() {
                 ? selectedConversation.type === "friendGroup"
                   ? selectedConversation.groupName
                   : selectedFriend
-                  ? selectedFriend.name
-                  : "Select a friend"
+                    ? selectedFriend.name
+                    : "Select a friend"
                 : "Select a friend or group"
             }
             messages={messages}

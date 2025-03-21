@@ -14,19 +14,30 @@ export const useConversationsPage = (setFriendGroups,selectedConversation, setSe
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [isLoadingPrivateChat, setIsLoadingPrivateChat] = useState(false);
 
-  const fetchPrivateChatHistory = useCallback((targetUserId) => {
-    if (socket && socket.readyState === WebSocket.OPEN && targetUserId) {
+  const fetchPrivateChatHistory = useCallback(async (targetUserId) => {
+    if (targetUserId) {
       setIsLoadingPrivateChat(true);
-      const historyRequestPayload = {
-        type: "GET_PRIVATE_CHAT_HISTORY",
-        targetUserId: targetUserId,
-      };
-      socket.send(JSON.stringify(historyRequestPayload));
+      try {
+        const token = localStorage.getItem('token'); 
+        const response = await axios.get(
+          `http://localhost:3001/api/private-chat/private-chat-history?receiverId=${targetUserId}`, 
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setMessages(response.data.history); 
+      } catch (error) {
+        console.error("Özel sohbet geçmişi alınırken hata:", error);
+        showSnackbar({ message: 'Özel sohbet geçmişi yüklenirken hata oluştu.', severity: 'error' });
+        setMessages([]); 
+      } finally {
+        setIsLoadingPrivateChat(false);
+      }
     } else {
-      console.error("WebSocket bağlantısı açık değil veya hedef kullanıcı ID'si yok, özel sohbet geçmişi alınamıyor.");
-      setTimeout(() => setIsLoadingPrivateChat(false), 1000);
+      setIsLoadingPrivateChat(false); 
+      setMessages([]); 
     }
-  }, [socket]);
+  }, [showSnackbar]); 
 
   const fetchFriendGroupChatHistory = useCallback(async (groupId) => {
     if (groupId) {
@@ -206,6 +217,7 @@ export const useConversationsPage = (setFriendGroups,selectedConversation, setSe
     setNewMessage,
     isMessagingLoading,
     selectedFriend,
+    setSelectedFriend,
     isLoadingPrivateChat,
     handleSendFriendMessage,
     handleFriendSelection,

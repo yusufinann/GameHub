@@ -36,8 +36,15 @@ export const storePrivateMessage = async (senderId, receiverId, message) => {
   }
 };
 
-export const getPrivateChatHistory = async (senderId, receiverId) => {
+export const getPrivateChatHistory = async (req, res) => {
   try {
+    const senderId = req.user._id;
+    const receiverId = req.query.receiverId; 
+
+    if (!receiverId) {
+      return res.status(400).json({ message: "Receiver ID is required" });
+    }
+
     const history = await PrivateChatMessage.find({
       $or: [
         { senderId: senderId, receiverId: receiverId },
@@ -48,7 +55,7 @@ export const getPrivateChatHistory = async (senderId, receiverId) => {
       .populate({ path: 'senderId', select: 'username name avatar' })
       .populate({ path: 'receiverId', select: 'username name avatar' });
 
-    return history.map(msg => ({
+    const formattedHistory = history.map(msg => ({
       _id: msg._id,
       senderId: {
         _id: msg.senderId._id,
@@ -65,8 +72,10 @@ export const getPrivateChatHistory = async (senderId, receiverId) => {
       message: msg.message,
       timestamp: msg.timestamp,
     }));
+
+    res.status(200).json({ history: formattedHistory }); 
   } catch (error) {
     console.error("Özel sohbet geçmişi alınırken hata:", error);
-    return [];
+    res.status(500).json({ message: "Failed to get private chat history", error: error.message });
   }
 };
