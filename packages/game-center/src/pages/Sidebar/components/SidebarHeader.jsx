@@ -17,13 +17,13 @@ const StyledHeader = styled(Box)(({ theme }) => ({
 }));
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
-  width: '40px',
-  height: '40px',
+  width: '60px',
+  height: '60px',
   marginBottom: '5px',
   marginTop: '2rem',
   border: '2px solid #d5fdcd',
   backgroundColor: '#3f51b5',
-  fontSize: '1.2rem',
+  fontSize: '1.5rem',
   fontWeight: 'bold',
 }));
 
@@ -56,7 +56,9 @@ function SidebarHeader() {
 
   return (
     <StyledHeader>
-      <StyledAvatar>{initial}</StyledAvatar>
+      <StyledAvatar src={currentUser?.avatar || undefined}>
+        {!currentUser?.avatar && initial}
+      </StyledAvatar>
       <Tooltip title="Logout" placement="right">
         <StyledLogoutButton onClick={handleLogout}>
           <LogoutIcon />

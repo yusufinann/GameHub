@@ -46,15 +46,16 @@ function CustomAvatarGroup({ members, gradient, max = 7, getInitials }) {
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       {displayedMembers.map((member, index) => (
         <StyledAvatar
+          src={member.avatar || undefined}
           key={index}
           gradient={gradient}
           sx={{
-            ml: index === 0 ? 0 : '-16px', // Avatarların üst üste gelmesi için negatif margin
-            zIndex: members.length - index, // Sonradan gelenlerin altta kalması için z-index
+            ml: index === 0 ? 0 : '-16px', 
+            zIndex: members.length - index, 
           }}
           title={member.name}
         >
-          {getInitials(member.name)}
+          {!member.avatar && getInitials(member.name)} 
         </StyledAvatar>
       ))}
       {extraCount > 0 && (

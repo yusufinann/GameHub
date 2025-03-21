@@ -211,13 +211,13 @@ const ConversationList = ({
                       }}
                     >
                       <Avatar
-                        src={friend.profilePicture}
+                          src={friend.avatar || undefined}
                         sx={{
                           bgcolor: friend.isOnline ? theme.palette.success.main : theme.palette.grey[400],
                           boxShadow: 2,
                         }}
                       >
-                        <PersonIcon />
+                        {!friend.avatar && <PersonIcon/>}
                       </Avatar>
                     </Badge>
                   </ListItemAvatar>
@@ -340,12 +340,12 @@ const ConversationList = ({
                       }}
                     >
                       <Avatar
-                        src={friend.profilePicture}
+                        src={friend.avatar || undefined}
                         sx={{
                           bgcolor: friend.isOnline ? theme.palette.success.main : theme.palette.grey[400],
                         }}
                       >
-                        <PersonIcon />
+                     {!friend.avatar && <PersonIcon/>}
                       </Avatar>
                     </Badge>
                   </ListItemAvatar>

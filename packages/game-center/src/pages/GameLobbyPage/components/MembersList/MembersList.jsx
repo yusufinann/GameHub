@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Paper, List, Avatar, Tooltip,Stack } from '@mui/material';
-import {Person as PersonIcon } from '@mui/icons-material';
+import { Paper, List, Avatar, Tooltip, Stack } from '@mui/material';
+import { Person as PersonIcon } from '@mui/icons-material';
 import Header from './Header';
 import MemberItem from './MemberItem';
 
@@ -29,18 +29,15 @@ function MembersList({ members }) {
         onToggle={handleToggle}
       />
       {isCollapsed ? (
-        <Stack
-          spacing={1}
-          alignItems="center"
-          sx={{ mt: 2 }}
-        >
+        <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
           {members.map((member) => (
             <Tooltip title={member.name} key={member.id}>
               <Avatar
+                src={member.avatar || undefined}
                 sx={{
-                  width: 32,
-                  height: 32,
-                  fontSize: '0.9rem',
+                  width: 40, 
+                  height: 40,     
+                  fontSize: '1.1rem',
                   bgcolor: member.isHost ? '#1a237e' : '#2196f3',
                   cursor: 'pointer',
                   '&:hover': {
@@ -49,15 +46,15 @@ function MembersList({ members }) {
                   },
                 }}
               >
-                <PersonIcon fontSize="small" />
+                {!member.avatar && <PersonIcon fontSize="medium" />}
               </Avatar>
             </Tooltip>
           ))}
         </Stack>
       ) : (
         <List sx={{ p: 0 }}>
-          {members.map((member,index) => (
-            <MemberItem key={member.id} member={member} index={index}/>
+          {members.map((member, index) => (
+            <MemberItem key={member.id} member={member} index={index} />
           ))}
         </List>
       )}

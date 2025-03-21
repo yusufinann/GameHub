@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItem, Avatar, ListItemText,Typography, Box } from '@mui/material';
+import { ListItem, Avatar, ListItemText, Typography, Box } from '@mui/material';
 
 function MemberItem({ member, index }) {
   return (
@@ -15,16 +15,17 @@ function MemberItem({ member, index }) {
       }}
     >
       <Avatar
+        src={member.avatar || undefined}
         sx={{
-          width: 35,
-          height: 35,
-          fontSize: '0.9rem',
+          width: 50, // boyutu büyüttük
+          height: 50,
+          fontSize: '1rem', // font boyutunu da orantılı hale getirebilirsiniz
           bgcolor: member.isHost ? '#ffb300' : '#2196f3',
           border: member.isHost ? '2px solid gold' : 'none',
           boxShadow: member.isHost ? '0 0 8px rgba(255, 215, 0, 0.6)' : 'none',
         }}
       >
-        {member.name?.[0] || `P${index + 1}`}
+        { !member.avatar ? (member.name?.[0] || `P${index + 1}`) : null }
       </Avatar>
 
       <ListItemText
