@@ -156,37 +156,37 @@ export const leaveGroup = async (ws, data, broadcastToSender, broadcastGroupEven
     }
 };
 
-export const getAllGroups = async (ws, broadcastToSender) => {
+export const getAllGroups = async (req, res) => {
     try {
         const groups = await GroupChat.find({})
             .populate({ path: 'hostId', select: 'username name avatar' })
             .populate({ path: 'members', select: 'username name avatar' });
-        broadcastToSender({
+        res.status(200).json({
             type: "ALL_GROUPS_LIST",
             groups: groups.map(formatGroupResponse),
         });
     } catch (error) {
         console.error("Grupları listeleme hatası:", error);
-        ws.send(JSON.stringify({ type: "ERROR", message: "Gruplar listelenirken bir hata oluştu." }));
+        res.status(500).json({ type: "ERROR", message: "Gruplar listelenirken bir hata oluştu." });
     }
 };
 
-export const getUserGroups = async (ws, broadcastToSender) => {
+export const getUserGroups = async (req, res) => {
     try {
-        const userId = ws.userId;
+        const userId = req.user._id;
         const groups = await GroupChat.find({
             $or: [{ hostId: userId }, { members: userId }]
         })
             .populate({ path: 'hostId', select: 'username name avatar' })
             .populate({ path: 'members', select: 'username name avatar' });
 
-        broadcastToSender({
+        res.status(200).json({
             type: "USER_GROUPS_LIST",
             groups: groups.map(formatGroupResponse),
         });
     } catch (error) {
         console.error("Kullanıcı gruplarını listeleme hatası:", error);
-        ws.send(JSON.stringify({ type: "ERROR", message: "Kullanıcı grupları listelenirken bir hata oluştu." }));
+        res.status(500).json({ type: "ERROR", message: "Kullanıcı grupları listelenirken bir hata oluştu." });
     }
 };
 
@@ -303,16 +303,16 @@ export const sendGroupMessage = async (ws, data, broadcastGroupMessage) => {
     }
 };
 
-export const getGroupChatHistory = async (ws, data, broadcastToSender) => {
+export const getGroupChatHistory = async (req, res) => {
     try {
-        const { groupId } = data;
+        const { groupId } = req.params;
 
         const chatHistory = await GroupChatMessage.find({ groupId })
             .populate({
                 path: 'senderId',
                 select: 'username name avatar'
             })
-            .sort({ timestamp: 1 }); 
+            .sort({ timestamp: 1 });
 
         const formattedHistory = chatHistory.map(chatMessage => ({
             _id: chatMessage._id,
@@ -328,7 +328,7 @@ export const getGroupChatHistory = async (ws, data, broadcastToSender) => {
         }));
 
 
-        broadcastToSender({
+        res.status(200).json({
             type: "GROUP_CHAT_HISTORY",
             groupId: groupId,
             history: formattedHistory,
@@ -336,9 +336,10 @@ export const getGroupChatHistory = async (ws, data, broadcastToSender) => {
 
     } catch (error) {
         console.error("Grup mesaj geçmişi alınırken hata:", error);
-        ws.send(JSON.stringify({ type: "ERROR", message: "Grup mesaj geçmişi alınırken bir hata oluştu." }));
+        res.status(500).json({ type: "ERROR", message: "Grup mesaj geçmişi alınırken bir hata oluştu." });
     }
 };
+
 
 
 const formatGroupResponse = (group) => {

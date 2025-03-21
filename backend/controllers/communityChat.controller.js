@@ -44,3 +44,14 @@ export const getRecentCommunityChatHistory = async () => {
     return [];
   }
 };
+
+// Yeni HTTP endpoint için controller fonksiyonu
+export const getCommunityMessages = async (req, res) => {
+  try {
+    const history = await getRecentCommunityChatHistory(); // Mevcut fonksiyonu kullan
+    res.status(200).json({ history });
+  } catch (error) {
+    console.error("Topluluk mesajları alınırken hata:", error);
+    res.status(500).json({ message: "Topluluk mesajları alınırken bir hata oluştu." });
+  }
+};

@@ -320,27 +320,6 @@ const setupWebSocket = (server) => {
           }
           break;
 
-        case "GET_COMMUNITY_CHAT_HISTORY":
-          try {
-            const history =
-              await communityChatController.getRecentCommunityChatHistory();
-            ws.send(
-              JSON.stringify({
-                type: "COMMUNITY_CHAT_HISTORY",
-                history: history,
-              })
-            );
-          } catch (error) {
-            console.error("Topluluk sohbet geçmişi alınırken hata:", error);
-            ws.send(
-              JSON.stringify({
-                type: "ERROR",
-                message: "Sohbet geçmişi alınırken bir hata oluştu.",
-              })
-            );
-          }
-          break;
-
         // Özel Sohbet Mesajları
         case "PRIVATE_MESSAGE":
           if (!ws.userId) {
@@ -444,16 +423,6 @@ const setupWebSocket = (server) => {
             broadcastToAll
           );
           break;
-        case "GET_ALL_GROUPS":
-          groupChatController.getAllGroups(ws, (messageToSend) =>
-            sendToSpecificUser(ws.userId, messageToSend)
-          );
-          break;
-        case "GET_USER_GROUPS":
-          groupChatController.getUserGroups(ws, (messageToSend) =>
-            sendToSpecificUser(ws.userId, messageToSend)
-          );
-          break;
         case "UPDATE_GROUP":
           groupChatController.updateGroup(
             ws,
@@ -474,12 +443,6 @@ const setupWebSocket = (server) => {
         case "GROUP_MESSAGE":
           groupChatController.sendGroupMessage(ws, data, broadcastGroupMessage);
           break;
-        case "GET_GROUP_CHAT_HISTORY":
-          groupChatController.getGroupChatHistory(ws, data, (messageToSend) =>
-            sendToSpecificUser(ws.userId, messageToSend)
-          );
-          break;
-
         // Friend Group Sohbeti Mesajları
         case "JOIN_FRIEND_GROUP_WS":
           friendGroupChatController.joinFriendGroupWebSocket(
