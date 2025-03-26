@@ -3,7 +3,7 @@ import { Box, Avatar, Typography, Tooltip, IconButton, Menu, MenuItem, Badge, Fa
 import MailIcon from '@mui/icons-material/Mail';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 
-const FriendAvatar = memo(({ friend, onMessage, onInvite,existingLobby }) => {
+const FriendAvatar = memo(({ friend, onMessage, onInvite, existingLobby }) => {
   const status = friend.isOnline ? 'online' : 'offline';
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -46,6 +46,7 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite,existingLobby }) => {
                 ? 'linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%)'
                 : 'linear-gradient(45deg, #808080 0%, #a0a0a0 100%)',
               cursor: friend.isOnline ? 'pointer' : 'default',
+              opacity: friend.isOnline ? 1 : 0.7, // Frame opacity reduced when offline
               '&:hover': friend.isOnline ? {
                 transform: 'scale(1.05)',
                 boxShadow: '0 0 15px rgba(0, 210, 255, 0.5)',
@@ -85,23 +86,34 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite,existingLobby }) => {
                   height: 50,
                   border: '2px solid rgba(255, 255, 255, 0.8)',
                   transition: 'all 0.3s ease',
-                  filter: friend.isOnline ? 'none' : 'grayscale(0.8)',
+                  filter: 'none', // Removed grayscale filter to keep image clear when offline
                 }}
               />
             </Badge>
+            
+            {/* Enhanced status indicator */}
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 1,
-                right: 1,
-                width: 3,
-                height: 3,
+                bottom: 0,
+                right: 0,
+                width: 15,
+                height: 15,
                 borderRadius: '50%',
                 backgroundColor: status === 'online'
                   ? 'rgb(46, 213, 115)'
                   : 'rgb(255, 71, 87)',
-                border: '2px solid rgba(255, 255, 255, 0.8)',
-                boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
+                border: '2px solid rgba(255, 255, 255, 0.9)',
+                boxShadow: status === 'online' 
+                  ? '0 0 10px rgba(46, 213, 115, 0.7)' 
+                  : '0 0 10px rgba(255, 71, 87, 0.7)',
+                zIndex: 3,
+                animation: status === 'online' ? 'fadeInOut 2s infinite' : 'none',
+                '@keyframes fadeInOut': {
+                  '0%': { opacity: 0.7 },
+                  '50%': { opacity: 1 },
+                  '100%': { opacity: 0.7 }
+                }
               }}
             />
           </Box>
@@ -172,12 +184,13 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite,existingLobby }) => {
           <Typography variant="body2">Send Message</Typography>
         </MenuItem>
         {
-            existingLobby &&(  <MenuItem onClick={handleInviteClick}>
-                <GroupAddIcon fontSize="small" sx={{ mr: 1 }} />
-                <Typography variant="body2">Invite to Lobby</Typography>
-              </MenuItem>)
+          existingLobby && (
+            <MenuItem onClick={handleInviteClick}>
+              <GroupAddIcon fontSize="small" sx={{ mr: 1 }} />
+              <Typography variant="body2">Invite to Lobby</Typography>
+            </MenuItem>
+          )
         }
-      
       </Menu>
     </>
   );

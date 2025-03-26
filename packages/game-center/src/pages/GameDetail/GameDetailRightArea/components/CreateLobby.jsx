@@ -3,7 +3,7 @@ import { Box, Typography, Button } from "@mui/material";
 import { SportsEsports } from "@mui/icons-material";
 import { useLocation, useParams } from "react-router-dom";
 import ErrorModal from "../../../../shared/ErrorModal";
-import CreateLobbyModal from "../../../MainScreen/MainScreenMiddleArea/CreateLobbyArea/components/CreateLobbyModal";
+import CreateLobbyModal from "../../../../shared/CreateLobbyModal";
 function CreateLobby({ colorScheme, existingLobby, lobbies }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);

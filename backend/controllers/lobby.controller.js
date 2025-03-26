@@ -134,7 +134,8 @@ export const createLobby = async (req, res) => {
 
       const startTimeDate = new Date(startTime);
       const endTimeDate = new Date(endTime);
-
+      console.log("Backend'e gelen startTime:", startTime); // Loglama
+      console.log("Backend'e gelen endTime:", endTime);   // Loglama
       if (startTimeDate >= endTimeDate) {
         return res.status(400).json({
           message: "Başlangıç zamanı, bitiş zamanından önce olmalıdır.",

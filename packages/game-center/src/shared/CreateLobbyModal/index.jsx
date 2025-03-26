@@ -1,10 +1,11 @@
+// src/components/MainScreen/CreateLobbyModal/CreateLobbyModal.js
 import React from 'react';
 import { Dialog, Slide, Snackbar, Alert, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useLobbyForm } from './useLobbyForm';
 import LobbyForm from './LobbyForm';
 import { SuccessScreen } from './SuccessScreen';
-import { useLobbyContext } from '../../../context';
+import { useLobbyContext } from '../../pages/MainScreen/MainScreenMiddleArea/context';
 
 const CreateLobbyModal = ({ open, onClose }) => {
   const { existingLobby } = useLobbyContext();
@@ -13,7 +14,7 @@ const CreateLobbyModal = ({ open, onClose }) => {
     snackbar,
     setSnackbar,
     handleChange,
-    handleSubmit,setFormData
+    handleSubmit, setFormData
   } = useLobbyForm();
 
   return (

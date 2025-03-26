@@ -1,15 +1,17 @@
+// src/components/MainScreen/CreateLobbyModal/EventFields.js
 import React from 'react';
 import { Box, TextField } from '@mui/material';
 
 export const EventFields = ({ formData, handleChange }) => (
+  console.log("EventFields - formData:", formData), // Debugging line
   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
     <TextField
       fullWidth
-      label="Başlangıç Zamanı" // Updated label
-      type="datetime-local" // Changed to datetime-local
-      name="startTime"      // Correct name: startTime
-      value={formData.startTime} // Correct value from formData.startTime
-      onChange={handleChange}   // Correct handleChange
+      label="Başlangıç Zamanı"
+      type="datetime-local"
+      name="startTime"
+      value={formData.startTime}
+      onChange={handleChange}
       InputLabelProps={{ shrink: true }}
       required
       InputProps={{

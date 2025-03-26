@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Container, useTheme } from '@mui/material';
-import { mainScreenStyles } from './styles';
-import ImageSlider from './components/ImageSlider';
-import HeroContent from './components/HeroContent';
-import CreateLobbyModal from './components/CreateLobbyModal'
+import { Box, Button, Typography} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { useLobbyContext } from '../context';
+import CreateLobbyModal from '../../../../shared/CreateLobbyModal';
 
 const CreateLobbyArea = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,25 +13,55 @@ const CreateLobbyArea = () => {
   };
 
   const handleCloseModal = () => setIsModalOpen(false);
-  const theme = useTheme();
-  const styles = mainScreenStyles(theme);
 
   return (
-    <Box sx={styles.container}>     
-      <Box sx={styles.overlay} />
-      <Container maxWidth="md">
-        <HeroContent 
-          onCreateLobby={handleOpenModal}
-          existingLobby={existingLobby}
-        />
-      </Container>
-      <Box sx={styles.bottomBar} />
-      <CreateLobbyModal 
+    <Box
+      sx={{
+        padding: 2,
+        bgcolor: "background.paper",
+        boxShadow: 2,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: "5vh",
+        borderTopLeftRadius: "10px",
+        borderTopRightRadius: "10px",
+      }}
+    >
+      <Typography variant="h6" fontWeight="bold" color="primary">
+        Lobby Creator
+      </Typography>
+      
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+        onClick={handleOpenModal}
+        sx={{
+          borderRadius: "20px",
+          padding: "18px 24px",
+          fontWeight: "bold",
+          boxShadow: 3,
+          background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+          '&:hover': {
+            background: "linear-gradient(45deg, #1565C0 30%, #0288D1 90%)",
+            transform: "translateY(-2px)",
+            transition: "all 0.3s"
+          }
+        }}
+      >
+       {existingLobby ? 'Go your Lobby' : 'Create A Lobby'}
+      </Button>
+
+      {/* Create Lobby Dialog */}
+      <CreateLobbyModal
         open={isModalOpen} 
         onClose={handleCloseModal}
         existingLobby={existingLobby}
       />
-       <ImageSlider />
+
+      {/* Success Screen Dialog */}
+   
     </Box>
   );
 };

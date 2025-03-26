@@ -9,7 +9,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuthContext } from "../../../../shared/context/AuthContext";
 import UserSearch from "./UserSearch";
 import { useNavigate } from "react-router-dom";
-//import UnifiedNotifications from "./UnifiedNotifications";
 
 function Header() {
   const { currentUser } = useAuthContext();
@@ -41,7 +40,6 @@ function Header() {
           <IconButton sx={{ bgcolor: "rgba(255, 255, 255, 0.1)" }}>
             <ShoppingCartIcon sx={{ color: "common.white" }} />
           </IconButton>
-          {/* <UnifiedNotifications /> */}
         </Stack>
       </Toolbar>
   );

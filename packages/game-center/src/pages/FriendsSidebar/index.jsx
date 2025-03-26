@@ -3,11 +3,11 @@ import React, { memo, useEffect, useState } from 'react';
 import { Box,Typography} from '@mui/material';
 import { useFriendsContext } from '../Profile/context';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
-import UnifiedNotifications from '../MainScreen/MainScreenHeaderArea/components/UnifiedNotifications';
 import FriendAvatar from './components/FriendAvatar';
 import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/context';
 import InviteDialog from './components/InviteDialog';
 import MessageDialog from './components/MessageDialog';
+import UnifiedNotifications from './components/UnifiedNotifications';
 
 // Create a street lamp post component
 const StreetLampPost = memo(() => (
@@ -83,8 +83,7 @@ const sidebarStyles = {
   top: '10px',
   borderRadius: '20px',
   mr: '20px',
-  background: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
-  boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)',
+  background: '#caecd5',
   backdropFilter: 'blur(4px)',
   display: 'flex',
   flexDirection: 'column',
@@ -216,8 +215,8 @@ const FriendsSidebar = () => {
             width: '45px',
             height: '45px',
             borderRadius: '50% 50% 5px 5px',
-            background: 'linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%)',
-            boxShadow: '0 2px 15px rgba(58, 123, 213, 0.8)',
+            background: 'linear-gradient(135deg, #328761 0%, #1e5240 100%)',
+            boxShadow: '0 2px 15px rgba(50, 135, 97, 0.8)',
             '&:hover': {
               filter: 'brightness(1.2)',
               transform: 'scale(1.05)',

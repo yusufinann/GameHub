@@ -1,18 +1,17 @@
+// src/components/MainScreen/CreateLobbyModal/useLobbyForm.js
 import { useState } from "react";
-import { useLobbyContext } from "../../../context";
-import { useAuthContext } from "../../../../../../shared/context/AuthContext";
+import { useLobbyContext } from "../../pages/MainScreen/MainScreenMiddleArea/context";
+import { useAuthContext } from "../context/AuthContext";
 export const useLobbyForm = () => {
   const { createLobby } = useLobbyContext();
   const { currentUser } = useAuthContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     lobbyName: "",
     eventType: "normal",
-    startDate: "",
     startTime: "",
-    endDate: "",
-    endTime: "",
+    endTime: "", // datetime-local will provide combined date and time
     password: "",
     gameId: "",
     maxMembers: 4,
@@ -26,6 +25,7 @@ export const useLobbyForm = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    console.log("handleChange - Name:", event.target.name, "Value:", event.target.value); // Input değerini
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -34,16 +34,16 @@ export const useLobbyForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       const lobbyData = {
         lobbyName: formData.lobbyName,
         lobbyType: formData.eventType,
-        startTime: formData.eventType === "event" ? `${formData.startDate}T${formData.startTime}` : null,
-        endTime: formData.eventType === "event" ? `${formData.endDate}T${formData.endTime}` : null,
+        startTime: formData.eventType === "event" ? formData.startTime : null, // Directly use datetime-local value
+        endTime: formData.eventType === "event" ? formData.endTime : null,     // Directly use datetime-local value
         password: formData.password,
         game: formData.gameId,
         maxMembers: formData.maxMembers,
@@ -57,19 +57,17 @@ export const useLobbyForm = () => {
         message: "Lobi başarıyla oluşturuldu!",
         severity: "success",
       });
-      
+
       setFormData({
         lobbyName: "",
         eventType: "normal",
-        startDate: "",
         startTime: "",
-        endDate: "",
         endTime: "",
         password: "",
         gameId: "",
         maxMembers: 4,
       });
-      
+
     } catch (error) {
       setSnackbar({
         open: true,
@@ -87,6 +85,6 @@ export const useLobbyForm = () => {
     setSnackbar,
     handleChange,
     handleSubmit,
-    isSubmitting,setFormData
+    isSubmitting, setFormData
   };
 };

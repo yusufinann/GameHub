@@ -7,6 +7,8 @@ import useMainScreenBottomArea from './useMainScreenBottomArea';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import HighlightsSection from './components/HighlightsSection';
+import BrowseGames from './components/BrowseGames';
 // Lazy loading GameCard component
 const GameCard = React.lazy(() => import('./components/GameCard'));
 
@@ -26,10 +28,6 @@ function MainScreenBottomArea() {
       </Box>
     );
   }
-
-  // Split games into three categories with 5 games in each
-  const popularGames = games.data.slice(0, 5);
-  const releasedGames = games.data.slice(5, 10);
   const trendGames = games.data.slice(10, 15);
 
   return (
@@ -39,45 +37,25 @@ function MainScreenBottomArea() {
           {/* Popular Games Section */}
           <Box>
           <Header 
-             title={"Popular Games"}
+             title={"Highlights and Recommended"}
              icon={<WhatshotIcon />}
            />
             <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
-              gap: 3
+              display:'flex',
+              gap: 3,
             }}>
-              {popularGames.map((game) => (
-                <GameCard
-                  key={game.id}
-                  title={game.title}
-                  thumbnail={game.thumbnail || '/default-thumbnail.png'}
-                  openGiveawayUrl={game.open_giveaway_url}
-                />
-              ))}
+           <HighlightsSection/>
             </Box>
           </Box>
 
-          {/* Released Games Section */}
+          {/* Browse Games Section */}
           <Box>
           <Header 
-            title={"Released Games"}
+            title={"Browse Games"}
             icon={<NewReleasesIcon />}
           />
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' },
-              gap: 3
-            }}>
-              {releasedGames.map((game) => (
-                <GameCard
-                  key={game.id}
-                  title={game.title}
-                  thumbnail={game.thumbnail || '/default-thumbnail.png'}
-                  openGiveawayUrl={game.open_giveaway_url}
-                />
-              ))}
-            </Box>
+           
+             <BrowseGames/>
           </Box>
 
           {/* Trending Games Section */}

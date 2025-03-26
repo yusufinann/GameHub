@@ -29,7 +29,7 @@ import { useAuthContext } from '../context/AuthContext';
 import { useWebSocket } from '../context/WebSocketContext/context';
 import { useParams } from 'react-router-dom';
 import { GAMES } from '../../utils/constants';
-import { EventFields } from '../../pages/MainScreen/MainScreenMiddleArea/CreateLobbyArea/components/CreateLobbyModal/EventFields';
+import { EventFields } from '../CreateLobbyModal/EventFields';
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });

@@ -18,10 +18,10 @@ import EventIcon from "@mui/icons-material/Event";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import GroupsIcon from '@mui/icons-material/Groups'; // Lobby Name Icon for lobby invitations
 import { useNavigate } from "react-router-dom";
-import notificationSound from "../../../../assets/notification-sound.mp3";
-import { useWebSocket } from "../../../../shared/context/WebSocketContext/context";
-import { useAuthContext } from "../../../../shared/context/AuthContext";
-import { useFriendsContext } from "../../../Profile/context";
+import notificationSound from "../../../assets/notification-sound.mp3";
+import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
+import { useAuthContext } from "../../../shared/context/AuthContext";
+import { useFriendsContext } from "../../Profile/context";
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'; 
 
 const UnifiedNotifications = () => {
@@ -219,7 +219,7 @@ const handleViewFriendGroup = useCallback((groupId) => {
   navigate(`/conversation/all/friend-group/${groupId}`);
   removeNotification(groupId);
   handleClose();
-}, [navigate, handleClose]);
+}, [navigate, handleClose,removeNotification]);
   const totalNotifications = notifications.length + incomingRequests.length;
 
   const menuItems = useMemo(() => {

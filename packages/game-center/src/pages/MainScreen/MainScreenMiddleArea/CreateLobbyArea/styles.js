@@ -5,7 +5,7 @@ export const mainScreenStyles = (theme) => ({
     justifyContent: 'center',
     flexDirection: 'column',
     [theme.breakpoints.up('md')]: {
-      width: '40%',
+      width: '50%',
     },
     [theme.breakpoints.down('md')]: {
       width: '100%',

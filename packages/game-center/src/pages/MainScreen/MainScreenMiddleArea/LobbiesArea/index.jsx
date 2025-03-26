@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, useTheme } from '@mui/material';
+import React from 'react';
+import { Box,useTheme } from '@mui/material';
 import { LobbyList } from './components/LobbyList';
 import { useLobbyContext } from '../context';
 
@@ -13,11 +13,10 @@ function LobbiesArea (){
     <Box
       sx={{
         [theme.breakpoints.up('md')]: {
-          width: '25vw', },
+          width: '100%', },
         [theme.breakpoints.down('md')]: { width: '100%' },
         position: 'relative',
-        borderRadius: '25px',
-        height: '60vh',
+        height: '65vh',
         transition: 'width 0.3s ease',
         overflow: 'auto',
         display: 'flex',

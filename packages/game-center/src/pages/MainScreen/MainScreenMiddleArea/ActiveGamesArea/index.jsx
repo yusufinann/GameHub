@@ -1,6 +1,6 @@
-import { Box, Button, Typography, IconButton, useTheme, keyframes } from '@mui/material';
+import { Box, Button, Typography, IconButton, useTheme} from '@mui/material';
 import React, { useState, useRef } from 'react';
-import { Gamepad, Star, Timer, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Gamepad, Star, Timer, ChevronLeft, ChevronRight, Construction, EmojiEvents } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { GAMES } from '../../../../utils/constants';
 
@@ -20,33 +20,36 @@ function ActiveGamesArea() {
       behavior: 'smooth'
     });
   };
-  const floatAnimation = keyframes`
-  0%, 100% { transform: translate3d(-50%, 0, 0); }
-  50% { transform: translate3d(-50%, -8px, 0); }
-`;
 
-const spinAnimation = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
+  const isGameFullyImplemented = (gameId) => {
+    // Only Bingo (id: 1) is fully implemented
+    return gameId === 1;
+  };
 
-const bounceAnimation = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-`;
+  const handleGameClick = (gameId) => {
+    if (isGameFullyImplemented(gameId)) {
+      // Navigate to the actual game
+      navigate(`/game-detail/${gameId}`);
+    } else {
+      // For dummy games, navigate to the same page but show a preview/demo
+      navigate(`/game-detail/${gameId}?preview=true`);
+    }
+  };
 
   return (
     <Box
       sx={{
-        [theme.breakpoints.up('md')]: { width: '30%' },
+        [theme.breakpoints.up('md')]: { width: '100%' },
         [theme.breakpoints.down('md')]: { width: '100%' },
-        background: 'linear-gradient(135deg,rgb(135, 243, 165) 0%,rgb(31, 210, 82) 100%)',
+        height: "50vh",
+        background: 'transparent',
+        marginTop: "20px",
         borderRadius: '25px',
         position: 'relative',
         overflow: 'hidden',
-        justifyContent:'center',
-        alignItems:'center',
-        display:'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -61,49 +64,39 @@ const bounceAnimation = keyframes`
         }
       }}
     >
-        <Box sx={{
+      <Box sx={{
         position: 'absolute',
-        top: 20,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        top: 10,
+        left: 30,
         zIndex: 3,
-        textAlign: 'center',
-        //animation: `${floatAnimation} 3s ease-in-out infinite`
+        textAlign: 'left',
       }}>
-       <Typography variant="h2" sx={{
+        <Typography variant="h2" sx={{
           fontFamily: '"Poppins", sans-serif',
           fontWeight: 800,
-          background: 'linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 100%)',
+          background: 'linear-gradient(45deg, #ff6b6b 0%,rgb(78, 205, 133) 100%)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
           textShadow: '0 4px 6px rgba(0,0,0,0.2)',
           fontSize: '2.5rem',
           letterSpacing: '-1px',
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          '&::before': {
-            content: '"🎮"',
-            fontSize: '1.5em',
-            //animation: `${spinAnimation} 5s linear infinite`,
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-          },
-          '&::after': {
-            content: '"🚀"',
-            //animation: `${bounceAnimation} 2s ease-in-out infinite`
-          }
         }}>
-          Let's Play!
+          <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}}>🎮</span>
+          Game Paradise Awaits!
+          <span>🚀</span>
         </Typography>
       </Box>
+
       <Box sx={{ 
         position: 'relative', 
-        height: '30vh',
-        mt: 8,
+        height: '40vh',
+        mt: 10,
         width: '90%',
         zIndex: 2
       }}>
-        {/* Navigation Arrows - Updated Style */}
+        {/* Navigation Arrows */}
         <IconButton
           onClick={() => handleScroll('left')}
           sx={{
@@ -112,19 +105,21 @@ const bounceAnimation = keyframes`
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            bgcolor: 'rgba(255, 255, 255, 0.3)',
+            bgcolor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(5px)',
             '&:hover': { 
-              bgcolor: 'rgba(255, 255, 255, 0.5)',
+              bgcolor: 'rgba(255, 255, 255, 0.7)',
+              transform: 'translateY(-50%) scale(1.1)',
             },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            color: '#022b3a'
+            color: '#022b3a',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}
         >
           <ChevronLeft fontSize="large" />
         </IconButton>
         
-        {/* Right Arrow - Mirror of left arrow */}
+        {/* Right Arrow */}
         <IconButton
           onClick={() => handleScroll('right')}
           sx={{
@@ -133,13 +128,15 @@ const bounceAnimation = keyframes`
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            bgcolor: 'rgba(255, 255, 255, 0.3)',
+            bgcolor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(5px)',
             '&:hover': { 
-              bgcolor: 'rgba(255, 255, 255, 0.5)',
+              bgcolor: 'rgba(255, 255, 255, 0.7)',
+              transform: 'translateY(-50%) scale(1.1)',
             },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            color: '#022b3a'
+            color: '#022b3a',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}
         >
           <ChevronRight fontSize="large" />
@@ -159,126 +156,188 @@ const bounceAnimation = keyframes`
             alignItems: 'center'
           }}
         >
-          {GAMES.map((game, index) => (
-            <Box
-              key={game.id}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              sx={{
-                flex: '0 0 280px',
-                 aspectRatio: '16/9',
-                 position: 'relative',
-                borderRadius: '25px',
-                overflow: 'hidden',
-                height: '90%',
-                cursor: 'pointer',
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: hoveredIndex === index 
-                  ? '0 8px 32px rgba(78, 205, 196, 0.4)' 
-                  : '0 4px 16px rgba(0, 0, 0, 0.2)',
-                border: '2px solid',
-                borderColor: hoveredIndex === index ? '#4ECDC4' : 'transparent'
-              }}
-            >
-              {/* Image Container */}
+          {GAMES.map((game, index) => {
+            const fullyImplemented = isGameFullyImplemented(game.id);
+            
+            return (
               <Box
-                component="img"
-                src={game.image}
-                alt={game.title}
+                key={game.id}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
                 sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  willChange: 'transform',
-                  backfaceVisibility: 'hidden',
-                  perspective: 1000,
-                  filter: hoveredIndex === index ? 'brightness(1.1)' : 'brightness(0.9)'
-                }}
-              />
-              
-              {/* Content Overlay */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  padding: '20px',
-                  //background: 'linear-gradient(to top, rgba(2,43,58,0.9) 0%, rgba(2,43,58,0.4) 100%)',
-                 // backdropFilter: 'blur(4px)'
+                  flex: '0 0 280px',
+                  aspectRatio: '16/9',
+                  position: 'relative',
+                  borderRadius: '25px',
+                  overflow: 'hidden',
+                  height: '80%',
+                  cursor: 'pointer',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: hoveredIndex === index 
+                    ? fullyImplemented ? '0 12px 32px rgba(78, 205, 196, 0.5)' : '0 12px 32px rgba(255, 180, 0, 0.5)'
+                    : '0 6px 16px rgba(0, 0, 0, 0.2)',
+                  border: '2px solid',
+                  borderColor: hoveredIndex === index 
+                    ? fullyImplemented ? '#4ECDC4' : '#FFB400' 
+                    : 'transparent',
+                  transform: hoveredIndex === index ? 'translateY(-8px) scale(1.03)' : 'translateY(0) scale(1)'
                 }}
               >
-                <Typography variant="h6" sx={{ 
-                  color: '#fff', 
-                  mb: 1, 
-                  fontWeight: 700,
-                  fontFamily: '"Poppins", sans-serif',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }}>
-                  {game.title}
-                </Typography>
-                
-                {/* Game Info Icons */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 2, 
-                  mb: 2,
-                  '& > *': {
+                {/* Game status badge for non-implemented games */}
+                {!fullyImplemented && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 15,
+                    right: 15,
+                    zIndex: 5,
+                    backgroundColor: 'rgba(255, 123, 0, 0.85)',
+                    color: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
-                  }
-                }}>
-                  <Box>
-                    <Gamepad sx={{ color: '#4ECDC4', fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ color: '#fff' }}>
-                      {game.genre}
-                    </Typography>
+                    gap: 1,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    <Construction fontSize="small" />
+                    <Typography variant="caption" fontWeight="bold">Preview Mode</Typography>
                   </Box>
-                  <Box>
-                    <Star sx={{ color: '#FFD700', fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ color: '#fff' }}>
-                      {game.rating}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Timer sx={{ color: '#FF6B6B', fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ color: '#fff' }}>
-                      {game.playTime}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Play Button */}
-                <Button
-                  variant="contained"
-                  onClick={() => navigate(`/game-detail/${game.id}`)}
-                  fullWidth
+                )}
+              
+                {/* Image Container */}
+                <Box
+                  component="img"
+                  src={game.image}
+                  alt={game.title}
                   sx={{
-                    bgcolor: 'rgba(214, 207, 207, 0.49)',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    perspective: 1000,
+                    filter: !fullyImplemented 
+                      ? 'brightness(0.85)' 
+                      : hoveredIndex === index 
+                        ? 'brightness(1.1)' 
+                        : 'brightness(0.9)',
+                    transition: 'transform 0.4s ease-out, filter 0.3s ease',
+                    transform: hoveredIndex === index ? 'scale(1.05)' : 'scale(1)'
+                  }}
+                />
+                
+                {/* Game highlight for Bingo */}
+                {fullyImplemented && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 15,
+                    left: 15,
+                    zIndex: 5,
+                    backgroundColor: 'rgba(38, 166, 154, 0.85)',
+                    color: 'white',
+                    padding: '5px 10px',
                     borderRadius: '12px',
-                    textTransform: 'none',
-                    fontWeight: 700,
-                    letterSpacing: '0.05em',
-                    padding: '10px 0',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { bgcolor: 'rgba(46, 45, 45, 0.49)',
-                      
-                    }
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    <EmojiEvents fontSize="small" />
+                    <Typography variant="caption" fontWeight="bold">FULLY READY!</Typography>
+                  </Box>
+                )}
+                
+                {/* Content Overlay */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: '20px',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 70%, transparent 100%)',
+                    backdropFilter: 'blur(2px)',
+                    transition: 'all 0.3s ease-in-out'
                   }}
                 >
-                  Play Now
-                </Button>
-          
+                  <Typography variant="h6" sx={{ 
+                    color: '#fff', 
+                    mb: 1, 
+                    fontWeight: 700,
+                    fontFamily: '"Poppins", sans-serif',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                  }}>
+                    {game.title}
+                  </Typography>
+                  
+                  {/* Game Info Icons */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2, 
+                    mb: 2,
+                    '& > *': {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                    }
+                  }}>
+                    <Box>
+                      <Gamepad sx={{ color: '#4ECDC4', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
+                        {game.genre}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Star sx={{ color: '#FFD700', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
+                        {game.rating}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Timer sx={{ color: '#FF6B6B', fontSize: 20 }} />
+                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
+                        {game.playTime}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Play Button - Now all are active */}
+                  <Button
+                    variant="contained"
+                    onClick={() => handleGameClick(game.id)}
+                    fullWidth
+                    sx={{
+                      bgcolor: fullyImplemented ? 'rgba(38, 166, 154, 0.85)' : 'rgba(255, 180, 0, 0.85)',
+                      borderRadius: '12px',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      padding: '10px 0',
+                      transition: 'all 0.3s ease',
+                      color: '#fff',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                      '&:hover': { 
+                        bgcolor: fullyImplemented ? 'rgba(38, 166, 154, 1)' : 'rgba(255, 180, 0, 1)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.3)'
+                      },
+                      '&:active': {
+                        transform: 'translateY(1px)',
+                      }
+                    }}
+                  >
+                    {fullyImplemented ? 'Play Now' : 'Try Preview'}
+                  </Button>
+                </Box>
               </Box>
-            </Box>
-            
-          ))}
+            );
+          })}
         </Box>
-        
       </Box>
-    
     </Box>
   );
 }

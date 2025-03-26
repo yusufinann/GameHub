@@ -6,10 +6,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { gameData } from "../../../utils/constants";
-import GameList from "./components/GameList";
-import GameInfo from "./components/GameInfo";
 import Header from "./components/Header";
-import BackgroundLayer from "./components/BackgroundLayer";
+import MainScreenContent from "./components/MainScreenContent "; 
 
 const theme = createTheme({
   palette: {
@@ -41,7 +39,6 @@ const theme = createTheme({
 
 const MainScreenHeader = () => {
   const [selectedGame, setSelectedGame] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
   useEffect(() => {
@@ -53,20 +50,29 @@ const MainScreenHeader = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box
-    //onMouseEnter={() => setIsHovered(true)}
-   // onMouseLeave={() => setIsHovered(false)}
         sx={{
-          minHeight: "20vh",
+          minHeight: "50vh",
           position: "relative",
           borderRadius: 4,
           overflow: "hidden",
-          bgcolor: "background.paper",
+          bgcolor: "rgb(50,135,97)",
           display: "flex",
           flexDirection: "column",
         }}
-      >
-        {/* Background Layer */}
-       <BackgroundLayer theme={theme} selectedGame={selectedGame} isHovered={isHovered} /> 
+      >        
+        {/* Background pattern */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)",
+            zIndex: 1
+          }}
+        />
+        
         {/* Content Layer */}
         <Box
           sx={{
@@ -79,7 +85,8 @@ const MainScreenHeader = () => {
           }}
         >
           {/* Header */}
-          <Header/>
+          <Header />
+          
           {/* Main Content */}
           <Box
             sx={{
@@ -88,22 +95,15 @@ const MainScreenHeader = () => {
               gap: 2,
               flexDirection: isMediumScreen ? "column" : "row",
               overflow: "hidden",
+              mt: 2,
             }}
           >
-            {/* Game Info Section */}
-            <GameInfo selectedGame={selectedGame} theme={theme} />
-            {/* Game List Section */}
-            <GameList
-              isMediumScreen={isMediumScreen}
-              selectedGame={selectedGame}
-              setSelectedGame={setSelectedGame}
-              theme={theme}
-            />
+            {/* Main Content Area - Now using our new component */}
+            <MainScreenContent />
           </Box>
         </Box>
       </Box>
     </ThemeProvider>
   );
 };
-
 export default MainScreenHeader;

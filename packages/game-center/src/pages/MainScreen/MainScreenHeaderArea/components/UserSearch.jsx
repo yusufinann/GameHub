@@ -87,7 +87,7 @@ const UserSearch = () => {
             alignItems: 'center',
             width: 400,
             borderRadius: 2,
-            boxShadow: 3, bgcolor: 'transparent' 
+            boxShadow: 3,   bgcolor: "rgb(50,135,97)", 
           }}
         >
           <IconButton sx={{ p: '10px', color: 'primary.main' }}>
