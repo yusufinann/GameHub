@@ -28,75 +28,10 @@ export const LobbyProvider = ({ children }) => {
     currentUser,
     setLobbies,
     existingLobby,
-    setMembersByLobby, // Güncellendi
+    setMembersByLobby,
     setExistingLobby
   );
 
-  const hostLeaveLobbyTimer = useCallback(
-    async (lobbyCode) => {
-      // 1 dakika sonra lobi silme zamanlayıcısı
-      const timer = setTimeout(async () => {
-        try {
-          // Lobi bilgilerini tekrar çek
-          const lobbies = await lobbyApi.fetchLobbies();
-          const lobby = lobbies.find(l => l.lobbyCode === lobbyCode);
-  
-          if (lobby && lobby.lobbyType === 'normal') {
-            // Lobi üyelerini anlık olarak çıkar
-            const deletionData = {
-              lobbyCode,
-              reason: 'Host did not return within 1 minute'
-            };
-  
-            if (socket && socket.readyState === WebSocket.OPEN) {
-              socket.send(
-                JSON.stringify({
-                  type: 'HOST_LEAVE_TIMEOUT',
-                  data: deletionData
-                })
-              );
-  
-              await lobbyApi.deleteLobbyApi(lobbyCode);
-            }
-          }
-        } catch (error) {
-          console.error('Error in host leave timeout:', error);
-        }
-      }, 1 * 60 * 1000); // 1 dakika
-  
-      return timer;
-    },
-    [socket]
-  );
-  const hostReturnLobby = useCallback(
-    async (lobbyCode) => {
-      try {
-        // Clear any existing host leave timer
-        const hostLeaveTimer = localStorage.getItem(`hostLeaveTimer_${lobbyCode}`);
-        if (hostLeaveTimer) {
-          clearTimeout(hostLeaveTimer);
-          localStorage.removeItem(`hostLeaveTimer_${lobbyCode}`);
-        }
-  
-        // Broadcast host return via WebSocket
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: 'HOST_RETURNED',
-              lobbyCode,
-              userId: currentUser?.id,
-              userName: currentUser?.name,
-              avatar: currentUser?.avatar,
-            })
-          );
-        }
-      } catch (error) {
-        console.error('Error in host return:', error);
-      }
-    },
-    [socket, currentUser]
-  );
-  
   const fetchAndSetLobbies = useCallback(async () => {
     try {
       const lobbies = await lobbyApi.fetchLobbies();
@@ -109,7 +44,7 @@ export const LobbyProvider = ({ children }) => {
 
       // Lobi üyelerini lobbyCode bazlı olarak kaydet
       const membersMap = {};
-      sortedLobbies.forEach(lobby => {
+      sortedLobbies.forEach((lobby) => {
         membersMap[lobby.lobbyCode] = lobby.members;
       });
       setMembersByLobby(membersMap);
@@ -170,9 +105,9 @@ export const LobbyProvider = ({ children }) => {
           setLobbies((prev) => [...prev, lobby]);
           setLobbyCode(lobby.lobbyCode);
           setLobbyLink(lobbyLink);
-          setMembersByLobby(prev => ({
+          setMembersByLobby((prev) => ({
             ...prev,
-            [lobby.lobbyCode]: lobbyMembers
+            [lobby.lobbyCode]: lobbyMembers,
           }));
           setIsJoined(true);
           localStorage.setItem(
@@ -219,8 +154,10 @@ export const LobbyProvider = ({ children }) => {
           );
         }
 
-        setLobbies((prev) => prev.filter((lobby) => lobby.lobbyCode !== lobbyCode));
-        setMembersByLobby(prev => {
+        setLobbies((prev) =>
+          prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
+        );
+        setMembersByLobby((prev) => {
           const newState = { ...prev };
           delete newState[lobbyCode];
           return newState;
@@ -242,14 +179,6 @@ export const LobbyProvider = ({ children }) => {
   const leaveLobby = useCallback(
     async (lobbyCode, userId) => {
       try {
-        const lobby = lobbies.find(l => l.lobbyCode === lobbyCode);
-        // Eğer çıkan kullanıcı host ise ve normal lobi ise
-      if (lobby && lobby.createdBy === userId && lobby.lobbyType === 'normal') {
-        const leaveTimer = await hostLeaveLobbyTimer(lobbyCode);
-        // Timer bilgisini bir yerde saklamak isterseniz (opsiyonel)
-        localStorage.setItem(`hostLeaveTimer_${lobbyCode}`, leaveTimer);
-      }
-      
         await lobbyApi.leaveLobbyApi(lobbyCode, userId);
 
         if (socket && socket.readyState === WebSocket.OPEN) {
@@ -273,9 +202,11 @@ export const LobbyProvider = ({ children }) => {
           )
         );
 
-        setMembersByLobby(prev => ({
+        setMembersByLobby((prev) => ({
           ...prev,
-          [lobbyCode]: (prev[lobbyCode] || []).filter(member => member.id !== userId)
+          [lobbyCode]: (prev[lobbyCode] || []).filter(
+            (member) => member.id !== userId
+          ),
         }));
 
         if (existingLobby?.lobbyCode === lobbyCode) {
@@ -289,7 +220,29 @@ export const LobbyProvider = ({ children }) => {
         throw error;
       }
     },
-    [socket, existingLobby,lobbies,hostLeaveLobbyTimer]
+    [socket, existingLobby]
+  );
+
+  const hostReturnLobby = useCallback(
+    async (lobbyCode) => {
+      try {
+        // Broadcast host return via WebSocket
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(
+            JSON.stringify({
+              type: "HOST_RETURNED",
+              lobbyCode,
+              userId: currentUser?.id,
+              userName: currentUser?.name,
+              avatar: currentUser?.avatar,
+            })
+          );
+        }
+      } catch (error) {
+        console.error("Error in host return:", error);
+      }
+    },
+    [socket, currentUser]
   );
 
   return (
@@ -307,7 +260,8 @@ export const LobbyProvider = ({ children }) => {
         setIsJoined,
         createLobby,
         deleteLobby,
-        leaveLobby,hostReturnLobby
+        leaveLobby,
+        hostReturnLobby,
       }}
     >
       {children}
@@ -320,5 +274,5 @@ export const useLobbyContext = () => {
   if (!context) {
     throw new Error("useLobbyContext must be used within a LobbyProvider");
   }
-  return context; 
+  return context;
 };

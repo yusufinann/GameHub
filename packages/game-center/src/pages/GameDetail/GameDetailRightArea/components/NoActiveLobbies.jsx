@@ -1,8 +1,13 @@
-import { Box, Typography,useTheme, Paper, keyframes } from '@mui/material';
 import React from 'react';
-import noactivelobbies from "../../../../assets/noactivelobbies-removebg.png";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Paper,
+  keyframes,
+} from '@mui/material';
+import Theaters from '@mui/icons-material/Theaters'; 
 
-// Define keyframes for simple animations using MUI
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -14,76 +19,88 @@ const fadeIn = keyframes`
   }
 `;
 
+
 function NoActiveLobbies() {
   const theme = useTheme();
-  
+
   return (
     <Paper
-      elevation={6}
+      elevation={0}
       sx={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        p:2,
-        //borderRadius: 4,
-        background: `transparent`,
+        p: 2,
+        background: 'linear-gradient(135deg, #caecd5 0%, rgb(50,135,97) 100%)',
         position: 'relative',
         overflow: 'hidden',
         height: '100%',
       }}
     >
-      {/* Background pattern */}
-      <Box 
+      {/* Subtle Background Pattern */}
+      <Box
         sx={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
-          opacity: 0.05,
-          backgroundImage: 'radial-gradient(circle, transparent 20%, #fff 20%, #fff 21%, transparent 21%)',
-          backgroundSize: '40px 40px',
+          opacity: 0.1,
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
           pointerEvents: 'none',
         }}
       />
-      
+
+      {/* Theaters Icon */}
       <Box
-        component="img"
-        src={noactivelobbies}
-        alt="No active lobbies"
         sx={{
-          height: 320, // Much larger image
-          width: 'auto',
-          filter: 'drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2))',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          mb: 3,
           animation: `${fadeIn} 0.6s ease-out`,
         }}
-      />
-      
-      <Box sx={{ animation: `${fadeIn} 0.6s ease-out 0.2s both` }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            fontWeight: 'bold',
-            textAlign: 'center',
+      >
+        <Theaters sx={{ // Use Theaters icon here
+          width: 200,
+          height: 200,
+          color: 'rgba(255,255,255,0.3)',
+          animation: `${fadeIn} 0.6s ease-out`,
+        }} />
+      </Box>
+
+      <Box
+        sx={{
+          textAlign: 'center',
+          animation: `${fadeIn} 0.6s ease-out 0.2s both`,
+          px: 3,
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
             color: theme.palette.common.white,
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+            mb: 2,
+            textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
           }}
         >
-          Oops! No active lobbies found.
+          No Active Lobbies
         </Typography>
-        
-        <Typography 
-          variant="body1" 
-          sx={{ 
-            textAlign: 'center',
+
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'rgba(255, 255, 255, 0.9)',
             maxWidth: 400,
             mx: 'auto',
-            mb: 3.5,
-            color: 'rgba(255, 255, 255, 0.85)',
+            mb: 3,
           }}
         >
-          It seems there are no games happening right now. Why not create your own lobby?
+          Looks like the game arena is quiet right now.
+          Be the first to create a lobby and kick off the action!
         </Typography>
       </Box>
     </Paper>

@@ -7,6 +7,7 @@ import { LobbyProvider } from "../MainScreen/MainScreenMiddleArea/context";
 import { WebSocketProvider } from "../../shared/context/WebSocketContext/context";
 import FriendsSidebar from "../FriendsSidebar";
 import { FriendsProvider } from "../Profile/context";
+import { GlobalNotificationProvider } from "../FriendsSidebar/context";
 function MainContainer() {
   //  const theme = useTheme();
 
@@ -27,27 +28,27 @@ function MainContainer() {
 
         <LobbyProvider>
           {" "}
-          <FriendsProvider>
-            <SnackbarProvider>
-              <Box
-                sx={{
-                  display: "flex",
-                  height: "100%",
-                  width: "80vw",
-                  flexDirection: "column",
-                  flexGrow: 1,
-                  padding: "10px",
-                  overflow: "hidden",
-                  borderRadius: "10px",
-                  //border: `2px solid ${theme.palette.primary.main}`, // Theme-based accent border
-                }}
-              >
-                <Outlet />
-              </Box>
-              {/* Right Sidebar  */}
-              <FriendsSidebar /> 
-            </SnackbarProvider>
-          </FriendsProvider>
+          <GlobalNotificationProvider>
+            <FriendsProvider>
+              <SnackbarProvider>
+                <Box
+                  sx={{
+                    display: "flex",
+                    height: "100%",
+                    width: "80vw",
+                    flexDirection: "column",
+                    flexGrow: 1,
+                    padding: "10px",
+                    overflow: "hidden",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <Outlet />
+                </Box>
+                <FriendsSidebar />
+              </SnackbarProvider>
+            </FriendsProvider>
+          </GlobalNotificationProvider>
         </LobbyProvider>
       </WebSocketProvider>
     </Box>

@@ -1,30 +1,17 @@
-import React from 'react';
-import { Box,useTheme } from '@mui/material';
+import React, { useState } from 'react';
 import { LobbyList } from './components/LobbyList';
 import { useLobbyContext } from '../context';
+import CreateLobbyArea from './components/CreateLobbyArea';
 
 
 function LobbiesArea (){
-  const { lobbies } = useLobbyContext();
-  const theme=useTheme();
-
-
+  const { lobbies } = useLobbyContext(); 
+  const [activeTab, setActiveTab] = useState('all');
   return (
-    <Box
-      sx={{
-        [theme.breakpoints.up('md')]: {
-          width: '100%', },
-        [theme.breakpoints.down('md')]: { width: '100%' },
-        position: 'relative',
-        height: '65vh',
-        transition: 'width 0.3s ease',
-        overflow: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <LobbyList lobbies={lobbies}/>
-    </Box>
+   <>
+      <CreateLobbyArea  activeTab={activeTab} setActiveTab={setActiveTab}/>
+      <LobbyList lobbies={lobbies} activeTab={activeTab}/>
+   </>
   );
 };
 

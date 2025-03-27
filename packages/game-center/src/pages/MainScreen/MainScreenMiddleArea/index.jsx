@@ -1,6 +1,5 @@
 import React from "react";
 import { Box } from "@mui/material";
-import CreateLobbyArea from "./CreateLobbyArea";
 import ActiveGamesArea from "./ActiveGamesArea";
 import LobbiesArea from "./LobbiesArea";
 import BingoStatsSchema from "./ActiveGamesArea/BingoStatsSchema";
@@ -41,7 +40,6 @@ function MainScreenMiddleArea() {
             height: "70vh",         
           }}
         >
-          <CreateLobbyArea />
           <LobbiesArea />
         </Box>
       </Box>

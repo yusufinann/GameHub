@@ -23,6 +23,7 @@ import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
 import { useAuthContext } from "../../../shared/context/AuthContext";
 import { useFriendsContext } from "../../Profile/context";
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded'; 
+import { useNotification } from "../context";
 
 const UnifiedNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -37,7 +38,7 @@ const UnifiedNotifications = () => {
     acceptFriendRequest,
     rejectFriendRequest,
   } = useFriendsContext();
-
+  const showNotification = useNotification();
   const handleSnackbarClose = useCallback(() => setSnackbarOpen(false), []);
 
   const handleMessage = useCallback((event) => {
@@ -58,7 +59,7 @@ const UnifiedNotifications = () => {
           }
 
           if (document.hasFocus()) {
-            setSnackbarMessage(`${eventData.game} event has started!`);
+            showNotification(`${eventData.game} event has started!`);
             setSnackbarOpen(true);
           } else {
             const audio = new Audio(notificationSound);
@@ -89,7 +90,7 @@ const UnifiedNotifications = () => {
         break;
 
       case "FRIEND_REQUEST_RECEIVED":
-          setSnackbarMessage(`Friend request received from ${data.sender.username}`);
+        showNotification(`Friend request received from ${data.sender.username}`);
           setSnackbarOpen(true);
         break;
 
@@ -163,7 +164,7 @@ const UnifiedNotifications = () => {
       default:
         break;
     }
-  }, []);
+  }, [showNotification]);
 
   useEffect(() => {
     if (!socket || !currentUser) return;

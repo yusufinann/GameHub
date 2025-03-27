@@ -30,9 +30,9 @@ function LobbyItem({ lobby}) {
     useLobbyItem(lobby, currentUser);
   const { socket } = useWebSocket();
   const [isHostLeft, setIsHostLeft] = useState(false);
-  const [isLobbyFull, setIsLobbyFull] = useState(false); // New state for lobby full
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); // For ErrorModal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for Edit Modal
+  const [isLobbyFull, setIsLobbyFull] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const handleWebSocketMessage = useCallback(
     (event) => {
       const data = JSON.parse(event.data);
@@ -84,32 +84,32 @@ function LobbyItem({ lobby}) {
   const handleJoinClick = async () => {
     try {
       if (lobby.maxMembers && lobby.members.length >= lobby.maxMembers) {
-        setIsLobbyFull(true); // Set lobby full state
-        setIsErrorModalOpen(true); // Open ErrorModal directly
-        return; // Stop further execution
+        setIsLobbyFull(true); 
+        setIsErrorModalOpen(true); 
+        return; 
       }
 
       if (lobby.password) {
         setIsPasswordModalOpen(true);
       } else {
-        await handleJoin(); // Call handleJoin if no password and not full
+        await handleJoin(); 
       }
     } catch (error) {
       console.error("Error joining lobby:", error);
-      setIsErrorModalOpen(true); // Open error modal on any join error
+      setIsErrorModalOpen(true);
     }
   };
 
 
   const handleErrorModalClose = useCallback(() => {
     setIsErrorModalOpen(false);
-    setIsLobbyFull(false); // Reset the lobby full state when modal is closed
+    setIsLobbyFull(false); 
   }, []);
   const handleEditClick = () => {
-    setIsEditModalOpen(true); // Open edit modal
+    setIsEditModalOpen(true); 
   };
   const handleEditModalClose = () => {
-    setIsEditModalOpen(false); // Close edit modal
+    setIsEditModalOpen(false); 
   };
   const handleNavigate = () => navigate(`/lobby/${lobby.lobbyCode}`);
   const theme = useTheme();
@@ -232,6 +232,7 @@ function LobbyItem({ lobby}) {
                   onNavigate={handleNavigate}
                   isMobile={isMobile}
                   onEdit={isCreator ? handleEditClick : undefined} // Conditionally pass onEdit
+                  lobby={lobby}
                 />
               </Box>
             </Box>

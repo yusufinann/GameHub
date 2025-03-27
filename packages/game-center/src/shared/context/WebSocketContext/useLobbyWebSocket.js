@@ -6,7 +6,7 @@ const useLobbyWebSocket = (
   currentUser,
   setLobbies,
   existingLobby,
-  setMembersByLobby, // Değişen parametre
+  setMembersByLobby,
   setExistingLobby
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
@@ -47,17 +47,14 @@ const useLobbyWebSocket = (
           case "HOST_RETURNED":
             handleHostReturned(data);
             break;
-          case "HOST_LEAVE_TIMEOUT":
-            handleHostLeaveTimeout(data.data);
-            break;
-            case "LOBBY_REMOVED": // NEW CASE HANDLING LOBBY_REMOVED
+          case "LOBBY_REMOVED":
             handleLobbyRemoved(data.lobbyCode);
             break;
-            case "LOBBY_UPDATED": // NEW CASE HANDLING LOBBY_UPDATED
+          case "LOBBY_UPDATED":
             handleLobbyUpdated(data.data);
             break;
           default:
-           // console.warn("Bilinmeyen WebSocket mesaj türü:", data.type);
+            // console.warn("Bilinmeyen WebSocket mesaj türü:", data.type);
             break;
         }
       } finally {
@@ -155,41 +152,9 @@ const useLobbyWebSocket = (
         return newState;
       });
     };
-    const handleHostLeaveTimeout = (data) => {
-      const { lobbyCode } = data;
 
-      // Broadcast host leave timeout
-      socket.send(
-        JSON.stringify({
-          type: "HOST_LEAVE_TIMEOUT",
-          lobbyCode,
-          data: { reason: "Host did not return" },
-        })
-      );
-      // Lobi listesinden kaldır
-      setLobbies((prev) =>
-        prev.map((lobby) =>
-          lobby.lobbyCode === lobbyCode
-            ? { ...lobby, status: "host_left" } // Add a status for host leave
-            : lobby
-        )
-      );
-
-      // Üye listesini temizle
-      setMembersByLobby((prev) => {
-        const newState = { ...prev };
-        delete newState[lobbyCode];
-        return newState;
-      });
-
-      // Mevcut kullanıcının lobisi ise temizle
-      if (existingLobby?.lobbyCode === lobbyCode) {
-        setExistingLobby(null);
-        localStorage.removeItem("userLobby");
-      }
-    };
     const handleHostReturned = (data) => {
-      const { lobbyCode,data: hostData  } = data;
+      const { lobbyCode, data: hostData } = data;
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
@@ -260,14 +225,16 @@ const useLobbyWebSocket = (
 
     const handleEventStatus = (data) => {
       const { lobbyCode, status, message } = data;
-      
+
       // Eğer event bitmiş ise
       if (status === "ended") {
         // Lobi listesinden kaldır
-        setLobbies(prev => prev.filter(lobby => lobby.lobbyCode !== lobbyCode));
-        
+        setLobbies((prev) =>
+          prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
+        );
+
         // Üye listesini temizle
-        setMembersByLobby(prev => {
+        setMembersByLobby((prev) => {
           const newState = { ...prev };
           delete newState[lobbyCode];
           return newState;
@@ -277,32 +244,32 @@ const useLobbyWebSocket = (
         if (existingLobby?.lobbyCode === lobbyCode) {
           setExistingLobby(null);
           localStorage.removeItem("userLobby");
-          
+
           // Kullanıcıyı ana sayfaya yönlendir
-          navigate("/", { 
-            state: { 
+          navigate("/", {
+            state: {
               notification: {
                 type: "info",
-                message: message || "Event has ended"
-              }
-            }
+                message: message || "Event has ended",
+              },
+            },
           });
         }
       } else {
         // Diğer durumlar için normal güncelleme
-        setLobbies(prev =>
-          prev.map(lobby =>
-            lobby.lobbyCode === lobbyCode
-              ? { ...lobby, status }
-              : lobby
+        setLobbies((prev) =>
+          prev.map((lobby) =>
+            lobby.lobbyCode === lobbyCode ? { ...lobby, status } : lobby
           )
         );
       }
     };
     const handleLobbyRemoved = (lobbyCode) => {
       // Remove the lobby from the global list
-      setLobbies((prev) => prev.filter((lobby) => lobby.lobbyCode !== lobbyCode));
-    
+      setLobbies((prev) =>
+        prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
+      );
+
       // Clean up the corresponding members list
       setMembersByLobby((prev) => {
         const newState = { ...prev };
@@ -310,7 +277,7 @@ const useLobbyWebSocket = (
         return newState;
       });
       navigate("/");
-    
+
       // If the current user is in this lobby, clear the local storage and state
       if (existingLobby?.lobbyCode === lobbyCode) {
         setExistingLobby(null);
@@ -341,6 +308,7 @@ const useLobbyWebSocket = (
     setLobbies,
     setMembersByLobby,
     setExistingLobby,
+    navigate,
   ]);
 
   return isWebSocketUpdate;
