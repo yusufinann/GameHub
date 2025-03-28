@@ -239,12 +239,14 @@ const setupWebSocket = (server) => {
             senderName,
             senderUsername,
             senderId,
+            senderAvatar,
           } = data;
           lobbyChatController.storeMessage(lobbyCode, {
             senderName,
             senderUsername,
             senderId,
             expression,
+            senderAvatar,
           });
 
           broadcastToAll({
@@ -255,6 +257,7 @@ const setupWebSocket = (server) => {
               senderName: senderName,
               senderUsername: senderUsername,
               senderId: senderId,
+              senderAvatar: senderAvatar,
             },
           });
           break;

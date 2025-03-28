@@ -104,7 +104,7 @@ const GameLobbyPage = () => {
         id="gameLobbyPage"
         sx={{ 
           p: 1, 
-          minHeight: "calc(100vh - 100px)", 
+          height: "100vh", 
           display: "flex", 
           gap: 1,
           position: 'relative',

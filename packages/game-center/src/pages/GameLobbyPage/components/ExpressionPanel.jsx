@@ -1,15 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
   TextField,
   IconButton,
   Avatar,
-  Button,
-  Chip,
-  Tooltip,
-  Zoom,
-  Fade,
   styled,
   keyframes,
   alpha,
@@ -18,31 +13,15 @@ import {
 import {
   Send as SendIcon,
   InsertEmoticon as EmoticonIcon,
-  EmojiEmotions as EmojiEmotionsIcon,
-  Celebration as CelebrationIcon,
-  Favorite as HeartIcon,
-  ThumbUp as ThumbUpIcon,
-  SportsEsports as GameIcon,
 } from "@mui/icons-material";
 
+import EmojiPickerPanel from "./EmojiPickerPanel";
 
-
-const fadeInSlideUp = keyframes`
+// Animation
+const expressionSlideUpFadeOut = keyframes`
   0% {
     opacity: 0;
-    transform: translateY(40px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-
-const expressionFadeInOut = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
+    transform: translateY(50px) scale(0.9);
   }
   10%, 90% {
     opacity: 1;
@@ -50,48 +29,13 @@ const expressionFadeInOut = keyframes`
   }
   100% {
     opacity: 0;
-    transform: translateY(-30px) scale(0.8);
+    transform: translateY(-40px) scale(0.9);
   }
 `;
 
-// Predefined expressions
-const predefinedExpressions = [
-  "👍", "😂", "❤️", "🎉", "😮", "👏", "💯", "🤔", "🙏", "🔥", "🤝", "🤩",
-];
-
-// Emoji categories
-const emojiCategories = [
-  {
-    name: "Yüz İfadeleri",
-    icon: <EmojiEmotionsIcon />,
-    emojis: ["😀", "😁", "😂", "🤣", "😊", "😇", "🙂", "😍", "🥰", "😘", "😜", "😎", "🤩", "😱", "🥺", "😴"],
-  },
-  {
-    name: "Jestler",
-    icon: <ThumbUpIcon />,
-    emojis: ["👍", "👏", "👋", "🙌", "🤝", "✌️", "🤙", "💪", "👊", "🙏", "🫶", "🤲", "🫂", "🤗", "👀", "💯"],
-  },
-  {
-    name: "Kutlama",
-    icon: <CelebrationIcon />,
-    emojis: ["🎉", "🎊", "🎁", "🎂", "🍾", "🥂", "🏆", "🏅", "🎯", "⭐", "✨", "🌟", "💫", "🔥", "❄️", "🎮"],
-  },
-  {
-    name: "Kalpler",
-    icon: <HeartIcon />,
-    emojis: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💖", "💗", "💓", "💝"],
-  },
-  {
-    name: "Oyun",
-    icon: <GameIcon />,
-    emojis: ["🎮", "🎲", "🎯", "🎪", "🎭", "🎨", "🧩", "♟️", "🎪", "🎯", "🎪", "🚀", "🏁", "🎫", "🎟️", "🧸"],
-  },
-];
-
-// Styled components
 const AnimatedExpressionBox = styled(Box)(({ theme }) => {
   const animations = {
-    default: `${expressionFadeInOut} 3s ease-out forwards`,
+    default: `${expressionSlideUpFadeOut} 3s ease-out forwards`,
   };
 
   const selectedAnimation = animations.default;
@@ -122,46 +66,20 @@ const AnimatedExpressionBox = styled(Box)(({ theme }) => {
   };
 });
 
-const EmojiButton = styled(Button)(({ theme }) => ({
-  minWidth: "auto",
-  height: "48px",
-  width: "48px",
-  borderRadius: "50%",
-  fontSize: "24px",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  margin: theme.spacing(0.5),
-  padding: 0,
-  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-  background: alpha(theme.palette.background.paper, 0.8),
-  backdropFilter: "blur(5px)",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    transform: "scale(1.15)",
-    boxShadow: `0 5px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
-    background: alpha(theme.palette.primary.light, 0.15),
-    border: `2px solid ${alpha(theme.palette.primary.main, 0.6)}`,
-  },
-}));
-
 // Main Expression Panel Component
 const ExpressionPanel = ({ centerExpressions }) => {
   return (
     <Box
       sx={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: "50%",
+        left: "50%",
         pointerEvents: "none",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         zIndex: 1000,
-        padding: 4,
+        padding: 1,
+        transform: "translate(-50%, -50%)", 
       }}
     >
       {centerExpressions.map((expr) => (
@@ -178,13 +96,14 @@ const ExpressionPanel = ({ centerExpressions }) => {
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <Avatar
+               src={expr.senderAvatar || undefined}
                 sx={{
                   bgcolor: "primary.main",
                   border: "2px solid white",
                   boxShadow: "0 3px 5px rgba(0,0,0,0.2)"
                 }}
               >
-                {expr.senderName.charAt(0).toUpperCase()}
+                    { !expr.avatar ? expr.senderName.charAt(0).toUpperCase() : null }
               </Avatar>
               <Box>
                 <Typography
@@ -233,14 +152,14 @@ const ExpressionInput = ({ onSendExpression }) => {
   const [expressionInput, setExpressionInput] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
+  const emojiPickerRef = useRef(null);
 
   const handleSendExpression = (expressionToSend) => {
     const expression = expressionToSend || expressionInput;
     if (expression.trim()) {
       onSendExpression(expression);
       setExpressionInput("");
-      
-      // Close emoji picker if sending a selected emoji
+
       if (expressionToSend) {
         setEmojiPickerOpen(false);
       }
@@ -255,6 +174,23 @@ const ExpressionInput = ({ onSendExpression }) => {
     setEmojiPickerOpen(!emojiPickerOpen);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setEmojiPickerOpen(false);
+      }
+    };
+
+    if (emojiPickerOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [emojiPickerOpen]);
+
+
   return (
     <Box
       sx={{
@@ -262,70 +198,24 @@ const ExpressionInput = ({ onSendExpression }) => {
         borderTop: "2px solid #1a237e",
         background: "linear-gradient(180deg, rgba(240, 240, 255, 0.6), rgba(255, 255, 255, 0.9))",
         boxShadow: "0 -4px 10px rgba(0,0,0,0.05)",
+        position: 'relative',
+        height:'30vh'
       }}
     >
       {/* Emoji Picker Panel */}
-      <Fade in={emojiPickerOpen}>
-        <Box
-          sx={{
-            p: 2,
-            mb: 2,
-            borderRadius: "16px",
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-            display: emojiPickerOpen ? "block" : "none",
-            animation: `${fadeInSlideUp} 0.3s ease-out`,
-          }}
-        >
-          {/* Emoji Categories */}
-          <Box sx={{ display: "flex", mb: 2, justifyContent: "center" }}>
-            {emojiCategories.map((category, index) => (
-              <Tooltip key={index} title={category.name} TransitionComponent={Zoom}>
-                <Chip
-                  icon={category.icon}
-                  label={category.name}
-                  onClick={() => setActiveCategory(index)}
-                  color={activeCategory === index ? "primary" : "default"}
-                  sx={{
-                    mx: 0.5,
-                    fontWeight: activeCategory === index ? "bold" : "normal",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                    },
-                  }}
-                />
-              </Tooltip>
-            ))}
-          </Box>
-
-          {/* Active Category Emojis */}
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            {emojiCategories[activeCategory].emojis.map((emoji, index) => (
-              <Zoom key={index} in={true} style={{ transitionDelay: `${index * 30}ms` }}>
-                <EmojiButton
-                  onClick={() => handleSendExpression(emoji)}
-                  variant="outlined"
-                >
-                  {emoji}
-                </EmojiButton>
-              </Zoom>
-            ))}
-          </Box>
-        </Box>
-      </Fade>
+      <EmojiPickerPanel
+        emojiPickerOpen={emojiPickerOpen}
+        setEmojiPickerOpen={setEmojiPickerOpen}
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+        handleSendExpression={handleSendExpression}
+        emojiPickerRef={emojiPickerRef}
+      />
 
       {/* Text Input Area */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <IconButton 
-          color="primary" 
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1}}>
+        <IconButton
+          color="primary"
           aria-label="emoji"
           onClick={toggleEmojiPicker}
           sx={{
@@ -393,70 +283,11 @@ const ExpressionInput = ({ onSendExpression }) => {
           <SendIcon fontSize="medium" />
         </IconButton>
       </Box>
-
-      {/* Quick Emoji Access */}
-      <Box 
-        sx={{ 
-          display: "flex", 
-          justifyContent: "center", 
-          mt: 1.5,
-          gap: 0.5,
-          overflowX: "auto",
-          px: 1,
-          pb: 1,
-          "::-webkit-scrollbar": {
-            height: "6px",
-          },
-          "::-webkit-scrollbar-track": {
-            background: "rgba(0,0,0,0.05)",
-            borderRadius: "10px",
-          },
-          "::-webkit-scrollbar-thumb": {
-            background: "rgba(26, 35, 126, 0.3)",
-            borderRadius: "10px",
-            "&:hover": {
-              background: "rgba(26, 35, 126, 0.5)",
-            },
-          }
-        }}
-      >
-        {predefinedExpressions.map((emoji, index) => (
-          <Button
-            key={index}
-            onClick={() => handleSendExpression(emoji)}
-            variant="outlined"
-            sx={{
-              minWidth: "auto",
-              width: "40px",
-              height: "40px",
-              fontSize: "20px",
-              borderRadius: "12px",
-              p: 0,
-              mx: 0.2,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              border: "1px solid",
-              borderColor: "primary.light",
-              color: "primary.main",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                transform: "translateY(-3px)",
-                bgcolor: "primary.light",
-                color: "white",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-              },
-            }}
-          >
-            {emoji}
-          </Button>
-        ))}
-      </Box>
     </Box>
   );
 };
 
-// Connect subcomponents
+
 ExpressionPanel.Input = ExpressionInput;
 
 export default ExpressionPanel;

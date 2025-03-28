@@ -13,10 +13,10 @@ function MembersList({ members }) {
     <Paper
       elevation={8}
       sx={{
-        p: 1.5,
-        width: isCollapsed ? '60px' : '200px',
+        p: 1,
+        width: isCollapsed ? '60px' : '250px',
         height: '100vh',
-        background: 'rgba(255, 255, 255, 0.9)',
+        background: 'rgba(202, 236, 213, 0.9)', // Updated background color to rgba of #caecd5
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
         transition: 'all 0.3s ease',
@@ -35,10 +35,11 @@ function MembersList({ members }) {
               <Avatar
                 src={member.avatar || undefined}
                 sx={{
-                  width: 40, 
-                  height: 40,     
+                  width: 40,
+                  height: 40,
                   fontSize: '1.1rem',
-                  bgcolor: member.isHost ? '#1a237e' : '#2196f3',
+                  bgcolor: member.isHost ? '#328761' : '#caecd5', // Updated Avatar colors
+                  color: member.isHost ? 'white' : 'rgba(0, 0, 0, 0.87)', // Ensuring good contrast for icons/text
                   cursor: 'pointer',
                   '&:hover': {
                     transform: 'scale(1.1)',

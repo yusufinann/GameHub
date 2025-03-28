@@ -11,7 +11,7 @@ import {
   Link,
   CircularProgress,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import useLoginForm from "../useLoginForm"; // Import the custom hook
 import QuickLoginSection from "./QuickLoginSection";
 
@@ -89,7 +89,7 @@ function LoginForm() {
           handlePasswordChange={handlePasswordChange}
           showPassword={showPassword}
           handleClickShowPassword={handleClickShowPassword}
-          handleUseDifferentAccount={ handleUseDifferentAccount}
+          handleUseDifferentAccount={handleUseDifferentAccount}
           loading={loading}
         />
       ) : (
@@ -118,6 +118,11 @@ function LoginForm() {
               sx={textFieldStyles}
               InputProps={{
                 sx: { height: "56px" },
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email />
+                  </InputAdornment>
+                ),
               }}
             />
             <TextField
@@ -131,12 +136,14 @@ function LoginForm() {
               sx={textFieldStyles}
               InputProps={{
                 sx: { height: "56px" },
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
+                    <IconButton onClick={handleClickShowPassword} edge="end">
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
