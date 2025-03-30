@@ -15,7 +15,7 @@ import {
   EmojiEvents,
   Stars,
   Schedule,
-  Email,
+  Person,
   LocationOn,
   CalendarMonth,
   SportsEsports,
@@ -30,36 +30,42 @@ import { useFriendsContext } from './context';
 import { StatCard, ProfileSection } from './components/profileComponents';
 import { profileTheme, colorScheme } from './profileTheme';
 import RemoveFriendConfirm from './components/RemoveFriendConfirm';
-import BingoPlayerStats from './components/BingoPlayerStats';
+import BingoOverallStats from './components/BingoOverallStats'; // Import new components
+import BingoGameHistory from './components/BingoGameHistory'; // Import new components
+import { useAuthContext } from '../../shared/context/AuthContext';
 
 const Profile = () => {
   const { userId } = useParams();
   const [activeTab, setActiveTab] = useState(0);
   const [showContent, setShowContent] = useState(false);
-  const { user, loading, error } = useProfile(userId);
+  const { user, loading: userLoading, error: userError } = useProfile(userId);
   const {
     sendFriendRequest,
     removeFriend,
     isRequestSent,
     isFriend,
+    friends
   } = useFriendsContext();
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+  const [bingoWinRate, setBingoWinRate] = useState(0);
+  const [bingoLongestStreak, setBingoLongestStreak] = useState(0);
+  const { currentUser } = useAuthContext(); 
+
+
   const handleRemoveFriendClick = () => {
-    // Open the confirmation dialog instead of removing right away
     setConfirmDialogOpen(true);
   };
-  
+
   const handleRemoveFriendConfirm = () => {
-    // This will be called when user confirms in the dialog
     if (isFriend) {
       removeFriend(userId);
-      // Close the dialog after removing
       setConfirmDialogOpen(false);
     }
   };
   const handleDialogClose = () => {
-    // Close the dialog without taking action
     setConfirmDialogOpen(false);
   };
 
@@ -70,6 +76,54 @@ const Profile = () => {
   };
 
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setStatsLoading(true);
+        setStatsError(null);   
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:3001/api/bingo/stats/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch bingo stats');
+        }
+        const data = await response.json();
+        setStats(data);
+      } catch (err) {
+        setStatsError(err.message);
+      } finally {
+        setStatsLoading(false); 
+      }
+    };
+
+    fetchStats();
+  }, [userId]);
+
+  useEffect(() => {
+    if (stats && stats.totalGames > 0 && stats.games) {
+      setBingoWinRate(((stats.wins / stats.totalGames) * 100).toFixed(1));
+
+      let currentStreak = 0;
+      let maxStreak = 0;
+      for (const game of stats.games) {
+        if (game.finalRank === 1) {
+          currentStreak++;
+        } else {
+          maxStreak = Math.max(maxStreak, currentStreak);
+          currentStreak = 0;
+        }
+      }
+      maxStreak = Math.max(maxStreak, currentStreak);
+      setBingoLongestStreak(maxStreak);
+
+
+    } else {
+      setBingoWinRate(0);
+      setBingoLongestStreak(0); 
+    }
+  }, [stats]);
+
 
   useEffect(() => {
     if (user) {
@@ -77,7 +131,7 @@ const Profile = () => {
     }
   }, [user]);
 
-  if (loading) {
+  if (userLoading || statsLoading) { 
     return (
       <Box
         sx={{
@@ -92,7 +146,8 @@ const Profile = () => {
     );
   }
 
-  if (error) return <div>Error loading profile: {error.message}</div>;
+  if (userError) return <div>Error loading profile: {userError.message}</div>;
+  if (statsError) return <div>Error loading bingo statistics: {statsError.message}</div>; 
   if (!user) return <div>No user found</div>;
 
   const getFriendButtonState = () => {
@@ -100,7 +155,7 @@ const Profile = () => {
       return (
         <Button
         variant="contained"
-        onClick={handleRemoveFriendClick} // Changed to open dialog
+        onClick={handleRemoveFriendClick} 
         startIcon={<PersonRemove />}
         sx={{
           background: colorScheme.buttonGradient,
@@ -220,7 +275,7 @@ const Profile = () => {
 
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
               {[
-                { icon: <Email />, label: user.email },
+                { icon: <Person />, label: user.name },
                 { icon: <LocationOn />, label: user.location },
                 {
                   icon: <CalendarMonth />,
@@ -237,7 +292,8 @@ const Profile = () => {
                 />
               ))}
 
-              {getFriendButtonState()}
+              {/* Conditionally render getFriendButtonState */}
+              {currentUser && currentUser.id !== userId && getFriendButtonState()}
             </Box>
 
             <Box>
@@ -261,18 +317,18 @@ const Profile = () => {
         }}
       >
         {[
-          { icon: SportsEsports, title: 'Toplam Oyun', value: user.totalGames },
+          { icon: SportsEsports, title: 'Toplam Oyun', value: stats?.totalGames || 0 },
           {
             icon: Timeline,
             title: 'Kazanma Oranı',
-            value: `${user.winRate}%`,
+            value: `${bingoWinRate}%`,
           },
           {
             icon: Psychology,
             title: 'En Uzun Seri',
-            value: user.stats.longestStreak,
+            value: bingoLongestStreak || 0, 
           },
-          { icon: Group, title: 'Arkadaşlar', value: user.friendsCount || '124' },
+          { icon: Group, title: 'Arkadaşlar', value: friends.length || 0 },
         ].map((stat, index) => (
           <Box
             key={index}
@@ -319,21 +375,19 @@ const Profile = () => {
 
       <Box sx={{ mt: 2 }}>
       {activeTab === 0 && (
-    <>
-      <ProfileSection.Achievements
-        achievements={user.achievements}
-        theme={profileTheme}
-      />
-      <BingoPlayerStats />
-    </>
-  )}
+        <BingoOverallStats stats={stats} loading={statsLoading} error={statsError} />
+      )}
 
         {activeTab === 1 && (
-          <ProfileSection.RecentGames recentGames={user.recentGames} />
+          <BingoGameHistory stats={stats} loading={statsLoading} error={statsError} />
         )}
 
         {activeTab === 2 && (
-          <ProfileSection.GameStats stats={user.stats} />
+
+          <ProfileSection.Achievements
+    achievements={user.achievements}
+    theme={profileTheme}
+  />
         )}
       </Box>
     </Box>

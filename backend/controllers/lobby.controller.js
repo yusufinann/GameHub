@@ -24,25 +24,33 @@ const generateLobbyCode = () => {
 export const getLobbies = async (req, res) => {
     try {
         const { eventType, hasPassword } = req.query;
-        let query = {};
-
-        if (eventType) {
-            query.lobbyType = eventType;
-        }
+        let eventQuery = { lobbyType: "event", isActive: true, endTime: { $gt: new Date() } };
+        let normalQuery = { lobbyType: "normal", isActive: true };
 
         if (hasPassword === "true") {
-            query.password = { $ne: null };
+            eventQuery.password = { $ne: null };
+            normalQuery.password = { $ne: null };
         } else if (hasPassword === "false") {
-            query.password = null;
+            eventQuery.password = null;
+            normalQuery.password = null;
         }
 
-        query.isActive = true;
-        query.$or = [
-            { lobbyType: "normal" },
-            { lobbyType: "event", endTime: { $gt: new Date() } },
-        ];
+        if (eventType && eventType !== "all") {
+            if (eventType === "event") {
+                normalQuery.lobbyType = null; // To exclude normal lobbies when eventType is 'event'
+            } else if (eventType === "normal") {
+                eventQuery.lobbyType = null; // To exclude event lobbies when eventType is 'normal'
+            }
+        }
 
-        const filteredLobbies = await Lobby.find(query).lean();
+
+        const eventLobbies = eventType === "normal" ? [] : await Lobby.find(eventQuery).lean();
+        const normalLobbies = eventType === "event" ? [] : await Lobby.find(normalQuery).lean();
+
+
+        const sortedEventLobbies = eventLobbies.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+        const filteredLobbies = [...sortedEventLobbies, ...normalLobbies];
+
 
         res.status(200).json({
             message: "Lobiler başarıyla getirildi.",

@@ -23,10 +23,17 @@ const getTimeInfo = (startDate, startTime, endDate, endTime, eventStatus) => {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  // 24 saatten az kaldıysa saniyeyi ekle
   if (days > 0) {
-    return `Starts in ${days}d ${hours}h ${minutes}m`;
+    // Etkinlik 24 saatten fazla bir süre sonra ise sadece başlangıç tarihini göster
+    const eventStartDate = new Date(startDate);
+    const formattedDate = eventStartDate.toLocaleDateString('en-US', { // You can adjust locale and options
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    return `Starts on ${formattedDate}`;
   } else {
+    // 24 saatten az kaldıysa saniyeyi ekle
     const timeParts = [];
     if (hours > 0) timeParts.push(`${hours}h`);
     timeParts.push(`${minutes}m`);
@@ -36,7 +43,7 @@ const getTimeInfo = (startDate, startTime, endDate, endTime, eventStatus) => {
 };
 
 export const LobbyInfo = ({ startDate, startTime, endDate, endTime, eventStatus,isMobile  }) => {
-  const [timeInfo, setTimeInfo] = useState(() => 
+  const [timeInfo, setTimeInfo] = useState(() =>
     getTimeInfo(startDate, startTime, endDate, endTime, eventStatus)
   );
 
@@ -51,7 +58,7 @@ export const LobbyInfo = ({ startDate, startTime, endDate, endTime, eventStatus,
   }, [startDate, startTime, endDate, endTime, eventStatus]);
 
   const getIcon = () => {
-    if (timeInfo.startsWith("Starts in")) return <ScheduleIcon />;
+    if (timeInfo.startsWith("Starts in") || timeInfo.startsWith("Starts on")) return <ScheduleIcon />; // "Starts on" da eklendi
     if (timeInfo === "The event continues") return <PlayCircleFilledIcon />;
     return <CheckCircleIcon />;
   };
@@ -69,17 +76,17 @@ export const LobbyInfo = ({ startDate, startTime, endDate, endTime, eventStatus,
       size={isMobile ? 'small' : 'medium'}
       sx={{
         minWidth: {
-          xs: '280px',  // Minimum genişlik - çok küçük ekranlar
-          sm: '320px',  // Tablet
-          md: '80px'   // Desktop
+          xs: '280px',
+          sm: '320px',
+          md: '80px'
         },
         backgroundColor: getColor(),
         color: 'common.white',
         fontWeight: 'bold',
         fontSize: isMobile ? '0.7rem' : '0.75rem',
-        '& .MuiChip-icon': { 
-          fontSize: isMobile ? '14px' : '16px', 
-          color: 'common.white' 
+        '& .MuiChip-icon': {
+          fontSize: isMobile ? '14px' : '16px',
+          color: 'common.white'
         },
         flexGrow: isMobile ? 1 : 0,
       }}

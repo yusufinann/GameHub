@@ -130,7 +130,7 @@ const BingoPlayerStats = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Lobby Code</TableCell>
-                  <TableCell>Game ID</TableCell> {/* Yeni Game ID kolonu */}
+                  <TableCell>Game ID</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell align="right">Score</TableCell>
                   <TableCell align="right">Rank</TableCell>
@@ -138,9 +138,9 @@ const BingoPlayerStats = () => {
               </TableHead>
               <TableBody>
                 {stats.games.map((game) => (
-                  <TableRow key={game.gameId}> {/* key olarak game.gameId kullanın */}
+                  <TableRow key={game.gameId}>
                     <TableCell>{game.lobbyCode}</TableCell>
-                    <TableCell>{game.gameId}</TableCell> {/* Game ID verisi */}
+                    <TableCell>{game.gameId}</TableCell>
                     <TableCell>
                       {new Date(game.startedAt).toLocaleDateString()}
                     </TableCell>

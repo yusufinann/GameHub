@@ -7,10 +7,8 @@ import {
   Grid,
   Paper,
   Box,
-  Chip
 } from '@mui/material';
 import { profileTheme, colorScheme } from '../profileTheme';
-import { SportsEsports } from '@mui/icons-material';
 
 export const StatCard = ({ icon: Icon, title, value, delay }) => (
   <Grow in={true} timeout={1000} style={{ transitionDelay: `${delay}ms` }}>
@@ -23,9 +21,6 @@ export const StatCard = ({ icon: Icon, title, value, delay }) => (
         transform: 'translateY(-8px) scale(1.02)',
         boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
         background: colorScheme.hoverGradient,
-        // '& .icon': {
-        //   transform: 'rotate(360deg) scale(1.2)',
-        // },
         '& .title': {
           color: '#fff'
         },
@@ -90,63 +85,4 @@ export const ProfileSection = {
       ))}
     </Grid>
   ),
-
-  RecentGames: ({ recentGames }) => (
-    <Grid container spacing={2}>
-      {recentGames.map((game) => (
-        <Grid item xs={12} key={game.id}>
-          <Paper sx={{ 
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            '&:hover': { transform: 'translateX(4px)', transition: 'transform 0.2s' }
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <SportsEsports color="primary" />
-              <Box>
-                <Typography variant="subtitle1">{game.game}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {new Date(game.date).toLocaleDateString()}
-                </Typography>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="subtitle1">{game.score} puan</Typography>
-              <Chip 
-                label={game.result}
-                color={game.result === 'Kazandı' ? 'success' : 'error'}
-                size="small"
-              />
-            </Box>
-          </Paper>
-        </Grid>
-      ))}
-    </Grid>
-  ),
-
-  GameStats: ({ stats }) => (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={6}>
-        <Paper sx={{ p: 3, height: '90%' }}>
-          <Typography variant="h6" gutterBottom>Oyun İstatistikleri</Typography>
-          <Box sx={{ mt: 2 }}>
-            {[
-              { label: 'Toplam Galibiyet', value: stats.totalWins, color: 'success.main' },
-              { label: 'Toplam Mağlubiyet', value: stats.totalLosses, color: 'error.main' },
-              { label: 'En Sevilen Oyun', value: stats.favoriteGame, color: 'primary.main' },
-              { label: 'Mevcut Seri', value: `${stats.currentStreak} oyun` }
-            ].map((item, index) => (
-              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>{item.label}:</Typography>
-                <Typography color={item.color}>{item.value}</Typography>
-              </Box>
-            ))}
-          </Box>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-      </Grid>
-    </Grid>
-  )
 };

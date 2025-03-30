@@ -91,8 +91,11 @@ function broadcastToGame(game, data) {
 function broadcastGameStatus(game) {
   // Tamamlayan oyuncuların listesini oluştur
   const completedPlayers = Object.entries(game.players)
-    .filter(([id, player]) => player.completedAt)
-    .map(([id]) => id);
+    .filter(([, player]) => player.completedAt)
+    .map(([id, player]) => ({
+      id: id,
+      userName: player.userName // Include userName
+    }));
 
   // Güncel oyun durumunu gönder
   broadcastToGame(game, {
@@ -462,7 +465,9 @@ export const startGame = (ws, data) => {
     countdown--;
     if (countdown < 0) {
       clearInterval(countdownInterval);
+      game.startedAt = new Date();
       game.gameStarted = true;
+      console.log('Oyun başladı - Başlangıç Zamanı:', game.startedAt);
       broadcastToGame(game, {
         type: "BINGO_STARTED",
         message: "Oyun başladı!",
@@ -499,6 +504,7 @@ export const startGame = (ws, data) => {
 
 // Yardımcı fonksiyon: Oyun istatistiklerini MongoDB'ye kaydeder
 async function saveGameStatsToDB(game) {
+  console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date()); 
   try {
     const rankings = getGameRankings(game);
 
@@ -548,6 +554,7 @@ async function saveGameStatsToDB(game) {
     });
 
     await newBingoGame.save();
+    console.log('Oyun istatistikleri kaydedildi - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date());
   } catch (error) {
     console.error("Oyun istatistikleri kaydedilirken hata oluştu:", error);
   }
@@ -585,8 +592,12 @@ export const checkBingo = (ws, data) => {
 
         // Tamamlayan oyuncuların listesini oluştur
         const completedPlayers = Object.entries(game.players)
-        .filter(([id, player]) => player.completedAt)
-        .map(([id]) => id);
+  .filter(([, player]) => player.completedAt)
+  .map(([id, player]) => ({
+    id: id,
+    userName: player.userName // Kullanıcı adını ekle
+  }));
+  console.log("checkBingo - completedPlayers:", completedPlayers);
 
       // Broadcast the bingo call and current rankings
       broadcastToGame(game, {
@@ -736,12 +747,11 @@ export const getPlayerStats = async (req, res) => {
     // Get all games where this user was a player
     const games = await BingoGame.find({ "players.playerId": userId });
 
-
-    let totalGames = games.length; // Directly use games.length
+    let totalGames = games.length;
     let wins = 0;
     let totalScore = 0;
 
-    const gamesDetails = games.map(game => { // Directly map over games
+    const gamesDetails = games.map(game => {
       const playerInfo = game.players.find(p => p.playerId === userId);
       let isWin = false;
       if (playerInfo && playerInfo.finalRank === 1) {
@@ -750,11 +760,17 @@ export const getPlayerStats = async (req, res) => {
       }
       totalScore += playerInfo ? playerInfo.score : 0;
 
+      let duration = null;
+      if (game.startedAt && game.endedAt) {
+        duration = game.endedAt.getTime() - game.startedAt.getTime(); // Duration in milliseconds
+      }
+
       return {
         gameId: game.gameId,
         lobbyCode: game.lobbyCode,
         startedAt: game.startedAt,
         endedAt: game.endedAt,
+        duration: duration, // Oyun süresini ekle
         score: playerInfo ? playerInfo.score : 0,
         finalRank: playerInfo ? playerInfo.finalRank : null,
         isWin: isWin

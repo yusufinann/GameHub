@@ -19,6 +19,7 @@ export const LobbyProvider = ({ children }) => {
   const [lobbyLink, setLobbyLink] = useState("");
   const [isJoined, setIsJoined] = useState(false);
   const [membersByLobby, setMembersByLobby] = useState({}); // Lobby bazlı üye listesi
+  const [isLoading, setIsLoading] = useState(false);
 
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
@@ -33,6 +34,7 @@ export const LobbyProvider = ({ children }) => {
   );
 
   const fetchAndSetLobbies = useCallback(async () => {
+    setIsLoading(true);
     try {
       const lobbies = await lobbyApi.fetchLobbies();
       const sortedLobbies = lobbies.sort((a, b) => {
@@ -76,6 +78,9 @@ export const LobbyProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error fetching lobbies:", error);
+    }
+    finally {
+      setIsLoading(false); // Yükleme bittikten sonra false yap (başarılı veya başarısız)
     }
   }, [currentUser?.id]);
 
@@ -262,6 +267,7 @@ export const LobbyProvider = ({ children }) => {
         deleteLobby,
         leaveLobby,
         hostReturnLobby,
+        isLoading,
       }}
     >
       {children}
