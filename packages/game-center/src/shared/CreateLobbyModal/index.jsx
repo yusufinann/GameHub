@@ -14,7 +14,8 @@ const CreateLobbyModal = ({ open, onClose }) => {
     snackbar,
     setSnackbar,
     handleChange,
-    handleSubmit, setFormData
+    handleSubmit, setFormData,
+    isCreatingLobby
   } = useLobbyForm();
 
   return (
@@ -51,6 +52,7 @@ const CreateLobbyModal = ({ open, onClose }) => {
             handleChange={handleChange}
             handleSubmit={handleSubmit}
             onClose={onClose}
+            isCreatingLobby={isCreatingLobby}
           />
         )}
       </Dialog>

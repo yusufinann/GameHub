@@ -19,7 +19,7 @@ export const useLobbyItem = (lobby, currentUser) => {
   const [error, setError] = useState("");
   const [eventStatus, setEventStatus] = useState(null);
   const { socket } = useWebSocket();
-  
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Tek bir useEffect içinde tüm WebSocket mesajlarını yönetiyoruz
   useEffect(() => {
@@ -177,7 +177,7 @@ export const useLobbyItem = (lobby, currentUser) => {
     if (event) {
       event.stopPropagation();
     }
-
+    setIsDeleting(true);
     try {
       await deleteLobby(lobbyCode);
 
@@ -194,6 +194,8 @@ export const useLobbyItem = (lobby, currentUser) => {
         message: error.response?.data?.message || "An error occurred while deleting the lobby.",
         severity: "error",
       });
+    }finally {
+      setIsDeleting(false); // End deleting animation
     }
   };
 
@@ -205,5 +207,6 @@ export const useLobbyItem = (lobby, currentUser) => {
     handleDelete,
     setError,
     eventStatus,
+    isDeleting
   };
 };

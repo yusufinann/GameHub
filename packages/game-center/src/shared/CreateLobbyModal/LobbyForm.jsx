@@ -14,6 +14,7 @@ import {
   Paper,
   Typography,
   InputAdornment,
+  CircularProgress,
 } from '@mui/material';
 import {
   Lock as LockIcon,
@@ -24,7 +25,7 @@ import { EventFields } from './EventFields';
 import { useParams, useLocation } from 'react-router-dom';
 import { GAMES } from '../../utils/constants';
 
-function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose }) {
+function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,isCreatingLobby }) {
   const { gameId } = useParams();
   const location = useLocation();
 
@@ -261,6 +262,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose 
             variant="contained"
             type="submit"
             fullWidth
+            disabled={isCreatingLobby}
             sx={{
               background: 'linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))',
               '&:hover': {
@@ -271,7 +273,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose 
               fontSize: '1rem',
             }}
           >
-            Create Lobby
+            {isCreatingLobby ? <CircularProgress size={24} color="inherit" /> : 'Create Lobby'}
           </Button>
         </Box>
       </Box>

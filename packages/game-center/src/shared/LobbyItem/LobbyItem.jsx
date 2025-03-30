@@ -26,7 +26,7 @@ function LobbyItem({ lobby}) {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const { isJoining, isMember, handleJoin, handleDelete, eventStatus } =
+  const { isJoining, isMember, handleJoin, handleDelete, eventStatus,isDeleting} =
     useLobbyItem(lobby, currentUser);
   const { socket } = useWebSocket();
   const [isHostLeft, setIsHostLeft] = useState(false);
@@ -233,6 +233,7 @@ function LobbyItem({ lobby}) {
                   isMobile={isMobile}
                   onEdit={isCreator ? handleEditClick : undefined} // Conditionally pass onEdit
                   lobby={lobby}
+                  isDeleting={isDeleting}
                 />
               </Box>
             </Box>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useLobbyContext } from "../../pages/MainScreen/MainScreenMiddleArea/context";
 import { useAuthContext } from "../context/AuthContext";
 export const useLobbyForm = () => {
-  const { createLobby } = useLobbyContext();
+  const { createLobby,isCreatingLobby } = useLobbyContext();
   const { currentUser } = useAuthContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -85,6 +85,7 @@ export const useLobbyForm = () => {
     setSnackbar,
     handleChange,
     handleSubmit,
-    isSubmitting, setFormData
+    isSubmitting, setFormData,
+    isCreatingLobby
   };
 };

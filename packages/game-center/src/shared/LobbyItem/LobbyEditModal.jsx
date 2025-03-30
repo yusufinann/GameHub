@@ -18,6 +18,7 @@ import {
   IconButton,
   Snackbar,
   Alert,
+  CircularProgress, // Import CircularProgress
 } from '@mui/material';
 import {
   Lock as LockIcon,
@@ -25,9 +26,6 @@ import {
   Stars as StarsIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { useAuthContext } from '../context/AuthContext';
-import { useWebSocket } from '../context/WebSocketContext/context';
-import { useParams } from 'react-router-dom';
 import { GAMES } from '../../utils/constants';
 import { EventFields } from '../CreateLobbyModal/EventFields';
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -42,9 +40,11 @@ function LobbyEditModal({ open, onClose, lobby }) {
     startTime: lobby?.startTime ? new Date(lobby.startTime).toISOString().slice(0, 16) : '',
     endTime: lobby?.endTime ? new Date(lobby.endTime).toISOString().slice(0, 16) : '',
     maxMembers: lobby?.maxMembers || 4,
-    password: '', // Password alanı güncelleme için boş bırakılabilir veya mevcut değerle doldurulabilir.
+    password: '',
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [loading, setLoading] = useState(false); // Loading state added
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({
@@ -55,44 +55,41 @@ function LobbyEditModal({ open, onClose, lobby }) {
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
+    setLoading(true); // Start loading
     try {
-        const token=localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/lobbies/update/${lobby.lobbyCode}`, { // Doğru endpoint: /api/lobby/update/:lobbyCode
-        method: 'PUT', // PUT metodu
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3001/api/lobbies/update/${lobby.lobbyCode}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           lobbyName: formData.lobbyName,
-          game: formData.gameId, // Doğru alan adı: game
+          game: formData.gameId,
           lobbyType: formData.eventType,
           startTime: formData.startTime,
           endTime: formData.endTime,
           maxMembers: formData.maxMembers,
-          password: formData.password, // Şifre güncellenmek istenmiyorsa boş string gönderilebilir.
+          password: formData.password,
         }),
       });
-console.log("Debugging endTime update:", {
-    lobbyType: lobby.lobbyType,
-    lobbyStartTime: lobby.startTime, // **BUNU KONTROL EDİN**
-    
-});
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Lobby update failed');
       }
 
-       await response.json();
+      await response.json();
       setSnackbar({ open: true, message: 'Lobby updated successfully!', severity: 'success' });
-      onClose(); // Modal'ı kapat
-      
+      onClose();
     } catch (error) {
       console.error('Lobby update error:', error);
       setSnackbar({ open: true, message: error.message, severity: 'error' });
+    } finally {
+      setLoading(false); // End loading regardless of success or failure
     }
-  }, [formData,lobby.lobbyCode, onClose]);
-
+  }, [formData, lobby.lobbyCode, onClose]);
 
   return (
     <Dialog
@@ -133,6 +130,7 @@ console.log("Debugging endTime update:", {
         </Box>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ '& .MuiTextField-root': { mb: 3 } }}>
+          {/* Form fields as before */}
           <TextField
             fullWidth
             label="Lobby Name"
@@ -298,6 +296,7 @@ console.log("Debugging endTime update:", {
               variant="outlined"
               onClick={onClose}
               fullWidth
+              disabled={loading} // Disable cancel button when loading
               sx={{
                 borderColor: 'rgba(34,193,195,0.8)',
                 color: 'rgba(34,193,195,1)',
@@ -316,6 +315,7 @@ console.log("Debugging endTime update:", {
               variant="contained"
               type="submit"
               fullWidth
+              disabled={loading} // Disable save button when loading
               sx={{
                 background: 'linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))',
                 '&:hover': {
@@ -326,7 +326,7 @@ console.log("Debugging endTime update:", {
                 fontSize: '1rem',
               }}
             >
-              Save Changes
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'} {/* Loading indicator */}
             </Button>
           </Box>
         </Box>

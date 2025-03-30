@@ -20,7 +20,7 @@ export const LobbyProvider = ({ children }) => {
   const [isJoined, setIsJoined] = useState(false);
   const [membersByLobby, setMembersByLobby] = useState({}); // Lobby bazlı üye listesi
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isCreatingLobby, setIsCreatingLobby] = useState(false); 
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
 
@@ -90,6 +90,7 @@ export const LobbyProvider = ({ children }) => {
 
   const createLobby = useCallback(
     async (lobbyData) => {
+      setIsCreatingLobby(true);
       try {
         const savedLobby = localStorage.getItem("userLobby");
         if (existingLobby || savedLobby) {
@@ -140,6 +141,9 @@ export const LobbyProvider = ({ children }) => {
         return response;
       } catch (error) {
         throw error;
+      }
+      finally {
+        setIsCreatingLobby(false); // Lobi oluşturma tamamlandığında veya hata oluştuğunda false yap
       }
     },
     [socket, isWebSocketUpdate, currentUser, existingLobby]
@@ -268,6 +272,7 @@ export const LobbyProvider = ({ children }) => {
         leaveLobby,
         hostReturnLobby,
         isLoading,
+        isCreatingLobby
       }}
     >
       {children}

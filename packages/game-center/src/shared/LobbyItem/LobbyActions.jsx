@@ -13,7 +13,8 @@ export const LobbyActions = ({
   onNavigate,
   onEdit,
   isMobile,
-  lobby 
+  lobby ,
+  isDeleting
 }) => {
   const hasPassword = lobby && lobby.password != null;
 
@@ -25,6 +26,7 @@ export const LobbyActions = ({
             <IconButton
               onClick={onDelete}
               size="small"
+              disabled={isDeleting}
               sx={{
                 color: 'rgba(244, 67, 54, 0.7)',
                 "&:hover": {
@@ -33,7 +35,11 @@ export const LobbyActions = ({
                 },
               }}
             >
-              <DeleteIcon fontSize="medium" />
+              {isDeleting ? ( // Show CircularProgress if deleting
+                <CircularProgress size={24} sx={{ color: 'rgba(244, 67, 54, 1)' }} />
+              ) : (
+                <DeleteIcon fontSize="medium" />
+              )}
             </IconButton>
           </Tooltip>
 

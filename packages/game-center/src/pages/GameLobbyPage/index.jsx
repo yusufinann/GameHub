@@ -23,6 +23,8 @@ const GameLobbyPage = () => {
   const navigate = useNavigate();
   const { deleteLobby, leaveLobby } = useLobbyContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDeletingLobby, setIsDeletingLobby] = useState(false);
+  const [isLeavingLobby, setIsLeavingLobby] = useState(false);
   const {
     lobbyDetails,
     loading,
@@ -60,20 +62,27 @@ const GameLobbyPage = () => {
   };
 
   const handleDeleteLobby = async () => {
+    setIsDeletingLobby(true);
     try {
       await deleteLobby(lobbyDetails.lobbyCode);
       navigate("/");
     } catch (err) {
       setError("Lobi silinirken bir hata oluştu.");
     }
+    finally {
+      setIsDeletingLobby(false);
+    }
   };
 
   const handleLeaveLobby = async () => {
+    setIsLeavingLobby(true);
     try {
       await leaveLobby(lobbyDetails.lobbyCode, userId);
       navigate("/");
     } catch (err) {
       setError("Lobiden ayrılırken bir hata oluştu.");
+    }finally {
+      setIsLeavingLobby(false);
     }
   };
 
@@ -141,6 +150,8 @@ const GameLobbyPage = () => {
           isHost={isHost}
           onDelete={handleDeleteLobby}
           onLeave={handleLeaveLobby}
+          isDeletingLobby={isDeletingLobby}
+          isLeavingLobby={isLeavingLobby}
         />
       </Box>
     );

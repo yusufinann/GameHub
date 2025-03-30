@@ -6,6 +6,7 @@ import {
   Button,
   IconButton,
   Collapse,
+  CircularProgress,
 } from "@mui/material";
 import {
   ExitToApp as ExitIcon,
@@ -23,7 +24,7 @@ import ExpressionHistory from "./ExpressionHistory";
 import MessageIcon from "@mui/icons-material/Message";
 import { useEffect, useState } from "react";
 
-const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave }) => {
+const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby,isLeavingLobby}) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const [expressions, setExpressions] = useState([]);
@@ -189,6 +190,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave }) => {
               color="error"
               onClick={onDelete}
               startIcon={<ExitIcon />}
+              disabled={isDeletingLobby}
               sx={{
                 borderRadius: "16px",
                 textTransform: "none",
@@ -203,13 +205,14 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave }) => {
                 },
               }}
             >
-              Delete Lobby
+             {isDeletingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Delete Lobby'}
             </Button>
           )}
           <Button
             variant="outlined"
             color="inherit"
             startIcon={<ExitIcon />}
+            disabled={isLeavingLobby}
             sx={{
               borderRadius: "16px",
               textTransform: "none",
@@ -228,7 +231,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave }) => {
             }}
             onClick={onLeave}
           >
-            Leave Lobby
+           {isLeavingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Leave Lobby'}
           </Button>
         </Box>
       </Box>
