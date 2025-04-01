@@ -336,7 +336,7 @@ export const drawNumber = (ws, data) => {
 
 // Adjust startGame to set correct interval for auto draw mode
 export const startGame = (ws, data) => {
-  const { lobbyCode, drawMode, drawer, bingoMode } = data;
+  const { lobbyCode, drawMode, drawer, bingoMode,competitionMode  } = data;
   const game = bingoGames[lobbyCode];
   if (!game) {
       return ws.send(
@@ -369,6 +369,7 @@ export const startGame = (ws, data) => {
   game.gameEnded = false;
   game.gameStarted = false;
   game.gameId = new mongoose.Types.ObjectId();
+  game.competitionMode = competitionMode || 'competitive'; // Default to competitive if not provided
 
   if (game.autoDrawInterval) {
       clearInterval(game.autoDrawInterval);
@@ -409,7 +410,8 @@ export const startGame = (ws, data) => {
               players: Object.keys(game.players).map(playerId => ({
                   playerId: playerId,
                   ticket: game.players[playerId].ticket
-              }))
+              })),
+              competitionMode: game.competitionMode
           });
           
           if (drawMode === "auto") {
@@ -582,19 +584,10 @@ export const markNumber = (ws, data) => {
   }
 };
 /**
- * Oyunu başlatma: Genellikle host tarafından tetiklenir.
- * Beklenen data örneği: { lobbyCode: "ABC123" }
- */
-
-
-/**
  * Bingo kontrolü: Oyuncu "BINGO" dediğinde, ticket’ındaki tüm numaraların
  * çekilmiş numaralar arasında olup olmadığını kontrol eder.
  * Beklenen data örneği: { lobbyCode: "ABC123" }
  **/
-
-// bingo.game.controller.js dosyasına ekleyin
-
 // Yardımcı fonksiyon: Oyun istatistiklerini MongoDB'ye kaydeder
 async function saveGameStatsToDB(game) {
   console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date()); 
@@ -692,38 +685,27 @@ export const checkBingo = (ws, data) => {
   }));
   console.log("checkBingo - completedPlayers:", completedPlayers);
 
-      // Broadcast the bingo call and current rankings
-      broadcastToGame(game, {
-          type: "BINGO_CALL_SUCCESS",
-          playerId: ws.userId,
-          playerName: player.userName, // Use stored userName
-          rank: playerRank,
-          rankings: rankings,
-          ticket: player.ticket,
-          gameEnded: false, // Default olarak false, oyun henüz bitmedi
-          completedPlayers: completedPlayers ,// Tamamlayan oyuncuların listesini gönder
-          gameId: game.gameId // gameId eklendi
-      });
-
-      // Two player game scenario - end game immediately after first bingo
-      if (Object.keys(game.players).length <= 2) {
-          const finalRankings = getGameRankings(game);
+      if (game.competitionMode === 'non-competitive') { // Non-competitive mode logic
           game.gameEnded = true;
+          const nonCompetitiveRankings = [{ // Create rankings with only the winner
+              playerId: ws.userId,
+              userName: player.userName,
+              score: calculatePlayerScore(player, game.drawnNumbers),
+              completedAt: player.completedAt
+          }];
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
-              message: "Game Over - Final Rankings",
-              finalRankings: finalRankings,
-              gameId: game.gameId // gameId eklendi
+              message: `${player.userName} BINGO! Oyunu Kazandı!`, // Custom message for non-competitive mode
+              finalRankings: nonCompetitiveRankings,
+              gameId: game.gameId
           });
-          saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-      } else {
-          // For 3+ players, check if all players have completed or numbers are finished
-          const completedPlayersCount = rankings.filter(r => r.completedAt).length;
-          const allNumbersDrawn = game.numberPool.length === 0;
-          const allPlayersCompleted = completedPlayersCount === Object.keys(game.players).length;
-
-
-          if (allNumbersDrawn || allPlayersCompleted) {
+          saveGameStatsToDB(game);
+          clearInterval(game.autoDrawInterval); // Stop auto draw if running
+          game.gameStarted = false; // Ensure gameStarted is false after game over in non-competitive mode.
+          return; // Exit function after non-competitive bingo win
+      } else { // Competitive Mode Logic (Existing logic, slightly modified for clarity)
+          // Two player game scenario - end game immediately after first bingo
+          if (Object.keys(game.players).length <= 2) {
               const finalRankings = getGameRankings(game);
               game.gameEnded = true;
               broadcastToGame(game, {
@@ -733,33 +715,14 @@ export const checkBingo = (ws, data) => {
                   gameId: game.gameId // gameId eklendi
               });
               saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-          } else if (completedPlayersCount === 1) {
-              // First bingo in a multi-player game, update rankings but game continues
-              broadcastToGame(game, {
-                  type: "BINGO_CALL_SUCCESS",
-                  playerId: ws.userId,
-                  playerName: player.userName,
-                  rank: playerRank,
-                  rankings: rankings,
-                  ticket: player.ticket,
-                  gameEnded: false ,// Oyun devam ediyor
-                  gameId: game.gameId ,// gameId eklendi
-              });
           } else {
-               // Subsequent bingo calls in multi-player, update rankings and check game end again if needed.
-               broadcastToGame(game, {
-                  type: "BINGO_CALL_SUCCESS",
-                  playerId: ws.userId,
-                  playerName: player.userName,
-                  rank: playerRank,
-                  rankings: rankings,
-                  ticket: player.ticket,
-                  gameEnded: false ,// Oyun devam ediyor
-                  gameId: game.gameId // gameId eklendi
-              });
-               const completedPlayersCountAfterCall = rankings.filter(r => r.completedAt).length;
-               const allPlayersCompletedAfterCall = completedPlayersCountAfterCall === Object.keys(game.players).length;
-               if(allPlayersCompletedAfterCall) {
+              // For 3+ players, check if all players have completed or numbers are finished
+              const completedPlayersCount = rankings.filter(r => r.completedAt).length;
+              const allNumbersDrawn = game.numberPool.length === 0;
+              const allPlayersCompleted = completedPlayersCount === Object.keys(game.players).length;
+
+
+              if (allNumbersDrawn || allPlayersCompleted) {
                   const finalRankings = getGameRankings(game);
                   game.gameEnded = true;
                   broadcastToGame(game, {
@@ -769,10 +732,46 @@ export const checkBingo = (ws, data) => {
                       gameId: game.gameId // gameId eklendi
                   });
                   saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-               }
+              } else if (completedPlayersCount === 1) {
+                  // First bingo in a multi-player game, update rankings but game continues
+                  broadcastToGame(game, {
+                      type: "BINGO_CALL_SUCCESS",
+                      playerId: ws.userId,
+                      playerName: player.userName,
+                      rank: playerRank,
+                      rankings: rankings,
+                      ticket: player.ticket,
+                      gameEnded: false ,// Oyun devam ediyor
+                      gameId: game.gameId ,// gameId eklendi
+                  });
+              } else {
+                   // Subsequent bingo calls in multi-player, update rankings and check game end again if needed.
+                   broadcastToGame(game, {
+                      type: "BINGO_CALL_SUCCESS",
+                      playerId: ws.userId,
+                      playerName: player.userName,
+                      rank: playerRank,
+                      rankings: rankings,
+                      ticket: player.ticket,
+                      gameEnded: false ,// Oyun devam ediyor
+                      gameId: game.gameId // gameId eklendi
+                  });
+                   const completedPlayersCountAfterCall = rankings.filter(r => r.completedAt).length;
+                   const allPlayersCompletedAfterCall = completedPlayersCountAfterCall === Object.keys(game.players).length;
+                   if(allPlayersCompletedAfterCall) {
+                      const finalRankings = getGameRankings(game);
+                      game.gameEnded = true;
+                      broadcastToGame(game, {
+                          type: "BINGO_GAME_OVER",
+                          message: "Game Over - Final Rankings",
+                          finalRankings: finalRankings,
+                          gameId: game.gameId // gameId eklendi
+                      });
+                      saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
+                   }
+              }
           }
       }
-
 
   } else {
       ws.send(JSON.stringify({
