@@ -199,7 +199,7 @@ const ExpressionInput = ({ onSendExpression }) => {
         background: "linear-gradient(180deg, rgba(240, 240, 255, 0.6), rgba(255, 255, 255, 0.9))",
         boxShadow: "0 -4px 10px rgba(0,0,0,0.05)",
         position: 'relative',
-        height:'30vh'
+        height:'10vh'
       }}
     >
       {/* Emoji Picker Panel */}

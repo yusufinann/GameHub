@@ -5,14 +5,14 @@ import {
   Typography,
   Button,
   IconButton,
-  Collapse,
   CircularProgress,
 } from "@mui/material";
 import {
   ExitToApp as ExitIcon,
   SportsEsports as GameIcon,
   Stars as StarsIcon,
-  KeyboardArrowUp as ExpandLessIcon,
+  Message as MessageIcon,
+  KeyboardArrowLeft as CollapseIcon,
 } from "@mui/icons-material";
 import { BingoGame } from "@gamecenter/bingo-game";
 import { useAuthContext } from "../../../shared/context/AuthContext";
@@ -21,15 +21,14 @@ import { v4 as uuidv4 } from "uuid";
 import ExpressionPanel from "./ExpressionPanel";
 import QuickExpressionButtons from "./QuickExpressionButtons";
 import ExpressionHistory from "./ExpressionHistory";
-import MessageIcon from "@mui/icons-material/Message";
 import { useEffect, useState } from "react";
 
-const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby,isLeavingLobby}) => {
+const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby }) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const [expressions, setExpressions] = useState([]);
   const [centerExpressions, setCenterExpressions] = useState([]);
-  const [isExpressionAreaOpen, setIsExpressionAreaOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   useEffect(() => {
     if (socket && lobbyInfo) {
@@ -75,7 +74,6 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         senderAvatar: currentUser.avatar,
       };
       socket.send(JSON.stringify(messagePayload));
-
     }
   };
 
@@ -95,8 +93,8 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     }, 3000);
   };
 
-  const handleToggleExpressionArea = () => {
-    setIsExpressionAreaOpen(!isExpressionAreaOpen);
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   return (
@@ -121,7 +119,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
           right: 0,
           bottom: 0,
           left: 0,
-          backgroundImage: `url('https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg')`,
+          backgroundImage: 'url("https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -205,7 +203,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
                 },
               }}
             >
-             {isDeletingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Delete Lobby'}
+              {isDeletingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Delete Lobby'}
             </Button>
           )}
           <Button
@@ -231,7 +229,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
             }}
             onClick={onLeave}
           >
-           {isLeavingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Leave Lobby'}
+            {isLeavingLobby ? <CircularProgress size={24} sx={{ color: 'white', mr: 1 }} /> : 'Leave Lobby'}
           </Button>
         </Box>
       </Box>
@@ -241,51 +239,60 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         sx={{
           flex: 1,
           display: "flex",
-          overflow: "auto",
+          overflow: "hidden",
           p: 1,
           position: "relative",
         }}
       >
-        {/* Game Area - Left Side*/}
-        <Box sx={{ flex: '0 0 80%', maxWidth: '70%', display: 'flex', flexDirection: 'column' }}>
+        {/* Game Area - Left Side */}
+        <Box 
+          sx={{ 
+            width: isChatOpen ? "70%" : "100%", 
+            display: 'flex', 
+            flexDirection: 'column',
+            transition: 'width 0.3s ease-in-out',
+            overflow: 'hidden',
+            pr: isChatOpen ? 1 : 0
+          }}
+        >
           {/* Center Screen Expression Area */}
           <ExpressionPanel centerExpressions={centerExpressions} />
 
           {/* Bingo Game */}
           {lobbyInfo.game === "1" ? (
-            <Box sx={{height:'70vh'}}>
-                <BingoGame
-              sx={{
-                width: "100%",
-                height: "100%",
-                "& .MuiContainer-root": {
+            <Box sx={{ height: '70vh' }}>
+              <BingoGame
+                sx={{
+                  width: "100%",
                   height: "100%",
-                  maxWidth: "none",
-                  p: 0,
-                },
-                "& .MuiCard-root": {
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: "24px",
-                  overflow: "hidden",
-                  boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(8px)',
-                },
-                "& .MuiCardContent-root": {
-                  flex: 1,
-                  overflow: "auto",
-                  p: 3,
-                },
-              }}
-              lobbyCode={lobbyInfo.lobbyCode}
-              socket={socket}
-              currentUser={currentUser}
-              lobbyInfo={lobbyInfo}
-              members={members}
-            />
+                  "& .MuiContainer-root": {
+                    height: "100%",
+                    maxWidth: "none",
+                    p: 0,
+                  },
+                  "& .MuiCard-root": {
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    borderRadius: "24px",
+                    overflow: "hidden",
+                    boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(8px)',
+                  },
+                  "& .MuiCardContent-root": {
+                    flex: 1,
+                    overflow: "auto",
+                    p: 3,
+                  },
+                }}
+                lobbyCode={lobbyInfo.lobbyCode}
+                socket={socket}
+                currentUser={currentUser}
+                lobbyInfo={lobbyInfo}
+                members={members}
+              />
             </Box>
           ) : (
             <Box
@@ -307,65 +314,93 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
               </Typography>
             </Box>
           )}
-          {/* Quick Expression Buttons moved here */}
+          {/* Quick Expression Buttons */}
           <QuickExpressionButtons onSendExpression={handleSendExpression} />
         </Box>
 
-        {/* Chat & Expression Area - Right Side (Collapsible) */}
-        <Box sx={{ flex: '1', display: 'flex', flexDirection: 'column', width:'30%',height:'100%'}}>
-          {/* Toggle Button */}
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <IconButton
-              onClick={handleToggleExpressionArea}
-              aria-label={isExpressionAreaOpen ? "Sohbeti Gizle" : "Sohbeti Göster"}
-              sx={{
-                borderRadius: "50%",
-                background: isExpressionAreaOpen
-                  ? "linear-gradient(135deg, #328761, #4CAF50)"
-                  : "linear-gradient(135deg, #b2ebf2, #80deea)",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
-                "&:hover": {
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
-                  transform: "translateY(-3px) scale(1.05)",
-                  filter: "brightness(1.2)",
-                },
-                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                width: 40,
-                height: 40,
-                border: "2px solid white",
-                p: 0.5,
-              }}
-            >
-              {isExpressionAreaOpen ? (
-                <ExpandLessIcon sx={{ color: "white", fontSize: 24 }} />
-              ) : (
-                <MessageIcon sx={{ color: "white", fontSize: 20 }} />
-              )}
-            </IconButton>
-          </Box>
-
-          {/* Collapsible Expression Input and History Area */}
-          <Collapse
-            in={isExpressionAreaOpen}
-            collapsedSize="30px"
+        {/* Chat Toggle Button*/}
+        <Box 
+          sx={{ 
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            zIndex: 5
+          }}
+        >
+          <IconButton
+            onClick={toggleChat}
+            aria-label={isChatOpen ? "Sohbeti Gizle" : "Sohbeti Göster"}
             sx={{
-              transitionDuration: "500ms",
-              overflow: 'hidden',
-              borderRadius: '12px',
-              background: "linear-gradient(to bottom, #b2ebf2, white)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              border: '1px solid rgba(0,0,0,0.1)',
+              borderRadius: "50%",
+              background: isChatOpen
+                ? "linear-gradient(135deg, #328761, #4CAF50)"
+                : "linear-gradient(135deg, #b2ebf2, #80deea)",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+              "&:hover": {
+                boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                transform: "translateY(-3px) scale(1.05)",
+                filter: "brightness(1.2)",
+              },
+              transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              width: 40,
+              height: 40,
+              border: "2px solid white",
+              p: 0.5,
             }}
           >
-            <Box p={1}>
+            {isChatOpen ? <CollapseIcon /> : <MessageIcon />}
+          </IconButton>
+        </Box>
 
+        {/* Chat Area - Right Side (Slidable) */}
+        <Box 
+          sx={{ 
+            width: isChatOpen ? "30%" : "0%",
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            borderLeft: isChatOpen ? '1px solid rgba(0,0,0,0.1)' : 'none',
+            transition: 'width 0.3s ease-in-out',
+            ml: isChatOpen ? 2 : 0,
+            opacity: isChatOpen ? 1 : 0,
+          }}
+        >
+          {isChatOpen && (
+            <>
+              <Box 
+                sx={{ 
+                  p: 1, 
+                  background: "linear-gradient(to right, #328761, #4CAF50)",
+                  color: 'white',
+                  borderRadius: '12px 12px 0 0',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Chat
+                </Typography>
+              </Box>
+              
               {/* Expression History */}
-              <ExpressionHistory expressions={expressions} />
-                  {/* Expression Input Area */}
-               <ExpressionPanel.Input onSendExpression={handleSendExpression} />
-
-            </Box>
-          </Collapse>
+              <Box 
+                sx={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  background: "linear-gradient(to bottom, #b2ebf2, white)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: '0 0 12px 12px',
+                  overflow: 'hidden'
+                }}
+              >
+                <ExpressionHistory expressions={expressions} />
+                <ExpressionPanel.Input onSendExpression={handleSendExpression} />
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
     </Paper>

@@ -5,7 +5,7 @@ import Header from './Header';
 import MemberItem from './MemberItem';
 
 function MembersList({ members }) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleToggle = () => setIsCollapsed(!isCollapsed);
 

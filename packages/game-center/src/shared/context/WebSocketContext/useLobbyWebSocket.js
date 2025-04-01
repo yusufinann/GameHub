@@ -36,7 +36,7 @@ const useLobbyWebSocket = (
             handleUserLeft(data);
             break;
           case "LOBBY_DELETED":
-            handleLobbyDeleted(data.lobbyCode);
+            handleLobbyDeleted(data.lobbyCode,data.data);
             break;
           case "LOBBY_EXPIRED":
             handleLobbyExpired(data);
@@ -91,7 +91,7 @@ const useLobbyWebSocket = (
                 ...lobby.members,
                 {
                   id: userData.userId,
-                  name: userData.userName,
+                  name: userData.name,
                   avatar: userData.avatar,
                   isHost: userData.isHost, // Use isHost from message
                 },
@@ -109,7 +109,7 @@ const useLobbyWebSocket = (
           ...(prev[lobbyCode] || []),
           {
             id: userData.userId,
-            name: userData.userName,
+            name: userData.name,
             avatar: userData.avatar,
             isHost: userData.isHost,
           },
@@ -135,17 +135,24 @@ const useLobbyWebSocket = (
         )
       );
 
-      // İlgili lobinin üye listesini güncelle
       setMembersByLobby((prev) => ({
         ...prev,
         [lobbyCode]: (prev[lobbyCode] || []).filter((m) => m.id !== userId),
       }));
     };
 
-    const handleLobbyDeleted = (lobbyCode) => {
+  const handleLobbyDeleted = (lobbyCode, lobbyData) => {
       setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
-      navigate("/");
-      // İlgili lobinin üye listesini temizle
+      navigate("/", {
+        state: {
+          notification: {
+            type: "info",
+            message: lobbyData?.reason || "Lobi deleted", 
+          },
+        },
+      });
+      setExistingLobby(null)
+      localStorage.removeItem('userLobby');
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
@@ -155,6 +162,8 @@ const useLobbyWebSocket = (
 
     const handleHostReturned = (data) => {
       const { lobbyCode, data: hostData } = data;
+      console.log("HOST_RETURNED mesajı alındı:", data); // Mesajı logla
+
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
@@ -183,9 +192,9 @@ const useLobbyWebSocket = (
           updatedMembers = [...currentMembers];
           updatedMembers[existingMemberIndex] = {
             id: hostData.userId,
-            name: hostData.userName,
+            name: hostData.name,
             avatar: hostData.avatar,
-            isHost: true,
+            isHost: hostData.isHost,
           };
         } else {
           // Add new member if not exists
@@ -193,9 +202,9 @@ const useLobbyWebSocket = (
             ...currentMembers,
             {
               id: hostData.userId,
-              name: hostData.userName,
+              name: hostData.name,
               avatar: hostData.avatar,
-              isHost: hostData.true,
+              isHost: hostData.isHost,
             },
           ];
         }

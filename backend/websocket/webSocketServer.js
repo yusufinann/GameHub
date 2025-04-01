@@ -160,18 +160,7 @@ const setupWebSocket = (server) => {
           });
           break;
         case "HOST_RETURNED":
-          broadcastToOthers(ws, {
-            type: "HOST_RETURNED",
-            lobbyCode: data.lobbyCode,
-            data: data.data,
-          });
-          break;
-        case "NEW_HOST":
-          broadcastToOthers(ws, {
-            type: "NEW_HOST",
-            lobbyCode: data.lobbyCode,
-            data: data.data,
-          });
+          broadcastLobbyEvent(data.lobbyCode, "HOST_RETURNED", data.data);
           break;
         case "USER_KICKED":
           broadcastToOthers(ws, {

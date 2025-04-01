@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState,useCallback } from "react";
 import {
   Box,
   Chip,
@@ -15,66 +15,22 @@ import { useLobbyContext } from "../../pages/MainScreen/MainScreenMiddleArea/con
 import { useAuthContext } from "../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";
-import { useWebSocket } from "../context/WebSocketContext/context";
 import { Event, Group, People } from "@mui/icons-material";
 import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
 
 
 function LobbyItem({ lobby}) {
-  const { existingLobby, setMembersByLobby} = useLobbyContext();
+  const { existingLobby} = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const { isJoining, isMember, handleJoin, handleDelete, eventStatus,isDeleting} =
     useLobbyItem(lobby, currentUser);
-  const { socket } = useWebSocket();
-  const [isHostLeft, setIsHostLeft] = useState(false);
   const [isLobbyFull, setIsLobbyFull] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const handleWebSocketMessage = useCallback(
-    (event) => {
-      const data = JSON.parse(event.data);
-      if (data.lobbyCode !== lobby.lobbyCode) return;
 
-      if (data.type === "HOST_RETURNED") {
-        setIsHostLeft(false);
-        setMembersByLobby((prev) => ({
-          ...prev,
-          [lobby.lobbyCode]: prev[lobby.lobbyCode].map((member) =>
-            member.id === currentUser.id ? { ...member, isHost: true } : member
-          ),
-        }));
-      }
-
-      if (data.type === "HOST_LEAVE_TIMEOUT") {
-        setIsHostLeft(true);
-      }
-    },
-    [lobby.lobbyCode, currentUser, setMembersByLobby]
-  );
-  console.log(lobby)
-  useEffect(() => {
-    if (!socket) return;
-    const handleWebSocketMessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.lobbyCode !== lobby.lobbyCode) return;
-      switch (data.type) {
-        case "HOST_RETURNED":
-          // Reset host state
-          setIsHostLeft(false);
-          break;
-        case "HOST_LEAVE_TIMEOUT":
-          setIsHostLeft(true);
-          break;
-        default:
-          console.warn(`Unhandled WebSocket event type: ${data.type}`);
-      }
-    };
-    socket.addEventListener("message", handleWebSocketMessage);
-    return () => socket.removeEventListener("message", handleWebSocketMessage);
-  }, [socket, handleWebSocketMessage, lobby.lobbyCode]);
 
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
@@ -130,7 +86,6 @@ function LobbyItem({ lobby}) {
           justifyContent: "flex-start",
           gap: "12px",
           background:"rgba(255, 255, 255, 0.8)",
-          opacity: eventStatus === "host_left" || isHostLeft ? 0.5 : 1,
           color:theme.palette.text.primary
             ,
           p: { xs: 1.5, sm: 1.5 } ,
@@ -240,11 +195,6 @@ function LobbyItem({ lobby}) {
           </Stack>
         
 
-        {isHostLeft && (
-          <Typography color="error" variant="caption">
-            Lobby closed - Host did not return
-          </Typography>
-        )}
       </Paper>
 
       <LobbyPasswordModal

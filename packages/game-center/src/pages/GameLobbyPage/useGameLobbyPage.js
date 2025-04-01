@@ -44,6 +44,7 @@ export const useGameLobbyPage = () => {
             [lobby.lobbyCode]: lobby.members.map(member => ({
               id: member.id,
               name: member.name,
+              avatar:member.avatar,
               isHost: member.id === lobby.createdBy,
               isReady: false,
             }))
@@ -99,6 +100,7 @@ export const useGameLobbyPage = () => {
             [lobby.lobbyCode]: lobby.members.map(member => ({
               id: member.id,
               name: member.name,
+              avatar: member.avatar,
               isHost: member.id === lobby.createdBy,
               isReady: false,
             }))

@@ -2,6 +2,7 @@ import React from 'react';
 import { ListItem, Avatar, ListItemText, Typography, Box } from '@mui/material';
 
 function MemberItem({ member, index }) {
+  console.log('MemberItem:', member); // Debugging line to check member data
   return (
     <ListItem
       sx={{
@@ -17,9 +18,9 @@ function MemberItem({ member, index }) {
       <Avatar
         src={member.avatar || undefined}
         sx={{
-          width: 50, // boyutu büyüttük
+          width: 50, 
           height: 50,
-          fontSize: '1rem', // font boyutunu da orantılı hale getirebilirsiniz
+          fontSize: '1rem', 
           bgcolor: member.isHost ? '#ffb300' : '#2196f3',
           border: member.isHost ? '2px solid gold' : 'none',
           boxShadow: member.isHost ? '0 0 8px rgba(255, 215, 0, 0.6)' : 'none',

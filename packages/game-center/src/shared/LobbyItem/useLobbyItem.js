@@ -24,53 +24,21 @@ export const useLobbyItem = (lobby, currentUser) => {
   // Tek bir useEffect içinde tüm WebSocket mesajlarını yönetiyoruz
   useEffect(() => {
     if (!socket) return;
-
     const handleWebSocketMessage = (event) => {
       const data = JSON.parse(event.data);
       console.log("WebSocket message:", data);
 
       if (data.lobbyCode === lobby.lobbyCode) {
         switch (data.type) {
-          case "HOST_RETURNED":
-          setEventStatus('active');
-          break;
-        case "HOST_LEAVE_TIMEOUT":
-          setEventStatus('host_left');
-          break;
           case "EVENT_STATUS":
             setEventStatus(data.status);
             break;
-
-          case "USER_JOINED":
-            setMembersByLobby((prevState) => {
-              const currentMembers = prevState[data.lobbyCode] || [];
-              // Kullanıcı zaten varsa ekleme yapma
-              if (!currentMembers.some((member) => member.id === data.data.userId)) {
-                return {
-                  ...prevState,
-                  [data.lobbyCode]: [
-                    ...currentMembers,
-                    {
-                      id: data.data.userId,
-                      name: data.data.userName,
-                      avatar: data.data.avatar,
-                      isHost: false,
-                    },
-                  ],
-                };
-              }
-              return prevState;
-            });
-            break;
-
           case "LOBBY_EXPIRED":
             showSnackbar({
               message: "Event time expired, lobby closed.",
               severity: "info",
             });
-            navigate("/");
             break;
-
           default:
             console.warn("Unknown WebSocket message type:", data.type);
             break;
@@ -96,26 +64,6 @@ export const useLobbyItem = (lobby, currentUser) => {
     setIsJoining(true);
 
     try {
-       // Check and clear host leave timer if exists
-    const hostLeaveTimer = localStorage.getItem(`hostLeaveTimer_${lobby.lobbyCode}`);
-
-    if (hostLeaveTimer) {
-      // Timer bilgisini temizle
-      localStorage.removeItem(`hostLeaveTimer_${lobby.lobbyCode}`);
-      
-      // Sunucuya host geri döndü bilgisini gönder
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            type: 'HOST_RETURNED',
-            lobbyCode: lobby.lobbyCode,
-            userId: currentUser.id,
-            userName: currentUser.name,
-            avatar: currentUser.avatar
-          })
-        );
-      }
-    }
       const joinResponse = await joinLobby(lobby.lobbyCode, password);
       const updatedLobby = await getLobbyDetails(lobby.lobbyCode);
 

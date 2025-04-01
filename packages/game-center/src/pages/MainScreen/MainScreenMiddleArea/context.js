@@ -217,41 +217,11 @@ export const LobbyProvider = ({ children }) => {
             (member) => member.id !== userId
           ),
         }));
-
-        if (existingLobby?.lobbyCode === lobbyCode) {
-          setExistingLobby(null);
-          setLobbyCode("");
-          setLobbyLink("");
-          localStorage.removeItem("userLobby");
-          setIsJoined(false);
-        }
       } catch (error) {
         throw error;
       }
     },
-    [socket, existingLobby]
-  );
-
-  const hostReturnLobby = useCallback(
-    async (lobbyCode) => {
-      try {
-        // Broadcast host return via WebSocket
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "HOST_RETURNED",
-              lobbyCode,
-              userId: currentUser?.id,
-              userName: currentUser?.name,
-              avatar: currentUser?.avatar,
-            })
-          );
-        }
-      } catch (error) {
-        console.error("Error in host return:", error);
-      }
-    },
-    [socket, currentUser]
+    [socket]
   );
 
   return (
@@ -263,14 +233,13 @@ export const LobbyProvider = ({ children }) => {
         setLobbies,
         lobbyCode,
         lobbyLink,
-        membersByLobby, // Yeni state
-        setMembersByLobby, // Yeni state
+        membersByLobby, 
+        setMembersByLobby,
         isJoined,
         setIsJoined,
         createLobby,
         deleteLobby,
         leaveLobby,
-        hostReturnLobby,
         isLoading,
         isCreatingLobby
       }}
