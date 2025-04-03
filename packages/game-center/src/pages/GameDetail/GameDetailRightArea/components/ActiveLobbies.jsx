@@ -1,6 +1,6 @@
 // ActiveLobbies.js
 import React from 'react';
-import { Card, CardContent, Typography, List,useTheme } from '@mui/material';
+import { Card, CardContent, Typography, List,useTheme, Box } from '@mui/material';
 import { People } from '@mui/icons-material';
 import NoActiveLobbies from './NoActiveLobbies';
 import LobbyItem from '../../../../shared/LobbyItem/LobbyItem';
@@ -13,9 +13,8 @@ function ActiveLobbies({filteredLobbies}) {
       sx={{
         borderRadius: 4,
         boxShadow: theme.shadows[8],
-        background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+        backgroundColor: "rgb(50,135,97)",
         overflow: 'hidden',
-        p: 2,
         position: 'relative',
         transition: 'transform 0.3s, box-shadow 0.3s',
         '&:hover': {
@@ -23,12 +22,10 @@ function ActiveLobbies({filteredLobbies}) {
           boxShadow: theme.shadows[12],
         },
       }}
-    >
-      <CardContent>
+    ><Box sx={{ background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"}}>   <CardContent>
         <Typography
           variant="h6"
           sx={{
-            mb: 2,
             display: 'flex',
             alignItems: 'center',
             color: theme.palette.common.white,
@@ -47,6 +44,8 @@ function ActiveLobbies({filteredLobbies}) {
           )}
         </List>
       </CardContent>
+      </Box>
+   
     </Card>
   );
 }

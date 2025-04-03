@@ -157,7 +157,6 @@ const BingoGameDetails = ({ colorScheme }) => {
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
               <TableCell sx={{ fontWeight: "bold" }}>Player</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Game ID</TableCell>{" "}
               {/* New Game ID Column */}
               <TableCell sx={{ fontWeight: "bold" }}>Score</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Average</TableCell>
@@ -204,7 +203,6 @@ const BingoGameDetails = ({ colorScheme }) => {
                     </Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{stat.gameId}</TableCell> {/* Game ID Data */}
                 <TableCell>
                   <Chip
                     label={stat.score}

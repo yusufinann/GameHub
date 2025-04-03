@@ -76,6 +76,7 @@ function LobbyItem({ lobby}) {
         elevation={2}
         sx={{
           borderRadius: "8px",
+          m:1,
           minWidth: {
             xs: "10px", // Minimum genişlik - çok küçük ekranlar
             sm: "10px", // Tablet
