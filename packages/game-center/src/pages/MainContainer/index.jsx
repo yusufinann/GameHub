@@ -8,6 +8,7 @@ import { WebSocketProvider } from "../../shared/context/WebSocketContext/context
 import FriendsSidebar from "../FriendsSidebar";
 import { FriendsProvider } from "../Profile/context";
 import { GlobalNotificationProvider } from "../FriendsSidebar/context";
+import { GameSettingsProvider} from "../GameDetail/GameDetailRightArea/context";
 function MainContainer() {
   //  const theme = useTheme();
 
@@ -31,6 +32,7 @@ function MainContainer() {
           <GlobalNotificationProvider>
             <FriendsProvider>
               <SnackbarProvider>
+                <GameSettingsProvider>
                 <Box
                   sx={{
                     display: "flex",
@@ -45,6 +47,7 @@ function MainContainer() {
                 >
                   <Outlet />
                 </Box>
+                </GameSettingsProvider>
                 <FriendsSidebar />
               </SnackbarProvider>
             </FriendsProvider>

@@ -1,8 +1,13 @@
-import React from 'react';
+// components/GameSettings.js
+import React, { useContext } from 'react'; // Import useContext
 import { Card, CardContent, Box, Typography, Switch, FormControlLabel } from '@mui/material';
 import { Settings } from '@mui/icons-material';
+import { GameSettingsContext } from '../context'; // Import GameSettingsContext
 
 function GameSettings({ settings, onSettingsChange }) {
+  // Use useContext to access soundEnabled and toggleSound from GameSettingsContext
+  const { soundEnabled, toggleSound } = useContext(GameSettingsContext);
+
   return (
     <Card sx={{ borderRadius: 4, boxShadow: 3 }}>
       <CardContent>
@@ -13,8 +18,8 @@ function GameSettings({ settings, onSettingsChange }) {
         <FormControlLabel
           control={
             <Switch
-              checked={settings.sound}
-              onChange={(e) => onSettingsChange({...settings, sound: e.target.checked})}
+              checked={soundEnabled} // Use soundEnabled from context
+              onChange={toggleSound} // Use toggleSound from context
             />
           }
           label="Sound Effects"

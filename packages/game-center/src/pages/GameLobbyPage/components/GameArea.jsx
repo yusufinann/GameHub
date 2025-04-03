@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Box,
   Paper,
@@ -22,6 +22,7 @@ import ExpressionPanel from "./ExpressionPanel";
 import QuickExpressionButtons from "./QuickExpressionButtons";
 import ExpressionHistory from "./ExpressionHistory";
 import { useEffect, useState } from "react";
+import { GameSettingsContext} from "../../GameDetail/GameDetailRightArea/context";
 
 const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby }) => {
   const { currentUser } = useAuthContext();
@@ -96,7 +97,8 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
-
+  const { soundEnabled, toggleSound, soundEnabledRef } =
+    useContext(GameSettingsContext); // Context'i tüketiyoruz
   return (
     <Paper
       elevation={12}
@@ -292,6 +294,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
                 currentUser={currentUser}
                 lobbyInfo={lobbyInfo}
                 members={members}
+                soundEnabled={soundEnabled} toggleSound={toggleSound} soundEnabledRef={soundEnabledRef}
               />
             </Box>
           ) : (
