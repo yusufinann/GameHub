@@ -30,7 +30,9 @@ export const LobbyProvider = ({ children }) => {
     setLobbies,
     existingLobby,
     setMembersByLobby,
-    setExistingLobby
+    setExistingLobby,
+    membersByLobby,
+    lobbies
   );
 
   const fetchAndSetLobbies = useCallback(async () => {

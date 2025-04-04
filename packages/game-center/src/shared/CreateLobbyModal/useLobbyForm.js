@@ -25,7 +25,6 @@ export const useLobbyForm = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log("handleChange - Name:", event.target.name, "Value:", event.target.value); // Input değerini
     setFormData((prev) => ({
       ...prev,
       [name]: value,

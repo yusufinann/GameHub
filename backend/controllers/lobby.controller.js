@@ -326,11 +326,18 @@ export const joinLobby = async (req, res) => {
         });
         await lobby.save();
 
-        broadcastLobbyEvent(lobbyCode, "USER_JOINED", {
-            userId: user.id,
-            name: user.name,
-            avatar: user.avatar,
-        });
+        // Best practice: Send USER_JOINED event only to other members in the lobby
+        const lobbyMembersExceptNewUser = lobby.members.filter(member => member.id !== user.id);
+        const memberIdsToNotify = lobbyMembersExceptNewUser.map(member => member.id);
+
+        if (memberIdsToNotify.length > 0) { // Only broadcast if there are other members to notify
+            broadcastLobbyEvent(lobbyCode, "USER_JOINED", {
+                userId: user.id,
+                name: user.name,
+                avatar: user.avatar,
+                lobbyName: lobby.lobbyName,
+            }, memberIdsToNotify); // Send to specific users (other members)
+        }
 
         res.status(200).json({
             message: "Lobiye başarıyla katıldınız.",

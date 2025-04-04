@@ -9,7 +9,7 @@ import {
 } from "../controllers/friend.controller.js";
 import User from "../models/user.model.js";
 import GroupChat from "../models/groupChat.model.js";
-import FriendGroupChat from "../models/friendGroupChat.model.js"; // Import FriendGroupChat model
+import FriendGroupChat from "../models/friendGroupChat.model.js";
 import * as bingoGameController from "../controllers/bingo.game.controller.js";
 import * as lobbyController from "../controllers/lobby.controller.js";
 import * as authController from "../controllers/auth.controller.js";
@@ -61,8 +61,6 @@ const setupWebSocket = (server) => {
             if (client === ws) {
               connectedClients.delete(id);
               console.log(`Client disconnected: ${id}`);
-              // Offline bildirimi artık burada gönderilmiyor.
-              // Sadece userLogout fonksiyonu tarafından gönderilecek.
               break;
             }
           }
@@ -118,23 +116,17 @@ const setupWebSocket = (server) => {
         case "GET_FRIEND_REQUESTS":
           handleGetFriendRequests(ws);
           break;
+
         case "LOBBY_CREATED":
           broadcastToOthers(ws, { type: "LOBBY_CREATED", data: data.data });
           break;
-        case "USER_JOINED":
-          broadcastToOthers(ws, {
-            type: "USER_JOINED",
-            lobbyCode: data.lobbyCode,
-            data: data.data,
-          });
-          break;
-        case "USER_LEFT":
-          broadcastToOthers(ws, {
-            type: "USER_LEFT",
-            lobbyCode: data.lobbyCode,
-            data: data.data,
-          });
-          break;
+        // case "USER_LEFT":
+        //   broadcastToOthers(ws, {
+        //     type: "USER_LEFT",
+        //     lobbyCode: data.lobbyCode,
+        //     data: data.data,
+        //   });
+        //   break;
         case "LOBBY_DELETED":
           if (data.lobbyCode) {
             lobbyChatController.clearChatHistory(data.lobbyCode);
@@ -651,13 +643,15 @@ const setupWebSocket = (server) => {
     sendToSpecificUser,
     broadcastGroupMessage,
   });
-  authController.initializeFriendWebSocket(broadcastFriendEvent); // Initialize for friend status updates
+  authController.initializeFriendWebSocket(broadcastFriendEvent); 
   return {
     broadcastLobbyEvent,
     broadcastFriendEvent,
     broadcastToAll,
     getConnectedClientsCount: () => connectedClients.size,
     sendToSpecificUser,
+    broadcastLobbyEvent: broadcastLobbyEvent,
+    broadcastFriendEvent: broadcastFriendEvent,
   };
 };
 

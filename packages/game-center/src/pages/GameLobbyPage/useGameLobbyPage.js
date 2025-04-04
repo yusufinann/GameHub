@@ -88,8 +88,7 @@ export const useGameLobbyPage = () => {
       const joinResponse = await joinLobby(link, password);
 
       if (joinResponse) {
-        // Pass token in fetchLobbyDetails call
-        const updatedLobby = await fetchLobbyDetails(link, token); // Add token here
+        const updatedLobby = await fetchLobbyDetails(link, token); 
 
         if (updatedLobby.data.lobby) {
           const lobby = updatedLobby.data.lobby;

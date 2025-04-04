@@ -80,11 +80,11 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
 
   const displayCenterExpression = (expressionData) => {
     const expressionId = uuidv4();
-    const animationType = expressionData.animationType;
+    const animationtype = expressionData.animationtype;
 
     setCenterExpressions((prevExpressions) => [
       ...prevExpressions,
-      { ...expressionData, id: expressionId, animationType },
+      { ...expressionData, id: expressionId, animationtype },
     ]);
 
     setTimeout(() => {

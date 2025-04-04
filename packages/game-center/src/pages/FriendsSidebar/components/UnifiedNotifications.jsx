@@ -16,9 +16,10 @@ import {
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import EventIcon from "@mui/icons-material/Event";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import GroupsIcon from '@mui/icons-material/Groups'; // Lobby Name Icon for lobby invitations
+import GroupsIcon from '@mui/icons-material/Groups';
 import { useNavigate } from "react-router-dom";
 import notificationSound from "../../../assets/notification-sound.mp3";
+import joinLobby from "../../../assets/joinLobby.ogg";
 import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
 import { useAuthContext } from "../../../shared/context/AuthContext";
 import { useFriendsContext } from "../../Profile/context";
@@ -88,6 +89,33 @@ const UnifiedNotifications = () => {
           );
         }
         break;
+        case "USER_JOINED":
+          const userData = data.data;
+  
+          if (document.hasFocus()) {
+            showNotification(`${userData.name} joined ${userData.lobbyName} lobby `, 'info'); 
+          } else {
+            const audio = new Audio(joinLobby);
+            audio.play().catch((error) => console.log("Audio play failed:", error));
+            setNotifications((prev) => {
+              const existingNotification = prev.find(notif => notif.type === 'user-join' && notif.lobbyCode === userData.lobbyCode);
+              if (existingNotification) {
+                return prev; 
+              }
+              return [
+                ...prev,
+                {
+                  type: "user-join",
+                  lobbyCode: userData.lobbyCode,
+                  lobbyName: userData.lobbyName,
+                  userName: userData.name,
+                  message: `${userData.name} joined ${userData.lobbyName} lobby`,
+                  timestamp: new Date().toISOString(),
+                },
+              ];
+            });
+          }
+          break;
 
       case "FRIEND_REQUEST_RECEIVED":
         showNotification(`Friend request received from ${data.sender.username}`);
@@ -189,12 +217,15 @@ const UnifiedNotifications = () => {
     [navigate, handleClose]
   );
 
-  const removeNotification = useCallback((notificationId) => {
+  const removeNotification = useCallback((notificationId,type) => {
     setNotifications((prev) =>
       prev.filter((notif) => {
         if (notif.type === 'friend-group-invite') {
           return notif.groupId !== notificationId;
-        } else {
+        } else if (notif.type === 'user-join') {
+          return !(notif.lobbyCode === notificationId && notif.type === type); 
+        }        
+        else {
           return notif.lobbyId !== notificationId;
         }
       })
@@ -367,7 +398,44 @@ const handleViewFriendGroup = useCallback((groupId) => {
           </MenuItem>
         );
       });
-    }
+      if (notifications.filter(notif => notif.type === 'user-join').length > 0) {
+        items.push(<Divider key="divider-lobby-invites" />);
+      }
+  }
+  const userJoinNotifications = notifications.filter(notif => notif.type === 'user-join');
+
+  if (userJoinNotifications.length > 0) {
+    items.push(
+      <MenuItem key="user-join-header" disabled>
+        <Typography variant="subtitle2" color="primary">
+          Lobby Joins
+        </Typography>
+      </MenuItem>
+    );
+    userJoinNotifications.forEach((notification) => {
+      items.push(
+        <MenuItem key={`user-join-${notification.lobbyCode}-${notification.userName}`} sx={{ py: 2 }}>
+          <ListItemIcon>
+            <Avatar sx={{ bgcolor: "secondary.light" }}>
+              <GroupsIcon />
+            </Avatar>
+          </ListItemIcon>
+          <ListItemText
+            primary={notification.lobbyName}
+            secondary={`${notification.userName} joined`}
+            sx={{ mr: 2 }}
+          />
+           <Button
+              size="small"
+              color="error"
+              onClick={() => removeNotification(notification.lobbyCode, 'user-join')} // need lobbyCode and type
+            >
+              Dismiss
+            </Button>
+        </MenuItem>
+      );
+    });
+  }
 
     const friendGroupInviteNotifications = notifications.filter(notif => notif.type === 'friend-group-invite');
     if (friendGroupInviteNotifications.length > 0) {

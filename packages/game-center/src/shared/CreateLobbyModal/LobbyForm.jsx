@@ -86,6 +86,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           value={formData.lobbyName}
           onChange={handleChange}
           required
+          autoComplete="username"
           sx={{
             '& .MuiOutlinedInput-root': {
               '&:hover fieldset': {
@@ -114,6 +115,9 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             onChange={handleChange}
             label="Game Selection"
             disabled={isGameSelectionDisabled}
+            inputProps={{
+              autoComplete: 'off', // Or 'none'
+            }}
             sx={{
               '&.MuiOutlinedInput-root': {
                 '&:hover fieldset': {
@@ -217,6 +221,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           label="Lobby Password (Optional)" // Opsiyonel olduğunu belirtmek için label güncellendi
           name="password"
           type="password"
+          autoComplete="current-password" // FIX: Re-applied "current-password" as suggested by warning
           value={formData.password}
           onChange={handleChange}
           sx={{

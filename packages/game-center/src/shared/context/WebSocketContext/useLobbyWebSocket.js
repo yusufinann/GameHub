@@ -7,7 +7,8 @@ const useLobbyWebSocket = (
   setLobbies,
   existingLobby,
   setMembersByLobby,
-  setExistingLobby
+  setExistingLobby,
+  membersByLobby
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
   const navigate = useNavigate();
@@ -71,10 +72,9 @@ const useLobbyWebSocket = (
           return [...prev, lobbyData];
         });
       }
-      // Yeni lobby için boş üye listesi oluştur
       setMembersByLobby((prev) => ({
         ...prev,
-        [lobbyData.lobbyCode]: [],
+        [lobbyData.lobbyCode]: lobbyData.members || [],
       }));
     };
 
@@ -93,7 +93,7 @@ const useLobbyWebSocket = (
                   id: userData.userId,
                   name: userData.name,
                   avatar: userData.avatar,
-                  isHost: userData.isHost, // Use isHost from message
+                  isHost: userData.isHost, 
                 },
               ],
             };
@@ -115,6 +115,7 @@ const useLobbyWebSocket = (
           },
         ],
       }));
+      console.log("membersByLobby : "  , membersByLobby);
     };
 
     const handleUserLeft = (data) => {

@@ -20,15 +20,15 @@ import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
 
 
-function LobbyItem({ lobby}) {
-  const { existingLobby} = useLobbyContext();
+function LobbyItem({lobby}) {
+  const { membersByLobby, existingLobby} = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const { isJoining, isMember, handleJoin, handleDelete, eventStatus,isDeleting} =
     useLobbyItem(lobby, currentUser);
   const [isLobbyFull, setIsLobbyFull] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); 
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
 
@@ -39,16 +39,18 @@ function LobbyItem({ lobby}) {
   const isCreator = currentUser?.id === lobby.createdBy;
   const handleJoinClick = async () => {
     try {
-      if (lobby.maxMembers && lobby.members.length >= lobby.maxMembers) {
-        setIsLobbyFull(true); 
-        setIsErrorModalOpen(true); 
-        return; 
+      // Use membersByLobby to check max members instead of lobby.members
+      const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
+      if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers) {
+        setIsLobbyFull(true);
+        setIsErrorModalOpen(true);
+        return;
       }
 
       if (lobby.password) {
         setIsPasswordModalOpen(true);
       } else {
-        await handleJoin(); 
+        await handleJoin();
       }
     } catch (error) {
       console.error("Error joining lobby:", error);
@@ -59,13 +61,13 @@ function LobbyItem({ lobby}) {
 
   const handleErrorModalClose = useCallback(() => {
     setIsErrorModalOpen(false);
-    setIsLobbyFull(false); 
+    setIsLobbyFull(false);
   }, []);
   const handleEditClick = () => {
-    setIsEditModalOpen(true); 
+    setIsEditModalOpen(true);
   };
   const handleEditModalClose = () => {
-    setIsEditModalOpen(false); 
+    setIsEditModalOpen(false);
   };
   const handleNavigate = () => navigate(`/lobby/${lobby.lobbyCode}`);
   const theme = useTheme();
@@ -100,7 +102,7 @@ function LobbyItem({ lobby}) {
           },
         }}
       >
-      
+
           <Stack spacing={2}>
             <Box
               sx={{
@@ -150,7 +152,8 @@ function LobbyItem({ lobby}) {
               >
                 <Chip
                   size={isMobile ? "small" : "medium"}
-                  label={lobby.members.length}
+                  // Use membersByLobby for member count
+                  label={membersByLobby[lobby.lobbyCode]?.length || 0}
                   icon={<People sx={{ fontSize: isMobile ? 14 : 16 }} />}
                   sx={{
                     backgroundColor: theme.palette.warning.light,
@@ -187,14 +190,14 @@ function LobbyItem({ lobby}) {
                   onJoin={handleJoinClick}
                   onNavigate={handleNavigate}
                   isMobile={isMobile}
-                  onEdit={isCreator ? handleEditClick : undefined} // Conditionally pass onEdit
+                  onEdit={isCreator ? handleEditClick : undefined} 
                   lobby={lobby}
                   isDeleting={isDeleting}
                 />
               </Box>
             </Box>
           </Stack>
-        
+
 
       </Paper>
 
@@ -204,8 +207,8 @@ function LobbyItem({ lobby}) {
         onSubmit={handleJoin}
       />
        <ErrorModal
-        open={isErrorModalOpen} 
-        onClose={handleErrorModalClose} 
+        open={isErrorModalOpen}
+        onClose={handleErrorModalClose}
         errorMessage={isLobbyFull ? "Lobi Full!" : "There was an error joining the lobby."} // Dynamic message
       />
        <LobbyEditModal
