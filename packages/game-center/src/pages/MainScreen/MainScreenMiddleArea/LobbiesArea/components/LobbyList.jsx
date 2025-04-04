@@ -1,4 +1,3 @@
-// LobbyList.js
 import React, { useMemo } from "react";
 import { Box, Card, Divider, useTheme} from "@mui/material";
 import LobbyItem from "../../../../../shared/LobbyItem/LobbyItem";
@@ -62,12 +61,13 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
             overflow: 'auto',
             display: 'flex',
             flexDirection: 'column',
+            backgroundColor: "rgb(50,135,97)",
           }}
         >
     <Card
       sx={{
-        background: 'linear-gradient(135deg, #caecd5 0%, rgb(50,135,97) 100%)',
-        height: "100%",
+        background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"
+        ,        height: "100%",
         overflow: "auto",
         position: "relative",
         boxShadow: theme.shadows[4],
@@ -104,7 +104,7 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
       ) : (
         <Box
           sx={{
-            height: '60vh',
+            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
