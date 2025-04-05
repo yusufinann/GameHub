@@ -12,7 +12,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import useLoginForm from "../useLoginForm"; // Import the custom hook
+import useLoginForm from "../useLoginForm";
 import QuickLoginSection from "./QuickLoginSection";
 
 function LoginForm() {
@@ -30,7 +30,7 @@ function LoginForm() {
     handleClickShowPassword,
     handleSubmit,
     quickLogin,
-    handleUseDifferentAccount
+    handleUseDifferentAccount,
   } = useLoginForm();
 
   const formStyles = {

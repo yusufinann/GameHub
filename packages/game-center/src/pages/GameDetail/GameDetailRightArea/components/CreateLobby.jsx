@@ -4,6 +4,8 @@ import { SportsEsports } from "@mui/icons-material";
 import { useLocation, useParams } from "react-router-dom";
 import ErrorModal from "../../../../shared/ErrorModal";
 import CreateLobbyModal from "../../../../shared/CreateLobbyModal";
+import DummyImage from "../../../../assets/bingoPulse-bg.png";
+
 function CreateLobby({ colorScheme, existingLobby, lobbies }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -57,6 +59,28 @@ function CreateLobby({ colorScheme, existingLobby, lobbies }) {
           },
         }}
       >
+        {/* DummyImage in the upper left corner */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left:0,
+            zIndex: 0,
+            width: "180px",
+            height: "180px",
+          }}
+        >
+          <img 
+            src={DummyImage} 
+            alt="Game" 
+            style={{ 
+              width: "100%", 
+              height: "100%", 
+              objectFit: "contain" 
+            }} 
+          />
+        </Box>
+
         {/* Arka planda yaratıcı efekt için bulanık daire */}
         <Box
           sx={{

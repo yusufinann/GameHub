@@ -102,7 +102,7 @@ const MainScreenContent = () => {
                 position: "absolute",
                 bottom: 0,
                 left: "10%",
-                height: "90%",
+                height: "100%",
                 width: "auto",
                 maxWidth: "80%",
                 display: "flex",

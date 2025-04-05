@@ -9,7 +9,7 @@ const QuickLoginSection = ({
   handlePasswordChange, 
   showPassword, 
   handleClickShowPassword,
-  handleUseDifferentAccount, // Add the new prop
+  handleUseDifferentAccount,
   loading
 }) => {
   return (
@@ -26,17 +26,20 @@ const QuickLoginSection = ({
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
       }}
     >
-      <Avatar 
-        sx={{ 
-          width: 80,
-          height: 80,
-          bgcolor: 'primary.main',
-          fontSize: '2rem',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}
-      >
-        {savedUser.email[0].toUpperCase()}
-      </Avatar>
+           <Avatar
+      
+                    src={savedUser.avatar || undefined}
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        bgcolor: 'primary.main',
+                        fontSize: '2rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      }}
+                    >
+                      { !savedUser.avatar ? savedUser.name[0].toUpperCase() : null }
+                    </Avatar>
+      
       
       <Typography variant="h6" sx={{ color: 'black' }}>
         {savedUser.email}
