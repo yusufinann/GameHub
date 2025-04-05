@@ -10,7 +10,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import hallowenBingo from "../../../../../assets/hallowenBingo.png";
-import { LobbyInfo } from "../../../../../shared/LobbyItem/LobbyInfo";
+import { LobbyInfo } from "../../../../../shared/components/LobbyItem/LobbyInfo";
 
 function GameInfoHeader({game, filteredLobbies }) {
   const theme = useTheme();

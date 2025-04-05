@@ -26,7 +26,7 @@ import {
   Stars as StarsIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { GAMES } from '../../utils/constants';
+import { GAMES } from '../../../utils/constants';
 import { EventFields } from '../CreateLobbyModal/EventFields';
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;

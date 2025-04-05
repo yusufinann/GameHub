@@ -23,7 +23,7 @@ import {
 } from '@mui/icons-material';
 import { EventFields } from './EventFields';
 import { useParams, useLocation } from 'react-router-dom';
-import { GAMES } from '../../utils/constants';
+import { GAMES } from '../../../utils/constants';
 
 function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,isCreatingLobby }) {
   const { gameId } = useParams();

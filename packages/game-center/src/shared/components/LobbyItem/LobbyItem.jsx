@@ -11,8 +11,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { LobbyInfo } from "./LobbyInfo";
 import { LobbyActions } from "./LobbyActions";
-import { useLobbyContext } from "../../pages/MainScreen/MainScreenMiddleArea/context";
-import { useAuthContext } from "../context/AuthContext";
+import { useLobbyContext } from "../../../pages/MainScreen/MainScreenMiddleArea/context";
+import { useAuthContext } from "../../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";
 import { Event, Group, People } from "@mui/icons-material";
@@ -39,7 +39,6 @@ function LobbyItem({lobby}) {
   const isCreator = currentUser?.id === lobby.createdBy;
   const handleJoinClick = async () => {
     try {
-      // Use membersByLobby to check max members instead of lobby.members
       const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
       if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers) {
         setIsLobbyFull(true);

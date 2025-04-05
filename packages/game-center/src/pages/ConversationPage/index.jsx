@@ -1,10 +1,8 @@
-// ConversationPage.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
 import { Group as GroupIcon } from "@mui/icons-material";
 import ConversationList from "./components/ConversationList";
-import ChatBox from "../../shared/ChatBox/ChatBox";
 import CreateFriendGroupDialog from "./components/CreateFriendGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendGroupDialog } from "./components/useFriendGroupDialog";
@@ -13,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import { useFriendsContext } from "../Profile/context";
+import ChatBox from "../../shared/components/ChatBox/ChatBox";
 
 function ConversationPage() {
   const {

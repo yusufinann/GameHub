@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { SportsEsports } from "@mui/icons-material";
 import { useLocation, useParams } from "react-router-dom";
-import ErrorModal from "../../../../shared/ErrorModal";
-import CreateLobbyModal from "../../../../shared/CreateLobbyModal";
+import ErrorModal from "../../../../shared/components/ErrorModal";
+import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
 
 function CreateLobby({ colorScheme, existingLobby, lobbies }) {

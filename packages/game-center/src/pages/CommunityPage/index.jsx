@@ -2,13 +2,13 @@
 import React from "react";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
 import { Forum as ForumIcon } from "@mui/icons-material";
-import ChatBox from "../../shared/ChatBox/ChatBox";
 import CommunityList from "./components/CommunityList/CommunityList";
 import { CreateGroupDialog, JoinGroupDialog } from "./components/Dialogs";
 import { useCommunityPage } from "./useCommunityPage";
 import { useGroupDialog } from "./components/useGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
+import ChatBox from "../../shared/components/ChatBox/ChatBox";
 
 function CommunityPage() {
   // Snackbar state

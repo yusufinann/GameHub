@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, Typography, List,useTheme, Box } from '@mui/material';
 import { People } from '@mui/icons-material';
 import NoActiveLobbies from './NoActiveLobbies';
-import LobbyItem from '../../../../shared/LobbyItem/LobbyItem';
+import LobbyItem from '../../../../shared/components/LobbyItem/LobbyItem';
 
 function ActiveLobbies({filteredLobbies}) {
   const theme = useTheme();

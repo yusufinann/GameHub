@@ -6,10 +6,10 @@ import ChatBoxHeader from "./ChatBoxHeader";
 import ChatMessageList from "./ChatMessageList";
 import ChatInput from "./ChatInput";
 import { Message as MessageIcon } from "@mui/icons-material";
-import { useWebSocket } from "../context/WebSocketContext/context";
 import { useNavigate, useParams } from "react-router-dom";
 import ErrorModal from "../ErrorModal";
-import GroupMemberList from "../../pages/ConversationPage/components/GroupMemberList";
+import { useWebSocket } from "../../context/WebSocketContext/context";
+import GroupMemberList from "./GroupMemberList";
 
 const ChatBox = ({
   chatType,

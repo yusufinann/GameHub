@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Box, Card, Divider, useTheme} from "@mui/material";
-import LobbyItem from "../../../../../shared/LobbyItem/LobbyItem";
+import LobbyItem from "../../../../../shared/components/LobbyItem/LobbyItem";
 import NoActiveLobbies from "../../../../GameDetail/GameDetailRightArea/components/NoActiveLobbies";
 import { useAuthContext } from "../../../../../shared/context/AuthContext"; 
 
