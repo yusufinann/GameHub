@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
-import { useLobbyContext } from "../../../pages/MainScreen/MainScreenMiddleArea/context";
+import { useLobbyContext } from "../../context/context";
 import { useWebSocket } from "../../context/WebSocketContext/context";
 import { getLobbyDetails, joinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
 

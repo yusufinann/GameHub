@@ -26,13 +26,13 @@ import {
   PersonRemove // Import for remove friend icon
 } from '@mui/icons-material';
 import { useProfile } from './useProfile';
-import { useFriendsContext } from './context';
 import { StatCard, ProfileSection } from './components/profileComponents';
 import { profileTheme, colorScheme } from './profileTheme';
 import RemoveFriendConfirm from './components/RemoveFriendConfirm';
 import BingoOverallStats from './components/BingoOverallStats'; // Import new components
 import BingoGameHistory from './components/BingoGameHistory'; // Import new components
 import { useAuthContext } from '../../shared/context/AuthContext';
+import { useFriendsContext } from '../../shared/context/FriendsContext/context';
 
 const Profile = () => {
   const { userId } = useParams();

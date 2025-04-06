@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { LobbyInfo } from "./LobbyInfo";
 import { LobbyActions } from "./LobbyActions";
-import { useLobbyContext } from "../../../pages/MainScreen/MainScreenMiddleArea/context";
+import { useLobbyContext } from "../../context/context";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";

@@ -10,8 +10,8 @@ import { useConversationsPage } from "./useConversationPage";
 import { useParams } from "react-router-dom";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
-import { useFriendsContext } from "../Profile/context";
 import ChatBox from "../../shared/components/ChatBox/ChatBox";
+import { useFriendsContext } from "../../shared/context/FriendsContext/context";
 
 function ConversationPage() {
   const {

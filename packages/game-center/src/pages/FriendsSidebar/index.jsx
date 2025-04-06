@@ -1,14 +1,14 @@
 import React, { memo } from 'react';
 import { Box } from '@mui/material';
-import { useFriendsContext } from '../Profile/context';
+import { useFriendsContext } from '../../shared/context/FriendsContext/context';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
-import { useLobbyContext } from '../MainScreen/MainScreenMiddleArea/context';
 import InviteDialog from './components/InviteDialog';
 import MessageDialog from './components/MessageDialog';
 import Notifications from './components/Notifications/Notifications';
 import FriendsList from './components/FriendList/FriendsList';
 import { StreetLampPost, LampBase, LampGlowEffect } from './components/LampComponents';
 import useFriendsSidebar from './useFriendsSidebar';
+import { useLobbyContext } from '../../shared/context/context';
 
 const sidebarStyles = {
   height: 'calc(100vh - 20px)',

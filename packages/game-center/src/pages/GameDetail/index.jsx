@@ -4,7 +4,7 @@ import GameDetailLeftArea from "./GameDetailLeftArea";
 import GameDetailRightArea from "./GameDetailRightArea";
 import { GAMES } from "../../utils/constants";
 import { useEffect, useState } from "react";
-import { useLobbyContext } from "../MainScreen/MainScreenMiddleArea/context";
+import { useLobbyContext } from "../../shared/context/context";
 
 const GameDetail = () => {
   const { gameId } = useParams();

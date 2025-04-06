@@ -15,8 +15,8 @@ import {
 import MembersList from "./components/MembersList/MembersList";
 import GameArea from "./components/GameArea";
 import { useGameLobbyPage } from "./useGameLobbyPage";
-import { useLobbyContext } from "../MainScreen/MainScreenMiddleArea/context";
 import LobbyPasswordModal from "../../shared/components/LobbyPasswordModal";
+import { useLobbyContext } from "../../shared/context/context";
 
 const GameLobbyPage = () => {
   const { link } = useParams();

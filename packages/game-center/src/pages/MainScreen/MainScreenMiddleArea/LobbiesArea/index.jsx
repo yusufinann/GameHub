@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LobbyList } from './components/LobbyList';
-import { useLobbyContext } from '../context';
+import { useLobbyContext } from '../../../../shared/context/context';
 import CreateLobbyArea from './components/CreateLobbyArea';
 import { Box, CircularProgress } from '@mui/material';
 

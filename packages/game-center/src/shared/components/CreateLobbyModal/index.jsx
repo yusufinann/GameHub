@@ -5,7 +5,7 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { useLobbyForm } from './useLobbyForm';
 import LobbyForm from './LobbyForm';
 import { SuccessScreen } from './SuccessScreen';
-import { useLobbyContext } from '../../../pages/MainScreen/MainScreenMiddleArea/context';
+import { useLobbyContext } from '../../context/context';
 
 const CreateLobbyModal = ({ open, onClose }) => {
   const { existingLobby } = useLobbyContext();

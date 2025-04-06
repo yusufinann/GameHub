@@ -1,5 +1,4 @@
-// src/components/MainScreen/CreateLobbyModal/LobbyForm.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -15,19 +14,24 @@ import {
   Typography,
   InputAdornment,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Lock as LockIcon,
   SportsEsports as GameIcon,
   Stars as StarsIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
 } from '@mui/icons-material';
 import { EventFields } from './EventFields';
 import { useParams, useLocation } from 'react-router-dom';
 import { GAMES } from '../../../utils/constants';
 
-function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,isCreatingLobby }) {
+function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose, isCreatingLobby }) {
   const { gameId } = useParams();
   const location = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (gameId) {
@@ -51,6 +55,11 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
   // Determine if game selection should be disabled
   const isGameSelectionDisabled = location.pathname.includes('game-detail');
 
+  // Toggle password visibility
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <Paper
       elevation={4}
@@ -59,6 +68,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
         borderRadius: 3,
         background: 'linear-gradient(135deg, rgba(34,193,195,0.1) 0%, rgba(253,187,45,0.1) 100%)',
         border: '1px solid rgba(34,193,195,0.3)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
@@ -89,6 +99,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           autoComplete="username"
           sx={{
             '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
               '&:hover fieldset': {
                 borderColor: 'rgba(34,193,195,0.8)',
               },
@@ -116,9 +127,10 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             label="Game Selection"
             disabled={isGameSelectionDisabled}
             inputProps={{
-              autoComplete: 'off', // Or 'none'
+              autoComplete: 'off',
             }}
             sx={{
+              borderRadius: 2,
               '&.MuiOutlinedInput-root': {
                 '&:hover fieldset': {
                   borderColor: 'rgba(34,193,195,0.8)',
@@ -155,6 +167,10 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             borderRadius: 2,
             background: 'rgb(165, 249, 190, 0.1)',
             border: '1px solid rgb(165, 249, 190, 0.3)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              boxShadow: '0 2px 10px rgba(34,193,195,0.2)',
+            },
           }}
         >
           <Typography variant="subtitle1" sx={{ mb: 1.5, color: 'rgba(34,193,195,1)', fontWeight: 600 }}>
@@ -194,9 +210,10 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
         </Paper>
 
         {formData.eventType === 'event' && <EventFields formData={formData} handleChange={handleChange} />}
+        
         <TextField
           fullWidth
-          label="Max maxMembers"
+          label="Max Members"
           name="maxMembers"
           type="number"
           value={formData.maxMembers}
@@ -204,6 +221,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           required
           sx={{
             '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
               '&:hover fieldset': {
                 borderColor: 'rgba(34,193,195,0.8)',
               },
@@ -213,19 +231,28 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             },
           }}
           InputProps={{
-            inputProps: { min: 1, max: 10 }, // Min ve max değerlerini belirleyin
+            inputProps: { min: 1, max: 10 },
+            startAdornment: (
+              <InputAdornment position="start">
+                <Typography variant="body2" color="rgba(34,193,195,0.8)">
+                  👥
+                </Typography>
+              </InputAdornment>
+            ),
           }}
         />
+        
         <TextField
           fullWidth
-          label="Lobby Password (Optional)" // Opsiyonel olduğunu belirtmek için label güncellendi
+          label="Lobby Password (Optional)"
           name="password"
-          type="password"
-          autoComplete="current-password" // FIX: Re-applied "current-password" as suggested by warning
+          type={showPassword ? 'text' : 'password'}
+          autoComplete="current-password"
           value={formData.password}
           onChange={handleChange}
           sx={{
             '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
               '&:hover fieldset': {
                 borderColor: 'rgba(34,193,195,0.8)',
               },
@@ -240,7 +267,23 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
                 <LockIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
               </InputAdornment>
             ),
-            placeholder: 'Enter a password (optional)', // Placeholder ile opsiyonel olduğunu belirtme
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip title={showPassword ? "Hide password" : "Show password"}>
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleTogglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? 
+                      <VisibilityOffIcon sx={{ color: 'rgba(34,193,195,0.8)' }} /> : 
+                      <VisibilityIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
+                    }
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+            placeholder: 'Enter a password (optional)',
           }}
         />
 
@@ -252,6 +295,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             sx={{
               borderColor: 'rgba(34,193,195,0.8)',
               color: 'rgba(34,193,195,1)',
+              borderRadius: 2,
               '&:hover': {
                 borderColor: 'rgba(34,193,195,1)',
                 backgroundColor: 'rgba(34,193,195,0.1)',
@@ -259,6 +303,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
               textTransform: 'none',
               py: 1.5,
               fontSize: '1rem',
+              transition: 'all 0.3s ease',
             }}
           >
             Cancel
@@ -270,12 +315,16 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             disabled={isCreatingLobby}
             sx={{
               background: 'linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))',
+              borderRadius: 2,
               '&:hover': {
                 background: 'linear-gradient(45deg, rgba(34,193,195,0.9), rgba(253,187,45,0.9))',
+                boxShadow: '0 4px 15px rgba(34,193,195,0.4)',
+                transform: 'translateY(-2px)',
               },
               textTransform: 'none',
               py: 1.5,
               fontSize: '1rem',
+              transition: 'all 0.3s ease',
             }}
           >
             {isCreatingLobby ? <CircularProgress size={24} color="inherit" /> : 'Create Lobby'}

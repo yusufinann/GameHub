@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Tabs, Tab} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useLobbyContext } from '../../context';
+import { useLobbyContext } from '../../../../../shared/context/context';
 import CreateLobbyModal from '../../../../../shared/components/CreateLobbyModal';
 
 const CreateLobbyArea = ({ activeTab, setActiveTab }) => { 

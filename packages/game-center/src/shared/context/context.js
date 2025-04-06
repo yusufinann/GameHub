@@ -5,10 +5,10 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { lobbyApi } from "../api";
-import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
-import { useAuthContext } from "../../../shared/context/AuthContext";
-import useLobbyWebSocket from "../../../shared/context/WebSocketContext/useLobbyWebSocket";
+import { lobbyApi } from "../../pages/MainScreen/api";
+import { useWebSocket } from "./WebSocketContext/context";
+import { useAuthContext } from "./AuthContext";
+import useLobbyWebSocket from "./WebSocketContext/useLobbyWebSocket";
 
 const LobbyContext = createContext();
 

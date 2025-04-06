@@ -3,12 +3,12 @@ import Sidebar from "../Sidebar";
 import { Box } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { SnackbarProvider } from "../../shared/context/SnackbarContext";
-import { LobbyProvider } from "../MainScreen/MainScreenMiddleArea/context";
 import { WebSocketProvider } from "../../shared/context/WebSocketContext/context";
 import FriendsSidebar from "../FriendsSidebar";
-import { FriendsProvider } from "../Profile/context";
+import { FriendsProvider } from "../../shared/context/FriendsContext/context";
 import { GlobalNotificationProvider } from "../FriendsSidebar/context";
 import { GameSettingsProvider} from "../GameDetail/GameDetailRightArea/context";
+import { LobbyProvider } from "../../shared/context/context";
 function MainContainer() {
   //  const theme = useTheme();
 

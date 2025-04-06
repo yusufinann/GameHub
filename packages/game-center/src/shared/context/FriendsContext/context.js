@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { useWebSocket } from "../../shared/context/WebSocketContext/context";
-import { useAuthContext } from "../../shared/context/AuthContext";
+import { useWebSocket } from "../WebSocketContext/context";
+import { useAuthContext } from "../AuthContext";
 import { useParams } from "react-router-dom";
 
 const FriendsContext = createContext();
@@ -75,6 +75,7 @@ export const FriendsProvider = ({ children }) => {
     setIncomingRequests((prev) =>
       prev.filter((req) => req.id.toString() !== requesterId.toString())
     );
+    console.log("requesterId", requesterId);
     sendMessage({
       type: "FRIEND_REQUEST_ACCEPT",
       requesterId: requesterId.toString(),
@@ -156,28 +157,32 @@ export const FriendsProvider = ({ children }) => {
               });
             }
             break;
-          case "FRIEND_REQUEST_ACCEPTED":
-            if (
-              data.receiverId &&
-              currentUser.id.toString() === data.receiverId.toString()
-            ) {
-              setFriends((prev) => {
-                if (
-                  !prev.some(
-                    (f) => f.id.toString() === data.acceptedBy.id.toString()
-                  )
-                ) {
-                  return [...prev, data.acceptedBy];
-                }
-                return prev;
-              });
-              setOutgoingRequests((prev) =>
-                prev.filter(
-                  (id) => id.toString() !== data.acceptedBy.id.toString()
-                )
-              );
-            }
-            break;
+            case "FRIEND_REQUEST_ACCEPTED":
+              if (data.receiverId && currentUser.id.toString() === data.receiverId.toString()) {
+                setFriends((prev) => {
+                  // Create a new friend object with isOnline property explicitly set
+                  const newFriend = {
+                    ...data.acceptedBy,
+                    isOnline: data.acceptedBy.isOnline || false // Default to false if not provided
+                  };
+                  
+                  // Check if friend already exists
+                  if (!prev.some((f) => f.id.toString() === newFriend.id.toString())) {
+                    return [...prev, newFriend];
+                  }
+                  return prev;
+                });
+                
+                setOutgoingRequests((prev) => 
+                  prev.filter((req) => {
+                    if (typeof req === 'object' && req.id) {
+                      return req.id.toString() !== data.acceptedBy.id.toString();
+                    }
+                    return req.toString() !== data.acceptedBy.id.toString();
+                  })
+                );
+              }
+              break;
           case "FRIEND_REQUEST_REJECTED":
             if (
               data.requesterId &&

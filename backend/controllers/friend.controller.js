@@ -85,6 +85,20 @@ export const handleFriendRequestAccept = async (ws, data) => {
     ]);
 
     if (broadcastFriendEvent) {
+      // Send requester info to the accepting user
+      broadcastFriendEvent(userId.toString(), {
+        type: 'FRIEND_REQUEST_ACCEPTED',
+        receiverId: userId,
+        acceptedBy: {
+          id: requester._id,
+          name: requester.name,
+          username: requester.username,
+          avatar: requester.avatar,
+          isOnline: requester.isOnline
+        }
+      });
+
+      // Send accepting user info to the requester
       broadcastFriendEvent(requesterId.toString(), {
         type: 'FRIEND_REQUEST_ACCEPTED',
         receiverId: requesterId,
@@ -93,17 +107,7 @@ export const handleFriendRequestAccept = async (ws, data) => {
           name: user.name,
           username: user.username,
           avatar: user.avatar,
-        }
-      });
-      
-      broadcastFriendEvent(userId.toString(), {
-        type: 'FRIEND_REQUEST_ACCEPTED',
-        receiverId: userId,
-        acceptedBy: {
-          id: user._id,
-          name: user.name,
-          username: user.username,
-          avatar: user.avatar,
+          isOnline: user.isOnline
         }
       });
     }

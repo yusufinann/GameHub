@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchLobbyDetails} from "./api";
-import { useLobbyContext } from "../MainScreen/MainScreenMiddleArea/context";
 import { joinLobby } from "../MainScreen/MainScreenMiddleArea/LobbiesArea/api";
+import { useLobbyContext } from "../../shared/context/context";
 
 export const useGameLobbyPage = () => {
   const { link } = useParams();
