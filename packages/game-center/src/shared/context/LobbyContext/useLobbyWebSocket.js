@@ -8,10 +8,12 @@ const useLobbyWebSocket = (
   existingLobby,
   setMembersByLobby,
   setExistingLobby,
-  membersByLobby
+  membersByLobby,
+  setDeletedLobbyInfo
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!socket) return;
 
@@ -37,7 +39,7 @@ const useLobbyWebSocket = (
             handleUserLeft(data);
             break;
           case "LOBBY_DELETED":
-            handleLobbyDeleted(data.lobbyCode,data.data);
+            handleLobbyDeleted(data.lobbyCode, data.data);
             break;
           case "LOBBY_EXPIRED":
             handleLobbyExpired(data);
@@ -93,7 +95,7 @@ const useLobbyWebSocket = (
                   id: userData.userId,
                   name: userData.name,
                   avatar: userData.avatar,
-                  isHost: userData.isHost, 
+                  isHost: userData.isHost,
                 },
               ],
             };
@@ -115,7 +117,7 @@ const useLobbyWebSocket = (
           },
         ],
       }));
-      console.log("membersByLobby : "  , membersByLobby);
+      console.log("membersByLobby : ", membersByLobby);
     };
 
     const handleUserLeft = (data) => {
@@ -142,18 +144,19 @@ const useLobbyWebSocket = (
       }));
     };
 
-  const handleLobbyDeleted = (lobbyCode, lobbyData) => {
-      setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
-      navigate("/", {
-        state: {
-          notification: {
-            type: "info",
-            message: lobbyData?.reason || "Lobi deleted", 
-          },
-        },
+    const handleLobbyDeleted = (lobbyCode, lobbyData) => {
+      setDeletedLobbyInfo({
+        lobbyCode,
+        reason: lobbyData?.reason || "Lobby has been deleted by the host.",
       });
-      setExistingLobby(null)
-      localStorage.removeItem('userLobby');
+
+      setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
+      if (existingLobby?.lobbyCode === lobbyCode) {
+        setExistingLobby(null);
+        localStorage.removeItem("userLobby");
+      }
+
+      // Remove members data for this lobby
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
@@ -216,6 +219,7 @@ const useLobbyWebSocket = (
         };
       });
     };
+
     const handleLobbyExpired = (data) => {
       const { lobbyCode } = data;
       setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
@@ -255,14 +259,10 @@ const useLobbyWebSocket = (
           setExistingLobby(null);
           localStorage.removeItem("userLobby");
 
-          // Kullanıcıyı ana sayfaya yönlendir
-          navigate("/", {
-            state: {
-              notification: {
-                type: "info",
-                message: message || "Event has ended",
-              },
-            },
+          // Set deleted lobby info instead of navigating
+          setDeletedLobbyInfo({
+            lobbyCode,
+            reason: message || "Event has ended",
           });
         }
       } else {
@@ -274,6 +274,7 @@ const useLobbyWebSocket = (
         );
       }
     };
+
     const handleLobbyRemoved = (lobbyCode) => {
       // Remove the lobby from the global list
       setLobbies((prev) =>
@@ -286,22 +287,18 @@ const useLobbyWebSocket = (
         delete newState[lobbyCode];
         return newState;
       });
-      navigate("/");
 
-      // If the current user is in this lobby, clear the local storage and state
+      // If the current user is in this lobby, set deleted info instead of navigating
       if (existingLobby?.lobbyCode === lobbyCode) {
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
-        navigate("/", {
-          state: {
-            notification: {
-              type: "info",
-              message: "Event has ended",
-            },
-          },
+        setDeletedLobbyInfo({
+          lobbyCode,
+          reason: "Event has ended",
         });
       }
     };
+
     const handleLobbyUpdated = (lobbyData) => {
       setLobbies((prev) =>
         prev.map((lobby) =>
@@ -309,6 +306,7 @@ const useLobbyWebSocket = (
         )
       );
     };
+
     socket.addEventListener("message", handleWebSocketMessage);
     return () => socket.removeEventListener("message", handleWebSocketMessage);
   }, [
@@ -319,6 +317,7 @@ const useLobbyWebSocket = (
     setMembersByLobby,
     setExistingLobby,
     navigate,
+    setDeletedLobbyInfo,
   ]);
 
   return isWebSocketUpdate;

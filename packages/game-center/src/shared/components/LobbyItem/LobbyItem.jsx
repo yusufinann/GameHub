@@ -11,13 +11,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import { LobbyInfo } from "./LobbyInfo";
 import { LobbyActions } from "./LobbyActions";
-import { useLobbyContext } from "../../context/context";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";
 import { Event, Group, People } from "@mui/icons-material";
 import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
+import { useLobbyContext } from "../../context/LobbyContext/context";
 
 
 function LobbyItem({lobby}) {

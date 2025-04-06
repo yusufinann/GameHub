@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
-import { useLobbyContext } from "../../context/context";
 import { useWebSocket } from "../../context/WebSocketContext/context";
 import { getLobbyDetails, joinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
+import { useLobbyContext } from "../../context/LobbyContext/context";
 
 export const useLobbyItem = (lobby, currentUser) => {
   const { 
@@ -21,7 +21,6 @@ export const useLobbyItem = (lobby, currentUser) => {
   const { socket } = useWebSocket();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Tek bir useEffect içinde tüm WebSocket mesajlarını yönetiyoruz
   useEffect(() => {
     if (!socket) return;
     const handleWebSocketMessage = (event) => {
@@ -50,7 +49,6 @@ export const useLobbyItem = (lobby, currentUser) => {
     return () => socket.removeEventListener("message", handleWebSocketMessage);
   }, [socket, lobby.lobbyCode, setMembersByLobby, deleteLobby, navigate, showSnackbar]);
 
-  // isMember kontrolü ve setIsJoined effect'i
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
     (member) => member.id === currentUser?.id
   );
@@ -67,19 +65,15 @@ export const useLobbyItem = (lobby, currentUser) => {
       const joinResponse = await joinLobby(lobby.lobbyCode, password);
       const updatedLobby = await getLobbyDetails(lobby.lobbyCode);
 
-      // Hemen üye listesini güncelle
       setMembersByLobby((prevState) => {
         const currentMembers = prevState[lobby.lobbyCode] || [];
         const isHost = updatedLobby.createdBy === currentUser.id;
-           // Kullanıcı zaten listede yoksa ekle
-       // Add or update the user with isHost status
        const existingMemberIndex = currentMembers.findIndex(
         (m) => m.id === currentUser.id
       );
    
 
       if (existingMemberIndex >= 0) {
-        // Update existing member
         const updatedMembers = [...currentMembers];
         updatedMembers[existingMemberIndex] = {
           ...updatedMembers[existingMemberIndex],
@@ -87,7 +81,6 @@ export const useLobbyItem = (lobby, currentUser) => {
         };
         return { ...prevState, [lobby.lobbyCode]: updatedMembers };
       } else {
-        // Add new member
         return {
           ...prevState,
           [lobby.lobbyCode]: [
@@ -133,8 +126,6 @@ export const useLobbyItem = (lobby, currentUser) => {
         message: "Lobby successfully deleted.",
         severity: "success",
       });
-
-      navigate("/");
     } catch (error) {
       console.error("Error deleting lobby:", error);
 
@@ -143,7 +134,7 @@ export const useLobbyItem = (lobby, currentUser) => {
         severity: "error",
       });
     }finally {
-      setIsDeleting(false); // End deleting animation
+      setIsDeleting(false);
     }
   };
 

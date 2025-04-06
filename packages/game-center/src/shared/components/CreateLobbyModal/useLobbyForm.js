@@ -1,7 +1,7 @@
 // src/components/MainScreen/CreateLobbyModal/useLobbyForm.js
 import { useState } from "react";
-import { useLobbyContext } from "../../context/context";
 import { useAuthContext } from "../../context/AuthContext";
+import { useLobbyContext } from "../../context/LobbyContext/context";
 export const useLobbyForm = () => {
   const { createLobby,isCreatingLobby } = useLobbyContext();
   const { currentUser } = useAuthContext();

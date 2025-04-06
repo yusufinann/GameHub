@@ -8,7 +8,7 @@ import FriendsSidebar from "../FriendsSidebar";
 import { FriendsProvider } from "../../shared/context/FriendsContext/context";
 import { GlobalNotificationProvider } from "../FriendsSidebar/context";
 import { GameSettingsProvider} from "../GameDetail/GameDetailRightArea/context";
-import { LobbyProvider } from "../../shared/context/context";
+import { LobbyProvider } from "../../shared/context/LobbyContext/context";
 function MainContainer() {
   //  const theme = useTheme();
 

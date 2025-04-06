@@ -1,13 +1,10 @@
-// CreateLobbyArea.js
 import React, { useState } from 'react';
 import { Box, Button, Typography, Tabs, Tab} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useLobbyContext } from '../../../../../shared/context/context';
 import CreateLobbyModal from '../../../../../shared/components/CreateLobbyModal';
 
-const CreateLobbyArea = ({ activeTab, setActiveTab }) => { 
+const CreateLobbyArea = ({ activeTab, setActiveTab,existingLobby }) => { 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { existingLobby } = useLobbyContext();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);

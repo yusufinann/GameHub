@@ -5,10 +5,10 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { lobbyApi } from "../../pages/MainScreen/api";
-import { useWebSocket } from "./WebSocketContext/context";
-import { useAuthContext } from "./AuthContext";
-import useLobbyWebSocket from "./WebSocketContext/useLobbyWebSocket";
+import { lobbyApi } from "../../../pages/MainScreen/api";
+import { useAuthContext } from "../AuthContext";
+import useLobbyWebSocket from "./useLobbyWebSocket";
+import { useWebSocket } from "../WebSocketContext/context";
 
 const LobbyContext = createContext();
 
@@ -20,7 +20,8 @@ export const LobbyProvider = ({ children }) => {
   const [isJoined, setIsJoined] = useState(false);
   const [membersByLobby, setMembersByLobby] = useState({}); // Lobby bazlı üye listesi
   const [isLoading, setIsLoading] = useState(false);
-  const [isCreatingLobby, setIsCreatingLobby] = useState(false); 
+  const [isCreatingLobby, setIsCreatingLobby] = useState(false);
+  const [deletedLobbyInfo, setDeletedLobbyInfo] = useState(null); // { lobbyCode, reason }
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
 
@@ -32,7 +33,7 @@ export const LobbyProvider = ({ children }) => {
     setMembersByLobby,
     setExistingLobby,
     membersByLobby,
-    lobbies
+    setDeletedLobbyInfo
   );
 
   const fetchAndSetLobbies = useCallback(async () => {
@@ -80,9 +81,8 @@ export const LobbyProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error fetching lobbies:", error);
-    }
-    finally {
-      setIsLoading(false); // Yükleme bittikten sonra false yap (başarılı veya başarısız)
+    } finally {
+      setIsLoading(false);
     }
   }, [currentUser?.id]);
 
@@ -143,9 +143,8 @@ export const LobbyProvider = ({ children }) => {
         return response;
       } catch (error) {
         throw error;
-      }
-      finally {
-        setIsCreatingLobby(false); // Lobi oluşturma tamamlandığında veya hata oluştuğunda false yap
+      } finally {
+        setIsCreatingLobby(false);
       }
     },
     [socket, isWebSocketUpdate, currentUser, existingLobby]
@@ -207,7 +206,9 @@ export const LobbyProvider = ({ children }) => {
             lobby.lobbyCode === lobbyCode
               ? {
                   ...lobby,
-                  members: lobby.members.filter((member) => member.id !== userId),
+                  members: lobby.members.filter(
+                    (member) => member.id !== userId
+                  ),
                 }
               : lobby
           )
@@ -226,6 +227,10 @@ export const LobbyProvider = ({ children }) => {
     [socket]
   );
 
+  const clearDeletedLobbyInfo = useCallback(() => {
+    setDeletedLobbyInfo(null);
+  }, []);
+
   return (
     <LobbyContext.Provider
       value={{
@@ -235,7 +240,7 @@ export const LobbyProvider = ({ children }) => {
         setLobbies,
         lobbyCode,
         lobbyLink,
-        membersByLobby, 
+        membersByLobby,
         setMembersByLobby,
         isJoined,
         setIsJoined,
@@ -243,7 +248,10 @@ export const LobbyProvider = ({ children }) => {
         deleteLobby,
         leaveLobby,
         isLoading,
-        isCreatingLobby
+        isCreatingLobby,
+        deletedLobbyInfo,
+        setDeletedLobbyInfo,
+        clearDeletedLobbyInfo,
       }}
     >
       {children}

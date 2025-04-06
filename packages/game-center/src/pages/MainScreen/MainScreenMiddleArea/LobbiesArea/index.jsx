@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { LobbyList } from './components/LobbyList';
-import { useLobbyContext } from '../../../../shared/context/context';
 import CreateLobbyArea from './components/CreateLobbyArea';
 import { Box, CircularProgress } from '@mui/material';
+import { useLobbyContext } from '../../../../shared/context/LobbyContext/context';
 
 function LobbiesArea() {
-  const { lobbies, isLoading } = useLobbyContext();
+  const { lobbies, isLoading,existingLobby } = useLobbyContext();
   const [activeTab, setActiveTab] = useState('all');
 
   if (isLoading) {
@@ -25,7 +25,7 @@ function LobbiesArea() {
 
   return (
     <>
-      <CreateLobbyArea activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CreateLobbyArea activeTab={activeTab} setActiveTab={setActiveTab} existingLobby={existingLobby}/>
       <LobbyList lobbies={lobbies} activeTab={activeTab} />
     </>
   );

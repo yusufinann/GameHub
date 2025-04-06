@@ -10,7 +10,7 @@ import {
 } from "@mui/icons-material";
 import { handleCopy, handleShare } from "../../../utils/handleShare.js";
 import LobbyMembers from "./LobbyMembers.jsx";
-import { useLobbyContext } from "../../context/context.js";
+import { useLobbyContext } from "../../context/LobbyContext/context.js";
 
 export const SuccessScreen = ({ setSnackbar, onClose }) => {
   const navigate = useNavigate();

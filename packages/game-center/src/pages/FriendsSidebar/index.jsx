@@ -8,7 +8,7 @@ import Notifications from './components/Notifications/Notifications';
 import FriendsList from './components/FriendList/FriendsList';
 import { StreetLampPost, LampBase, LampGlowEffect } from './components/LampComponents';
 import useFriendsSidebar from './useFriendsSidebar';
-import { useLobbyContext } from '../../shared/context/context';
+import { useLobbyContext } from '../../shared/context/LobbyContext/context';
 
 const sidebarStyles = {
   height: 'calc(100vh - 20px)',
