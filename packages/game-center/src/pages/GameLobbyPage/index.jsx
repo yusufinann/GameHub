@@ -12,11 +12,11 @@ import {
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
 } from "@mui/icons-material";
-import MembersList from "./components/MembersList/MembersList";
-import GameArea from "./components/GameArea";
+import MembersList from "./MembersList/MembersList";
+import GameArea from "./GameArea/GameArea";
 import { useGameLobbyPage } from "./useGameLobbyPage";
 import LobbyPasswordModal from "../../shared/components/LobbyPasswordModal";
-import LobbyDeletedModal from "./components/LobbyDeletedModal";
+import LobbyDeletedModal from "./LobbyDeletedModal";
 import { useLobbyContext } from "../../shared/context/LobbyContext/context";
 
 const GameLobbyPage = () => {
@@ -40,13 +40,11 @@ const GameLobbyPage = () => {
     handleJoin,
   } = useGameLobbyPage();
 
-  // Handle the deleted lobby modal
   const handleDeletedModalClose = () => {
     clearDeletedLobbyInfo();
     navigate("/");
   };
 
-  // Tam ekran durumunu yönet
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -94,7 +92,6 @@ const GameLobbyPage = () => {
     }
   };
 
-  // Show deleted modal if this lobby was deleted
   if (
     deletedLobbyInfo &&
     lobbyDetails &&

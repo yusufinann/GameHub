@@ -117,7 +117,6 @@ const useLobbyWebSocket = (
           },
         ],
       }));
-      console.log("membersByLobby : ", membersByLobby);
     };
 
     const handleUserLeft = (data) => {
@@ -239,34 +238,29 @@ const useLobbyWebSocket = (
 
     const handleEventStatus = (data) => {
       const { lobbyCode, status, message } = data;
-
-      // Eğer event bitmiş ise
+      const isUserInLobby = membersByLobby[lobbyCode]?.some(member => member.id === currentUser?.id);
+    
       if (status === "ended") {
-        // Lobi listesinden kaldır
         setLobbies((prev) =>
           prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
         );
-
-        // Üye listesini temizle
+    
         setMembersByLobby((prev) => {
           const newState = { ...prev };
           delete newState[lobbyCode];
           return newState;
         });
-
-        // Eğer kullanıcı bu lobideyse
-        if (existingLobby?.lobbyCode === lobbyCode) {
+    
+        if (existingLobby?.lobbyCode === lobbyCode || isUserInLobby) {
           setExistingLobby(null);
           localStorage.removeItem("userLobby");
-
-          // Set deleted lobby info instead of navigating
+    
           setDeletedLobbyInfo({
             lobbyCode,
             reason: message || "Event has ended",
           });
         }
       } else {
-        // Diğer durumlar için normal güncelleme
         setLobbies((prev) =>
           prev.map((lobby) =>
             lobby.lobbyCode === lobbyCode ? { ...lobby, status } : lobby
@@ -276,20 +270,19 @@ const useLobbyWebSocket = (
     };
 
     const handleLobbyRemoved = (lobbyCode) => {
-      // Remove the lobby from the global list
+      const isUserInLobby = membersByLobby[lobbyCode]?.some(member => member.id === currentUser?.id);
+      
       setLobbies((prev) =>
         prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
       );
-
-      // Clean up the corresponding members list
+    
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
         return newState;
       });
-
-      // If the current user is in this lobby, set deleted info instead of navigating
-      if (existingLobby?.lobbyCode === lobbyCode) {
+    
+      if (existingLobby?.lobbyCode === lobbyCode || isUserInLobby) {
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
         setDeletedLobbyInfo({

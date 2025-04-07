@@ -1,4 +1,3 @@
-// LobbyInfo.js
 import { useEffect, useState } from 'react';
 import { Chip } from "@mui/material";
 import ScheduleIcon from '@mui/icons-material/Schedule';
