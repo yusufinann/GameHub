@@ -43,7 +43,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
     password: '',
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [loading, setLoading] = useState(false); // Loading state added
+  const [loading, setLoading] = useState(false); 
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -81,8 +81,10 @@ function LobbyEditModal({ open, onClose, lobby }) {
       }
 
       await response.json();
-      setSnackbar({ open: true, message: 'Lobby updated successfully!', severity: 'success' });
-      onClose();
+      setSnackbar({ open: true, message: 'Lobby updated successfully!', severity: 'warning' });
+      setTimeout(() => {
+        onClose();
+      }, 5000);
     } catch (error) {
       console.error('Lobby update error:', error);
       setSnackbar({ open: true, message: error.message, severity: 'error' });

@@ -4,7 +4,7 @@ import { useAuthContext } from '../../shared/context/AuthContext';
 import { useWebSocket } from '../../shared/context/WebSocketContext/context';
 import { useSnackbar } from '../../shared/context/SnackbarContext'; 
 
-export const useConversationsPage = (setFriendGroups,selectedConversation, setSelectedConversation) => {
+export const useConversationsPage = (friendGroups,setFriendGroups,selectedConversation, setSelectedConversation) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
  const { showSnackbar } = useSnackbar(); 
@@ -105,13 +105,23 @@ export const useConversationsPage = (setFriendGroups,selectedConversation, setSe
             setSelectedConversation(prev => prev ? {...prev, members: prev.members.filter(member => member._id !== message.data.userId)} : null); // Update selected conversation members too
           }
           break;
-        case "FRIEND_GROUP_DELETED":
-          showSnackbar({ message: `Friend Group "${message.groupId}" has been deleted by the host.`, severity: 'info' });
-          console.log("FRIEND_GROUP_DELETED : ", message);
-          setFriendGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
-          setSelectedConversation(null);
-          setMessages([]);
-          break;
+          case "FRIEND_GROUP_DELETED":
+            // Find the group name from the friendGroups state
+            const deletedGroup = friendGroups.find(group => group._id === message.groupId);
+            const deletedGroupName = deletedGroup ? deletedGroup.groupName : message.groupId;
+            
+            showSnackbar({ 
+              message: `Friend Group "${deletedGroupName}" has been deleted by the host.`, 
+              severity: 'info' 
+            });
+            console.log("FRIEND_GROUP_DELETED : ", message);
+            setFriendGroups(prevGroups => prevGroups.filter(group => group._id !== message.groupId));
+            
+            if (selectedConversation?._id === message.groupId) {
+              setSelectedConversation(null);
+              setMessages([]);
+            }
+            break;
         default:
           console.log("Bilinmeyen mesaj tipi:", message.type);
       }
@@ -180,12 +190,19 @@ export const useConversationsPage = (setFriendGroups,selectedConversation, setSe
   }, [fetchFriendGroupChatHistory, setSelectedConversation]);
 
   const handleDeleteFriendGroup = async (groupId) => {
+
+    const groupToDelete = friendGroups.find(group => group._id === groupId);
+  const groupName = groupToDelete ? groupToDelete.groupName : "Unknown group";
     if (socket && socket.readyState === WebSocket.OPEN) {
       const deletePayload = {
         type: "DELETE_FRIEND_GROUP_WS",
         groupId: groupId,
       };
       socket.send(JSON.stringify(deletePayload));
+      showSnackbar({ 
+        message: `Friend Group "${groupName}" has been deleted successfully.`, 
+        severity: 'success' 
+      });
     } else {
       console.error("WebSocket bağlantısı açık değil, Friend Group silinemiyor.");
       showSnackbar({ message: 'WebSocket bağlantısı kurulamadı. Friend Group silinemiyor.', severity: 'error' }); 

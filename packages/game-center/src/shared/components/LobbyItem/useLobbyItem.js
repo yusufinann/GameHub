@@ -126,6 +126,7 @@ export const useLobbyItem = (lobby, currentUser) => {
         message: "Lobby successfully deleted.",
         severity: "success",
       });
+      
     } catch (error) {
       console.error("Error deleting lobby:", error);
 

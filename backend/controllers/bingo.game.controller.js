@@ -1,7 +1,7 @@
-import Lobby from "../models/lobby.model.js"; 
+import Lobby from "../models/lobby.model.js";
 import { BingoGame } from '../models/bingo.game.model.js';
 import User from '../models/user.model.js';
-import mongoose from 'mongoose'; 
+import mongoose from 'mongoose';
 // Helper function to get user info from MongoDB
 async function getUserInfo(userId) {
   try {
@@ -57,7 +57,7 @@ function getGameRankings(game) {
   const rankings = Object.entries(game.players)
     .map(([playerId, player]) => ({
       playerId,
-      userName: player.userName, 
+      userName: player.userName,
       score: calculatePlayerScore(player, game.drawnNumbers),
       completedAt: player.completedAt || null
     }))
@@ -89,7 +89,7 @@ function broadcastGameStatus(game) {
     .filter(([, player]) => player.completedAt)
     .map(([id, player]) => ({
       id: id,
-      userName: player.userName 
+      userName: player.userName
     }));
 
   broadcastToGame(game, {
@@ -104,15 +104,15 @@ function autoDrawNumber(game) {
   if (game.numberPool.length === 0) {
       const rankings = getGameRankings(game);
       game.gameEnded = true;
-      game.gameStarted = false;
+      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
       broadcastToGame(game, {
           type: "BINGO_GAME_OVER",
           message: "All numbers drawn - Final Rankings",
           finalRankings: rankings
       });
-      saveGameStatsToDB(game); 
+      saveGameStatsToDB(game);
       game.gameStarted = false;
-      clearInterval(game.autoDrawInterval); 
+      clearInterval(game.autoDrawInterval);
       return;
   }
 
@@ -122,7 +122,7 @@ function autoDrawNumber(game) {
   // Configuration based on game mode
   let numberDisplayDuration = 5000;    // Display time for current number
   let activeNumberTotalDuration = 5000; // Total time number stays active (including display time)
-  
+
   // Extended mode: numbers remain active for 10 seconds total (5s display + 5s active only)
   if (game.bingoMode === "extended") {
       activeNumberTotalDuration = 10000; // 10 seconds total active time
@@ -157,7 +157,7 @@ function autoDrawNumber(game) {
           broadcastToGame(game, {
               type: "BINGO_NUMBER_DISPLAY_END",
               number: number,
-              activeNumbers: game.activeNumbers  
+              activeNumbers: game.activeNumbers
           });
       }
   }, numberDisplayDuration);
@@ -171,16 +171,16 @@ function autoDrawNumber(game) {
           } else {
               game.activeNumbers = [];
           }
-      } else { 
+      } else {
           game.activeNumbers = [];
       }
-    
+
       broadcastToGame(game, {
           type: "BINGO_NUMBER_CLEAR",
           clearedNumber: number,
           activeNumbers: game.activeNumbers
       });
-      
+
       broadcastGameStatus(game);
 
       // Game end checks
@@ -190,6 +190,7 @@ function autoDrawNumber(game) {
       if (allPlayersCompleted && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
+          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All players completed - Final Rankings",
@@ -200,6 +201,7 @@ function autoDrawNumber(game) {
       } else if (game.numberPool.length === 0 && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
+          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All numbers drawn - Final Rankings",
@@ -231,6 +233,7 @@ export const drawNumber = (ws, data) => {
   if (game.numberPool.length === 0) {
       const rankings = getGameRankings(game);
       game.gameEnded = true;
+      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
       broadcastToGame(game, {
           type: "BINGO_GAME_OVER",
           message: "Tüm numaralar çekildi.",
@@ -242,11 +245,11 @@ export const drawNumber = (ws, data) => {
 
   const number = game.numberPool.shift();
   game.drawnNumbers.push(number);
-  
+
   // Configuration based on game mode
   let numberDisplayDuration = 5000; // Display time for current number
   let activeNumberTotalDuration = 5000; // Total time number stays active (including display time)
-  
+
   // Extended mode: numbers remain active for 10 seconds total (5s display + 5s active only)
   if (game.bingoMode === "extended") {
       activeNumberTotalDuration = 10000; // 10 seconds total active time
@@ -313,6 +316,7 @@ export const drawNumber = (ws, data) => {
       if (allPlayersCompleted && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
+          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All players completed - Final Rankings",
@@ -323,6 +327,7 @@ export const drawNumber = (ws, data) => {
       } else if (game.numberPool.length === 0 && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
+          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All numbers drawn - Final Rankings",
@@ -413,13 +418,13 @@ export const startGame = (ws, data) => {
               })),
               competitionMode: game.competitionMode
           });
-          
+
           if (drawMode === "auto") {
               let drawInterval = 5000; // Default for all modes
               if (game.bingoMode === "superfast") {
                   drawInterval = 3000;
               }
-              
+
               const autoDrawInterval = setInterval(() => {
                   if (game.gameEnded) {
                       clearInterval(autoDrawInterval);
@@ -427,7 +432,7 @@ export const startGame = (ws, data) => {
                   }
                   autoDrawNumber(game);
               }, drawInterval);
-              
+
               game.autoDrawInterval = autoDrawInterval;
           }
       }
@@ -590,7 +595,7 @@ export const markNumber = (ws, data) => {
  **/
 // Yardımcı fonksiyon: Oyun istatistiklerini MongoDB'ye kaydeder
 async function saveGameStatsToDB(game) {
-  console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date()); 
+  console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date());
   try {
     const rankings = getGameRankings(game);
 
@@ -687,6 +692,7 @@ export const checkBingo = (ws, data) => {
 
       if (game.competitionMode === 'non-competitive') { // Non-competitive mode logic
           game.gameEnded = true;
+          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
           const nonCompetitiveRankings = [{ // Create rankings with only the winner
               playerId: ws.userId,
               userName: player.userName,
@@ -708,6 +714,7 @@ export const checkBingo = (ws, data) => {
           if (Object.keys(game.players).length <= 2) {
               const finalRankings = getGameRankings(game);
               game.gameEnded = true;
+              game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
               broadcastToGame(game, {
                   type: "BINGO_GAME_OVER",
                   message: "Game Over - Final Rankings",
@@ -725,6 +732,7 @@ export const checkBingo = (ws, data) => {
               if (allNumbersDrawn || allPlayersCompleted) {
                   const finalRankings = getGameRankings(game);
                   game.gameEnded = true;
+                  game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
                   broadcastToGame(game, {
                       type: "BINGO_GAME_OVER",
                       message: "Game Over - Final Rankings",
@@ -761,6 +769,7 @@ export const checkBingo = (ws, data) => {
                    if(allPlayersCompletedAfterCall) {
                       const finalRankings = getGameRankings(game);
                       game.gameEnded = true;
+                      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
                       broadcastToGame(game, {
                           type: "BINGO_GAME_OVER",
                           message: "Game Over - Final Rankings",
@@ -949,4 +958,3 @@ export const getAllPlayerBingoStats = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-

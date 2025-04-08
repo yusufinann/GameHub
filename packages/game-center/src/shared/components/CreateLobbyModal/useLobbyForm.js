@@ -14,7 +14,7 @@ export const useLobbyForm = () => {
     endTime: "", // datetime-local will provide combined date and time
     password: "",
     gameId: "",
-    maxMembers: 4,
+    maxMembers: 2, //default
   });
 
   const [snackbar, setSnackbar] = useState({

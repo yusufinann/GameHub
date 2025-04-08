@@ -12,13 +12,15 @@ import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import ChatBox from "../../shared/components/ChatBox/ChatBox";
 import { useFriendsContext } from "../../shared/context/FriendsContext/context";
+import ErrorModal from "../../shared/components/ErrorModal";
 
 function ConversationPage() {
   const {
     snackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    handleSnackbarClose, showSnackbar
+    handleSnackbarClose,
+    showSnackbar,
   } = useSnackbar();
 
   const { currentUser } = useAuthContext();
@@ -27,7 +29,8 @@ function ConversationPage() {
   const { friendId, groupId } = useParams();
   const { socket } = useWebSocket();
   const { friends, incomingRequests } = useFriendsContext();
-
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     createFriendGroupDialogOpen,
@@ -57,8 +60,12 @@ function ConversationPage() {
     handleFriendGroupSelection,
     handleDeleteFriendGroup,
     handleLeaveFriendGroup,
-  } = useConversationsPage(setFriendGroups, selectedConversation, setSelectedConversation);
-
+  } = useConversationsPage(
+    friendGroups,
+    setFriendGroups,
+    selectedConversation,
+    setSelectedConversation
+  );
 
   useEffect(() => {
     if (!socket || !currentUser) return;
@@ -76,13 +83,20 @@ function ConversationPage() {
         const { groupId: joinedGroupId, group } = data.data;
 
         setFriendGroups((prevGroups) => {
-          const existingGroups = prevGroups.filter(g => g._id !== joinedGroupId);
+          const existingGroups = prevGroups.filter(
+            (g) => g._id !== joinedGroupId
+          );
           return [...existingGroups, group];
         });
-        showSnackbar(`Gruba başarıyla katıldınız: ${group.groupName}`, "success");
+        showSnackbar(
+          `Gruba başarıyla katıldınız: ${group.groupName}`,
+          "success"
+        );
       }
       if (data.type === "ERROR") {
-        showSnackbar(data.message, "error");
+        // Show error modal instead of snackbar for errors
+        setErrorMessage(data.message);
+        setErrorModalOpen(true);
         return;
       }
     };
@@ -90,7 +104,6 @@ function ConversationPage() {
     socket.addEventListener("message", handleMessage);
     return () => socket.removeEventListener("message", handleMessage);
   }, [socket, currentUser, setFriendGroups, showSnackbar]);
-
 
   useEffect(() => {
     const fetchGroupDetails = async () => {
@@ -113,7 +126,6 @@ function ConversationPage() {
             ...data.group,
             type: "friendGroup",
           });
-
         } else {
           console.warn("Grup bilgisi alınamadıı:", groupId);
         }
@@ -152,12 +164,16 @@ function ConversationPage() {
 
   useEffect(() => {
     if (selectedFriend) {
-      const updatedFriend = friends.find(f => f.id === selectedFriend.id);
+      const updatedFriend = friends.find((f) => f.id === selectedFriend.id);
       if (updatedFriend) {
-        setSelectedFriend(updatedFriend); 
+        setSelectedFriend(updatedFriend);
       }
     }
-  }, [friends, selectedFriend, setSelectedFriend]); 
+  }, [friends, selectedFriend, setSelectedFriend]);
+
+  const handleErrorModalClose = () => {
+    setErrorModalOpen(false);
+  };
   return (
     <Box
       sx={{
@@ -183,6 +199,11 @@ function ConversationPage() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ErrorModal
+        open={errorModalOpen}
+        onClose={handleErrorModalClose}
+        errorMessage={errorMessage}
+      />
 
       {/* Create Friend Group Dialog */}
       <CreateFriendGroupDialog
@@ -195,7 +216,7 @@ function ConversationPage() {
         friendGroupPassword={friendGroupPassword}
         setFriendGroupPassword={setFriendGroupPassword}
         handleCreateFriendGroup={handleCreateFriendGroup}
-        friends={friends} 
+        friends={friends}
       />
 
       {/* Main Content */}
@@ -251,12 +272,12 @@ function ConversationPage() {
             fetchFriendGroups={fetchFriendGroups}
             onDeleteFriendGroup={handleDeleteFriendGroup}
             handleLeaveFriendGroup={handleLeaveFriendGroup}
-            friends={friends} 
-            incomingRequests={incomingRequests} 
+            friends={friends}
+            incomingRequests={incomingRequests}
           />
 
           <ChatBox
-            sx={{ height: '100%' }}
+            sx={{ height: "100%" }}
             chatType={
               selectedConversation?.type === "friendGroup"
                 ? "friendGroup"
@@ -269,8 +290,8 @@ function ConversationPage() {
                 ? selectedConversation.type === "friendGroup"
                   ? selectedConversation.groupName
                   : selectedFriend
-                    ? selectedFriend.name
-                    : "Select a friend"
+                  ? selectedFriend.name
+                  : "Select a friend"
                 : "Select a friend or group"
             }
             messages={messages}
