@@ -1,7 +1,7 @@
 <div align="center">
   <br />
  <p>
-    <a href="#"><img src="packages/game-center/src/assets/GameCenterApp.png" alt="image" height="200" width="200"></a>
+    <a href="#"><img src="packages/game-center/public/GameCenterApp.png" alt="image" height="200" width="200"></a>
 </p>
 
   <h2 align="center"><a href="https://github.com/yusufinann/GameHub">Game Center Game Platform</a></h2>
