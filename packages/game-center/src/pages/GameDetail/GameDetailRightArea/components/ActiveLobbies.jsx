@@ -13,7 +13,7 @@ function ActiveLobbies({filteredLobbies}) {
       sx={{
         borderRadius: 4,
         boxShadow: theme.shadows[8],
-        backgroundColor: "rgb(50,135,97)",
+        backgroundColor: theme.palette.background.stripeBg,
         overflow: 'hidden',
         position: 'relative',
         transition: 'transform 0.3s, box-shadow 0.3s',
@@ -22,7 +22,7 @@ function ActiveLobbies({filteredLobbies}) {
           boxShadow: theme.shadows[12],
         },
       }}
-    ><Box sx={{ background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"}}>   <CardContent>
+    ><Box  sx={{ background: theme.palette.background.stripe}}>   <CardContent>
         <Typography
           variant="h6"
           sx={{

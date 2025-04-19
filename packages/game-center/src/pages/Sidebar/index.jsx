@@ -11,7 +11,7 @@ const StyledSidebar = styled(Box)(({ theme }) => ({
   top: "10px", // Add top spacing for sticky positioning
   borderRadius: "20px",
   margin: "10px", // This will now work correctly on all sides
-  backgroundColor: "#caecd5",
+  backgroundColor: theme.palette.background.default,
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",

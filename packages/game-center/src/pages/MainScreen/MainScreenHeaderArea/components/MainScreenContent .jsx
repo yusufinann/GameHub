@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, IconButton} from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import olymposImage from "../../../../assets/olympos-removebg.png";
 import fortnite from "../../../../assets/fortnite-removebg.png";
 import oblivion from "../../../../assets/oblivion-removebg.png";
-const MainScreenContent = () => {
+const MainScreenContent = ({theme}) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const slides = [
     {
       id: 1,
@@ -18,7 +17,6 @@ const MainScreenContent = () => {
         { name: "Gates of Olympus", img: "https://wallpapercave.com/wp/wp10779463.jpg" },
         { name: "Starlight Princess", img: "https://wallpapercave.com/wp/wp10779482.jpg" }
       ],
-      bgColor: "rgb(50,135,97)"
     },
     {
       id: 2,
@@ -30,8 +28,6 @@ const MainScreenContent = () => {
         { name: "Big Bass", img: "https://wallpapercave.com/uwp/uwp4706340.jpeg" },
         { name: "Fruit Party", img: "https://wallpapercave.com/wp/wp10779473.jpg" }
       ],
-      //bgColor: "rgb(75,60,145)"
-       bgColor: "rgb(50,135,97)"
     },
     {
       id: 3,
@@ -43,8 +39,6 @@ const MainScreenContent = () => {
         { name: "Gonzo's Quest", img: "https://wallpapercave.com/wp/wp10779463.jpg" },
         { name: "Reactoonz", img: "https://wallpapercave.com/wp/wp10779473.jpg" }
       ],
-    //   bgColor: "rgb(190,30,45)"
-     bgColor: "rgb(50,135,97)"
     }
   ];
 
@@ -78,7 +72,7 @@ const MainScreenContent = () => {
             opacity: index === currentSlide ? 1 : 0,
             transition: "opacity 0.5s ease-in-out",
             display: "flex",
-            bgcolor: slide.bgColor,
+            bgcolor: theme.palette.background.stripeBg,
             borderRadius: 2,
             overflow: "hidden"
           }}
@@ -91,7 +85,7 @@ const MainScreenContent = () => {
               left: 0,
               width: "100%",
               height: "100%",
-              background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"
+              background: theme.palette.background.stripe
             }}
           />
 
@@ -135,7 +129,7 @@ const MainScreenContent = () => {
               variant="h3"
               component="h2"
               sx={{
-                color: "white",
+                color:theme.palette.primary.text,
                 fontWeight: "bold",
                 fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.75rem" },
                 mb: 4,
@@ -149,8 +143,8 @@ const MainScreenContent = () => {
             <Button
               variant="contained"
               sx={{
-                bgcolor: "#FFD700",
-                color: "black",
+                bgcolor: theme.palette.secondary.gold,
+                color: theme.palette.text.secondary,
                 fontWeight: "bold",
                 fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
                 py: 1.5,
@@ -187,7 +181,7 @@ const MainScreenContent = () => {
               width: 12,
               height: 12,
               borderRadius: "50%",
-              bgcolor: i === currentSlide ? "white" : "rgba(255,255,255,0.5)",
+              bgcolor: i === currentSlide ? "white" : theme.palette.background.dot,
               cursor: "pointer",
               transition: "all 0.3s ease"
             }}
@@ -206,7 +200,7 @@ const MainScreenContent = () => {
           color: "white",
           bgcolor: "rgba(0,0,0,0.3)",
           "&:hover": {
-            bgcolor: "rgba(0,0,0,0.5)"
+            bgcolor: theme.palette.text.primary
           },
           zIndex: 10
         }}
@@ -224,7 +218,7 @@ const MainScreenContent = () => {
           color: "white",
           bgcolor: "rgba(0,0,0,0.3)",
           "&:hover": {
-            bgcolor: "rgba(0,0,0,0.5)"
+            bgcolor:theme.palette.text.primary
           },
           zIndex: 10
         }}

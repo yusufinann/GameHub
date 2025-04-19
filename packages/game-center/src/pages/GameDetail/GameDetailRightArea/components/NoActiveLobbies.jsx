@@ -25,7 +25,7 @@ function NoActiveLobbies() {
         alignItems: "center",
         justifyContent: "center",
         p: 2,
-        background: "linear-gradient(135deg, #caecd5 0%, rgb(50,135,97) 100%)",
+        background: theme.palette.background.gradient,
         position: "relative",
         overflow: "hidden",
         height: "100%",

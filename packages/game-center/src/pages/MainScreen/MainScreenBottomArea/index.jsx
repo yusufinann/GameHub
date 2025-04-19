@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import LoadingSpinner from './components/LoadingSpinner';
 import Header from './components/Header';
 import { fetchGiveaways } from './api';
@@ -14,7 +14,7 @@ const GameCard = React.lazy(() => import('./components/GameCard'));
 
 function MainScreenBottomArea() {
   const { games, loading, error } = useMainScreenBottomArea(fetchGiveaways);
-
+  const theme=useTheme();
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -38,6 +38,7 @@ function MainScreenBottomArea() {
           <Box>
           <Header 
              title={"Highlights and Recommended"}
+             theme={theme}
              icon={<WhatshotIcon />}
            />
             <Box sx={{ 
@@ -52,7 +53,10 @@ function MainScreenBottomArea() {
           <Box>
           <Header 
             title={"Browse Games"}
-            icon={<NewReleasesIcon />}
+            theme={theme}
+            icon={<NewReleasesIcon />
+              
+            }
           />
            
              <BrowseGames/>
@@ -62,6 +66,7 @@ function MainScreenBottomArea() {
           <Box>
           <Header 
             title={"Trend Games"}
+            theme={theme}
             icon={<TrendingUpIcon />}
           />
             <Box sx={{ 

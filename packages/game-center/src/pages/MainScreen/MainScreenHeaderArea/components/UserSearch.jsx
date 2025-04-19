@@ -11,7 +11,8 @@ import {
   Popper,
   ClickAwayListener,
   Box,
-  CircularProgress
+  CircularProgress,
+  useTheme
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
@@ -43,7 +44,7 @@ const UserSearch = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
+const theme=useTheme();
   const handleSearch = async (event) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -87,12 +88,12 @@ const UserSearch = () => {
             alignItems: 'center',
             width: 400,
             borderRadius: 2,
-            boxShadow: 3,   bgcolor: "rgb(50,135,97)", 
+            boxShadow: 3,   bgcolor: theme.palette.background.stripeBg, 
           }}
         >
-          <IconButton sx={{ p: '10px', color: 'primary.main' }}>
+          <IconButton sx={{ p: '10px', color: theme.palette.primary.light }}>
             {isLoading ? (
-              <CircularProgress size={24} color="primary" />
+              <CircularProgress size={24} color={theme.palette.primary.light} />
             ) : (
               <SearchIcon />
             )}

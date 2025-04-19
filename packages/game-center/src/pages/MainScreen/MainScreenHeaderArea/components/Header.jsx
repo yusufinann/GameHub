@@ -31,7 +31,7 @@ function Header() {
       <Typography
         variant="h4"
         sx={{
-          color: "common.white",
+          color: "white",
           fontWeight: "bold",
           fontSize: { xs: "1.5rem", sm: "2rem" },
         }}
@@ -39,14 +39,14 @@ function Header() {
         Welcome back, {currentUser?.name}
       </Typography>
       <Stack direction="row" spacing={2} alignItems="center">
-        <UserSearch />
+        <UserSearch/>
         <IconButton
           onClick={handleProfileClick}
           sx={{ bgcolor: "rgba(255, 255, 255, 0.1)" }}
         >
           <AccountCircleIcon
             sx={{
-              color: "common.white",
+              color: "white",
               fontSize: { xs: "2rem", sm: "2.5rem" },
             }}
           />

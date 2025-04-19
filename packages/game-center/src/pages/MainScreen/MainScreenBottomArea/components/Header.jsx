@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Divider } from '@mui/material';
 
-const Header = ({ title, icon }) => (
+const Header = ({ title, icon,theme}) => (
   <Box
     sx={{
       background: 'transparent',
@@ -37,7 +37,7 @@ const Header = ({ title, icon }) => (
           variant="h3"
           sx={{
             fontWeight: 900,
-            background: 'linear-gradient(45deg,rgb(218, 31, 31), #ff8e53)',
+            background:theme.palette.text.title,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             textTransform: 'uppercase',

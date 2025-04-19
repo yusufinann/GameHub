@@ -16,7 +16,7 @@ const sidebarStyles = {
   top: '10px',
   borderRadius: '20px',
   mr: '20px',
-  background: '#caecd5',
+  bgcolor: 'background.default',
   backdropFilter: 'blur(4px)',
   display: 'flex',
   flexDirection: 'column',

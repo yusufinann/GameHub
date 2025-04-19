@@ -61,13 +61,13 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
             overflow: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: "rgb(50,135,97)",
+            backgroundColor: theme.palette.background.stripeBg,
           }}
         >
     <Card
       sx={{
-        background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"
-        ,        height: "100%",
+        background: theme.palette.background.stripe,
+        height: "100%",
         overflow: "auto",
         position: "relative",
         boxShadow: theme.shadows[4],

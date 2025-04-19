@@ -8,7 +8,7 @@ import { logout } from '../api';
 
 const StyledHeader = styled(Box)(({ theme }) => ({
   height: '25vh',
-  backgroundColor: '#caecd5',
+  backgroundColor: 'background.default',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

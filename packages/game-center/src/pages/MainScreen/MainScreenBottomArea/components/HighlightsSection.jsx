@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, IconButton, Chip} from '@mui/material';
+import { Box, Typography, IconButton, Chip, useTheme} from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const HighlightsSection = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const theme=useTheme();
   const featuredGames = [
     {
       id: 1,
@@ -160,7 +161,7 @@ const HighlightsSection = () => {
               sx={{
                 width: '35%',
                 height: '100%',
-                backgroundColor: '#42b781 ', // Slightly lighter than the background
+                backgroundColor:theme.palette.primary.medium, // Slightly lighter than the background
                 display: 'flex',
                 flexDirection: 'column',
                 padding: 0,
@@ -172,14 +173,14 @@ const HighlightsSection = () => {
                 sx={{
                   padding: '20px',
                   borderBottom: '1px solid rgba(255,255,255,0.1)',
-                  backgroundColor: '#328761',
+                  backgroundColor:theme.palette.primary.dark,
                 }}
               >
                 <Typography variant="h4" sx={{ color: 'white', fontWeight: 600 }}>
                   {game.title}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                  <Typography variant="body1" sx={{ color: '#8f98a0' }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.secondary.gold }}>
                     {game.status}
                   </Typography>
                   {game.mostSold && (
@@ -187,7 +188,7 @@ const HighlightsSection = () => {
                       label={game.mostSold}
                       size="small"
                       sx={{
-                        backgroundColor: '#3a9f71',
+                        backgroundColor: theme.palette.primary.darker,
                         color: 'white',
                         fontSize: '0.75rem',
                         height: '24px',
@@ -225,8 +226,8 @@ const HighlightsSection = () => {
                       sx={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover', // Cover the container while maintaining aspect ratio
-                        display: 'block' // Remove any bottom spacing
+                        objectFit: 'cover', 
+                        display: 'block' 
                       }}
                     />
                   </Box>
@@ -241,13 +242,13 @@ const HighlightsSection = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  backgroundColor: '#3a9f71',
+                  backgroundColor:  theme.palette.primary.darker,
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box
                     sx={{
-                      backgroundColor: '#4c9f38', // Green discount background
+                      backgroundColor: theme.palette.success.main,
                       padding: '2px 5px',
                       borderRadius: '2px',
                       display: 'flex',

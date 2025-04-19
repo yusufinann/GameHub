@@ -1,72 +1,90 @@
-import React, { useState } from 'react';
-import { Box, Button, Typography, Tabs, Tab} from '@mui/material';
+import React, {useState} from 'react';
+import { Box, Button, Typography, Tabs, Tab, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateLobbyModal from '../../../../../shared/components/CreateLobbyModal';
 
-const CreateLobbyArea = ({ activeTab, setActiveTab,existingLobby }) => { 
+const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
+  const theme = useTheme();
+  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue); 
-  };
+  const handleTabChange = (e, newVal) => setActiveTab(newVal);
 
   return (
     <Box
       sx={{
-        padding: 2,
-        bgcolor: "background.paper",
+        p: 2,
+        bgcolor: theme.palette.background.paper,
         boxShadow: 2,
-        display: "flex",
-        flexDirection: 'column', 
-        borderTopLeftRadius: "10px",
-        borderTopRightRadius: "10px",
+        display: 'flex',
+        flexDirection: 'column',
+        borderTopLeftRadius: 1,
+        borderTopRightRadius: 1,
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          height: "5vh",
-          mb: 2, 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '5vh',
+          mb: 2,
         }}
       >
-        <Typography variant="h6" fontWeight="bold" color="primary">
+        <Typography 
+          variant="h6" 
+          fontWeight="bold" 
+          color={theme.palette.primary.text}       
+        >
           Lobby Creator
         </Typography>
+
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
           onClick={handleOpenModal}
           sx={{
-            borderRadius: "20px",
-            padding: "10px 18px", 
-            fontWeight: "bold",
+            borderRadius: 2,
+            py: 1,
+            px: 2,
+            fontWeight: 'bold',
             boxShadow: 3,
-            background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+            background: (theme) =>
+              `linear-gradient(45deg, 
+                ${theme.palette.primary.main} 30%,  
+                ${theme.palette.primary.light} 90%)`,
             '&:hover': {
-              background: "linear-gradient(45deg, #1565C0 30%, #0288D1 90%)",
-              transform: "translateY(-2px)",
-              transition: "all 0.3s"
-            }
+              background: (theme) =>
+                `linear-gradient(45deg, 
+                  ${theme.palette.primary.dark} 30%, 
+                  ${theme.palette.primary.main} 90%)`,
+              transform: 'translateY(-2px)',
+              transition: 'all 0.3s',
+            },
           }}
         >
-         {existingLobby ? 'Go your Lobby' : 'Create A Lobby'}
+          {existingLobby ? 'Go to your Lobby' : 'Create A Lobby'}
         </Button>
       </Box>
 
       <Tabs
         value={activeTab}
         onChange={handleTabChange}
-        indicatorColor="primary"
-        textColor="primary"
+        indicatorColor="secondary"
+        textColor="secondary"
+        sx={{
+          '& .MuiTab-root': {
+            color: theme.palette.mode === 'light' ? theme.palette.text.secondary : theme.palette.text.primary,
+            '&.Mui-selected': {
+              color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main,
+              fontWeight: 'bold'
+            }
+          },
+          '& .MuiTabs-indicator': {
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.secondary.main
+          }
+        }}
         variant="fullWidth"
         aria-label="lobby tabs"
       >
@@ -76,7 +94,6 @@ const CreateLobbyArea = ({ activeTab, setActiveTab,existingLobby }) => {
         <Tab label="My Groups" value="myGroups" />
       </Tabs>
 
-      {/* Create Lobby Dialog */}
       <CreateLobbyModal
         open={isModalOpen}
         onClose={handleCloseModal}

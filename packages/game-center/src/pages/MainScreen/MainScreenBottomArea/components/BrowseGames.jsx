@@ -70,13 +70,13 @@ const BrowseGames = () => {
   }
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', height: '40vh', backgroundColor: '#328761' }}>
+    <Box sx={{ position: 'relative', width: '100%', height: '40vh', backgroundColor:theme.palette.primary.dark }}>
       <Typography 
         variant="h6" 
         component="div" 
         sx={{ 
           fontWeight: 'bold', 
-          color: 'white', 
+          color: theme.palette.text.contrast, 
           padding: '16px 24px',
           textTransform: 'uppercase'
         }}
@@ -96,11 +96,11 @@ const BrowseGames = () => {
             left: 0,
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: theme.palette.text.primary,
             color: 'white',
             zIndex: 2,
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backgroundColor: theme.palette.text.secondary,
             }
           }}
           onClick={handleBack}
@@ -123,7 +123,6 @@ const BrowseGames = () => {
                 flex: 1,
                 borderRadius: '8px',
                 overflow: 'hidden',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
                 transition: 'transform 0.3s',
                 '&:hover': {
                   transform: 'scale(1.03)',
@@ -157,13 +156,13 @@ const BrowseGames = () => {
                   left: '50%',
                   transform: 'translateX(-50%)',
                   backgroundColor: 'white',
-                  color: '#1a2433',
+                  color: theme.palette.primary.dark,
                   fontWeight: 'bold',
                   borderRadius: '20px',
                   minWidth: '120px',
                   '&:hover': {
                     backgroundColor: category.color,
-                    color: 'white'
+                    color: theme.palette.text.contrast
                   },
                   zIndex: 2
                 }}
@@ -180,11 +179,11 @@ const BrowseGames = () => {
             right: 0,
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: theme.palette.text.primary,
             color: 'white',
             zIndex: 2,
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backgroundColor: theme.palette.text.secondary,
             }
           }}
           onClick={handleNext}

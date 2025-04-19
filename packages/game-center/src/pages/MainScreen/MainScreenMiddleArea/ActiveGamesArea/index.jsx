@@ -14,7 +14,7 @@ function ActiveGamesArea() {
     const container = scrollContainerRef.current;
     const scrollAmount = 400;
     const targetScroll = container.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
-    
+
     container.scrollTo({
       left: targetScroll,
       behavior: 'smooth'
@@ -22,16 +22,13 @@ function ActiveGamesArea() {
   };
 
   const isGameFullyImplemented = (gameId) => {
-    // Only Bingo (id: 1) is fully implemented
     return gameId === 1;
   };
 
   const handleGameClick = (gameId) => {
     if (isGameFullyImplemented(gameId)) {
-      // Navigate to the actual game
       navigate(`/game-detail/${gameId}`);
     } else {
-      // For dummy games, navigate to the same page but show a preview/demo
       navigate(`/game-detail/${gameId}?preview=true`);
     }
   };
@@ -74,7 +71,7 @@ function ActiveGamesArea() {
         <Typography variant="h2" sx={{
           fontFamily: '"Poppins", sans-serif',
           fontWeight: 800,
-          background: 'linear-gradient(45deg, #ff6b6b 0%,rgb(78, 205, 133) 100%)',
+          background: theme.palette.text.gradient,
           WebkitBackgroundClip: 'text',
           textShadow: '0 4px 6px rgba(0,0,0,0.2)',
           fontSize: '2.5rem',
@@ -83,14 +80,14 @@ function ActiveGamesArea() {
           alignItems: 'center',
           gap: '12px',
         }}>
-          <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}}>🎮</span>
+          <Box component="span" sx={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}}>🎮</Box>
           Game Paradise Awaits!
-          <span>🚀</span>
+          <Box component="span">🚀</Box>
         </Typography>
       </Box>
 
-      <Box sx={{ 
-        position: 'relative', 
+      <Box sx={{
+        position: 'relative',
         height: '40vh',
         mt: 10,
         width: '90%',
@@ -105,9 +102,9 @@ function ActiveGamesArea() {
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            bgcolor: 'rgba(255, 255, 255, 0.5)',
+            bgcolor:  theme.palette.background.dot,
             backdropFilter: 'blur(5px)',
-            '&:hover': { 
+            '&:hover': {
               bgcolor: 'rgba(255, 255, 255, 0.7)',
               transform: 'translateY(-50%) scale(1.1)',
             },
@@ -118,7 +115,7 @@ function ActiveGamesArea() {
         >
           <ChevronLeft fontSize="large" />
         </IconButton>
-        
+
         {/* Right Arrow */}
         <IconButton
           onClick={() => handleScroll('right')}
@@ -128,9 +125,9 @@ function ActiveGamesArea() {
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            bgcolor: 'rgba(255, 255, 255, 0.5)',
+            bgcolor: theme.palette.background.dot,
             backdropFilter: 'blur(5px)',
-            '&:hover': { 
+            '&:hover': {
               bgcolor: 'rgba(255, 255, 255, 0.7)',
               transform: 'translateY(-50%) scale(1.1)',
             },
@@ -158,7 +155,7 @@ function ActiveGamesArea() {
         >
           {GAMES.map((game, index) => {
             const fullyImplemented = isGameFullyImplemented(game.id);
-            
+
             return (
               <Box
                 key={game.id}
@@ -173,12 +170,12 @@ function ActiveGamesArea() {
                   height: '80%',
                   cursor: 'pointer',
                   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: hoveredIndex === index 
+                  boxShadow: hoveredIndex === index
                     ? fullyImplemented ? '0 12px 32px rgba(78, 205, 196, 0.5)' : '0 12px 32px rgba(255, 180, 0, 0.5)'
                     : '0 6px 16px rgba(0, 0, 0, 0.2)',
                   border: '2px solid',
-                  borderColor: hoveredIndex === index 
-                    ? fullyImplemented ? '#4ECDC4' : '#FFB400' 
+                  borderColor: hoveredIndex === index
+                    ? fullyImplemented ? '#4ECDC4' : '#FFB400'
                     : 'transparent',
                   transform: hoveredIndex === index ? 'translateY(-8px) scale(1.03)' : 'translateY(0) scale(1)'
                 }}
@@ -190,7 +187,7 @@ function ActiveGamesArea() {
                     top: 15,
                     right: 15,
                     zIndex: 5,
-                    backgroundColor: 'rgba(255, 123, 0, 0.85)',
+                    backgroundColor: theme.palette.warning.light,
                     color: 'white',
                     padding: '5px 10px',
                     borderRadius: '12px',
@@ -203,7 +200,7 @@ function ActiveGamesArea() {
                     <Typography variant="caption" fontWeight="bold">Preview Mode</Typography>
                   </Box>
                 )}
-              
+
                 {/* Image Container */}
                 <Box
                   component="img"
@@ -216,16 +213,16 @@ function ActiveGamesArea() {
                     willChange: 'transform',
                     backfaceVisibility: 'hidden',
                     perspective: 1000,
-                    filter: !fullyImplemented 
-                      ? 'brightness(0.85)' 
-                      : hoveredIndex === index 
-                        ? 'brightness(1.1)' 
+                    filter: !fullyImplemented
+                      ? 'brightness(0.85)'
+                      : hoveredIndex === index
+                        ? 'brightness(1.1)'
                         : 'brightness(0.9)',
                     transition: 'transform 0.4s ease-out, filter 0.3s ease',
                     transform: hoveredIndex === index ? 'scale(1.05)' : 'scale(1)'
                   }}
                 />
-                
+
                 {/* Game highlight for Bingo */}
                 {fullyImplemented && (
                   <Box sx={{
@@ -233,7 +230,7 @@ function ActiveGamesArea() {
                     top: 15,
                     left: 15,
                     zIndex: 5,
-                    backgroundColor: 'rgba(38, 166, 154, 0.85)',
+                    backgroundColor: theme.palette.secondary.main,
                     color: 'white',
                     padding: '5px 10px',
                     borderRadius: '12px',
@@ -246,7 +243,7 @@ function ActiveGamesArea() {
                     <Typography variant="caption" fontWeight="bold">FULLY READY!</Typography>
                   </Box>
                 )}
-                
+
                 {/* Content Overlay */}
                 <Box
                   sx={{
@@ -260,21 +257,21 @@ function ActiveGamesArea() {
                     transition: 'all 0.3s ease-in-out'
                   }}
                 >
-                  <Typography variant="h6" sx={{ 
-                    color: '#fff', 
-                    mb: 1, 
+                  <Typography variant="h6" sx={{
+                    color: '#fff',
+                    mb: 1,
                     fontWeight: 700,
                     fontFamily: '"Poppins", sans-serif',
                     textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                   }}>
                     {game.title}
                   </Typography>
-                  
+
                   {/* Game Info Icons */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 2, 
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
                     mb: 2,
                     '& > *': {
                       display: 'flex',
@@ -311,7 +308,7 @@ function ActiveGamesArea() {
                     onClick={() => handleGameClick(game.id)}
                     fullWidth
                     sx={{
-                      bgcolor: fullyImplemented ? 'rgba(38, 166, 154, 0.85)' : 'rgba(255, 180, 0, 0.85)',
+                      bgcolor: fullyImplemented ? theme.palette.secondary.light : theme.palette.warning.light,
                       borderRadius: '12px',
                       textTransform: 'none',
                       fontWeight: 700,
@@ -320,8 +317,8 @@ function ActiveGamesArea() {
                       transition: 'all 0.3s ease',
                       color: '#fff',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                      '&:hover': { 
-                        bgcolor: fullyImplemented ? 'rgba(38, 166, 154, 1)' : 'rgba(255, 180, 0, 1)',
+                      '&:hover': {
+                        bgcolor: fullyImplemented ? theme.palette.secondary.main  : theme.palette.warning.main,
                         transform: 'translateY(-2px)',
                         boxShadow: '0 6px 16px rgba(0,0,0,0.3)'
                       },

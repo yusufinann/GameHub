@@ -1,44 +1,18 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  ThemeProvider,
-  createTheme,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { gameData } from "../../../utils/constants";
 import Header from "./components/Header";
 import MainScreenContent from "./components/MainScreenContent "; 
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#4CAF50",
-      dark: "#2E7D32",
-      light: "#81C784",
-    },
-    secondary: {
-      main: "#2196F3",
-      dark: "#1565C0",
-      light: "#64B5F6",
-    },
-    background: {
-      default: "#121212",
-      paper: "#1E1E1E",
-    },
-  },
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536,
-    },
-  },
-});
+
 
 const MainScreenHeader = () => {
   const [selectedGame, setSelectedGame] = useState(null);
+  const theme=useTheme();
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
   useEffect(() => {
@@ -48,14 +22,13 @@ const MainScreenHeader = () => {
   if (!selectedGame) return null;
 
   return (
-    <ThemeProvider theme={theme}>
       <Box
         sx={{
           minHeight: "50vh",
           position: "relative",
           borderRadius: 4,
           overflow: "hidden",
-          bgcolor: "rgb(50,135,97)",
+          bgcolor:  theme.palette.background.stripeBg,
           display: "flex",
           flexDirection: "column",
         }}
@@ -68,7 +41,7 @@ const MainScreenHeader = () => {
             left: 0,
             width: "100%",
             height: "100%",
-            background: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)",
+            background:  theme.palette.background.stripe,
             zIndex: 1
           }}
         />
@@ -99,11 +72,10 @@ const MainScreenHeader = () => {
             }}
           >
             {/* Main Content Area - Now using our new component */}
-            <MainScreenContent />
+            <MainScreenContent theme={theme}/>
           </Box>
         </Box>
       </Box>
-    </ThemeProvider>
   );
 };
 export default MainScreenHeader;

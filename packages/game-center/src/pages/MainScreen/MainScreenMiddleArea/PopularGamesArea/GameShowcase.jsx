@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Paper } from '@mui/material';
+import { Box, Typography, IconButton, Paper, useTheme } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -53,12 +53,7 @@ const GameShowcase = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
-
-  // Ana uygulama arka plan rengi
-  const appBackgroundColor = 'rgb(157,222,175)';
-  // Kart arka plan rengi - ana renge yakın ama biraz daha açık ton
-  const cardBackgroundColor = 'rgb(175,230,190)';
-
+  const theme=useTheme();
   // Otomatik slayt değişimi
   useEffect(() => {
     const interval = setInterval(() => {
@@ -82,7 +77,7 @@ const GameShowcase = () => {
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-        backgroundColor: appBackgroundColor, 
+        backgroundColor: theme.palette.background.app, 
         borderRadius: 2,
         overflow: 'hidden',
         position: 'relative',
@@ -136,7 +131,7 @@ const GameShowcase = () => {
           justifyContent: 'center',
           padding: 2,
           position: 'relative',
-          background: `linear-gradient(135deg, ${appBackgroundColor} 0%, rgba(140,210,160,0.8) 100%)`
+          background: theme.palette.background.gradient
         }}
       >
         {/* Arka plan dekoratif elementleri */}
@@ -145,7 +140,6 @@ const GameShowcase = () => {
             position: 'absolute',
             width: '100%',
             height: '100%',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(220,255,220,0.2) 100%)',
             zIndex: 0
           }}
         />
@@ -183,12 +177,12 @@ const GameShowcase = () => {
                   transform: isActive ? 'scale(1)' : 'scale(0.85)',
                   opacity: isActive ? 1 : 0.7,
                   transition: 'all 0.5s ease',
-                  color: 'white',
+                  color: theme.palette.text.contrast,
                   cursor: 'pointer',
                   overflow: 'hidden',
                   order: isActive ? 0 : (isNext ? 1 : -1),
                   zIndex: isActive ? 2 : 1,
-                  background: cardBackgroundColor, // Uygulamanın rengine uyumlu kart arka planı
+                  background: theme.palette.background.card, // Uygulamanın rengine uyumlu kart arka planı
                   borderRadius: 2,
                   border: isActive ? `3px solid ${game.color}` : 'none',
                 }}
@@ -220,7 +214,7 @@ const GameShowcase = () => {
                   <Typography 
                     variant="subtitle2" 
                     sx={{ 
-                      backgroundColor: 'rgba(255,255,255,0.85)',
+                      backgroundColor: theme.palette.background.offwhite,
                       color: game.color,
                       padding: '2px 8px',
                       borderRadius: 4,
@@ -248,7 +242,7 @@ const GameShowcase = () => {
                   <Box sx={{ 
                     display: 'flex', 
                     alignItems: 'center',
-                    backgroundColor: 'rgba(255,255,255,0.85)',
+                    backgroundColor: theme.palette.background.offwhite,
                     padding: '2px 8px',
                     borderRadius: 4,
                   }}>
@@ -258,7 +252,7 @@ const GameShowcase = () => {
                     </Typography>
                   </Box>
                   <Box sx={{ 
-                    backgroundColor: 'rgba(255,255,255,0.85)',
+                    backgroundColor:theme.palette.background.offwhite,
                     width: 28,
                     height: 28,
                     display: 'flex',
@@ -289,7 +283,7 @@ const GameShowcase = () => {
                       variant="button" 
                       sx={{ 
                         fontWeight: 'bold',
-                        color: 'white',
+                        color: theme.palette.text.contrast,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
@@ -312,8 +306,7 @@ const GameShowcase = () => {
           display: 'flex',
           justifyContent: 'center',
           padding: 1,
-          backgroundColor: 'rgba(255,255,255,0.7)', // Yarı şeffaf beyaz
-          borderTop: '1px solid rgba(0,0,0,0.05)'
+          backgroundColor: theme.palette.background.offwhite, // Yarı şeffaf beyaz
         }}
       >
         {games.map((game, index) => (

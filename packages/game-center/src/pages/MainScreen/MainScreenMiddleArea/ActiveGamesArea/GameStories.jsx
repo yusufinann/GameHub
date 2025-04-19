@@ -10,6 +10,7 @@ import {
   Stack,
   Grow,
   Paper,
+  useTheme,
 } from '@mui/material';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -17,13 +18,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 
 const GameStories = () => {
   const [hoverIndex, setHoverIndex] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState('adventure');
-  
+  const theme=useTheme();
   const games = [
     {
       id: 1,
@@ -67,14 +66,6 @@ const GameStories = () => {
       discount: '-50%'
     }
   ];
-
-  const categories = [
-    { id: 'adventure', name: 'Macera', icon: <SportsEsportsIcon /> },
-    { id: 'action', name: 'Aksiyon', icon: <SportsEsportsIcon /> },
-    { id: 'simulation', name: 'Simülasyon', icon: <SportsEsportsIcon /> },
-    { id: 'strategy', name: 'Strateji', icon: <SportsEsportsIcon /> },
-  ];
-  
   const displayedGames = games.slice(currentIndex, currentIndex + 3);
 
   const handlePrev = () => {
@@ -93,9 +84,6 @@ const GameStories = () => {
     setHoverIndex(null);
   };
 
-  const handleCategoryClick = (categoryId) => {
-    setActiveCategory(categoryId);
-  };
 
   return (
     <Box
@@ -124,34 +112,9 @@ const GameStories = () => {
           p: 1, 
           gap: 2 
         }}>
-          <Stack direction="row" spacing={1}>
-            {categories.map(category => (
-              <Button
-                key={category.id}
-                startIcon={category.icon}
-                variant={activeCategory === category.id ? "contained" : "outlined"}
-                color="primary"
-                size="small"
-                onClick={() => handleCategoryClick(category.id)}
-                sx={{
-                  borderRadius: 4,
-                  textTransform: 'none',
-                  px: 2,
-                  backgroundColor: activeCategory === category.id ? '#00a884' : 'transparent',
-                  borderColor: '#00a884',
-                  color: activeCategory === category.id ? 'white' : '#00a884',
-                  '&:hover': {
-                    backgroundColor: activeCategory === category.id ? '#009677' : 'rgba(0, 168, 132, 0.08)',
-                  }
-                }}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </Stack>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, gap: 1 }}>
-          <Typography variant="h4" sx={{ color: 'black', textShadow: '0 4px 6px rgba(0,0,0,0.2)',fontWeight: 800,filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+          <Typography variant="h4" sx={{ color:'black', textShadow: '0 4px 6px rgba(0,0,0,0.2)',fontWeight: 800,filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
             Adventure Stories
           </Typography>
         </Box>
@@ -293,7 +256,7 @@ const GameStories = () => {
                           position: 'absolute',
                           right: 10,
                           top: 10,
-                          backgroundColor: '#f44336',
+                          backgroundColor: theme.palette.error.main,
                           color: 'white',
                           px: 1,
                           py: 0.5,
@@ -351,7 +314,7 @@ const GameStories = () => {
                                     width: 0,
                                     height: 0,
                                     borderTop: '10px solid transparent',
-                                    borderLeft: '10px solid #00a884',
+                                    borderLeft: `10px solid  ${theme.palette.secondary.paper}`,
                                     borderBottom: '10px solid transparent',
                                   } 
                                 : {
@@ -360,7 +323,7 @@ const GameStories = () => {
                                     width: 0,
                                     height: 0,
                                     borderTop: '10px solid transparent',
-                                    borderRight: '10px solid #00a884',
+                                    borderRight: `10px solid  ${theme.palette.secondary.paper}`,
                                     borderBottom: '10px solid transparent',
                                   }),
                             }}
@@ -370,7 +333,7 @@ const GameStories = () => {
                           <Paper
                             elevation={6}
                             sx={{
-                              backgroundColor: '#00a884',
+                              backgroundColor: theme.palette.secondary.paper,
                               p: 2,
                               color: 'white',
                               borderRadius: 2,
@@ -437,7 +400,7 @@ const GameStories = () => {
                                   startIcon={<PlayArrowIcon />}
                                   color="primary"
                                   size="small"
-                                  sx={{ 
+                                  sx={{   
                                     bgcolor: '#90caf9', 
                                     color: '#000',
                                     '&:hover': { bgcolor: '#64b5f6' } 
