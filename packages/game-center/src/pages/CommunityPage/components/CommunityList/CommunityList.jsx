@@ -1,6 +1,5 @@
-// CommunityList.jsx
 import React, { useState, useEffect } from 'react';
-import { Box, List, Divider} from '@mui/material';
+import { Box, List, Divider, useTheme} from '@mui/material';
 import Header from './Header';
 import MyGroups from './MyGroups';
 import JoinableGroups from './JoinableGroups';
@@ -25,7 +24,7 @@ const CommunityList = ({
   const [groupToDeleteId, setGroupToDeleteId] = useState(null);
   const [myGroupSearch, setMyGroupSearch] = useState('');
   const [joinableGroupSearch, setJoinableGroupSearch] = useState('');
-
+ const theme = useTheme();
   useEffect(() => {
     if (allGroups && groups) {
       const filteredGroups = allGroups.filter(group => {
@@ -80,24 +79,30 @@ const CommunityList = ({
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         width: { xs: "100%", md: "30%" },
         height: '100vh',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.palette.background.default,
         borderRadius: 2,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+        boxShadow: theme.palette.mode === 'light' 
+          ? '0 0 10px rgba(50,135,97,0.1)' 
+          : '0 0 10px rgba(101, 147, 245, 0.2)',
         mt: 1
-      }}
+      })}
     >
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
         <List disablePadding>
-          <Header activeItem={activeItem} handleSelectCommunity={handleSelectCommunity} />
+          <Header activeItem={activeItem} handleSelectCommunity={handleSelectCommunity} theme={theme}/>
         </List>
 
-        <Divider sx={{ my: 1.5 }} />
+        <Divider sx={{ 
+          my: 1.5, 
+          borderColor: (theme) => theme.palette.primary.light,
+          opacity: 0.7 
+        }} />
 
         {/* My Groups */}
         <MyGroups
@@ -114,7 +119,11 @@ const CommunityList = ({
           isGroupDeleting={isGroupDeleting}
         />
 
-        <Divider sx={{ my: 1.5 }} />
+        <Divider sx={{ 
+          my: 1.5,
+          borderColor: (theme) => theme.palette.primary.light,
+          opacity: 0.7
+        }} />
 
         {/* Joinable Groups */}
         <JoinableGroups

@@ -28,13 +28,14 @@ const ChatBoxHeader = ({ chatType, chatTitle, selectedFriend, selectedConversati
   const [inviteMenuAnchor, setInviteMenuAnchor] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [appBaseUrl, setAppBaseUrl] = useState(''); 
+  
   useEffect(() => {
     setAppBaseUrl(window.location.origin);
   }, []);
 
   const handleMembersMenuOpen = () => setIsMembersMenuOpen(true);
   const handleMembersMenuClose = () => {
-    setSearchTerm(""); // Arama kutusunu sıfırla
+    setSearchTerm("");
     setIsMembersMenuOpen(false);
   };
 
@@ -46,7 +47,8 @@ const ChatBoxHeader = ({ chatType, chatTitle, selectedFriend, selectedConversati
   };
 
   const invitationLinkPath = selectedConversation?.invitationLink;
-const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPath}` : null;
+  const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPath}` : null;
+  
   const handleCopyLink = () => {
     if (fullInvitationLink) {
       navigator.clipboard.writeText(fullInvitationLink);
@@ -63,7 +65,7 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
   return (
     <Box sx={{
       p: 1,
-      backgroundColor: 'white',
+      backgroundColor: theme.palette.background.paper,
       borderBottom: `1px solid ${theme.palette.divider}`,
       display: "flex",
       alignItems: "center",
@@ -74,13 +76,22 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
         {chatType === 'conversation' && (
           <Avatar
             src={selectedFriend?.avatar}
-            sx={{ width: 40, height: 40 }}
+            sx={{ 
+              width: 40, 
+              height: 40,
+              border: `2px solid ${theme.palette.primary.light}`
+            }}
           />
         )}
         <Box>
           {selectedConversation?.type === 'friendGroup' ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2, color: 'text.primary' }}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                lineHeight: 1.2, 
+                color: theme.palette.text.primary,
+                fontFamily: theme.typography.fontFamily
+              }}>
                 {selectedConversation.groupName}
               </Typography>
               {fullInvitationLink  && (
@@ -89,6 +100,12 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
                     onClick={handleInviteMenuOpen} 
                     size="small" 
                     aria-label="davet linkini göster"
+                    sx={{
+                      color: theme.palette.secondary.main,
+                      '&:hover': {
+                        backgroundColor: theme.palette.action.hover
+                      }
+                    }}
                   >
                     <LinkIcon fontSize="small" />
                   </IconButton>
@@ -96,7 +113,12 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
               )}
             </Box>
           ) : (
-            <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2, color: 'text.primary' }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 600, 
+              lineHeight: 1.2, 
+              color: theme.palette.text.primary,
+              fontFamily: theme.typography.fontFamily
+            }}>
               {chatTitle}
             </Typography>
           )}
@@ -107,7 +129,8 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
                 theme.palette.text.secondary,
               display: 'flex',
               alignItems: 'center',
-              gap: 0.5
+              gap: 0.5,
+              fontFamily: theme.typography.fontFamily
             }}>
               <StatusIcon sx={{ fontSize: '0.8rem' }} />
               {selectedFriend?.isOnline ? 'Online' : 'Offline'}
@@ -121,14 +144,25 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
           <IconButton
             onClick={handleMembersMenuOpen}
             ref={membersButtonRef}
-            sx={{
-              bgcolor: 'background.default',
-              '&:hover': { bgcolor: 'action.hover' }
-            }}
           >
-            <AvatarGroup max={4}>
+            <AvatarGroup 
+              max={4}
+              sx={{
+                '& .MuiAvatar-root': {
+                  borderColor: theme.palette.background.paper
+                }
+              }}
+            >
               {selectedConversation?.members?.map((member) => (
-                <Avatar key={member._id} alt={member.name} src={member.avatar} />
+                <Avatar 
+                  key={member._id} 
+                  alt={member.name} 
+                  src={member.avatar}
+                  sx={{
+                    bgcolor: theme.palette.primary.light,
+                    color: theme.palette.primary.contrastText
+                  }}
+                />
               ))}
             </AvatarGroup>
           </IconButton>
@@ -140,7 +174,14 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
           anchorEl={membersButtonRef.current}
           open={isMembersMenuOpen}
           onClose={handleMembersMenuClose}
-          PaperProps={{ sx: { maxHeight: 300, width: 300 } }}
+          PaperProps={{ 
+            sx: { 
+              maxHeight: 300, 
+              width: 300,
+              bgcolor: theme.palette.background.paper,
+              border: `1px solid ${theme.palette.divider}`
+            } 
+          }}
         >
           <Box sx={{ p: 1 }}>
             <TextField
@@ -152,27 +193,65 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
+                    <SearchIcon 
+                      fontSize="small" 
+                      sx={{ color: theme.palette.text.secondary }}
+                    />
                   </InputAdornment>
-                )
+                ),
+                sx: {
+                  '& input': {
+                    color: theme.palette.text.primary,
+                    fontFamily: theme.typography.fontFamily
+                  }
+                }
               }}
             />
           </Box>
           <MenuList dense>
             {filteredMembers?.length ? filteredMembers.map((member) => (
-              <MenuItem key={member._id} disabled={member._id === currentUser?.id}>
+              <MenuItem 
+                key={member._id} 
+                disabled={member._id === currentUser?.id}
+                sx={{
+                  '&:hover': {
+                    bgcolor: theme.palette.action.hover
+                  }
+                }}
+              >
                 <ListItemAvatar>
-                  <Avatar alt={member.name} src={member.avatar} />
+                  <Avatar 
+                    alt={member.name} 
+                    src={member.avatar}
+                    sx={{
+                      bgcolor: theme.palette.primary.light,
+                      color: theme.palette.primary.contrastText
+                    }}
+                  />
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.name}
                   secondary={member.username}
-                  secondaryTypographyProps={{ variant: 'caption' }}
+                  primaryTypographyProps={{ 
+                    color: theme.palette.text.primary,
+                    fontFamily: theme.typography.fontFamily
+                  }}
+                  secondaryTypographyProps={{ 
+                    variant: 'caption',
+                    color: theme.palette.text.secondary,
+                    fontFamily: theme.typography.fontFamily
+                  }}
                 />
               </MenuItem>
             )) : (
               <MenuItem disabled>
-                <ListItemText primary="Hiç üye bulunamadı." />
+                <ListItemText 
+                  primary="Hiç üye bulunamadı." 
+                  primaryTypographyProps={{
+                    color: theme.palette.text.secondary,
+                    fontFamily: theme.typography.fontFamily
+                  }}
+                />
               </MenuItem>
             )}
           </MenuList>
@@ -186,9 +265,34 @@ const fullInvitationLink = invitationLinkPath ? `${appBaseUrl}${invitationLinkPa
           onClose={handleInviteMenuClose}
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           transformOrigin={{ vertical: "top", horizontal: "left" }}
+          PaperProps={{
+            sx: {
+              bgcolor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              border: `1px solid ${theme.palette.divider}`
+            }
+          }}
         >
-          <MenuItem onClick={handleCopyLink}>
-          {fullInvitationLink ? fullInvitationLink : "Invitation link not exist."} 
+          <MenuItem 
+            onClick={handleCopyLink}
+            sx={{
+              fontFamily: theme.typography.fontFamily,
+              '&:hover': {
+                bgcolor: theme.palette.action.hover
+              }
+            }}
+          >
+            {fullInvitationLink ? 
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: theme.palette.primary.main,
+                  fontFamily: 'monospace'
+                }}
+              >
+                {fullInvitationLink}
+              </Typography> : 
+              "Invitation link not exist."}
           </MenuItem>
         </Menu>
       )}

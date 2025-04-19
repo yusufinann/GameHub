@@ -1,4 +1,3 @@
-// ChatMessageList.js
 import React from "react";
 import {
     Box,
@@ -9,11 +8,11 @@ import {
     Paper,
     CircularProgress,
     Badge,
-    Fab,
-    Zoom,
+    IconButton,
+    Fade,
 } from "@mui/material";
 import {
-    ArrowDownward as ArrowDownwardIcon,
+    KeyboardArrowDown as KeyboardArrowDownIcon,
 } from "@mui/icons-material";
 import useChatMessageList from "./useChatMessageList";
 
@@ -28,15 +27,18 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
         scrollToBottom,
         handleScroll,
         processedMessages
-    } = useChatMessageList({ messages, currentUser, isLoadingHistory, selectedConversation }); 
+    } = useChatMessageList({ messages, currentUser, isLoadingHistory, selectedConversation });
+    
     const messageStyles = {
         currentUser: {
-            bgcolor: theme.palette.primary.light,
+            bgcolor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
             borderRadius: '20px 20px 4px 20px',
         },
         otherUser: {
-            bgcolor: theme.palette.grey[100],
+            bgcolor: theme.palette.mode === 'light' 
+                ? theme.palette.grey[100] 
+                : theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderRadius: '4px 20px 20px 20px',
         },
@@ -60,8 +62,13 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                         justifyContent: "center"
                     }}
                 >
-                    <Paper sx={{ ...messageStyles.systemMessage, p: 1, px: 2 }}>
-                        <Typography variant="body2">
+                    <Paper sx={{ 
+                        ...messageStyles.systemMessage, 
+                        p: 1, 
+                        px: 2,
+                        border: `1px solid ${theme.palette.divider}`
+                    }}>
+                        <Typography variant="body2" sx={{ fontFamily: theme.typography.fontFamily }}>
                             {message.message}
                         </Typography>
                     </Paper>
@@ -90,7 +97,12 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                     {!isCurrentUser && message.senderId && (
                         <Avatar
                             src={message.senderId.avatar}
-                            sx={{ width: 32, height: 32, mt: 0.5 }}
+                            sx={{ 
+                                width: 32, 
+                                height: 32, 
+                                mt: 0.5,
+                                border: `2px solid ${theme.palette.primary.light}`
+                            }}
                         />
                     )}
 
@@ -101,16 +113,23 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                         maxWidth: '100%',
                     }}>
                         {!isCurrentUser && message.senderId && (
-                            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, ml: 1 }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'baseline', 
+                                gap: 1, 
+                                ml: 1 
+                            }}>
                                 <Typography variant="caption" sx={{
                                     fontWeight: 500,
-                                    color: 'text.secondary',
+                                    color: theme.palette.text.secondary,
+                                    fontFamily: theme.typography.fontFamily
                                 }}>
                                     {message.senderId.name}
                                 </Typography>
                                 <Typography variant="caption" sx={{
-                                    color: 'text.disabled',
+                                    color: theme.palette.text.disabled,
                                     fontSize: '0.7rem',
+                                    fontFamily: theme.typography.fontFamily
                                 }}>
                                     @{message.senderId.username}
                                 </Typography>
@@ -121,11 +140,9 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                             p: 1.5,
                             px: 2,
                             boxShadow: theme.shadows[1],
-                            transition: 'transform 0.2s, box-shadow 0.2s',
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: theme.shadows[3],
-                            },
+                            transition: theme.transitions.create(['transform', 'box-shadow'], {
+                                duration: theme.transitions.duration.short,
+                            }),
                             ...(isCurrentUser
                                 ? messageStyles.currentUser
                                 : messageStyles.otherUser
@@ -136,16 +153,18 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                                 lineHeight: 1.4,
                                 whiteSpace: 'pre-wrap',
                                 wordBreak: 'break-word',
+                                fontFamily: theme.typography.fontFamily
                             }}>
                                 {message.message}
                             </Typography>
                         </Paper>
 
                         <Typography variant="caption" sx={{
-                            color: 'text.secondary',
+                            color: theme.palette.text.secondary,
                             alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
                             px: 1,
                             fontSize: '0.75rem',
+                            fontFamily: theme.typography.fontFamily
                         }}>
                             {formatMessageListTimestamp(message.timestamp)}
                         </Typography>
@@ -156,18 +175,36 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
     };
 
     return (
-        <Box ref={messagesContainerRef} onScroll={handleScroll} sx={{
-            flex: 1,
-            overflowY: 'auto',
-            p: 2,
-            bgcolor: 'background.default',
-            '&::-webkit-scrollbar': { width: '8px' },
-            '&::-webkit-scrollbar-track': { bgcolor: 'action.hover' },
-            '&::-webkit-scrollbar-thumb': {
-                bgcolor: 'text.disabled',
-                borderRadius: 4,
-            },
-        }}>
+        <Box 
+            ref={messagesContainerRef} 
+            onScroll={handleScroll} 
+            sx={{
+                flex: 1,
+                overflowY: 'auto',
+                p: 2,
+                position: 'relative',
+                bgcolor: theme.palette.background.default,
+                '&::-webkit-scrollbar': { 
+                    width: '6px',
+                    backgroundColor: 'transparent'
+                },
+                '&::-webkit-scrollbar-track': { 
+                    bgcolor: 'transparent',
+                    borderRadius: '3px'
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    bgcolor: theme.palette.mode === 'light' 
+                        ? theme.palette.grey[300] 
+                        : theme.palette.grey[700],
+                    borderRadius: '3px',
+                    '&:hover': {
+                        bgcolor: theme.palette.mode === 'light' 
+                            ? theme.palette.grey[400] 
+                            : theme.palette.grey[600]
+                    }
+                },
+            }}
+        >
             {isLoadingHistory ? (
                 <Box sx={{
                     display: 'flex',
@@ -175,7 +212,7 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                     alignItems: 'center',
                     height: '100%'
                 }}>
-                    <CircularProgress />
+                    <CircularProgress color="secondary" size={24} thickness={4} />
                 </Box>
             ) : (
                 <List sx={{
@@ -189,28 +226,53 @@ const ChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConv
                 </List>
             )}
 
-            <Zoom in={showScrollButton}>
-                <Fab
-                    color="primary"
-                    size="small"
-                    onClick={() => scrollToBottom()}
+            <Fade in={showScrollButton}>
+                <Box 
                     sx={{
                         position: 'absolute',
-                        bottom: 100,
-                        right: 20,
-                        zIndex: 999,
-                        boxShadow: theme.shadows[6],
-                        '&:hover': { transform: 'scale(1.1)' },
-                        transition: theme.transitions.create('transform', {
-                            duration: theme.transitions.duration.short,
-                        }),
+                        bottom: 16,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        zIndex: 2
                     }}
                 >
-                    <Badge badgeContent={unreadCount} color="error" max={99}>
-                        <ArrowDownwardIcon fontSize="small" />
+                    <Badge 
+                        badgeContent={unreadCount} 
+                        color="error" 
+                        max={99}
+                        sx={{
+                            '& .MuiBadge-badge': { 
+                                fontSize: '0.7rem',
+                                minWidth: '16px',
+                                height: '16px',
+                                padding: '0 4px'
+                            }
+                        }}
+                    >
+                        <IconButton
+                            onClick={scrollToBottom}
+                            size="small"
+                            sx={{
+                                bgcolor: theme.palette.background.paper,
+                                boxShadow: theme.shadows[2],
+                                border: `1px solid ${theme.palette.divider}`,
+                                color: theme.palette.text.secondary,
+                                '&:hover': {
+                                    bgcolor: theme.palette.mode === 'light' 
+                                        ? theme.palette.grey[100] 
+                                        : theme.palette.grey[800],
+                                    color: theme.palette.text.primary
+                                },
+                                padding: '6px'
+                            }}
+                        >
+                            <KeyboardArrowDownIcon fontSize="small" />
+                        </IconButton>
                     </Badge>
-                </Fab>
-            </Zoom>
+                </Box>
+            </Fade>
         </Box>
     );
 };

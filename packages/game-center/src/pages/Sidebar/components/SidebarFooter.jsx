@@ -15,18 +15,20 @@ const StyledFooter = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   padding: "10px 0",
-  backgroundColor: "rgb(165, 249, 190)",
-  borderTop: "1px solid #d5fdcd",
+  backgroundColor: theme.palette.background.card,
+  borderTop: `1px solid ${theme.palette.primary.light}`,
 }));
 
 const StyledFooterItem = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: "black",
+  color: theme.palette.text.primary,
   margin: "5px 0px",
+  transition: "color 0.2s ease-in-out",
   "&:hover": {
-    color: "#269366",
+    color: theme.palette.primary.dark,
+    cursor: "pointer"
   },
 }));
 

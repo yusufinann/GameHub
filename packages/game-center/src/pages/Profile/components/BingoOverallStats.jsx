@@ -14,7 +14,7 @@ const BingoOverallStats = ({ stats, loading, error, theme }) => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
-        <CircularProgress sx={{ color: theme.palette.primary.main }} />
+        <CircularProgress sx={{ color: theme.palette.primary.main}} />
       </Box>
     );
   }

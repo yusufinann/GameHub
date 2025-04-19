@@ -133,7 +133,7 @@ const ConversationList = ({
             variant="h6"
             sx={{
               fontWeight: "bold",
-              color: theme.palette.primary.main
+              color: theme.palette.text.primary
             }}
           >
             {tabValue === 0 && "All"}
@@ -158,7 +158,7 @@ const ConversationList = ({
               sx={{ mr: 1 }}
             >
               <IconButton
-                color="primary"
+                color={theme.palette.text.primary}
                 aria-label="friend requests"
               >
                 <MailIcon />
