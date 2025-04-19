@@ -1,35 +1,48 @@
 import { useState, useEffect } from 'react';
-import { userApi } from './api';
+import apiClient from './api'; 
 
 export const useProfile = (userId) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [progress, setProgress] = useState(0);
-  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const userData = await userApi.getUserProfile(userId);
-        setUser(userData);
-
-        // Küçük gecikme ile progress animasyonu
-        const timer = setTimeout(() => {
-          setProgress((1 / 5) * 100);
-        }, 200);
-        return () => clearTimeout(timer);
+        const userData = await apiClient.user.getUserProfile(userId);
+        
+        if (isMounted) {
+          setUser({
+            ...userData,
+            achievements: userData.achievements || [],
+            recentGames: userData.recentGames || []
+          });
+        }
       } catch (err) {
-        setError(err);
-        console.error('Profile fetch error:', err);
+        if (isMounted) {
+          setError(err.message || 'Profil yüklenirken hata oluştu');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchUserProfile();
+    if (userId) {
+      fetchUserProfile();
+    } else {
+      setLoading(false);
+      setError('Geçersiz kullanıcı ID');
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
-  return { user, loading, error, progress, successMessage };
+  return { user, loading, error };
 };

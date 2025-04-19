@@ -10,11 +10,11 @@ import {
   Alert
 } from '@mui/material';
 
-const BingoOverallStats = ({ stats, loading, error }) => {
+const BingoOverallStats = ({ stats, loading, error, theme }) => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: theme.palette.primary.main }} />
       </Box>
     );
   }
@@ -22,66 +22,102 @@ const BingoOverallStats = ({ stats, loading, error }) => {
   if (error) {
     return (
       <Box p={4}>
-        <Alert severity="error">Error loading statistics: {error}</Alert>
+        <Alert severity="error" sx={{ 
+          bgcolor: theme.palette.error.light,
+          color: theme.palette.error.contrastText 
+        }}>
+          Error loading statistics: {error}
+        </Alert>
       </Box>
     );
   }
 
-  if (!stats) {
-    return null; // Or a message like "No stats available"
-  }
+  if (!stats) return null;
 
   return (
-    <Card sx={{ mb: 4 }}>
+    <Card sx={{ 
+      mb: 4,
+      bgcolor: theme.palette.background.offwhite,
+      boxShadow: `0 4px 20px ${theme.palette.background.dot}`
+    }}>
       <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Bingo Overall Statistics
+        <Typography 
+          variant="h5" 
+          gutterBottom
+          sx={{
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+            background: theme.palette.text.gradient,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
+          Bingo Genel İstatistikler
         </Typography>
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
             <Paper
-              elevation={2}
+              elevation={0}
               sx={{
                 p: 3,
-                backgroundColor: '#bbdefb',
-                textAlign: 'center'
+                bgcolor: theme.palette.mode === 'light' 
+                  ? theme.palette.primary.light 
+                  : theme.palette.secondary.main,
+                textAlign: 'center',
+                borderRadius: 3,
+                border: `1px solid ${theme.palette.background.dot}`
               }}
             >
-              <Typography variant="h4">{stats.totalGames}</Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Total Games
+              <Typography variant="h4" sx={{ color: theme.palette.text.contrast }}>
+                {stats.totalGames}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: theme.palette.text.secondary }}>
+                Toplam Oyun
               </Typography>
             </Paper>
           </Grid>
+          
           <Grid item xs={12} md={4}>
             <Paper
-              elevation={2}
+              elevation={0}
               sx={{
                 p: 3,
-                backgroundColor: '#c8e6c9',
-                textAlign: 'center'
+                bgcolor: theme.palette.mode === 'light'
+                  ? theme.palette.success.light
+                  : theme.palette.secondary.light,
+                textAlign: 'center',
+                borderRadius: 3,
+                border: `1px solid ${theme.palette.background.dot}`
               }}
             >
-              <Typography variant="h4">{stats.wins}</Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Wins
+              <Typography variant="h4" sx={{ color: theme.palette.text.contrast }}>
+                {stats.wins}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: theme.palette.text.secondary }}>
+                Kazanma Sayısı
               </Typography>
             </Paper>
           </Grid>
+
           <Grid item xs={12} md={4}>
             <Paper
-              elevation={2}
+              elevation={0}
               sx={{
                 p: 3,
-                backgroundColor: '#e1bee7',
-                textAlign: 'center'
+                bgcolor: theme.palette.mode === 'light'
+                  ? theme.palette.secondary.paper
+                  : theme.palette.primary.dark,
+                textAlign: 'center',
+                borderRadius: 3,
+                border: `1px solid ${theme.palette.background.dot}`
               }}
             >
-              <Typography variant="h4">
-                {stats.averageScore ? stats.averageScore.toFixed(1) : '0'}
+              <Typography variant="h4" sx={{ color: theme.palette.text.contrast }}>
+                {stats.averageScore?.toFixed(1) || '0'}
               </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Average Score
+              <Typography variant="subtitle1" sx={{ color: theme.palette.text.secondary }}>
+                Ortalama Skor
               </Typography>
             </Paper>
           </Grid>

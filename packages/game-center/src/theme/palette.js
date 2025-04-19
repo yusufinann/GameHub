@@ -39,7 +39,7 @@ export const paletteTokens = {
     error: { main: "#f44336" },
     warning: { main: "rgba(255, 180, 0, 1)" ,light:"rgba(255, 123, 0, 0.85)"},
     info: { main: "#2196f3" },
-    success: { main: "#4c9f38", light:"#4caf50" },
+    success: { main: "#2E7D32",medium:"#4c9f38", light:"#4caf50" },
   },
   dark: {
     primary: {

@@ -11,14 +11,14 @@ import {
   Typography
 } from '@mui/material';
 import { Warning } from '@mui/icons-material';
-import { colorScheme } from '../profileTheme';
 
 const RemoveFriendConfirm = ({ 
   open, 
   onClose, 
   onConfirm, 
   friendName, 
-  friendAvatar 
+  friendAvatar,
+  theme 
 }) => {
   return (
     <Dialog
@@ -35,7 +35,7 @@ const RemoveFriendConfirm = ({
       }}
     >
       <DialogTitle sx={{ 
-        background: colorScheme.buttonGradient,
+        background:theme.palette.success.main,
         color: '#fff',
         display: 'flex',
         alignItems: 'center',

@@ -1,16 +1,33 @@
 const config = {
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001', // Varsayılan API base URL
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
   apiEndpoints: {
-    mockGames: '/api/games', // Mock oyunlar için endpoint
-    login: '/api/auth/login', // Oturum açma endpoint'i
-    logout: '/api/auth/logout', // Oturum kapatma endpoint'i
-    user: '/api/users/profile', // Kullanıcı bilgilerini getirme endpoint'i
-    lobbies: '/api/lobbies', // Lobi işlemleri için endpoint
-    createLobby: '/api/lobbies/create', // Lobi oluşturma endpoint'i
-    deleteLobby: '/api/lobbies/delete', // Lobi silme endpoint'i
-    joinLobby: '/api/lobbies/join', // Lobiye katılma endpoint'i
-    leaveLobby:'/api/lobbies/leave'
-  },
+    // Auth Endpoints
+    login: '/api/auth/login',
+    logout: '/api/auth/logout',
+    
+    // User Endpoints
+    user: '/api/users/profile',
+    userProfile: '/api/users', 
+    bingoStats: '/api/bingo/stats',
+    
+    // Friends Endpoints
+    friendRequest: '/api/friends/request',
+    friendAccept: '/api/friends/accept',
+    friendReject: '/api/friends/reject',
+    friendRemove: '/api/friends',
+    friendList: '/api/friends/list',
+    friendRequests: '/api/friends/requests',
+    
+    // Lobby Endpoints
+    lobbies: '/api/lobbies',
+    createLobby: '/api/lobbies/create',
+    deleteLobby: '/api/lobbies/delete',
+    joinLobby: '/api/lobbies/join',
+    leaveLobby: '/api/lobbies/leave',
+    
+    // Game Endpoints
+    mockGames: '/api/games'
+  }
 };
 
 export default config;

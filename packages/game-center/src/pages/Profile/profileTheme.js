@@ -27,11 +27,3 @@ export const profileTheme = createTheme({
     },
   },
 });
-
-export const colorScheme = {
-  gradientBg: "#81C784",
-  cardBg: "rgba(255, 255, 255, 0.8)",
-  accentGradient: "#4CAF50",
-  buttonGradient: "#2E7D32",
-  hoverGradient: "#81C784"
-};
