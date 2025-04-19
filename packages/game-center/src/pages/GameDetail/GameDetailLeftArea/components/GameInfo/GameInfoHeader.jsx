@@ -158,7 +158,7 @@ function GameInfoHeader({game, filteredLobbies }) {
       <Box
         sx={{
           background:
-            "linear-gradient(135deg, rgba(50,135,97,0.9) 50%, rgba(202,236,213,0.9) 100%)",
+          theme.palette.background.gradientB,
           width: "100%",
           borderRadius: "20px",
           display: "flex",

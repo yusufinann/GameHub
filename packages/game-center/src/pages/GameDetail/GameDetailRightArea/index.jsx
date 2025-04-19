@@ -4,7 +4,7 @@ import CreateLobby from './components/CreateLobby';
 import ActiveLobbies from './components/ActiveLobbies';
 import GameSettings from './components/GameSettings';
 
-function GameDetailRightArea({ colorScheme,filteredLobbies,lobbies,existingLobby }) {
+function GameDetailRightArea({filteredLobbies,lobbies,existingLobby }) {
 
   
   const [settings, setSettings] = useState({
@@ -14,8 +14,8 @@ function GameDetailRightArea({ colorScheme,filteredLobbies,lobbies,existingLobby
   });
   return (
     <Box sx={{ flex: '1 1 300px', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <CreateLobby colorScheme={colorScheme}existingLobby={existingLobby} lobbies={lobbies}/>
-      <ActiveLobbies colorScheme={colorScheme} filteredLobbies={filteredLobbies} />
+      <CreateLobby existingLobby={existingLobby} lobbies={lobbies}/>
+      <ActiveLobbies filteredLobbies={filteredLobbies} />
       <GameSettings settings={settings} onSettingsChange={setSettings} />
     </Box>
   );

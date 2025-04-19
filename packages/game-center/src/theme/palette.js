@@ -11,7 +11,7 @@ export const paletteTokens = {
     secondary: {
       main: "rgba(38, 166, 154, 1)", //mavi tonu 
       light: "rgba(38, 166, 154, 0.85)",
-      paper:"#00a884",
+      paper:"#7cccc4",
       dark: "#c51162",
       gold: "#FFD700",
       contrastText: "#fff", 
@@ -24,11 +24,12 @@ export const paletteTokens = {
       app: "rgb(157,222,175)",
       card: "rgb(175,230,190)",
       gradient: "linear-gradient(135deg, #caecd5 0%, rgb(50,135,97) 100%)", //noActiveLobby bg
+      gradientB: "linear-gradient(135deg, rgba(50,135,97,0.9) 50%, rgba(202,236,213,0.9) 100%)",
       stripeBg:'rgb(50,135,97)',
       stripe:"repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"
     },
     text: {
-      primary: "rgba(0, 0, 0, 0.5)",
+      primary: "rgba(0, 0, 0, 1)",
       secondary: "rgba(0, 0, 0, 0.8)",
       contrast: "white",
       gradient:'linear-gradient(45deg, #ff6b6b 0%,rgb(78, 205, 133) 100%)',
@@ -58,20 +59,22 @@ export const paletteTokens = {
       contrastText: "#fff",
     },
     background: {
-      default: "#1a202c",   // Sidebar rengi - koyu gri/mavi
+     // default: "#1a202c",   // Sidebar rengi - koyu gri/mavi
+      default: "#0f1924",
       paper: "#2d3748",     // Daha açık koyu gri
       offwhite: "rgba(255,255,255,0.12)", // Koyu tema için soluk beyaz
       dot: "rgba(255,255,255,0.3)",
       app: "rgb(26, 54, 93)",
       card: "rgb(37, 64, 103)",
       gradient: "linear-gradient(135deg, #1a202c 0%, #1d2e4a 100%)", // noActiveLobby bg
+      gradientB: "linear-gradient(135deg, rgba(23, 39, 64, 0.9) 50%, rgba(44, 74, 120, 0.9) 100%)",
       stripeBg: "#1d2e4a",
       stripe: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)"
     },
     text: {
       primary: "rgba(255, 255, 255, 0.9)",
       secondary: "rgba(255, 255, 255, 0.7)",
-      contrast: "#1a202c",
+      contrast: "white",
       gradient: 'linear-gradient(45deg, #4169e1 0%, #1d2e4a 100%)',
       disabled: "rgba(255,255,255,0.38)",
       title: "linear-gradient(45deg, #4169e1, #63b3ed)"

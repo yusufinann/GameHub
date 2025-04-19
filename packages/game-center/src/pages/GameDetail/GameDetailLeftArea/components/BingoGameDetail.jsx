@@ -28,7 +28,7 @@ import {
   History,
 } from "@mui/icons-material";
 
-const BingoGameDetails = ({ colorScheme }) => {
+const BingoGameDetails = () => {
   const [playerGameStats, setPlayerGameStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -132,7 +132,7 @@ const BingoGameDetails = ({ colorScheme }) => {
       sx={{
         borderRadius: 4,
         boxShadow: "0 8px 32px rgba(34,193,195,0.1)",
-        background: colorScheme.cardBg,
+        background:'transparent',
       }}
     > <CardContent>
       <Box
@@ -142,7 +142,7 @@ const BingoGameDetails = ({ colorScheme }) => {
           mb: 2,
           p: 2,
           borderRadius: 2,
-          background: colorScheme.buttonGradient,
+          background:theme.palette.secondary.main,
           color: "white",
         }}
       >

@@ -31,13 +31,13 @@ const GameDetail = () => {
 
   const game = GAMES.find((g) => g.id.toString() === gameId);
   
-  const colorScheme = {
-    gradientBg: "linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(45,253,163,1) 100%)",
-    cardBg: "rgba(255, 255, 255, 0.8)",
-    accentGradient: "linear-gradient(135deg, #2dcbb0 0%, #2dccb0 100%)",
-    buttonGradient: "linear-gradient(135deg, #22c1c3 0%, #2dccb0 100%)",
-    hoverGradient: "linear-gradient(135deg, #20b1b3 0%, #25b69c 100%)",
-  };
+  // const colorScheme = {
+  //   gradientBg: "linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(45,253,163,1) 100%)",
+  //   cardBg: "rgba(255, 255, 255, 0.8)",
+  //   accentGradient: "linear-gradient(135deg, #2dcbb0 0%, #2dccb0 100%)",
+  //   buttonGradient: "linear-gradient(135deg, #22c1c3 0%, #2dccb0 100%)",
+  //   hoverGradient: "linear-gradient(135deg, #20b1b3 0%, #25b69c 100%)",
+  // };
 
   if (!game) {
     return (
@@ -61,14 +61,12 @@ const GameDetail = () => {
       }}
     >
       <GameDetailLeftArea
-        colorScheme={colorScheme}
         game={game}
         filteredLobbies={filteredLobbies}
         lobbies={lobbies}
         existingLobby={existingLobby}
       />
       <GameDetailRightArea
-        colorScheme={colorScheme}
         game={game}
         lobbies={lobbies}
         existingLobby={existingLobby}

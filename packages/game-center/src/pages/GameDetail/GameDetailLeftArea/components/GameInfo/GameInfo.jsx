@@ -3,7 +3,7 @@ import {Box} from '@mui/material';
 import GameInfoHeader from './GameInfoHeader';
 import GameInfoDetails from './GameInfoDetails';
 
-function GameInfo({ colorScheme, game, filteredLobbies }) {
+function GameInfo({game, filteredLobbies }) {
   return (
     <Box
       sx={{
@@ -16,7 +16,6 @@ function GameInfo({ colorScheme, game, filteredLobbies }) {
       <GameInfoHeader game={game} filteredLobbies={filteredLobbies}/>
       <Box sx={{ px: 3 }}>
         <GameInfoDetails
-          colorScheme={colorScheme}
           game={game}
           filteredLobbies={filteredLobbies}
         />

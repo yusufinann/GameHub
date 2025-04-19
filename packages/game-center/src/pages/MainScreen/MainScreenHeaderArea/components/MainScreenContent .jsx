@@ -129,7 +129,7 @@ const MainScreenContent = ({theme}) => {
               variant="h3"
               component="h2"
               sx={{
-                color:theme.palette.primary.text,
+                color:theme.palette.text.contrast,
                 fontWeight: "bold",
                 fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.75rem" },
                 mb: 4,

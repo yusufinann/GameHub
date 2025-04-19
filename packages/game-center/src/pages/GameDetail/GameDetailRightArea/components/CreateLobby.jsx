@@ -6,7 +6,7 @@ import ErrorModal from "../../../../shared/components/ErrorModal";
 import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
 
-function CreateLobby({ colorScheme, existingLobby, lobbies }) {
+function CreateLobby({existingLobby}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const location = useLocation();
@@ -49,7 +49,7 @@ function CreateLobby({ colorScheme, existingLobby, lobbies }) {
           position: "relative",
           borderRadius: "20px",
           overflow: "hidden",
-          background: colorScheme.gradientBg,
+          background: "linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(45,253,163,1) 100%)",
           p: 4,
           boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",

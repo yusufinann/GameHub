@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import CustomAvatarGroup from './CustomAvatarGroup';
 
-function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
+function GameInfoDetails({game, filteredLobbies }) {
   const theme = useTheme();
 
   const allMemberAvatars = filteredLobbies
@@ -102,7 +102,6 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
           </Typography>
           <CustomAvatarGroup
             members={allMemberAvatars}
-            gradient={colorScheme.buttonGradient}
             max={7}
             getInitials={getInitials}
           />
@@ -123,7 +122,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
             icon={<SportsEsports sx={{ color: 'white !important' }} />}
             label={`Type: ${game.genre}`}
             sx={{
-              background: colorScheme.buttonGradient,
+              background: theme.palette.secondary.main,
               color: 'white',
               fontWeight: 'bold',
               boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
@@ -133,7 +132,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
             icon={<Star sx={{ color: 'white !important' }} />}
             label={`${game.rating}/5`}
             sx={{
-              background: colorScheme.buttonGradient,
+              background: theme.palette.secondary.main,
               color: 'white',
               fontWeight: 'bold',
               boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
@@ -143,7 +142,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
             icon={<EmojiEvents sx={{ color: 'white !important' }} />}
             label="Competitive"
             sx={{
-              background: colorScheme.buttonGradient,
+              background: theme.palette.secondary.main,
               color: 'white',
               fontWeight: 'bold',
               boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
@@ -163,7 +162,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
           backgroundColor: 'rgba(0,0,0,0.05)',
           padding: 3,
           borderRadius: '16px',
-          borderLeft: `4px solid ${colorScheme.primary}`
+          borderLeft: `4px solid ${theme.palette.secondary.main}`
         }}
       >
         {game.description}
@@ -181,7 +180,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
         <AccordionSummary
           expandIcon={<ExpandMore sx={{ color: 'white' }} />}
           sx={{
-            background: colorScheme.buttonGradient,
+            background: theme.palette.secondary.main,
             borderRadius: '12px',
             color: 'white',
             px: 2,
@@ -200,7 +199,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{
-          background: colorScheme.cardBg,
+          background: theme.palette.secondary.paper,
           borderRadius: '16px',
           mt: 1,
           padding: 3
@@ -222,7 +221,6 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
                 left: 0,
                 width: '60px',
                 height: '4px',
-                backgroundColor: colorScheme.primary,
                 borderRadius: '2px'
               }
             }}>
@@ -236,7 +234,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
             }}>
               {gameModes.bingo.map((mode) => (
                 <Box key={mode.mode} sx={{
-                  background: `linear-gradient(145deg, ${mode.color} 30%, ${colorScheme.cardBg} 100%)`,
+                  background: `linear-gradient(145deg, ${mode.color})`,
                   borderRadius: '16px',
                   p: 2,
                   boxShadow: 3,
@@ -319,7 +317,6 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
                 left: 0,
                 width: '60px',
                 height: '4px',
-                backgroundColor: colorScheme.primary,
                 borderRadius: '2px'
               }
             }}>
@@ -333,7 +330,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
             }}>
               {gameModes.competition.map((mode) => (
                 <Box key={mode.mode} sx={{
-                  background: `linear-gradient(145deg, ${mode.color} 30%, ${colorScheme.cardBg} 100%)`,
+                  background: `linear-gradient(145deg, ${mode.color} 30%, ${theme.palette.background.paper} 100%)`,
                   borderRadius: '16px',
                   p: 2,
                   boxShadow: 3,
@@ -411,7 +408,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
         <AccordionSummary
           expandIcon={<ExpandMore sx={{ color: 'white' }} />}
           sx={{
-            background: colorScheme.buttonGradient,
+            background:theme.palette.secondary.main,
             borderRadius: '12px',
             color: 'white',
             px: 2,
@@ -430,7 +427,7 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{
-          background: colorScheme.cardBg,
+          background:  theme.palette.secondary.paper,
           borderRadius: '16px',
           mt: 1,
           padding: 3
@@ -443,7 +440,6 @@ function GameInfoDetails({ colorScheme, game, filteredLobbies }) {
                   content: '""',
                   width: '8px',
                   height: '8px',
-                  backgroundColor: colorScheme.primary,
                   borderRadius: '50%',
                   mr: 2
                 }
