@@ -408,7 +408,7 @@ export const leaveLobby = async (req, res) => {
                 } catch (error) {
                     console.error("Host ayrılma zamanlayıcı hatası:", error);
                 }
-            }, 60 * 1000); // one minute
+            }, 8 * 60 * 60 * 1000); // 8 hours
 
             lobbyTimers.set(timerKey, deletionTimer);
             console.log(`Yeni zamanlayıcı ayarlandı. Lobi ID: ${lobby.id}, Zamanlayıcı Anahtarı: ${timerKey}`);

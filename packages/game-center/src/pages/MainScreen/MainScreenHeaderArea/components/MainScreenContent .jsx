@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, IconButton} from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import olymposImage from "../../../../assets/olympos-removebg.png";
+import gameOfThrones from "../../../../assets/headerGame3.png";
 import fortnite from "../../../../assets/fortnite-removebg.png";
 import oblivion from "../../../../assets/oblivion-removebg.png";
 const MainScreenContent = ({theme}) => {
@@ -11,34 +11,19 @@ const MainScreenContent = ({theme}) => {
       id: 1,
       title: "Play Together, Connect Everywhere",
       buttonText: "JOIN NOW",
-      characterImg: olymposImage,
-      gameIcons: [
-        { name: "Sweet Bonanza", img: "https://wallpapercave.com/uwp/uwp4706340.jpeg" },
-        { name: "Gates of Olympus", img: "https://wallpapercave.com/wp/wp10779463.jpg" },
-        { name: "Starlight Princess", img: "https://wallpapercave.com/wp/wp10779482.jpg" }
-      ],
+      characterImg: gameOfThrones
     },
     {
       id: 2,
       title: "Live Lobbies, Instant Battles",
       buttonText: "START PLAYING",
-      characterImg: fortnite,
-      gameIcons: [
-        { name: "Wolf Gold", img: "https://wallpapercave.com/uwp/uwp4687385.jpeg" },
-        { name: "Big Bass", img: "https://wallpapercave.com/uwp/uwp4706340.jpeg" },
-        { name: "Fruit Party", img: "https://wallpapercave.com/wp/wp10779473.jpg" }
-      ],
+      characterImg: fortnite
     },
     {
       id: 3,
       title: "Game. Connect. Conquer.",
       buttonText: "ENTER GAME ZONE",
-      characterImg: oblivion,
-      gameIcons: [
-        { name: "Book of Dead", img: "https://wallpapercave.com/uwp/uwp4698863.jpeg" },
-        { name: "Gonzo's Quest", img: "https://wallpapercave.com/wp/wp10779463.jpg" },
-        { name: "Reactoonz", img: "https://wallpapercave.com/wp/wp10779473.jpg" }
-      ],
+      characterImg: oblivion
     }
   ];
 
