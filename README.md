@@ -38,7 +38,7 @@ Game Center Game Platform is a **web-based dynamic game center** that offers pla
 * **⚡ Real-Time Live Gaming Experience:** Instant updates and real-time competition with WebSocket.
 * **🎨 User-Friendly and Stylish Interface:** Modern and intuitive design with React and Material UI.
 * **📱 Fully Responsive Design:** Seamless experience on desktop, tablet, and mobile devices.
-* **🌙 Theme Options (Coming Soon):** Personalization with a dark theme option that is easy on the eyes.
+* **🌙 Light & Dark Theme Options:** Personalize your experience with theme choices, including an eye-friendly dark mode.
 * **🌐 Multi-Language Support (Coming Soon):** Reaching a wide audience with English and Turkish language options.
 * **🔔 Smart Notification System:** Instant notifications for events, invitations, and updates.
 * **📊 Detailed Player Profile:** Personal development tracking with statistics, game history, friends, and achievements.
@@ -55,7 +55,7 @@ Our application is built on modern and powerful web technologies:
 * **⚛️ React:** Component-based, modular, and reusable interface development.
 * **🗺️ react-router-dom:** Smooth and dynamic page routing and navigation.
 * **📡 Axios:** HTTP client for reliable and fast Backend API communication.
-* **🎨 Material UI:** Aesthetics and functionality with a rich, modern, and customizable UI components library.
+* **🎨 Material UI:** Aesthetics and functionality with a rich, modern, and customizable UI components library (supports theming like Light/Dark modes).
 * **📦 React Context:** Efficient and easy state management throughout the application.
 
 ### Backend
@@ -296,14 +296,19 @@ Our platform supports your lobby management operations with instant notification
 * **🗑️ Delete Group:** "Delete Group" option from "..." menu in "Friend Groups" tab (host only).
 * **👉 Guidance to Start Chatting:** Guide message on initial opening.
 
+### ⚙️ Settings Screen
+
+*   **<img src="https://cdn-icons-png.flaticon.com/512/606/606788.png" alt="Theme" width="20" style="vertical-align: middle;"> In-App Theme Selection (Light/Dark):** Easily switch between light and dark modes to suit your preference.
+*   **<img src="https://cdn-icons-png.flaticon.com/512/2037/2037790.png" alt="Language" width="20" style="vertical-align: middle;"> In-App Language Selection (Coming Soon):** Choose your preferred language for the application interface.
+*   **<img src="https://cdn-icons-png.flaticon.com/512/878/878439.png" alt="Sound" width="20" style="vertical-align: middle;"> Game Sound Management:** Control and adjust game sound effects volume or mute them entirely.
+*   **<img src="https://cdn-icons-png.flaticon.com/512/929/929679.png" alt="Sidebar" width="20" style="vertical-align: middle;"> Sidebar Theme Control:** The theme can also be conveniently controlled directly from the sidebar.
+  
 ---
 
 <h2 id="coming-soon">⏳ Coming Soon</h2>
 
-* **🌙 Theme Options:** Dark theme and other visual customizations.
 * **🌐 Multi-Language Support:** Turkish and English language options.
 * **🎲 New Games:** Different game types in addition to Bingo (e.g., poker, okey, etc.).
-* **🏆 Achievements and Leaderboards:** New features to motivate players.
 * **🚀 Mobile Applications:** Mobile applications for iOS and Android platforms.
 
 ---
