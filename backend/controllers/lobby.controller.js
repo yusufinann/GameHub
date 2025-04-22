@@ -292,13 +292,19 @@ export const joinLobby = async (req, res) => {
                 }
                 await lobby.save();
 
-                broadcastLobbyEvent(lobbyCode, "HOST_RETURNED", { // Use broadcastLobbyEvent
-                    userId: user.id,
-                    name: user.name,
-                    avatar: user.avatar,
-                    lobbyCode: lobbyCode,
-                    isHost: true,
-                }, lobby.members.map(member => member.id)); // Send to all members
+                const otherMemberIds = lobby.members
+                .filter(member => member.id.toString() !== user.id.toString()) 
+                .map(member => member.id);
+                if (otherMemberIds.length > 0) {
+                    broadcastLobbyEvent(lobbyCode, "HOST_RETURNED", {
+                        userId: user.id,
+                        name: user.name,
+                        avatar: user.avatar,
+                        lobbyCode: lobbyCode,
+                        lobbyName: lobby.lobbyName,
+                        isHost: true,
+                    }, otherMemberIds);
+                }
 
                 return res.status(200).json({
                     message: "Lobiye host olarak geri döndünüz.",
@@ -376,7 +382,7 @@ export const leaveLobby = async (req, res) => {
          if (remainingMemberIds.length > 0) {
              broadcastLobbyEvent(lobbyCode, "USER_LEFT", {
                  userId: removedUser.id,
-                 userName: removedUser.name, 
+                 name: removedUser.name, 
                  wasHost: wasHost 
              }, remainingMemberIds);
          }

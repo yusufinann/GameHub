@@ -7,6 +7,8 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   Fullscreen as FullscreenIcon,
@@ -22,8 +24,12 @@ import { useLobbyContext } from "../../shared/context/LobbyContext/context";
 const GameLobbyPage = () => {
   const { link } = useParams();
   const navigate = useNavigate();
-  const { deleteLobby, leaveLobby, deletedLobbyInfo, clearDeletedLobbyInfo } =
+  const { deleteLobby, leaveLobby, deletedLobbyInfo, clearDeletedLobbyInfo,   userLeftInfo, 
+    setUserLeftInfo  } =
     useLobbyContext();
+    const handleCloseSnackbar = () => {
+      setUserLeftInfo(null);
+    };
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDeletingLobby, setIsDeletingLobby] = useState(false);
   const [isLeavingLobby, setIsLeavingLobby] = useState(false);
@@ -131,6 +137,7 @@ const GameLobbyPage = () => {
   const isHost = lobbyDetails.createdBy === userId;
 
   return (
+    <>
     <Box
       id="gameLobbyPage"
       sx={{
@@ -176,6 +183,33 @@ const GameLobbyPage = () => {
         isLeavingLobby={isLeavingLobby}
       />
     </Box>
+<Snackbar
+  open={Boolean(userLeftInfo && userLeftInfo.lobbyCode === lobbyDetails?.lobbyCode)}
+  autoHideDuration={4000}
+  onClose={handleCloseSnackbar}
+  anchorOrigin={{ 
+    vertical: 'bottom', 
+    horizontal: 'center' 
+  }}
+  sx={{ 
+    marginBottom: 4 
+  }}
+>
+  <Alert 
+    onClose={handleCloseSnackbar} 
+    severity="info"
+    variant="filled"
+    sx={{ 
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}
+  >
+    {userLeftInfo?.name} lobiden ayrıldı!
+  </Alert>
+</Snackbar>
+   </>
   );
 };
 

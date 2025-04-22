@@ -9,7 +9,7 @@ const useLobbyWebSocket = (
   setMembersByLobby,
   setExistingLobby,
   membersByLobby,
-  setDeletedLobbyInfo
+  setDeletedLobbyInfo,setUserLeftInfo
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
   const navigate = useNavigate();
@@ -122,10 +122,8 @@ const useLobbyWebSocket = (
     const handleUserLeft = (data) => {
       const {
         lobbyCode,
-        data: { userId },
+        data: { userId,name},
       } = data;
-
-      // Global lobi listesini güncelle
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
@@ -141,6 +139,7 @@ const useLobbyWebSocket = (
         ...prev,
         [lobbyCode]: (prev[lobbyCode] || []).filter((m) => m.id !== userId),
       }));
+      setUserLeftInfo({ lobbyCode, name });
     };
 
     const handleLobbyDeleted = (lobbyCode, lobbyData) => {
@@ -154,8 +153,6 @@ const useLobbyWebSocket = (
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
       }
-
-      // Remove members data for this lobby
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
@@ -164,8 +161,7 @@ const useLobbyWebSocket = (
     };
 
     const handleHostReturned = (data) => {
-      const { lobbyCode, data: hostData } = data;
-      console.log("HOST_RETURNED mesajı alındı:", data); // Mesajı logla
+      const { lobbyCode, data: hostData } = data;   
 
       setLobbies((prev) =>
         prev.map((lobby) =>

@@ -24,7 +24,7 @@ export const LobbyProvider = ({ children }) => {
   const [deletedLobbyInfo, setDeletedLobbyInfo] = useState(null); // { lobbyCode, reason }
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
-
+  const [userLeftInfo, setUserLeftInfo] = useState(null); 
   const isWebSocketUpdate = useLobbyWebSocket(
     socket,
     currentUser,
@@ -33,7 +33,7 @@ export const LobbyProvider = ({ children }) => {
     setMembersByLobby,
     setExistingLobby,
     membersByLobby,
-    setDeletedLobbyInfo
+    setDeletedLobbyInfo,setUserLeftInfo
   );
 
   const fetchAndSetLobbies = useCallback(async () => {
@@ -251,7 +251,7 @@ export const LobbyProvider = ({ children }) => {
         isCreatingLobby,
         deletedLobbyInfo,
         setDeletedLobbyInfo,
-        clearDeletedLobbyInfo,
+        clearDeletedLobbyInfo,userLeftInfo, setUserLeftInfo
       }}
     >
       {children}

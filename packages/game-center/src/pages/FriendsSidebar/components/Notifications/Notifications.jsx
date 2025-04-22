@@ -35,7 +35,6 @@ const Notifications = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-
   const handleMessage = useCallback(
     (event) => {
       let data;
@@ -131,6 +130,28 @@ const Notifications = () => {
           }
           break;
 
+        case "HOST_RETURNED":
+          const hostData = data.data;
+          if (!document.hasFocus()) {
+            new Audio(joinLobby).play().catch(() => {});
+          } else {
+            showNotification(
+              `${hostData.name} returned as host to ${hostData.lobbyName}!`
+            );
+          }
+          setNotifications((prev) => [
+            ...prev,
+            {
+              type: "user-join",
+              lobbyCode: hostData.lobbyCode,
+              lobbyName: hostData.lobbyName,
+              userName: hostData.name,
+              message: `${hostData.name} returned as host`,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+          break;
+
         case "FRIEND_REQUEST_RECEIVED":
           if (document.hasFocus()) {
             showNotification(
@@ -192,48 +213,48 @@ const Notifications = () => {
           });
           break;
 
-          case "FRIEND_GROUP_INVITATION_RECEIVED":
-            const friendGroupInvitationData = data;
-            
-            // Show notification via snackbar regardless of focus state
-            showNotification(
-              `Friend group invitation received for ${friendGroupInvitationData.groupName}`
-            );
-            
-            // Always add to notifications menu, regardless of document focus
-            setNotifications((prev) => {
-              if (
-                prev.some(
-                  (notif) =>
-                    notif.groupId === friendGroupInvitationData.groupId &&
-                    notif.type === "friend-group-invite"
-                )
-              ) {
-                return prev;
-              }
-          
-              // Only play sound if document is not in focus
-              if (!document.hasFocus()) {
-                const audio = new Audio(notificationSound);
-                audio
-                  .play()
-                  .catch((error) => console.log("Audio play failed:", error));
-              }
-          
-              return [
-                ...prev,
-                {
-                  type: "friend-group-invite",
-                  groupId: friendGroupInvitationData.groupId,
-                  groupName: friendGroupInvitationData.groupName,
-                  inviterUsername: friendGroupInvitationData.inviterUsername,
-                  inviterAvatar: null,
-                  message: `Friend group invitation from ${friendGroupInvitationData.inviterUsername} for group ${friendGroupInvitationData.groupName}`,
-                  timestamp: new Date().toISOString(),
-                },
-              ];
-            });
-            break;
+        case "FRIEND_GROUP_INVITATION_RECEIVED":
+          const friendGroupInvitationData = data;
+
+          // Show notification via snackbar regardless of focus state
+          showNotification(
+            `Friend group invitation received for ${friendGroupInvitationData.groupName}`
+          );
+
+          // Always add to notifications menu, regardless of document focus
+          setNotifications((prev) => {
+            if (
+              prev.some(
+                (notif) =>
+                  notif.groupId === friendGroupInvitationData.groupId &&
+                  notif.type === "friend-group-invite"
+              )
+            ) {
+              return prev;
+            }
+
+            // Only play sound if document is not in focus
+            if (!document.hasFocus()) {
+              const audio = new Audio(notificationSound);
+              audio
+                .play()
+                .catch((error) => console.log("Audio play failed:", error));
+            }
+
+            return [
+              ...prev,
+              {
+                type: "friend-group-invite",
+                groupId: friendGroupInvitationData.groupId,
+                groupName: friendGroupInvitationData.groupName,
+                inviterUsername: friendGroupInvitationData.inviterUsername,
+                inviterAvatar: null,
+                message: `Friend group invitation from ${friendGroupInvitationData.inviterUsername} for group ${friendGroupInvitationData.groupName}`,
+                timestamp: new Date().toISOString(),
+              },
+            ];
+          });
+          break;
         case "FRIEND_GROUP_UPDATED":
           console.log(
             "FRIEND_GROUP_UPDATED event received in notifications :",
