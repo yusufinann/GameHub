@@ -360,8 +360,8 @@ export const leaveLobby = async (req, res) => {
         }
         const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true });
 
-        if (!lobby) {
-            return res.status(404).json({ message: "Lobi bulunamadı." });
+        if (!lobby || !lobby.isActive) { 
+            return res.status(404).json({ message: "Aktif lobi bulunamadı." });
         }
 
         const userIndex = lobby.members.findIndex((member) => member.id === user.id);
@@ -370,57 +370,76 @@ export const leaveLobby = async (req, res) => {
         }
 
         const removedUser = lobby.members.splice(userIndex, 1)[0];
-        await lobby.save();
+        const wasHost = removedUser.id.toString() === lobby.createdBy.toString(); 
 
-        broadcastLobbyEvent(lobbyCode, "USER_LEFT", {
-            userId: removedUser.id,
-            userName: removedUser.userName,
-        });
+         const remainingMemberIds = lobby.members.map(m => m.id.toString());
+         if (remainingMemberIds.length > 0) {
+             broadcastLobbyEvent(lobbyCode, "USER_LEFT", {
+                 userId: removedUser.id,
+                 userName: removedUser.name, 
+                 wasHost: wasHost 
+             }, remainingMemberIds);
+         }
 
 
-        if (removedUser.id === lobby.createdBy && lobby.lobbyType === "normal") { // Sadece host ayrıldığında zamanlayıcı başlasın
-            const timerKey = `host_leave_${lobby.id}`;
-            console.log(`Host ayrıldı, zamanlayıcı başlatılıyor. Lobi ID: ${lobby.id}, Zamanlayıcı Anahtarı: ${timerKey}`);
-            let existingTimer = lobbyTimers.get(timerKey);
-            if (existingTimer) {
-                clearTimeout(existingTimer);
-                lobbyTimers.delete(timerKey);
-                console.log(`Önceki zamanlayıcı temizlendi. Lobi ID: ${lobby.id}, Zamanlayıcı Anahtarı: ${timerKey}`);
-            }
+        if (wasHost && lobby.lobbyType === "normal") {
+             if (lobby.members.length === 0) {
+                 console.log(`Host ${lobbyCode} lobisinden ayrıldı ve lobi boş kaldı. Direkt siliniyor.`);
 
-            const deletionTimer = setTimeout(async () => {
-                try {
-                    const currentLobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true });
-                    if (currentLobby) {
-                        currentLobby.members.forEach((member) => {
-                            broadcastLobbyEvent(lobbyCode, "USER_KICKED", {
-                                userId: member.id,
-                                reason: "Host geri dönmediği için lobi dağıtıldı",
-                            });
-                        });
+                 if (lobbyTimers.has(`start_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`start_${lobby.id}`)); lobbyTimers.delete(`start_${lobby.id}`); }
+                 if (lobbyTimers.has(`end_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`end_${lobby.id}`)); lobbyTimers.delete(`end_${lobby.id}`); }
+                 if (lobbyTimers.has(`host_leave_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`host_leave_${lobby.id}`)); lobbyTimers.delete(`host_leave_${lobby.id}`); }
 
-                        currentLobby.isActive = false;
-                        await currentLobby.save();
-                        broadcastLobbyEvent(lobbyCode, "LOBBY_DELETED", {
-                            reason: "Host geri dönmediği için lobi dağıtıldı",
-                        });
-                    }
-                } catch (error) {
-                    console.error("Host ayrılma zamanlayıcı hatası:", error);
+                 await Lobby.deleteOne({ lobbyCode: lobbyCode });
+
+             } else {
+                const timerKey = `host_leave_${lobby.id}`;
+                console.log(`Host ayrıldı, 8 saatlik silme zamanlayıcısı başlatılıyor. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
+                let existingTimer = lobbyTimers.get(timerKey);
+                if (existingTimer) {
+                    clearTimeout(existingTimer);
+                    lobbyTimers.delete(timerKey);
+                    console.log(`Önceki zamanlayıcı temizlendi. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
                 }
-            }, 8 * 60 * 60 * 1000); // 8 hours
 
-            lobbyTimers.set(timerKey, deletionTimer);
-            console.log(`Yeni zamanlayıcı ayarlandı. Lobi ID: ${lobby.id}, Zamanlayıcı Anahtarı: ${timerKey}`);
+                const deletionTimer = setTimeout(async () => {
+                    console.log(`8 saatlik süre doldu, ${lobbyCode} lobisi siliniyor (Host geri dönmedi).`);
+                    try {
+                        const currentLobby = await Lobby.findOne({ lobbyCode: lobbyCode }).lean();
+                        if (currentLobby) {
+                            broadcastLobbyEvent(lobbyCode, "LOBBY_DELETED", {
+                                lobbyCode: lobbyCode,
+                                reason: "Host geri dönmediği için lobi kapatıldı.",
+                                // lobbyId: currentLobby.id
+                            });
+
+                            await Lobby.deleteOne({ lobbyCode: lobbyCode });
+                            console.log(`Lobi ${lobbyCode} (Host geri dönmediği için) başarıyla silindi.`);
+                        } else {
+                            console.log(`Zamanlayıcı çalıştı ama lobi ${lobbyCode} zaten silinmiş veya bulunamadı.`);
+                        }
+                    } catch (error) {
+                        console.error("Host ayrılma zamanlayıcısı (silme) hatası:", error);
+                    } finally {
+                        lobbyTimers.delete(timerKey);
+                    }
+                }, 8 * 60 * 60 * 1000); // 8 saat 
+                 // }, 1 * 60 * 1000); // Test için 1 dakika
+
+                lobbyTimers.set(timerKey, deletionTimer);
+                console.log(`Yeni silme zamanlayıcısı ayarlandı. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
+             }
+
         }
+        if (lobby.members.length > 0 || !wasHost) {
+             await lobby.save();
+         }
+
 
         res.status(200).json({
-            message: "Lobiden başarıyla çıkıldı",
-            lobby: {
-                ...lobby.toObject(),
-                members: lobby.members.map((m) => ({ id: m.id, name: m.name })),
-            },
+            message: "Lobiden başarıyla çıkıldı.",
         });
+
 
     } catch (error) {
         console.error("Lobiden ayrılma hatası:", error);
@@ -436,7 +455,7 @@ export const deleteLobby = async (req, res) => {
         if (!lobbyCode) {
             return res.status(400).json({ message: "Lobi kodu gereklidir." });
         }
-        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true }); // Check if lobby is active
+        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true }); 
 
         if (!lobby) {
             return res.status(404).json({ message: "Lobi bulunamadı." });
@@ -446,7 +465,7 @@ export const deleteLobby = async (req, res) => {
             return res.status(403).json({ message: "Bu lobiyi silme yetkiniz yok." });
         }
 
-        lobby.isActive = false; // Deactivate lobby instead of deleting immediately
+        lobby.isActive = false; 
         await lobby.save();
 
         if (bingoGames[lobbyCode]) {
@@ -472,19 +491,41 @@ export const deleteLobby = async (req, res) => {
 
             delete bingoGames[lobbyCode];
         } else {
-            broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { // Changed event name to LOBBY_DEACTIVATED for clarity
+            broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
                 lobbyCode: lobby.lobbyCode,
                 message: "Lobi silindi."
             });
         }
 
-        // No need to delete from DB here, just deactivate, consider a cron job to clean up deactivated lobbies later
-        // await Lobby.deleteOne({ lobbyCode: lobbyCode });
+        if (lobbyTimers.has(`start_${lobby.id}`)) {
+            clearTimeout(lobbyTimers.get(`start_${lobby.id}`));
+            lobbyTimers.delete(`start_${lobby.id}`);
+        }
+        if (lobbyTimers.has(`end_${lobby.id}`)) {
+            clearTimeout(lobbyTimers.get(`end_${lobby.id}`));
+            lobbyTimers.delete(`end_${lobby.id}`);
+        }
+        // Host ayrılma zamanlayıcısını da temizle (eğer varsa)
+         if (lobbyTimers.has(`host_leave_${lobby.id}`)) {
+            clearTimeout(lobbyTimers.get(`host_leave_${lobby.id}`));
+            lobbyTimers.delete(`host_leave_${lobby.id}`);
+            console.log(`Lobi silinirken host ayrılma zamanlayıcısı temizlendi: ${`host_leave_${lobby.id}`}`);
+        }
 
+        const deletionResult = await Lobby.deleteOne({ lobbyCode: lobbyCode });
+
+
+        if (deletionResult.deletedCount === 0) {
+            console.warn(`Lobi ${lobbyCode} silinemedi, belki zaten silinmişti.`);
+            return res.status(404).json({ message: "Lobi silinemedi, muhtemelen zaten silinmiş." });
+        }
+
+         console.log(`Lobi ${lobbyCode} başarıyla silindi.`);
         res.status(200).json({
-            message: "Lobi başarıyla silindi.",
-            deletedLobby: lobby.toObject(),
+            message: "Lobi başarıyla veritabanından kalıcı olarak silindi.",
+            deletedLobbyCode: lobbyCode
         });
+
 
     } catch (error) {
         console.error("Lobi silme hatası:", error);
@@ -502,7 +543,7 @@ export const updateLobby = async (req, res) => {
         if (!lobbyCode) {
             return res.status(400).json({ message: "Lobi kodu gereklidir." });
         }
-        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true }); // Check if lobby is active
+        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true });
 
         if (!lobby) {
             return res.status(404).json({ message: "Lobi bulunamadı." });
@@ -513,7 +554,7 @@ export const updateLobby = async (req, res) => {
         }
 
         if (lobbyName !== undefined) {
-            if (!lobbyName?.trim()) { // Added optional chaining and ?.trim()
+            if (!lobbyName?.trim()) { 
                 return res.status(400).json({ message: "Lobi adı boş olamaz." });
             }
             lobby.lobbyName = lobbyName;
@@ -571,7 +612,7 @@ export const updateLobby = async (req, res) => {
             } else if (lobbyType === 'normal') {
                 lobby.startTime = null;
                 lobby.endTime = null;
-                if (lobbyTimers.get(`start_${lobby.id}`)) { // Clear event timers if lobby type changed to normal
+                if (lobbyTimers.get(`start_${lobby.id}`)) { 
                     clearTimeout(lobbyTimers.get(`start_${lobby.id}`));
                     lobbyTimers.delete(`start_${lobby.id}`);
                 }
@@ -592,7 +633,7 @@ export const updateLobby = async (req, res) => {
                     return res.status(400).json({ message: "Etkinlik lobisi için başlangıç zamanı zorunludur." });
                 }
                 const startTimeDate = new Date(startTime);
-                if (isNaN(startTimeDate.getTime())) { // Check for valid dates
+                if (isNaN(startTimeDate.getTime())) { 
                     return res.status(400).json({ message: "Geçersiz başlangıç zamanı formatı." });
                 }
                 const now = new Date();
@@ -608,7 +649,7 @@ export const updateLobby = async (req, res) => {
                     return res.status(400).json({ message: "Etkinlik lobisi için bitiş zamanı zorunludur." });
                 }
                 const endTimeDate = new Date(endTime);
-                if (isNaN(endTimeDate.getTime())) { // Check for valid dates
+                if (isNaN(endTimeDate.getTime())) { 
                     return res.status(400).json({ message: "Geçersiz bitiş zamanı formatı." });
                 }
                 if (!lobby.startTime) {
@@ -624,7 +665,7 @@ export const updateLobby = async (req, res) => {
 
         }
 
-        if (timeUpdated && lobby.lobbyType === "event") { // Only reset timers if time is updated and lobby is event type
+        if (timeUpdated && lobby.lobbyType === "event") { 
             if (lobbyTimers.get(`start_${lobby.id}`)) {
                 clearTimeout(lobbyTimers.get(`start_${lobby.id}`));
                 lobbyTimers.delete(`start_${lobby.id}`);
@@ -642,7 +683,7 @@ export const updateLobby = async (req, res) => {
                 if (startTimeMs > now) {
                     const startTimer = setTimeout(async () => {
                         try {
-                            const currentLobby = await Lobby.findOne({ id: lobby.id, isActive: true }).lean(); // Check if lobby is still active
+                            const currentLobby = await Lobby.findOne({ id: lobby.id, isActive: true }).lean(); 
                             if (currentLobby) {
                                 const memberIds = currentLobby.members.map(member => member.id);
 
@@ -665,7 +706,7 @@ export const updateLobby = async (req, res) => {
 
                 const endTimer = setTimeout(async () => {
                     try {
-                        const currentLobby = await Lobby.findOne({ id: lobby.id, isActive: true }).lean(); // Re-check active status
+                        const currentLobby = await Lobby.findOne({ id: lobby.id, isActive: true }).lean(); 
                         if (currentLobby) {
                             broadcastLobbyEvent(
                                 lobbyCode,
@@ -677,7 +718,7 @@ export const updateLobby = async (req, res) => {
                                 },
                                 null
                             );
-                            await Lobby.deleteOne({ id: currentLobby.id }); // Consider updating isActive to false instead of deleting
+                            await Lobby.deleteOne({ id: currentLobby.id }); 
                         }
                     } catch (error) {
                         console.error("Etkinlik bitiş zamanlayıcı hatası:", error);

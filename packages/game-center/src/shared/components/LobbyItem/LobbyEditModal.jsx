@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Dialog,
   Slide,
@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { GAMES } from '../../../utils/constants';
 import { EventFields } from '../CreateLobbyModal/EventFields';
+import formatDateForInputLocal from '../../../utils/formatDate';
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -37,11 +38,25 @@ function LobbyEditModal({ open, onClose, lobby }) {
     lobbyName: lobby?.lobbyName || '',
     gameId: lobby?.game || '',
     eventType: lobby?.lobbyType || 'normal',
-    startTime: lobby?.startTime ? new Date(lobby.startTime).toISOString().slice(0, 16) : '',
-    endTime: lobby?.endTime ? new Date(lobby.endTime).toISOString().slice(0, 16) : '',
+    startTime: lobby.startTime ? formatDateForInputLocal(lobby.startTime) : '',
+    endTime: lobby.endTime ? formatDateForInputLocal(lobby.endTime) : '',
     maxMembers: lobby?.maxMembers || 4,
     password: '',
   });
+
+  useEffect(() => {
+    if (lobby) {
+      setFormData({
+        lobbyName: lobby.lobbyName || '',
+        gameId: lobby.game || '', // Adjust if necessary
+        eventType: lobby.lobbyType || 'normal',
+        startTime: lobby.startTime ? formatDateForInputLocal(lobby.startTime) : '',
+        endTime: lobby.endTime ? formatDateForInputLocal(lobby.endTime) : '',
+        maxMembers: lobby.maxMembers || 4,
+        password: '',
+      });
+    }
+  }, [lobby]); // Dependency array includes lobby
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [loading, setLoading] = useState(false); 
 
@@ -58,6 +73,9 @@ function LobbyEditModal({ open, onClose, lobby }) {
     setLoading(true); // Start loading
     try {
       const token = localStorage.getItem('token');
+
+      const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : null;
+      const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : null;
       const response = await fetch(`http://localhost:3001/api/lobbies/update/${lobby.lobbyCode}`, {
         method: 'PUT',
         headers: {
@@ -68,8 +86,8 @@ function LobbyEditModal({ open, onClose, lobby }) {
           lobbyName: formData.lobbyName,
           game: formData.gameId,
           lobbyType: formData.eventType,
-          startTime: formData.startTime,
-          endTime: formData.endTime,
+          startTime: startTimeISO,
+          endTime: endTimeISO,
           maxMembers: formData.maxMembers,
           password: formData.password,
         }),
