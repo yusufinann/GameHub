@@ -17,7 +17,6 @@ export const LobbyActions = ({
   isDeleting
 }) => {
   const hasPassword = lobby && lobby.password != null;
-
   return (
     <>
       {isCreator && (

@@ -24,6 +24,7 @@ const config = {
     deleteLobby: '/api/lobbies/delete',
     joinLobby: '/api/lobbies/join',
     leaveLobby: '/api/lobbies/leave',
+    updateLobby: '/api/lobbies/update',
     
     // Game Endpoints
     mockGames: '/api/games'

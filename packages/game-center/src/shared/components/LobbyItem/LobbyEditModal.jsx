@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   Slide,
@@ -11,6 +11,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Switch,
   Button,
   Paper,
   Typography,
@@ -18,139 +19,229 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  CircularProgress, // Import CircularProgress
-} from '@mui/material';
+  CircularProgress,
+  Divider,
+} from "@mui/material";
 import {
   Lock as LockIcon,
   SportsEsports as GameIcon,
   Stars as StarsIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
-import { GAMES } from '../../../utils/constants';
-import { EventFields } from '../CreateLobbyModal/EventFields';
-import formatDateForInputLocal from '../../../utils/formatDate';
+  Sports as SportsEsports,
+  Group as GroupIcon,
+} from "@mui/icons-material";
+import { GAMES } from "../../../utils/constants";
+import { EventFields } from "../CreateLobbyModal/EventFields";
+import formatDateForInputLocal from "../../../utils/formatDate";
+import { updateLobby as apiUpdateLobby } from "./api";
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 function LobbyEditModal({ open, onClose, lobby }) {
   const [formData, setFormData] = useState({
-    lobbyName: lobby?.lobbyName || '',
-    gameId: lobby?.game || '',
-    eventType: lobby?.lobbyType || 'normal',
-    startTime: lobby.startTime ? formatDateForInputLocal(lobby.startTime) : '',
-    endTime: lobby.endTime ? formatDateForInputLocal(lobby.endTime) : '',
-    maxMembers: lobby?.maxMembers || 4,
-    password: '',
+    lobbyName: "",
+    gameId: "",
+    eventType: "normal",
+    startTime: "",
+    endTime: "",
+    maxMembers: 4,
+    password: "",
+    passwordConfirm: "",
   });
+
+  const [passwordEnabled, setPasswordEnabled] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (lobby) {
       setFormData({
-        lobbyName: lobby.lobbyName || '',
-        gameId: lobby.game || '', // Adjust if necessary
-        eventType: lobby.lobbyType || 'normal',
-        startTime: lobby.startTime ? formatDateForInputLocal(lobby.startTime) : '',
-        endTime: lobby.endTime ? formatDateForInputLocal(lobby.endTime) : '',
+        lobbyName: lobby.lobbyName || "",
+        gameId: lobby.game || "",
+        eventType: lobby.lobbyType || "normal",
+        startTime: lobby.startTime ? formatDateForInputLocal(lobby.startTime) : "",
+        endTime: lobby.endTime ? formatDateForInputLocal(lobby.endTime) : "",
         maxMembers: lobby.maxMembers || 4,
-        password: '',
+        password: "",
+        passwordConfirm: "",
       });
+      setPasswordEnabled(!!lobby.password);
+    } else {
+      setFormData({
+        lobbyName: "",
+        gameId: "",
+        eventType: "normal",
+        startTime: "",
+        endTime: "",
+        maxMembers: 4,
+        password: "",
+        passwordConfirm: "",
+      });
+      setPasswordEnabled(false);
     }
-  }, [lobby]); // Dependency array includes lobby
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [loading, setLoading] = useState(false); 
+  }, [lobby]);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const handleChange = useCallback((e) => {
+    const { name, type, value, valueAsNumber } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "number"
+        ? (Number.isNaN(valueAsNumber) ? "" : valueAsNumber)
+        : value,
+    }));
+  }, []);
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault();
-    setLoading(true); // Start loading
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+
+    if (!lobby?.lobbyCode) {
+      console.error("Lobby code is missing, cannot update.");
+      setSnackbar({ open: true, message: "Error: Lobby identifier missing.", severity: "error" });
+      return;
+    }
+
+    if (passwordEnabled && formData.password) {
+      if (formData.password !== formData.passwordConfirm) {
+        setSnackbar({ open: true, message: "Şifreler eşleşmiyor.", severity: "error" });
+        return;
+      }
+    }
+
+    setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-
       const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : null;
       const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : null;
-      const response = await fetch(`http://localhost:3001/api/lobbies/update/${lobby.lobbyCode}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          lobbyName: formData.lobbyName,
-          game: formData.gameId,
-          lobbyType: formData.eventType,
-          startTime: startTimeISO,
-          endTime: endTimeISO,
-          maxMembers: formData.maxMembers,
-          password: formData.password,
-        }),
-      });
+      const payload = {
+        lobbyName: formData.lobbyName,
+        game: formData.gameId,
+        lobbyType: formData.eventType,
+        startTime: startTimeISO,
+        endTime: endTimeISO,
+        maxMembers: formData.maxMembers,
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Lobby update failed');
+      if (!passwordEnabled) {
+        payload.password = null;
+      } else if (formData.password) {
+        payload.password = formData.password;
       }
 
-      await response.json();
-      setSnackbar({ open: true, message: 'Lobby updated successfully!', severity: 'warning' });
-      setTimeout(() => {
-        onClose();
-      }, 5000);
+      await apiUpdateLobby(lobby.lobbyCode, payload);
+      setSnackbar({ open: true, message: "Lobby başarıyla güncellendi!", severity: "success" });
+      setTimeout(() => onClose(true), 1500);
     } catch (error) {
-      console.error('Lobby update error:', error);
-      setSnackbar({ open: true, message: error.message, severity: 'error' });
+      console.error("Lobby update error:", error);
+      setSnackbar({ open: true, message: error.message || "Lobby güncelleme başarısız.", severity: "error" });
     } finally {
-      setLoading(false); // End loading regardless of success or failure
+      setLoading(false);
     }
-  }, [formData, lobby.lobbyCode, onClose]);
+  }, [formData, lobby, onClose, passwordEnabled]);
+
+  if (!lobby) {
+    return (
+      <Dialog open={open} onClose={onClose}>
+        <Box sx={{ p: 4, display: "flex", justifyContent: "center", alignItems: "center", height: 200 }}>
+          <CircularProgress sx={{ color: "secondary.main" }} />
+        </Box>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
       open={open}
       TransitionComponent={Transition}
       keepMounted
-      onClose={onClose}
+      onClose={() => onClose(false)}
       maxWidth="sm"
       fullWidth
+      PaperProps={{
+        sx: {
+          overflowY: "auto",
+          borderRadius: 2,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.15)"
+        }
+      }}
     >
       <Paper
-        elevation={4}
+        elevation={0}
         sx={{
-          p: 4,
-          borderRadius: 3,
-          background: 'linear-gradient(135deg, rgba(34,193,195,0.1) 0%, rgba(253,187,45,0.1) 100%)',
-          border: '1px solid rgba(34,193,195,0.3)',
+          p: { xs: 2, sm: 4 },
+          borderRadius: 2,
+          background: (theme) => 
+            theme.palette.mode === 'light' 
+              ? 'linear-gradient(135deg, rgba(202,236,213,0.6), rgba(50,135,97,0.05))'
+              : 'linear-gradient(135deg, rgba(26,54,93,0.6), rgba(29,46,74,0.2))',
+          border: (theme) => 
+            theme.palette.mode === 'light'
+              ? '1px solid rgba(50,135,97,0.2)'
+              : '1px solid rgba(65,105,225,0.2)',
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <StarsIcon sx={{ color: 'rgba(34,193,195,1)' }} />
+        <Box sx={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          mb: 3, 
+          alignItems: "center",
+          pb: 2,
+          borderBottom: (theme) => 
+            theme.palette.mode === 'light'
+              ? '1px solid rgba(50,135,97,0.2)'
+              : '1px solid rgba(65,105,225,0.2)'
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <StarsIcon sx={{ 
+              color: (theme) => 
+                theme.palette.mode === 'light' 
+                  ? 'primary.darker' 
+                  : 'secondary.main',
+              fontSize: 28
+            }} />
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 700,
-                background: 'linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                background: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'linear-gradient(45deg, rgba(50,135,97,1), rgba(66,183,129,0.9))'
+                    : 'linear-gradient(45deg, rgba(65,105,225,1), rgba(65,105,225,0.7))',
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
               Edit Lobby
             </Typography>
           </Box>
-          <IconButton onClick={onClose} aria-label="close">
-            <CloseIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
+          <IconButton 
+            onClick={() => onClose(false)} 
+            aria-label="close"
+            sx={{
+              color: (theme) => 
+                theme.palette.mode === 'light' 
+                  ? 'primary.darker' 
+                  : 'secondary.main',
+              '&:hover': {
+                backgroundColor: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'rgba(50,135,97,0.1)'
+                    : 'rgba(65,105,225,0.1)',
+              }
+            }}
+          >
+            <CloseIcon />
           </IconButton>
         </Box>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ '& .MuiTextField-root': { mb: 3 } }}>
-          {/* Form fields as before */}
+        <Box 
+          component="form" 
+          onSubmit={handleSubmit} 
+          sx={{ 
+            "& .MuiTextField-root": { mb: 2.5 },
+            "& .MuiFormControl-root": { mb: 2.5 },
+          }}
+        >
           <TextField
             fullWidth
             label="Lobby Name"
@@ -158,57 +249,76 @@ function LobbyEditModal({ open, onClose, lobby }) {
             value={formData.lobbyName}
             onChange={handleChange}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: 'rgba(34,193,195,0.8)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'rgba(34,193,195,1)',
-                },
-              },
-            }}
+            variant="outlined"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <GameIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
+                  <GameIcon sx={{ 
+                    color: (theme) => 
+                      theme.palette.mode === 'light' 
+                        ? 'primary.medium' 
+                        : 'secondary.light' 
+                  }} />
                 </InputAdornment>
               ),
             }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&.Mui-focused fieldset': {
+                  borderColor: (theme) => 
+                    theme.palette.mode === 'light' 
+                      ? 'primary.medium' 
+                      : 'secondary.main'
+                }
+              },
+              '& label.Mui-focused': {
+                color: (theme) => 
+                  theme.palette.mode === 'light' 
+                    ? 'primary.medium' 
+                    : 'secondary.main'
+              }
+            }}
           />
 
-          {/* Game Selection Area */}
-          <FormControl fullWidth required sx={{ mb: 3 }}>
+          <FormControl 
+            fullWidth 
+            required 
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&.Mui-focused fieldset': {
+                  borderColor: (theme) => 
+                    theme.palette.mode === 'light' 
+                      ? 'primary.medium' 
+                      : 'secondary.main'
+                }
+              },
+              '& label.Mui-focused': {
+                color: (theme) => 
+                  theme.palette.mode === 'light' 
+                    ? 'primary.medium' 
+                    : 'secondary.main'
+              }
+            }}
+          >
             <InputLabel>Game Selection</InputLabel>
-            <Select
-              name="gameId"
-              value={formData.gameId}
-              onChange={handleChange}
+            <Select 
+              name="gameId" 
+              value={formData.gameId} 
+              onChange={handleChange} 
               label="Game Selection"
-              sx={{
-                '&.MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: 'rgba(34,193,195,0.8)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgba(34,193,195,1)',
-                  },
-                },
-              }}
+              startAdornment={
+                <InputAdornment position="start" sx={{ ml: -0.5, mr: 1 }}>
+                  <SportsEsports sx={{ 
+                    color: (theme) => 
+                      theme.palette.mode === 'light' 
+                        ? 'primary.medium' 
+                        : 'secondary.light' 
+                  }} />
+                </InputAdornment>
+              }
             >
               {GAMES.map((game) => (
-                <MenuItem
-                  key={game.id}
-                  value={game.id}
-                  sx={{
-                    '&:hover': {
-                      background: 'linear-gradient(90deg, rgba(34,193,195,0.1), rgba(253,187,45,0.1))',
-                    },
-                    '&.Mui-selected': {
-                      background: 'linear-gradient(90deg, rgba(34,193,195,0.2), rgba(253,187,45,0.2))',
-                    },
-                  }}
-                >
+                <MenuItem key={game.id} value={game.id}>
                   {game.title}
                 </MenuItem>
               ))}
@@ -216,51 +326,85 @@ function LobbyEditModal({ open, onClose, lobby }) {
           </FormControl>
 
           <Paper
+            elevation={0}
             sx={{
               p: 2.5,
-              mb: 3,
+              mb: 2.5,
               borderRadius: 2,
-              background: 'rgb(165, 249, 190, 0.1)',
-              border: '1px solid rgb(165, 249, 190, 0.3)',
+              background: (theme) => 
+                theme.palette.mode === 'light'
+                  ? 'rgba(165, 249, 190, 0.1)'
+                  : 'rgba(65, 105, 225, 0.05)',
+              border: (theme) => 
+                theme.palette.mode === 'light'
+                  ? '1px solid rgba(165, 249, 190, 0.3)'
+                  : '1px solid rgba(65, 105, 225, 0.2)',
             }}
           >
-            <Typography variant="subtitle1" sx={{ mb: 1.5, color: 'rgba(34,193,195,1)', fontWeight: 600 }}>
-              Event Type
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                mb: 1.5, 
+                fontWeight: 600,
+                color: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'primary.medium'
+                    : 'secondary.main',
+              }}
+            >
+              Lobby Type
             </Typography>
-            <RadioGroup row name="eventType" value={formData.eventType} onChange={handleChange}>
-              <FormControlLabel
-                value="normal"
+            <RadioGroup 
+              row 
+              name="eventType" 
+              value={formData.eventType} 
+              onChange={handleChange}
+            >
+              <FormControlLabel 
+                value="normal" 
                 control={
-                  <Radio
+                  <Radio 
                     sx={{
-                      color: 'rgba(34,193,195,0.6)',
+                      color: (theme) => 
+                        theme.palette.mode === 'light'
+                          ? 'primary.medium'
+                          : 'secondary.light',
                       '&.Mui-checked': {
-                        color: 'rgba(34,193,195,1)',
-                      },
+                        color: (theme) => 
+                          theme.palette.mode === 'light'
+                            ? 'primary.medium'
+                            : 'secondary.main',
+                      }
                     }}
                   />
-                }
-                label="Normal"
-                sx={{ mr: 4 }}
+                } 
+                label="Normal" 
+                sx={{ mr: 4 }} 
               />
-              <FormControlLabel
-                value="event"
+              <FormControlLabel 
+                value="event" 
                 control={
-                  <Radio
+                  <Radio 
                     sx={{
-                      color: 'rgba(253,187,45,0.6)',
+                      color: (theme) => 
+                        theme.palette.mode === 'light'
+                          ? 'primary.medium'
+                          : 'secondary.light',
                       '&.Mui-checked': {
-                        color: 'rgba(253,187,45,1)',
-                      },
+                        color: (theme) => 
+                          theme.palette.mode === 'light'
+                            ? 'primary.medium'
+                            : 'secondary.main',
+                      }
                     }}
                   />
-                }
-                label="Event"
+                } 
+                label="Event" 
               />
             </RadioGroup>
           </Paper>
 
-          {formData.eventType === 'event' && <EventFields formData={formData} handleChange={handleChange} />}
+          {formData.eventType === "event" && <EventFields formData={formData} handleChange={handleChange} />}
 
           <TextField
             fullWidth
@@ -270,93 +414,248 @@ function LobbyEditModal({ open, onClose, lobby }) {
             value={formData.maxMembers}
             onChange={handleChange}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: 'rgba(34,193,195,0.8)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'rgba(34,193,195,1)',
-                },
-              },
-            }}
-            InputProps={{
+            InputProps={{ 
               inputProps: { min: 1, max: 10 },
-            }}
-          />
-          <TextField
-            fullWidth
-            label="Lobby Password (Optional)"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: 'rgba(34,193,195,0.8)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'rgba(34,193,195,1)',
-                },
-              },
-            }}
-            InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
+                  <GroupIcon sx={{ 
+                    color: (theme) => 
+                      theme.palette.mode === 'light' 
+                        ? 'primary.medium' 
+                        : 'secondary.light' 
+                  }} />
                 </InputAdornment>
               ),
-              placeholder: 'Enter a new password or leave blank to keep current',
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '&.Mui-focused fieldset': {
+                  borderColor: (theme) => 
+                    theme.palette.mode === 'light' 
+                      ? 'primary.medium' 
+                      : 'secondary.main'
+                }
+              },
+              '& label.Mui-focused': {
+                color: (theme) => 
+                  theme.palette.mode === 'light' 
+                    ? 'primary.medium' 
+                    : 'secondary.main'
+              }
             }}
           />
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+          <Divider sx={{ my: 2.5 }} />
+
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            mb: 2
+          }}>
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                fontWeight: 600, 
+                color: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'primary.medium'
+                    : 'secondary.main'
+              }}
+            >
+              Password Protection
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch 
+                  checked={passwordEnabled} 
+                  onChange={(e) => setPasswordEnabled(e.target.checked)} 
+                  name="passwordEnabled" 
+                  disabled={loading}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: (theme) => 
+                        theme.palette.mode === 'light'
+                          ? 'primary.medium'
+                          : 'secondary.main',
+                      '&:hover': {
+                        backgroundColor: (theme) => 
+                          theme.palette.mode === 'light'
+                            ? 'rgba(66, 183, 129, 0.08)'
+                            : 'rgba(65, 105, 225, 0.08)',
+                      },
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: (theme) => 
+                        theme.palette.mode === 'light'
+                          ? 'primary.medium'
+                          : 'secondary.main',
+                    },
+                  }}
+                />
+              }
+              label="Enable Password"
+            />
+          </Box>
+
+          {passwordEnabled && (
+            <Box sx={{ 
+              p: 2.5, 
+              mb: 1, 
+              borderRadius: 2,
+              background: (theme) => 
+                theme.palette.mode === 'light'
+                  ? 'rgba(165, 249, 190, 0.05)'
+                  : 'rgba(65, 105, 225, 0.03)',
+              border: (theme) => 
+                theme.palette.mode === 'light'
+                  ? '1px solid rgba(165, 249, 190, 0.2)'
+                  : '1px solid rgba(65, 105, 225, 0.1)',
+            }}>
+              <TextField
+                fullWidth
+                label="New Password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                InputProps={{ 
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon sx={{ 
+                        color: (theme) => 
+                          theme.palette.mode === 'light' 
+                            ? 'primary.medium' 
+                            : 'secondary.light' 
+                      }} />
+                    </InputAdornment>
+                  ) 
+                }}
+                helperText="Leave blank to keep the current password"
+                sx={{
+                  mb: 2.5,
+                  '& .MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: (theme) => 
+                        theme.palette.mode === 'light' 
+                          ? 'primary.medium' 
+                          : 'secondary.main'
+                    }
+                  },
+                  '& label.Mui-focused': {
+                    color: (theme) => 
+                      theme.palette.mode === 'light' 
+                        ? 'primary.medium' 
+                        : 'secondary.main'
+                  }
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Confirm Password"
+                name="passwordConfirm"
+                type="password"
+                value={formData.passwordConfirm}
+                onChange={handleChange}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: (theme) => 
+                        theme.palette.mode === 'light' 
+                          ? 'primary.medium' 
+                          : 'secondary.main'
+                    }
+                  },
+                  '& label.Mui-focused': {
+                    color: (theme) => 
+                      theme.palette.mode === 'light' 
+                        ? 'primary.medium' 
+                        : 'secondary.main'
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
             <Button
               variant="outlined"
-              onClick={onClose}
+              onClick={() => onClose(false)}
               fullWidth
-              disabled={loading} // Disable cancel button when loading
+              disabled={loading}
               sx={{
-                borderColor: 'rgba(34,193,195,0.8)',
-                color: 'rgba(34,193,195,1)',
-                '&:hover': {
-                  borderColor: 'rgba(34,193,195,1)',
-                  backgroundColor: 'rgba(34,193,195,0.1)',
+                borderColor: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'primary.medium'
+                    : 'secondary.main',
+                color: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'primary.medium'
+                    : 'secondary.main',
+                "&:hover": {
+                  borderColor: (theme) => 
+                    theme.palette.mode === 'light'
+                      ? 'primary.medium'
+                      : 'secondary.main',
+                  backgroundColor: (theme) => 
+                    theme.palette.mode === 'light'
+                      ? 'rgba(66, 183, 129, 0.08)'
+                      : 'rgba(65, 105, 225, 0.08)',
                 },
-                textTransform: 'none',
+                textTransform: "none",
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: "1rem",
+                fontWeight: 500,
+                borderRadius: 1.5,
               }}
             >
               Cancel
             </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              fullWidth
-              disabled={loading} // Disable save button when loading
+            <Button 
+              variant="contained" 
+              type="submit" 
+              fullWidth 
+              disabled={loading}   
               sx={{
-                background: 'linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, rgba(34,193,195,0.9), rgba(253,187,45,0.9))',
+                background: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? 'linear-gradient(45deg, rgba(50,135,97,1), rgba(66,183,129,0.9))'
+                    : 'linear-gradient(45deg, rgba(65,105,225,1), rgba(65,105,225,0.8))',
+                "&:hover": {
+                  background: (theme) => 
+                    theme.palette.mode === 'light'
+                      ? 'linear-gradient(45deg, rgba(50,135,97,0.9), rgba(66,183,129,0.8))'
+                      : 'linear-gradient(45deg, rgba(65,105,225,0.9), rgba(65,105,225,0.7))',
                 },
-                textTransform: 'none',
+                textTransform: "none",
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: "1rem",
+                fontWeight: 600,
+                borderRadius: 1.5,
+                boxShadow: (theme) => 
+                  theme.palette.mode === 'light'
+                    ? '0 4px 12px rgba(66,183,129,0.2)'
+                    : '0 4px 12px rgba(65,105,225,0.15)',
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'} {/* Loading indicator */}
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Save Changes"}
             </Button>
           </Box>
         </Box>
       </Paper>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={3000} 
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert 
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+          severity={snackbar.severity} 
+          variant="filled" 
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
