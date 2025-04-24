@@ -1,9 +1,7 @@
 import GroupChat from "../models/groupChat.model.js";
 import User from "../models/user.model.js";
 import GroupChatMessage from "../models/groupChatMessage.model.js";
-import { v4 as uuidv4 } from 'uuid';
 
-// Grup oluşturma
 export const createGroup = async (ws, data,broadcastToAll) => { 
     try {
         const { groupName, description, password, maxMembers } = data;
@@ -17,15 +15,13 @@ export const createGroup = async (ws, data,broadcastToAll) => {
             }));
         }
 
-        const invitationLink = uuidv4(); 
         const newGroup = new GroupChat({
             groupName,
             description,
             hostId,
             members: [hostId], 
             password,
-            maxMembers,
-            invitationLink: `group/invite/${invitationLink}`
+            maxMembers
         });
 
         await newGroup.save();
@@ -45,7 +41,6 @@ export const createGroup = async (ws, data,broadcastToAll) => {
     }
 };
 
-// Gruba katılma
 export const joinGroup = async (ws, data, broadcastToSender, broadcastGroupEvent,broadcastToAll) => {
     try {
         const { groupId, password } = data;
@@ -93,68 +88,64 @@ export const joinGroup = async (ws, data, broadcastToSender, broadcastGroupEvent
     }
 };
 
-// Gruptan ayrılma
 export const leaveGroup = async (ws, data, broadcastToSender, broadcastGroupEvent, broadcastToAll) => {
     try {
-        const { groupId } = data;
-        const userId = ws.userId;
-
-        const group = await GroupChat.findById(groupId).populate('members');
-        if (!group) {
-            console.log(`Group ${groupId} not found.`);
-            return ws.send(JSON.stringify({ type: "ERROR", message: "Grup bulunamadı." }));
-        }
-
-        group.members = group.members.filter(member => {
-            return String(member._id) !== String(userId);
-        });
-        if (group.members.length === 0) {
-            await GroupChat.findByIdAndDelete(groupId);
-            broadcastGroupEvent(groupId, "GROUP_DELETED", { groupId: groupId, reason: "No members left" });
-            broadcastToAll({
-                type: "GROUP_DELETED",
-                groupId: groupId,
-            });
+      const { groupId } = data;
+      const userId = ws.userId;
+  
+      const group = await GroupChat.findById(groupId).populate('members');
+      if (!group) {
+        return ws.send(JSON.stringify({ type: "ERROR", message: "Grup bulunamadı." }));
+      }
+  
+      // Üyeyi listeden çıkar
+      group.members = group.members.filter(m => m._id.toString() !== userId);
+  
+  
+     if (group.members.length === 0) {
+        await GroupChat.findByIdAndDelete(groupId);
+        broadcastGroupEvent(groupId, "GROUP_DELETED", { groupId, reason: "No members left" });
+        broadcastToAll({ type: "GROUP_DELETED", groupId });
+  
+      // Ayrılan kullanıcıya da başarı mesajı gönder
+      broadcastToSender(userId, { type: "GROUP_LEFT_SUCCESS", groupId });
+     
+       return;
+      }
+  
+      // Host ayrıldıysa ve geriye üye kalmadıysa
+      if (group.hostId.toString() === userId.toString()) {
+        if (group.members.length > 0) {
+          const newHostId = group.members[0]._id;
+          group.hostId = newHostId;
+          broadcastGroupEvent(groupId, "GROUP_HOST_CHANGED", { groupId, newHostId });
         } else {
-            if (group.hostId.toString() === userId.toString()) {
-                if (group.members.length > 0) {
-                    const newHostId = group.members[0]._id;
-                    group.hostId = newHostId;
-                    broadcastGroupEvent(groupId, "GROUP_HOST_CHANGED", { groupId: groupId, newHostId: newHostId });
-                } else {
-                    await GroupChat.findByIdAndDelete(groupId);
-                    broadcastGroupEvent(groupId, "GROUP_DELETED", { groupId: groupId, reason: "Host left and no members left" });
-                    broadcastToAll({
-                        type: "GROUP_DELETED",
-                        groupId: groupId,
-                    });
-                    broadcastToSender({ type: "GROUP_LEFT_SUCCESS", groupId: groupId });
-                    return;
-                }
-            }
-            await group.save();
-
-            const populatedGroup = await GroupChat.findById(groupId)
-                .populate({ path: 'hostId', select: 'username name avatar' })
-                .populate({ path: 'members', select: 'username name avatar' });
-
-            broadcastGroupEvent(groupId, "USER_LEFT_GROUP", { groupId: groupId, userId: userId });
-            broadcastToSender({ type: "USER_LEFT_GROUP", groupId: groupId, data: { groupId: groupId, userId: userId } });
-
-            broadcastToAll({
-                type: "GROUP_UPDATED",
-                group: formatGroupResponse(populatedGroup),
-                groupId: groupId,
-                userIdLeft: userId
-            });
+          await GroupChat.findByIdAndDelete(groupId);
+          broadcastGroupEvent(groupId, "GROUP_DELETED", { groupId, reason: "Host left and no members left" });
+          broadcastToAll({ type: "GROUP_DELETED", groupId });
         }
-
-        broadcastToSender({ type: "GROUP_LEFT_SUCCESS", groupId: groupId });
+      }
+  
+      await group.save();
+  
+      broadcastGroupEvent(groupId, "USER_LEFT_GROUP", { groupId, userId });
+      broadcastToSender({ type: "USER_LEFT_GROUP", groupId, data: { groupId, userId } });
+      broadcastToAll({
+        type: "GROUP_UPDATED",
+        group: formatGroupResponse(await GroupChat.findById(groupId)
+          .populate('hostId', 'username name avatar')
+          .populate('members', 'username name avatar')),
+        groupId,
+        userIdLeft: userId
+      });
+  
+ 
+      broadcastToSender(userId, { type: "GROUP_LEFT_SUCCESS", groupId });
     } catch (error) {
-        console.error("Gruptan ayrılma hatası:", error);
-        ws.send(JSON.stringify({ type: "ERROR", message: "Gruptan ayrılırken bir hata oluştu." }));
+      console.error("Gruptan ayrılma hatası:", error);
+      ws.send(JSON.stringify({ type: "ERROR", message: "Gruptan ayrılırken bir hata oluştu." }));
     }
-};
+  };
 
 export const getAllGroups = async (req, res) => {
     try {
@@ -377,7 +368,6 @@ const formatGroupResponse = (group) => {
             avatar: member.avatar,
         })),
         maxMembers: group.maxMembers,
-        invitationLink: group.invitationLink,
         createdAt: group.createdAt,
         updatedAt: group.updatedAt,
     };
