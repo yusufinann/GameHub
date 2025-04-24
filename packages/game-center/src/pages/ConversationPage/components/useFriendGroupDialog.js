@@ -28,7 +28,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
     setFriendGroupsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3001/api/friend/friendgroups/me", {
+      const response = await axios.get("http://localhost:3001/api/chat/friendgroups/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const fetchedGroups = response.data.groups.map((g) => ({
@@ -52,7 +52,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:3001/api/friend/friendgroup",
+        "http://localhost:3001/api/chat/friendgroup",
         {
           groupName,
           description,

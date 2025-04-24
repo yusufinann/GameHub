@@ -111,7 +111,7 @@ function ConversationPage() {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          `http://localhost:3001/api/friend/friendgroup/${groupId}`,
+          `http://localhost:3001/api/chat/friendgroup/${groupId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

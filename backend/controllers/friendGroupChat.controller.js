@@ -385,35 +385,55 @@ export const deleteFriendGroup = async (ws, data, broadcastFriendGroupEvent, bro
 
 export const getFriendGroupChatHistory = async (req, res) => {
     try {
-        const { groupId } = req.params;
-
-        const chatHistory = await FriendGroupChatMessage.find({ groupId })
-            .populate({
-                path: 'senderId',
-                select: 'username name avatar'
-            })
-            .sort({ timestamp: 1 });
-
-        const formattedHistory = chatHistory.map(chatMessage => ({
-            _id: chatMessage._id,
-            groupId: chatMessage.groupId,
-            senderId: {
-                _id: chatMessage.senderId._id,
-                username: chatMessage.senderId.username,
-                name: chatMessage.senderId.name,
-                avatar: chatMessage.senderId.avatar,
-            },
-            message: chatMessage.message,
-            timestamp: chatMessage.timestamp,
-        }));
-
-        res.status(200).json({ history: formattedHistory });
-
+      const { groupId } = req.params;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 25;
+      const skip = (page - 1) * limit;
+  
+      if (!groupId) {
+        return res.status(400).json({ message: "Friend Group ID is required" });
+      }
+  
+      // Get total count for pagination info
+      const totalMessages = await FriendGroupChatMessage.countDocuments({ groupId });
+  
+      // Fetch messages with pagination and sort in reverse chronological order
+      const messages = await FriendGroupChatMessage.find({ groupId })
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({ path: 'senderId', select: 'username name avatar' });
+  
+      // Format and reverse back to chronological order for display
+      const formattedHistory = messages
+        .map(chatMessage => ({
+          _id: chatMessage._id,
+          groupId: chatMessage.groupId,
+          senderId: {
+            _id: chatMessage.senderId._id,
+            username: chatMessage.senderId.username,
+            name: chatMessage.senderId.name,
+            avatar: chatMessage.senderId.avatar,
+          },
+          message: chatMessage.message,
+          timestamp: chatMessage.timestamp,
+        }))
+        .reverse();
+  
+      res.status(200).json({
+        history: formattedHistory,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalMessages / limit),
+          totalMessages,
+          hasMore: totalMessages > skip + messages.length
+        }
+      });
     } catch (error) {
-        console.error("Friend Grup mesaj geçmişi alınırken hata:", error);
-        res.status(500).json({ message: "Friend Grup mesaj geçmişi alınırken bir hata oluştu." });
+      console.error("Friend Grup mesaj geçmişi alınırken hata:", error);
+      res.status(500).json({ message: "Friend Grup mesaj geçmişi alınırken bir hata oluştu." });
     }
-};
+  };
 export const getFriendGroupById = async (req, res) => {
     try {
         const { groupId } = req.params;

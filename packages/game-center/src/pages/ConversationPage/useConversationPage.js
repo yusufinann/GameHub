@@ -20,7 +20,7 @@ export const useConversationsPage = (friendGroups,setFriendGroups,selectedConver
       try {
         const token = localStorage.getItem('token'); 
         const response = await axios.get(
-          `http://localhost:3001/api/private-chat/private-chat-history?receiverId=${targetUserId}`, 
+          `http://localhost:3001/api/chat/private-chat-history?receiverId=${targetUserId}`, 
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -45,7 +45,7 @@ export const useConversationsPage = (friendGroups,setFriendGroups,selectedConver
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `http://localhost:3001/api/friend/friendgroup/chat/${groupId}`,
+          `http://localhost:3001/api/chat/friendgroup/${groupId}/history`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setMessages(response.data.history);

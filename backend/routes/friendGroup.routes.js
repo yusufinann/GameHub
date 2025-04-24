@@ -15,7 +15,7 @@ router.get('/friendgroup/:groupId', authenticateUser, getFriendGroupById);
 
 router.get('/friendgroups/me', authenticateUser, getUserFriendGroups);
 
-router.get('/friendgroup/chat/:groupId', authenticateUser, getFriendGroupChatHistory);
+router.get('/friendgroup/:groupId/history', authenticateUser, getFriendGroupChatHistory);
 
 
 export default router;

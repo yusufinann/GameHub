@@ -4,7 +4,7 @@ import { getCommunityMessages } from "../controllers/communityChat.controller.js
 
 const router = express.Router();
 
-router.get("/",authenticateUser, getCommunityMessages);
+router.get("/community",authenticateUser, getCommunityMessages);
 
 
 export default router;

@@ -5,7 +5,7 @@ import { getAllGroups, getUserGroups, getGroupChatHistory } from "../controllers
 
 const router = express.Router();
 
-router.get('/', authenticateUser, getAllGroups);
+router.get('/groups', authenticateUser, getAllGroups);
 router.get('/user-groups', authenticateUser, getUserGroups);
 router.get('/groups/:groupId/history', authenticateUser, getGroupChatHistory);
 

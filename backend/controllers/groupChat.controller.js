@@ -305,40 +305,57 @@ export const sendGroupMessage = async (ws, data, broadcastGroupMessage) => {
 
 export const getGroupChatHistory = async (req, res) => {
     try {
-        const { groupId } = req.params;
-
-        const chatHistory = await GroupChatMessage.find({ groupId })
-            .populate({
-                path: 'senderId',
-                select: 'username name avatar'
-            })
-            .sort({ timestamp: 1 });
-
-        const formattedHistory = chatHistory.map(chatMessage => ({
-            _id: chatMessage._id,
-            groupId: chatMessage.groupId,
-            senderId: {
-                _id: chatMessage.senderId._id,
-                username: chatMessage.senderId.username,
-                name: chatMessage.senderId.name,
-                avatar: chatMessage.senderId.avatar,
-            },
-            message: chatMessage.message,
-            timestamp: chatMessage.timestamp,
-        }));
-
-
-        res.status(200).json({
-            type: "GROUP_CHAT_HISTORY",
-            groupId: groupId,
-            history: formattedHistory,
-        });
-
+      const { groupId } = req.params;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 25;
+      const skip = (page - 1) * limit;
+  
+      if (!groupId) {
+        return res.status(400).json({ message: "Group ID is required" });
+      }
+  
+      // Get total count for pagination info
+      const totalMessages = await GroupChatMessage.countDocuments({ groupId });
+  
+      // Fetch messages with pagination and sort in reverse chronological order
+      const messages = await GroupChatMessage.find({ groupId })
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({ path: 'senderId', select: 'username name avatar' });
+  
+      // Format and reverse back to chronological order for display
+      const formattedHistory = messages
+        .map(chatMessage => ({
+          _id: chatMessage._id,
+          groupId: chatMessage.groupId,
+          senderId: {
+            _id: chatMessage.senderId._id,
+            username: chatMessage.senderId.username,
+            name: chatMessage.senderId.name,
+            avatar: chatMessage.senderId.avatar,
+          },
+          message: chatMessage.message,
+          timestamp: chatMessage.timestamp,
+        }))
+        .reverse();
+  
+      res.status(200).json({
+        type: "GROUP_CHAT_HISTORY",
+        groupId: groupId,
+        history: formattedHistory,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalMessages / limit),
+          totalMessages,
+          hasMore: totalMessages > skip + messages.length
+        }
+      });
     } catch (error) {
-        console.error("Grup mesaj geçmişi alınırken hata:", error);
-        res.status(500).json({ type: "ERROR", message: "Grup mesaj geçmişi alınırken bir hata oluştu." });
+      console.error("Grup mesaj geçmişi alınırken hata:", error);
+      res.status(500).json({ type: "ERROR", message: "Grup mesaj geçmişi alınırken bir hata oluştu." });
     }
-};
+  };
 
 
 

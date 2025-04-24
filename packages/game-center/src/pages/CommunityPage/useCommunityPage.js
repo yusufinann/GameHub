@@ -27,7 +27,7 @@ export const useCommunityPage = () => {
     setIsGroupListLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/groups', {
+      const response = await axios.get('http://localhost:3001/api/chat/groups', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -46,7 +46,7 @@ export const useCommunityPage = () => {
     setIsGroupListLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/groups/user-groups', {
+      const response = await axios.get('http://localhost:3001/api/chat/user-groups', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +65,7 @@ export const useCommunityPage = () => {
     setIsLoadingCommunityChat(true);
     try {
       const token=localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/community-chat',
+      const response = await axios.get('http://localhost:3001/api/chat/community',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -87,7 +87,7 @@ export const useCommunityPage = () => {
       setIsLoadingGroupChat(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3001/api/groups/groups/${groupId}/history`, {
+        const response = await axios.get(`http://localhost:3001/api/chat/groups/${groupId}/history`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
