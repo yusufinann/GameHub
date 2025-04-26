@@ -1,148 +1,94 @@
-import { useRef, useEffect, useState, useCallback, useMemo } from "react";
-import { useTheme } from '@mui/material/styles';
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useTheme } from "@mui/material/styles";
 
-const useChatMessageList = ({ messages, currentUser, isLoadingHistory, selectedConversation }) => {
-    const formatMessageListTimestamp = useCallback((timestamp) => {
-        const date = new Date(timestamp);
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
+const useChatMessageList = ({
+  messages = [],
+  currentUser,
+  isLoadingHistory,
+  selectedConversation,
+}) => {
+  const theme = useTheme();
+  const [prevMessagesLength, setPrevMessagesLength] = useState(messages.length);
+  const prevSelectedConversationId = useRef(
+    selectedConversation?._id ?? selectedConversation?.friendId
+  );
+  const prevIsLoadingHistory = useRef(isLoadingHistory);
 
-        const isToday =
-            date.getDate() === today.getDate() &&
-            date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear();
+  const formatMessageListTimestamp = useCallback((timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  }, []);
 
-        if (isToday) {
-            return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-        } else {
-            return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-        }
-    }, []);
-
-    const messagesEndRef = useRef(null);
-    const messagesContainerRef = useRef(null);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [showScrollButton, setShowScrollButton] = useState(false);
-    const [prevMessagesLength, setPrevMessagesLength] = useState(0);
-    const theme = useTheme();
-    const [isAtBottom, setIsAtBottom] = useState(true);
-    const scrollToBottom = useCallback((behavior = 'smooth') => {
-        if (messagesEndRef.current) {
-            // Validate behavior parameter
-            const validBehavior = ['auto', 'smooth'].includes(behavior) 
-                ? behavior 
-                : 'auto';
-                
-            messagesEndRef.current.scrollIntoView({
-                behavior: validBehavior,
-                block: 'end'
-            });
-            setUnreadCount(0);
-            setShowScrollButton(false);
-        }
-    }, []);
-
-   // Initialize scroll position on mount
-useEffect(() => {
-    scrollToBottom('auto');
-}, [scrollToBottom]);
-
-// Reset scroll position when conversation changes
-useEffect(() => {
-    scrollToBottom('auto');
-    setIsAtBottom(true);
-    setUnreadCount(0);
+  useEffect(() => {
+    const currentConversationId =
+      selectedConversation?._id ?? selectedConversation?.friendId;
+    // Referansları ve önceki uzunluğu güncelle
     setPrevMessagesLength(messages.length);
-}, [selectedConversation, messages.length, scrollToBottom]);
+    prevSelectedConversationId.current = currentConversationId;
+    prevIsLoadingHistory.current = isLoadingHistory;
+  }, [
+    messages,
+    messages.length,
+    prevMessagesLength,
+    currentUser?.id,
+    selectedConversation,
+    isLoadingHistory,
+  ]);
 
-const handleScroll = useCallback(() => {
-    if (!messagesContainerRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    const isAtBottomNow = scrollHeight - scrollTop - clientHeight < 50; // 50px threshold
-    setIsAtBottom(isAtBottomNow);
-    setShowScrollButton(!isAtBottomNow);
-    if (isAtBottomNow) setUnreadCount(0);
-}, []);
+  // Mesajları işle: Gün ayırıcıları ekle
+  const processedMessages = useMemo(() => {
+    if (!messages || messages.length === 0) return [];
 
-useEffect(() => {
-    if (messages.length <= prevMessagesLength) return;
+    const output = [];
+    let lastDateString = null;
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString(); // Dünün tarihi
 
-    const newMessagesCount = messages.length - prevMessagesLength;
-    const newMessages = messages.slice(-newMessagesCount);
-    
-    const shouldAutoScroll = newMessages.some(message => 
-        message.senderId === currentUser?.id || 
-        message.senderId?._id === currentUser?.id
-    );
+    messages.forEach((msg, index) => {
+      if (!msg?.timestamp) return;
 
-    if (shouldAutoScroll) {
-        scrollToBottom('smooth');
-    } else if (!isAtBottom) {
-        setUnreadCount(prev => prev + newMessagesCount);
-    }
+      const messageDate = new Date(msg.timestamp);
+      const messageDateString = messageDate.toDateString();
 
-    setPrevMessagesLength(messages.length);
-}, [messages, prevMessagesLength, isAtBottom, currentUser?.id, scrollToBottom]);
-
-    useEffect(() => {
-        scrollToBottom('auto');
-        setIsAtBottom(true);
-        setUnreadCount(0);
-        setPrevMessagesLength(messages.length);
-    }, [selectedConversation, messages.length, scrollToBottom]);
-
-    const getDaySeparatorText = useCallback((date, today, yesterday) => {
-        if (date.getDate() === today.getDate() &&
-            date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear()) {
-            return "Today";
-        } else if (date.getDate() === yesterday.getDate() &&
-            date.getMonth() === yesterday.getMonth() &&
-            date.getFullYear() === yesterday.getFullYear()) {
-            return "Yesterday";
+      if (messageDateString !== lastDateString) {
+        let label;
+        if (messageDateString === today) {
+          label = "Today";
+        } else if (messageDateString === yesterday) {
+          label = "Yesterday";
         } else {
-            return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+          label = messageDate.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
         }
-    }, []);
-
-    const processedMessages = useMemo(() => {
-        if (!messages || messages.length === 0) return [];
-
-        let processed = [];
-        let currentGroupDay = null;
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-
-        messages.forEach((msg) => {
-            const msgDate = new Date(msg.timestamp);
-            const dayKey = msgDate.toDateString();
-            if (dayKey !== currentGroupDay) {
-                processed.push({
-                    type: 'system',
-                    message: getDaySeparatorText(msgDate, today, yesterday),
-                    _id: `day-separator-${msgDate.toISOString()}`
-                });
-                currentGroupDay = dayKey;
-            }
-            processed.push(msg);
+        output.push({
+          _id: `separator-${messageDateString}-${index}`, // Daha benzersiz ID
+          type: "system", // Ayırıcı tipi
+          message: label,
+          timestamp: messageDate.getTime(), // Sıralama için timestamp
         });
-        return processed;
-    }, [messages, getDaySeparatorText]);
+        lastDateString = messageDateString;
+      }
 
-    return {
-        formatMessageListTimestamp,
-        messagesEndRef,
-        messagesContainerRef,
-        unreadCount,
-        showScrollButton,
-        isAtBottom,
-        theme,
-        scrollToBottom,
-        handleScroll,
-        processedMessages
-    };
+      // Orijinal mesajı ekle
+      output.push({ ...msg, type: "message" }); // Mesaj tipi
+    });
+
+    return output;
+  }, [messages]);
+
+  return {
+    theme,
+    formatMessageListTimestamp,
+    processedMessages,
+  };
 };
 
 export default useChatMessageList;

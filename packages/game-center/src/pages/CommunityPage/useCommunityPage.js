@@ -1,20 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import axios from "axios";
+
+const LIMIT = 30;
+
 export const useCommunityPage = () => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const { showSnackbar } = useSnackbar();
+  const token = localStorage.getItem("token");
 
   const [communityMessages, setCommunityMessages] = useState([]);
   const [newCommunityMessage, setNewCommunityMessage] = useState("");
   const [isCommunityMessagingLoading, setIsCommunityMessagingLoading] =
     useState(false);
-  const [isLoadingCommunityChat, setIsLoadingCommunityChat] = useState(true);
+  const [isLoadingCommunityChat, setIsLoadingCommunityChat] = useState(false); // Renamed for clarity (initial load)
+  const [communityPage, setCommunityPage] = useState(1);
+  const [hasMoreCommunity, setHasMoreCommunity] = useState(false);
 
-  const [communityGroups, setCommunityGroups] = useState([]); // Groups the user is a member of
+  const [communityGroups, setCommunityGroups] = useState([]); // Groups user is in
   const [allGroups, setAllGroups] = useState([]); // All available groups
   const [isGroupListLoading, setIsGroupListLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -22,19 +28,19 @@ export const useCommunityPage = () => {
   const [newGroupMessage, setNewGroupMessage] = useState("");
   const [isGroupMessagingLoading, setIsGroupMessagingLoading] = useState(false);
   const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(false);
+  const [groupPage, setGroupPage] = useState(1);
+  const [hasMoreGroup, setHasMoreGroup] = useState(false);
   const [isGroupDeleting, setIsGroupDeleting] = useState(false);
+
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
+  const containerRef = useRef(null);
 
   const fetchAllGroups = useCallback(async () => {
     setIsGroupListLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         "http://localhost:3001/api/chat/groups",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setAllGroups(response.data.groups);
     } catch (error) {
@@ -46,23 +52,15 @@ export const useCommunityPage = () => {
     } finally {
       setIsGroupListLoading(false);
     }
-  }, [showSnackbar]);
+  }, [showSnackbar, token]);
 
-  // Fetch groups that the current user is a member of
   const fetchUserGroups = useCallback(async () => {
-    setIsGroupListLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         "http://localhost:3001/api/chat/user-groups",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setCommunityGroups(response.data.groups);
-      console.log("communitygroups : ", communityGroups);
     } catch (error) {
       console.error("Error fetching user groups:", error);
       showSnackbar({
@@ -70,72 +68,120 @@ export const useCommunityPage = () => {
         severity: "error",
       });
     } finally {
-      setIsGroupListLoading(false);
+      // Only set to false if both fetches might be complete, or handle loading state more granularly
+      // Consider a combined loading state if necessary
+      // setIsGroupListLoading(false);
     }
-  }, [showSnackbar]);
+  }, [showSnackbar, token]);
 
-  const fetchCommunityChatHistory = useCallback(async () => {
-    setIsLoadingCommunityChat(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://localhost:3001/api/chat/community",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setCommunityMessages(response.data.history);
-    } catch (error) {
-      console.error("Error fetching community chat history:", error);
-      showSnackbar({
-        message: "Topluluk sohbet geçmişi yüklenirken bir hata oluştu.",
-        severity: "error",
-      });
-    } finally {
-      setIsLoadingCommunityChat(false);
-    }
-  }, [showSnackbar]);
-
-  const fetchGroupChatHistory = useCallback(
-    async (groupId) => {
-      if (groupId) {
-        setIsLoadingGroupChat(true);
-        try {
-          const token = localStorage.getItem("token");
-          const response = await axios.get(
-            `http://localhost:3001/api/chat/groups/${groupId}/history`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          setGroupMessages(response.data.history);
-        } catch (error) {
-          console.error("Error fetching group chat history:", error);
-          showSnackbar({
-            message: "Grup sohbet geçmişi yüklenirken bir hata oluştu.",
-            severity: "error",
-          });
-        } finally {
-          setIsLoadingGroupChat(false);
-        }
+  const fetchCommunityChatHistory = useCallback(
+    async (page = 1) => {
+      if (page === 1) {
+        setIsLoadingCommunityChat(true);
+        setCommunityMessages([]);
       } else {
-        console.error("Group ID missing, cannot fetch group chat history.");
-        setTimeout(() => setIsLoadingGroupChat(false), 1000); // Timeout to prevent indefinite loading if WebSocket is down
+        setIsLoadingMoreMessages(true);
+      }
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/chat/community?page=${page}&limit=${LIMIT}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { history, pagination } = response.data;
+        setHasMoreCommunity(pagination.hasMore);
+        setCommunityPage(pagination.currentPage);
+
+        if (page === 1) {
+          setCommunityMessages(history);
+        } else {
+          setCommunityMessages((prevMessages) => [...history, ...prevMessages]);
+        }
+      } catch (error) {
+        console.error("Error fetching community chat history:", error);
         showSnackbar({
-          message: "Grup sohbet geçmişi yüklenemedi, grup seçilmedi.",
+          message: "Topluluk sohbet geçmişi yüklenirken bir hata oluştu.",
           severity: "error",
         });
+      } finally {
+        setIsLoadingCommunityChat(false);
+        if (page > 1) {
+          setIsLoadingMoreMessages(false);
+        }
       }
     },
-    [showSnackbar]
+    [showSnackbar, token]
   );
 
+  const fetchGroupChatHistory = useCallback(
+    async (groupId, page = 1) => {
+      if (!groupId) {
+        console.error("Group ID missing, cannot fetch group chat history.");
+        showSnackbar({
+          message: "Grup sohbet geçmişi yüklenemedi, grup seçilmedi.",
+          severity: "warning",
+        });
+        setIsLoadingGroupChat(false);
+        return;
+      }
+
+      if (page === 1) {
+        setIsLoadingGroupChat(true);
+        setGroupMessages([]); 
+      } else {
+        setIsLoadingMoreMessages(true);
+      }
+
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/chat/groups/${groupId}/history?page=${page}&limit=${LIMIT}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const { history, pagination } = response.data;
+        setHasMoreGroup(pagination.hasMore);
+        setGroupPage(pagination.currentPage);
+
+        if (page === 1) {
+          setGroupMessages(history);
+        } else {
+          setGroupMessages((prevMessages) => [...history, ...prevMessages]);
+        }
+      } catch (error) {
+        console.error("Error fetching group chat history:", error);
+        showSnackbar({
+          message: "Grup sohbet geçmişi yüklenirken bir hata oluştu.",
+          severity: "error",
+        });
+      } finally {
+        setIsLoadingGroupChat(false);
+        if (page > 1) {
+          setIsLoadingMoreMessages(false);
+        }
+      }
+    },
+    [showSnackbar, token]
+  );
+
+  const loadMoreMessages = useCallback(() => {
+    if (isLoadingMoreMessages) return;
+
+    if (!selectedGroup && hasMoreCommunity) {
+      fetchCommunityChatHistory(communityPage + 1);
+    } else if (selectedGroup && hasMoreGroup) {
+      fetchGroupChatHistory(selectedGroup._id, groupPage + 1);
+    }
+  }, [
+    selectedGroup,
+    hasMoreCommunity,
+    hasMoreGroup,
+    communityPage,
+    groupPage,
+    fetchCommunityChatHistory,
+    fetchGroupChatHistory,
+    isLoadingMoreMessages,
+  ]);
+
   useEffect(() => {
-    fetchCommunityChatHistory();
+    fetchCommunityChatHistory(1);
     fetchAllGroups();
     fetchUserGroups();
   }, [fetchAllGroups, fetchUserGroups, fetchCommunityChatHistory]);
@@ -155,7 +201,9 @@ export const useCommunityPage = () => {
           break;
 
         case "RECEIVE_GROUP_MESSAGE":
-          setGroupMessages((prevMessages) => [...prevMessages, message.data]);
+          if (selectedGroup && message.data.groupId === selectedGroup._id) {
+            setGroupMessages((prevMessages) => [...prevMessages, message.data]);
+          }
           break;
 
         case "GROUP_CREATED":
@@ -166,6 +214,7 @@ export const useCommunityPage = () => {
           });
           fetchUserGroups();
           break;
+
         case "GROUP_JOINED_SUCCESS":
           setCommunityGroups((prev) => {
             const exists = prev.some((g) => g._id === message.group._id);
@@ -188,16 +237,14 @@ export const useCommunityPage = () => {
           break;
 
         case "GROUP_LEFT_SUCCESS":
-          console.log(
-            "WebSocket Message Received: GROUP_LEFT_SUCCESS",
-            message
-          );
           setCommunityGroups((prevGroups) =>
             prevGroups.filter((group) => group._id !== message.groupId)
           );
           if (selectedGroup && selectedGroup._id === message.groupId) {
             setSelectedGroup(null);
             setGroupMessages([]);
+            setGroupPage(1);
+            setHasMoreGroup(false);
           }
           showSnackbar({
             message: "Gruptan başarıyla ayrıldınız!",
@@ -219,7 +266,6 @@ export const useCommunityPage = () => {
               return group;
             })
           );
-
           setCommunityGroups((prevGroups) => {
             return prevGroups.map((group) => {
               if (group._id === message.groupId) {
@@ -235,9 +281,9 @@ export const useCommunityPage = () => {
           });
           if (selectedGroup && selectedGroup._id === message.groupId) {
             setSelectedGroup(null);
-            setGroupMessages([]);
           }
           break;
+
         case "GROUP_UPDATED_SUCCESS":
           setCommunityGroups((prevGroups) =>
             prevGroups.map((group) =>
@@ -283,7 +329,6 @@ export const useCommunityPage = () => {
             severity: "success",
           });
           break;
-
         case "GROUP_DELETED":
           setIsGroupDeleting(false);
           setCommunityGroups((prevGroups) =>
@@ -299,9 +344,13 @@ export const useCommunityPage = () => {
           break;
         case "ERROR":
           setIsGroupDeleting(false);
+          setIsGroupMessagingLoading(false);
+          setIsCommunityMessagingLoading(false);
           showSnackbar({ message: message.message, severity: "error" });
           break;
+
         default:
+          // console.log("Unknown WS message type in Community Hook:", message.type);
           break;
       }
     };
@@ -311,74 +360,89 @@ export const useCommunityPage = () => {
     return () => {
       socket.removeEventListener("message", handleMessage);
     };
-  }, [socket, selectedGroup, showSnackbar, fetchUserGroups]);
+  }, [socket, selectedGroup, showSnackbar, fetchUserGroups, currentUser?.id]);
 
   const handleSendCommunityMessage = () => {
-    if (newCommunityMessage.trim()) {
+    if (
+      newCommunityMessage.trim() &&
+      socket &&
+      socket.readyState === WebSocket.OPEN
+    ) {
       setIsCommunityMessagingLoading(true);
       const messagePayload = {
         type: "COMMUNITY_MESSAGE",
         message: newCommunityMessage,
       };
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(messagePayload));
-        setNewCommunityMessage("");
-      } else {
-        console.error(
-          "WebSocket connection is not open, cannot send community message."
-        );
-        showSnackbar({
-          message:
-            "Topluluk mesajı gönderilemedi, WebSocket bağlantısı kapalı.",
-          severity: "error",
-        });
-      }
+      socket.send(JSON.stringify(messagePayload));
+      setNewCommunityMessage("");
+      setIsCommunityMessagingLoading(false);
+    } else if (!newCommunityMessage.trim()) {
+      // Maybe a small warning snackbar?
+    } else {
+      console.error(
+        "WebSocket connection is not open, cannot send community message."
+      );
+      showSnackbar({
+        message: "Topluluk mesajı gönderilemedi, WebSocket bağlantısı kapalı.",
+        severity: "error",
+      });
       setIsCommunityMessagingLoading(false);
     }
   };
 
   const handleSendGroupMessage = () => {
-    if (newGroupMessage.trim() && selectedGroup) {
+    if (
+      newGroupMessage.trim() &&
+      selectedGroup &&
+      socket &&
+      socket.readyState === WebSocket.OPEN
+    ) {
       setIsGroupMessagingLoading(true);
       const messagePayload = {
         type: "GROUP_MESSAGE",
         groupId: selectedGroup._id,
         message: newGroupMessage,
       };
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(messagePayload));
-        setNewGroupMessage("");
-      } else {
-        console.error(
-          "WebSocket connection is not open, cannot send group message."
-        );
-        showSnackbar({
-          message: "Grup mesajı gönderilemedi, WebSocket bağlantısı kapalı.",
-          severity: "error",
-        });
-      }
+      socket.send(JSON.stringify(messagePayload));
+      setNewGroupMessage("");
+      setIsGroupMessagingLoading(false);
+    } else if (!newGroupMessage.trim()) {
+    } else if (!selectedGroup) {
+      showSnackbar({
+        message: "Mesaj göndermek için bir grup seçin.",
+        severity: "warning",
+      });
+    } else {
+      console.error(
+        "WebSocket connection is not open, cannot send group message."
+      );
+      showSnackbar({
+        message: "Grup mesajı gönderilemedi, WebSocket bağlantısı kapalı.",
+        severity: "error",
+      });
       setIsGroupMessagingLoading(false);
     }
   };
 
   const handleGroupSelect = useCallback(
     (group) => {
+      if (selectedGroup?._id === group?._id) return;
+
       setSelectedGroup(group);
+      setGroupMessages([]);
+      setGroupPage(1);
+      setHasMoreGroup(false);
+
       if (group) {
-        fetchGroupChatHistory(group._id);
-      } else {
-        setGroupMessages([]);
+        fetchGroupChatHistory(group._id, 1);
       }
     },
-    [fetchGroupChatHistory]
+    [fetchGroupChatHistory, selectedGroup?._id]
   );
 
   const handleLeaveGroup = (groupId) => {
-    const leaveData = {
-      type: "LEAVE_GROUP",
-      groupId: groupId,
-    };
     if (socket && socket.readyState === WebSocket.OPEN) {
+      const leaveData = { type: "LEAVE_GROUP", groupId: groupId };
       socket.send(JSON.stringify(leaveData));
     } else {
       console.error("WebSocket connection is not open, cannot leave group.");
@@ -390,31 +454,30 @@ export const useCommunityPage = () => {
   };
 
   const handleDeleteGroup = (groupId) => {
-    setIsGroupDeleting(true);
-    const deleteData = {
-      type: "DELETE_GROUP",
-      groupId: groupId,
-    };
     if (socket && socket.readyState === WebSocket.OPEN) {
+      setIsGroupDeleting(true);
+      const deleteData = { type: "DELETE_GROUP", groupId: groupId };
       socket.send(JSON.stringify(deleteData));
     } else {
-      setIsGroupDeleting(false);
       console.error("WebSocket connection is not open, cannot delete group.");
       showSnackbar({
         message: "Grup silinemedi, WebSocket bağlantısı kapalı.",
         severity: "error",
       });
+      setIsGroupDeleting(false);
     }
   };
 
   return {
-    // Community states
+    currentUser,
     communityMessages,
     newCommunityMessage,
     setNewCommunityMessage,
     isCommunityMessagingLoading,
     isLoadingCommunityChat,
-    // Group states
+    handleSendCommunityMessage,
+    hasMoreCommunity,
+    communityPage,
     communityGroups,
     allGroups,
     isGroupListLoading,
@@ -424,16 +487,15 @@ export const useCommunityPage = () => {
     setNewGroupMessage,
     isGroupMessagingLoading,
     isLoadingGroupChat,
-    isGroupDeleting,
-    // Functions
-    handleSendCommunityMessage,
     handleSendGroupMessage,
     handleGroupSelect,
-    fetchCommunityChatHistory,
-    fetchAllGroups,
-    fetchUserGroups,
+    hasMoreGroup,
+    groupPage,
     handleLeaveGroup,
     handleDeleteGroup,
-    currentUser,
+    isGroupDeleting,
+    containerRef,
+    loadMoreMessages,
+    isLoadingMoreMessages,
   };
 };

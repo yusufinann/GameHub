@@ -53,13 +53,17 @@ function ConversationPage() {
     isMessagingLoading,
     selectedFriend,
     setSelectedFriend,
-    isLoadingPrivateChat,
     handleSendFriendMessage,
     handleFriendSelection,
     setNewMessage,
     handleFriendGroupSelection,
     handleDeleteFriendGroup,
     handleLeaveFriendGroup,
+    loadMoreMessages,
+    hasMoreFriend,
+    hasMorePrivate,
+    isLoadingChat,
+    isLoadingMore,
   } = useConversationsPage(
     friendGroups,
     setFriendGroups,
@@ -142,7 +146,7 @@ function ConversationPage() {
       if (friendConversation) {
         setSelectedConversation({
           ...friendConversation,
-          type: "friend",
+          type: "private",
         });
       } else {
         console.warn("Arkadaş bilgisi bulunamadı:", friendId);
@@ -300,9 +304,16 @@ function ConversationPage() {
             setNewMessage={setNewMessage}
             isMessagingLoading={isMessagingLoading}
             selectedFriend={selectedFriend}
-            isLoadingHistory={isLoadingPrivateChat}
+            isLoadingHistory={isLoadingChat}
             currentUser={currentUser}
             setFriendGroups={setFriendGroups}
+            loadMoreMessages={loadMoreMessages}
+            hasMore={
+              selectedConversation?.type === "friendGroup"
+                ? hasMoreFriend
+                : hasMorePrivate
+            }
+            isLoadingMore={isLoadingMore}
           />
         </Box>
       </Box>

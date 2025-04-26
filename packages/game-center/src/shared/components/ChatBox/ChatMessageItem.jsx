@@ -67,8 +67,8 @@ const ChatMessageItem = ({ message, currentUser, formatMessageListTimestamp }) =
         <ListItem
             sx={{
                 alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
-                maxWidth: { xs: '90%', md: '70%' },
-                p: 0,
+                maxWidth: { xs: '90%', md: '100%' },
+                p: 1,
             }}
         >
             <Box sx={{

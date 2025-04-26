@@ -298,7 +298,7 @@ export const getGroupChatHistory = async (req, res) => {
     try {
       const { groupId } = req.params;
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 25;
+      const limit = parseInt(req.query.limit) || 30;
       const skip = (page - 1) * limit;
   
       if (!groupId) {

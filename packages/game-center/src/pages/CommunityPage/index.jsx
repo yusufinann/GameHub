@@ -1,4 +1,3 @@
-// CommunityPage.jsx
 import React from "react";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
 import { Forum as ForumIcon } from "@mui/icons-material";
@@ -8,10 +7,9 @@ import { useCommunityPage } from "./useCommunityPage";
 import { useGroupDialog } from "./components/useGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
-import ChatBox from "../../shared/components/ChatBox/ChatBox";
+import ChatBox from "../../shared/components/ChatBox/ChatBox"; 
 
 function CommunityPage() {
-  // Snackbar state
   const {
     snackbarOpen,
     snackbarMessage,
@@ -21,32 +19,34 @@ function CommunityPage() {
 
   const { currentUser } = useAuthContext();
 
-  // Community  state and handlers
   const {
     communityMessages,
     newCommunityMessage,
+    setNewCommunityMessage,
     isCommunityMessagingLoading,
     isLoadingCommunityChat,
-    communityGroups,
-    allGroups,
+    handleSendCommunityMessage,
+    hasMoreCommunity,     
+    communityGroups,        
+    allGroups,             
     isGroupListLoading,
     selectedGroup,
     groupMessages,
     newGroupMessage,
+    setNewGroupMessage,
     isGroupMessagingLoading,
-    isLoadingGroupChat,
+    isLoadingGroupChat,     
     isGroupDeleting,
-    handleSendCommunityMessage,
     handleSendGroupMessage,
     handleGroupSelect,
-    fetchCommunityChatHistory,
     handleLeaveGroup,
     handleDeleteGroup,
-    setNewCommunityMessage,
-    setNewGroupMessage,
+    hasMoreGroup,           
+    loadMoreMessages,     
+    isLoadingMoreMessages,  
+    // currentUser is also returned, but we get it from AuthContext directly here
   } = useCommunityPage();
 
-  // Group dialog state and handlers (for community groups - lobby groups)
   const {
     createGroupDialogOpen,
     joinGroupDialogOpen,
@@ -68,12 +68,22 @@ function CommunityPage() {
     setJoinPassword,
   } = useGroupDialog();
 
+  const handleCommunitySelect = () => {
+      handleGroupSelect(null); // Deselect any active group
+      //setCommunityPage(1);
+      //setHasMoreCommunity(false); // Reset hasMoreCommunity when selecting the community
+      // No need to call fetchCommunityChatHistory here,
+      // useCommunityPage handles initial load and selection changes internally now.
+      // If you need an explicit refresh button, you could call fetchCommunityChatHistory(1).
+  };
+
+
   return (
     <Box
       sx={{
         height: "100%",
         width: "100%",
-        overflow: "hidden",
+        overflow: "hidden", 
         display: "flex",
         flexDirection: "column",
       }}
@@ -92,8 +102,6 @@ function CommunityPage() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-
-      {/* Community Group Dialogs*/}
       <CreateGroupDialog
         open={createGroupDialogOpen}
         onClose={handleCreateGroupDialogClose}
@@ -105,7 +113,7 @@ function CommunityPage() {
         setIsPasswordProtected={setIsPasswordProtected}
         newGroupPassword={newGroupPassword}
         setNewGroupPassword={setNewGroupPassword}
-        handleCreateGroup={handleCreateGroup}
+        handleCreateGroup={handleCreateGroup} 
       />
 
       <JoinGroupDialog
@@ -116,16 +124,14 @@ function CommunityPage() {
         handleJoinGroup={handleJoinGroup}
       />
 
-      {/* Main Content */}
       <Box
         sx={{
-          overflow: "hidden",
+          overflow: "hidden", 
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
         }}
       >
-        {/* Community Header */}
         <Box
           sx={{
             display: "flex",
@@ -134,6 +140,7 @@ function CommunityPage() {
             padding: 2,
             borderBottom: 1,
             borderColor: "divider",
+            flexShrink: 0, 
           }}
         >
           <ForumIcon sx={{ color: " #fd5959", mr: 1 }} />
@@ -141,39 +148,34 @@ function CommunityPage() {
             COMMUNITY
           </Typography>
         </Box>
-
-        {/* COMMUNITY Content */}
         <Box
           sx={{
             p: 0,
             display: "flex",
-            height: "100%",
-            overflow: "hidden",
+            flexGrow: 1, 
+            height: "calc(100% - 73px)", 
+            overflow: "hidden", 
             flexDirection: "row",
             gap: 1,
           }}
         >
           <CommunityList
-            onCommunitySelect={() => {
-              handleGroupSelect(null);
-              fetchCommunityChatHistory();
-            }}
-            onGroupSelect={handleGroupSelect}
-            groups={communityGroups}
-            allGroups={allGroups}
-            onCreateGroupDialogOpen={handleCreateGroupDialogOpen}
-            onJoinGroupDialogOpen={handleJoinGroupDialogOpen}
-            onLeaveGroup={handleLeaveGroup}
-            onDeleteGroup={handleDeleteGroup}
+            onCommunitySelect={handleCommunitySelect}
+            onGroupSelect={handleGroupSelect}      
+            groups={communityGroups}               
+            allGroups={allGroups}                  
+            onCreateGroupDialogOpen={handleCreateGroupDialogOpen} 
+            onJoinGroupDialogOpen={handleJoinGroupDialogOpen}     
+            onLeaveGroup={handleLeaveGroup}        
+            onDeleteGroup={handleDeleteGroup}      
             isGroupListLoading={isGroupListLoading}
-            isGroupDeleting={isGroupDeleting} 
+            isGroupDeleting={isGroupDeleting}
             currentUser={currentUser}
+            selectedGroupId={selectedGroup?._id} 
           />
           <ChatBox
             chatType={selectedGroup ? "group" : "community"}
-            chatTitle={
-              selectedGroup ? selectedGroup.groupName : "Global Community"
-            }
+            chatTitle={selectedGroup ? selectedGroup.groupName : "Global Community"}
             selectedConversation={selectedGroup}
             messages={selectedGroup ? groupMessages : communityMessages}
             newMessage={selectedGroup ? newGroupMessage : newCommunityMessage}
@@ -194,6 +196,9 @@ function CommunityPage() {
               selectedGroup ? isLoadingGroupChat : isLoadingCommunityChat
             }
             currentUser={currentUser}
+            loadMoreMessages={loadMoreMessages} 
+            hasMore={selectedGroup ? hasMoreGroup : hasMoreCommunity} 
+            isLoadingMore={isLoadingMoreMessages}
           />
         </Box>
       </Box>

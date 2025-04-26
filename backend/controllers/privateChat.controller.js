@@ -41,7 +41,7 @@ export const getPrivateChatHistory = async (req, res) => {
     const senderId = req.user._id;
     const receiverId = req.query.receiverId;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 25;
+    const limit = parseInt(req.query.limit) || 30;
     const skip = (page - 1) * limit;
 
     if (!receiverId) {

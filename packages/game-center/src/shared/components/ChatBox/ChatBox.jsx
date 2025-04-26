@@ -1,5 +1,5 @@
 // ChatBox.jsx
-import React, {useState } from "react";
+import React, { useState } from "react";
 import { Box, Paper, Typography, Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ChatBoxHeader from "./ChatBoxHeader";
@@ -23,6 +23,9 @@ const ChatBox = ({
   currentUser,
   selectedFriend,
   isLoadingHistory,
+  loadMoreMessages,
+  hasMore,
+  isLoadingMore,
 }) => {
   const theme = useTheme();
   const { socket } = useWebSocket();
@@ -36,7 +39,6 @@ const ChatBox = ({
       (member) => member._id === currentUser.id
     );
   }
-
   const handleJoinGroup = () => {
     if (!socket) return;
     const messagePayload = {
@@ -47,10 +49,14 @@ const ChatBox = ({
     navigate(`/conversation/all/friend-group/${groupId}`);
   };
 
-  const isJoinGroupViewVisible = (chatType === "friendGroup" && !isMember);
-  const isChatContentVisible = !isJoinGroupViewVisible && (chatType === "community" || chatType === "group" || selectedFriend || (chatType === "friendGroup" && isMember));
+  const isJoinGroupViewVisible = chatType === "friendGroup" && !isMember;
+  const isChatContentVisible =
+    !isJoinGroupViewVisible &&
+    (chatType === "community" ||
+      chatType === "group" ||
+      selectedFriend ||
+      (chatType === "friendGroup" && isMember));
   const isPlaceholderVisible = !isJoinGroupViewVisible && !isChatContentVisible;
-
 
   const handleCloseModal = () => {
     setErrorMessage(null);
@@ -85,19 +91,38 @@ const ChatBox = ({
             selectedConversation={selectedConversation}
             currentUser={currentUser}
           />
-          <Box sx={{ p: 3, overflowY: 'auto', flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <Box
+            sx={{
+              p: 3,
+              overflowY: "auto",
+              flexGrow: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Typography variant="h6" gutterBottom textAlign="center">
               You are not member this group
             </Typography>
             <Typography variant="subtitle1" gutterBottom textAlign="center">
               Group : {selectedConversation?.groupName}
             </Typography>
-            <Typography variant="body2" gutterBottom textAlign="center" sx={{ mt: 2 }}>
-           Group Members : 
+            <Typography
+              variant="body2"
+              gutterBottom
+              textAlign="center"
+              sx={{ mt: 2 }}
+            >
+              Group Members :
             </Typography>
             <GroupMemberList members={selectedConversation?.members} />
             <Box sx={{ mt: 3 }}>
-              <Button variant="contained" color="primary" onClick={handleJoinGroup}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleJoinGroup}
+              >
                 JOIN GROUP
               </Button>
             </Box>
@@ -127,6 +152,9 @@ const ChatBox = ({
             currentUser={currentUser}
             isLoadingHistory={isLoadingHistory}
             selectedConversation={selectedConversation}
+            loadMoreMessages={loadMoreMessages}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
           />
           <ChatInput
             newMessage={newMessage}
@@ -135,31 +163,37 @@ const ChatBox = ({
             isMessagingLoading={isMessagingLoading}
           />
         </Paper>
-      ) : isPlaceholderVisible && (
-        <Paper
-          elevation={0}
-          sx={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: theme.shadows[3],
-          }}
-        >
-          <MessageIcon
-            color="action"
-            sx={{ fontSize: 60, mb: 2, color: "text.secondary" }}
-          />
-          <Typography variant="subtitle1" color="textSecondary">
-            Sohbete başlamak için bir arkadaş veya grup seçin
-          </Typography>
-        </Paper>
+      ) : (
+        isPlaceholderVisible && (
+          <Paper
+            elevation={0}
+            sx={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              boxShadow: theme.shadows[3],
+            }}
+          >
+            <MessageIcon
+              color="action"
+              sx={{ fontSize: 60, mb: 2, color: "text.secondary" }}
+            />
+            <Typography variant="subtitle1" color="textSecondary">
+              Sohbete başlamak için bir arkadaş veya grup seçin
+            </Typography>
+          </Paper>
+        )
       )}
 
-      <ErrorModal open={Boolean(errorMessage)} onClose={handleCloseModal} errorMessage={errorMessage} />
+      <ErrorModal
+        open={Boolean(errorMessage)}
+        onClose={handleCloseModal}
+        errorMessage={errorMessage}
+      />
     </Box>
   );
 };
