@@ -233,13 +233,17 @@ export const routeMessage = async (ws, message, broadcasters) => {
             case "LEAVE_FRIEND_GROUP_WS":
                 friendGroupChatController.leaveFriendGroupWebSocket(ws, data, broadcastFriendGroupEvent, broadcastToAll); // Needs ws
                 break;
-            case "UPDATE_FRIEND_GROUP_WS":
-                 // friendGroupChatController.updateFriendGroup(ws, data, broadcastFriendGroupEvent); // Implement if needed
-                 console.warn("UPDATE_FRIEND_GROUP_WS handler not fully implemented.");
-                break;
-            case "DELETE_FRIEND_GROUP_WS":
-                friendGroupChatController.deleteFriendGroup(ws, data, broadcastFriendGroupEvent, broadcastToAll); // Needs ws
-                break;
+                case 'UPDATE_FRIEND_GROUP_WS':
+                    friendGroupChatController.updateFriendGroup(
+                      ws,
+                      data,
+                      broadcastFriendGroupEvent,
+                      broadcastToAll
+                    );
+                    break;
+                    case "DELETE_FRIEND_GROUP_WS":
+                        friendGroupChatController.deleteFriendGroup(ws, data, broadcastFriendGroupEvent, broadcastToAll); // Needs ws
+                        break;
             case "FRIEND_GROUP_MESSAGE_WS":
                 friendGroupChatController.sendFriendGroupMessage(ws, data, broadcastFriendGroupMessage); // Needs ws for senderId
                 break;

@@ -13,6 +13,7 @@ import { useSnackbar } from "../../shared/context/SnackbarContext";
 import ChatBox from "../../shared/components/ChatBox/ChatBox";
 import { useFriendsContext } from "../../shared/context/FriendsContext/context";
 import ErrorModal from "../../shared/components/ErrorModal";
+import UpdateFriendGroupDialog from "./components/UpdateFriendGroup";
 
 function ConversationPage() {
   const {
@@ -64,6 +65,12 @@ function ConversationPage() {
     hasMorePrivate,
     isLoadingChat,
     isLoadingMore,
+    isUpdateDialogOpen,
+    groupToUpdate,
+    openUpdateDialog,   
+    closeUpdateDialog,
+    handleUpdateFriendGroup,
+
   } = useConversationsPage(
     friendGroups,
     setFriendGroups,
@@ -108,6 +115,8 @@ function ConversationPage() {
     socket.addEventListener("message", handleMessage);
     return () => socket.removeEventListener("message", handleMessage);
   }, [socket, currentUser, setFriendGroups, showSnackbar]);
+
+  
 
   useEffect(() => {
     const fetchGroupDetails = async () => {
@@ -278,6 +287,7 @@ function ConversationPage() {
             handleLeaveFriendGroup={handleLeaveFriendGroup}
             friends={friends}
             incomingRequests={incomingRequests}
+            onEditFriendGroup={openUpdateDialog}
           />
 
           <ChatBox
@@ -316,6 +326,12 @@ function ConversationPage() {
             isLoadingMore={isLoadingMore}
           />
         </Box>
+        <UpdateFriendGroupDialog
+                open={isUpdateDialogOpen}
+                onClose={closeUpdateDialog}
+                group={groupToUpdate}
+                onUpdate={handleUpdateFriendGroup}
+             />
       </Box>
     </Box>
   );

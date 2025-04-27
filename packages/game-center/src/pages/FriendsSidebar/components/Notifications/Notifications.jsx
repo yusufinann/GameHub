@@ -255,12 +255,6 @@ const Notifications = () => {
             ];
           });
           break;
-        case "FRIEND_GROUP_UPDATED":
-          console.log(
-            "FRIEND_GROUP_UPDATED event received in notifications :",
-            data
-          );
-          break;
         default:
           break;
       }

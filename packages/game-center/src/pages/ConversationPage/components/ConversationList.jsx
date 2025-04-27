@@ -30,8 +30,8 @@ import FriendGroupList from "./FriendGroupList";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const ConversationList = ({
-  onFriendSelect,
-  onCreateFriendGroupDialogOpen, fetchFriendGroups, selectedConversation, onDeleteFriendGroup, handleLeaveFriendGroup, friends, incomingRequests, friendGroupsLoading, friendGroups
+  onFriendSelect,friendGroups,onEditFriendGroup,
+  onCreateFriendGroupDialogOpen, fetchFriendGroups, selectedConversation, onDeleteFriendGroup, handleLeaveFriendGroup, friends, incomingRequests, friendGroupsLoading,
 }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(2);
@@ -264,6 +264,7 @@ const ConversationList = ({
               onFriendGroupSelect={handleFriendGroupSelect}
               onDeleteFriendGroup={onDeleteFriendGroup}
               onLeaveFriendGroup={handleLeaveFriendGroup}
+              onEditFriendGroup={onEditFriendGroup}
             />
           )}
 
@@ -291,6 +292,7 @@ const ConversationList = ({
                 onFriendGroupSelect={handleFriendGroupSelect}
                 onDeleteFriendGroup={onDeleteFriendGroup}
                 onLeaveFriendGroup={handleLeaveFriendGroup}
+                onEditFriendGroup={onEditFriendGroup}
               />
               <Divider sx={{ my: 2 }} />
 

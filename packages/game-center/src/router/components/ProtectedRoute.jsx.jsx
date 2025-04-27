@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../shared/context/AuthContext";
+import { useAuthContext } from "../../shared/context/AuthContext";
 
 // JWT token'ı decode eden yardımcı fonksiyon
 const parseJwt = (token) => {

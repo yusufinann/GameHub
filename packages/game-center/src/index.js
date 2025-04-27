@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 //import App from './App';
-import AppRouter from "./router/AppRouter";
+import AppRouter from "./router/index";
 import reportWebVitals from "./reportWebVitals";
 import { AuthProvider } from "./shared/context/AuthContext";
 import { AppThemeProvider } from "./theme/context";
