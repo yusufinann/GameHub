@@ -24,12 +24,19 @@ import { useLobbyContext } from "../../shared/context/LobbyContext/context";
 const GameLobbyPage = () => {
   const { link } = useParams();
   const navigate = useNavigate();
-  const { deleteLobby, leaveLobby, deletedLobbyInfo, clearDeletedLobbyInfo,   userLeftInfo, 
-    setUserLeftInfo  } =
-    useLobbyContext();
-    const handleCloseSnackbar = () => {
-      setUserLeftInfo(null);
-    };
+  const { 
+    deleteLobby, 
+    leaveLobby, 
+    deletedLobbyInfo, 
+    clearDeletedLobbyInfo,   
+    userLeftInfo, 
+    setUserLeftInfo 
+  } = useLobbyContext();
+  
+  const handleCloseSnackbar = () => {
+    setUserLeftInfo(null);
+  };
+  
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDeletingLobby, setIsDeletingLobby] = useState(false);
   const [isLeavingLobby, setIsLeavingLobby] = useState(false);
@@ -42,9 +49,19 @@ const GameLobbyPage = () => {
     members,
     userId,
     isPasswordModalOpen,
-    setIsPasswordModalOpen,
     handleJoin,
+    handlePasswordModalClose,
+    isMember // Assuming this is provided by your hook or needs to be added
   } = useGameLobbyPage();
+
+  // Check if the current user is a member of the lobby
+  const checkIsMember = () => {
+    if (!members || !userId) return false;
+    return members.some(member => member.id === userId);
+  };
+
+  // Use the value from the hook if available, otherwise calculate it
+  const userIsMember = isMember !== undefined ? isMember : checkIsMember();
 
   const handleDeletedModalClose = () => {
     clearDeletedLobbyInfo();
@@ -60,6 +77,17 @@ const GameLobbyPage = () => {
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
+
+  // If the user is not a member and the lobby exists, redirect them or show access denied
+  useEffect(() => {
+    if (!loading && lobbyDetails && !userIsMember && !isPasswordModalOpen) {
+      // Option 1: Redirect to homepage
+      // navigate("/");
+      
+      // Option 2: Show access denied screen (we'll use this)
+      setError("Access denied. You are not a member of this lobby.");
+    }
+  }, [loading, lobbyDetails, userIsMember, isPasswordModalOpen]);
 
   const toggleFullscreen = () => {
     const gameLobbyElement = document.getElementById("gameLobbyPage");
@@ -120,8 +148,9 @@ const GameLobbyPage = () => {
     return (
       <LobbyPasswordModal
         open={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
+        onClose={handlePasswordModalClose} 
         onSubmit={handleJoin}
+        lobbyDetails={lobbyDetails}
       />
     );
   }
@@ -134,82 +163,88 @@ const GameLobbyPage = () => {
     return null;
   }
 
+  if (!userIsMember) {
+    return (
+      <AccessDeniedScreen navigate={navigate} />
+    );
+  }
+
   const isHost = lobbyDetails.createdBy === userId;
 
   return (
     <>
-    <Box
-      id="gameLobbyPage"
-      sx={{
-        p: 1,
-        height: "100vh",
-        display: "flex",
-        gap: 1,
-        position: "relative",
-        ...(isFullscreen && {
-          minHeight: "100vh",
-          p: 2,
-          bgcolor: "#f5f5f5",
-        }),
-      }}
-    >
-      <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
-        <IconButton
-          onClick={toggleFullscreen}
-          sx={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            zIndex: 1000,
-            bgcolor: "white",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "&:hover": {
-              bgcolor: "rgba(255,255,255,0.9)",
-            },
+      <Box
+        id="gameLobbyPage"
+        sx={{
+          p: 1,
+          height: "100vh",
+          display: "flex",
+          gap: 1,
+          position: "relative",
+          ...(isFullscreen && {
+            minHeight: "100vh",
+            p: 2,
+            bgcolor: "#f5f5f5",
+          }),
+        }}
+      >
+        <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
+          <IconButton
+            onClick={toggleFullscreen}
+            sx={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              zIndex: 1000,
+              bgcolor: "white",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              "&:hover": {
+                bgcolor: "rgba(255,255,255,0.9)",
+              },
+            }}
+          >
+            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+          </IconButton>
+        </Tooltip>
+        <MembersList members={members} />
+        <GameArea
+          lobbyInfo={lobbyDetails}
+          link={link}
+          members={members}
+          isHost={isHost}
+          onDelete={handleDeleteLobby}
+          onLeave={handleLeaveLobby}
+          isDeletingLobby={isDeletingLobby}
+          isLeavingLobby={isLeavingLobby}
+        />
+      </Box>
+      <Snackbar
+        open={Boolean(userLeftInfo && userLeftInfo.lobbyCode === lobbyDetails?.lobbyCode)}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ 
+          vertical: 'bottom', 
+          horizontal: 'center' 
+        }}
+        sx={{ 
+          marginBottom: 4 
+        }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity="info"
+          variant="filled"
+          sx={{ 
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-        </IconButton>
-      </Tooltip>
-      <MembersList members={members} />
-      <GameArea
-        lobbyInfo={lobbyDetails}
-        link={link}
-        members={members}
-        isHost={isHost}
-        onDelete={handleDeleteLobby}
-        onLeave={handleLeaveLobby}
-        isDeletingLobby={isDeletingLobby}
-        isLeavingLobby={isLeavingLobby}
-      />
-    </Box>
-<Snackbar
-  open={Boolean(userLeftInfo && userLeftInfo.lobbyCode === lobbyDetails?.lobbyCode)}
-  autoHideDuration={4000}
-  onClose={handleCloseSnackbar}
-  anchorOrigin={{ 
-    vertical: 'bottom', 
-    horizontal: 'center' 
-  }}
-  sx={{ 
-    marginBottom: 4 
-  }}
->
-  <Alert 
-    onClose={handleCloseSnackbar} 
-    severity="info"
-    variant="filled"
-    sx={{ 
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}
-  >
-    {userLeftInfo?.name} lobiden ayrıldı!
-  </Alert>
-</Snackbar>
-   </>
+          {userLeftInfo?.name} lobiden ayrıldı!
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
@@ -242,6 +277,29 @@ const ErrorScreen = ({ error, navigate }) => (
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
       Go Main Screen
+    </Button>
+  </Box>
+);
+
+const AccessDeniedScreen = ({ navigate }) => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      flexDirection: "column",
+      gap: 2,
+    }}
+  >
+    <Typography variant="h5" color="error">
+      Access Denied
+    </Typography>
+    <Typography variant="body1">
+      You're not a member of this lobby. Please join the lobby first.
+    </Typography>
+    <Button variant="contained" onClick={() => navigate("/")}>
+      Go to Main Screen
     </Button>
   </Box>
 );

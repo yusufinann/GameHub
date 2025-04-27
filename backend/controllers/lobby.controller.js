@@ -69,13 +69,22 @@ export const getLobbyByCode = async (req, res) => {
         if (!lobbyCode) {
             return res.status(400).json({ message: "Lobi kodu gereklidir." });
         }
-        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode }).lean();
+        const lobby = await Lobby.findOne(
+            { lobbyCode: lobbyCode },
+            { password: 0 } 
+        ).lean(); 
 
         if (!lobby) {
             return res.status(404).json({ message: "Lobi bulunamadı." });
         }
+        const lobbyWithPasswordCheck = await Lobby.findOne(
+            { lobbyCode: lobbyCode },
+            { password: 1 } 
+        ).lean();
 
-        const membersWithDetails = lobby.members.map((member) => ({
+        const isPasswordProtected = !!lobbyWithPasswordCheck?.password;
+
+        const membersWithDetails = (lobby.members || []).map((member) => ({ 
             id: member.id,
             name: member.name,
             avatar: member.avatar,
@@ -86,8 +95,8 @@ export const getLobbyByCode = async (req, res) => {
             message: "Lobi bilgileri başarıyla getirildi.",
             lobby: {
                 ...lobby,
+                isPasswordProtected: isPasswordProtected,
                 members: membersWithDetails,
-                password: undefined, 
             },
         });
 

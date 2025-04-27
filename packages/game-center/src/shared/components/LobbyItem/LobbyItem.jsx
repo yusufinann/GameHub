@@ -1,4 +1,4 @@
-import React, { useState,useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Chip,
@@ -19,19 +19,22 @@ import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
 import { useLobbyContext } from "../../context/LobbyContext/context";
 
-
-function LobbyItem({lobby}) {
-  const { membersByLobby, existingLobby} = useLobbyContext();
+function LobbyItem({ lobby }) {
+  const { membersByLobby, existingLobby } = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const { isJoining, isMember, handleJoin, handleDelete, eventStatus,isDeleting} =
-    useLobbyItem(lobby, currentUser);
+  const {
+    isJoining,
+    isMember,
+    handleJoin,
+    handleDelete,
+    eventStatus,
+    isDeleting,
+  } = useLobbyItem(lobby, currentUser);
   const [isLobbyFull, setIsLobbyFull] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
   const [endDate, endTime] = lobby.endTime?.split("T") || [null, null];
@@ -48,6 +51,7 @@ function LobbyItem({lobby}) {
 
       if (lobby.password) {
         setIsPasswordModalOpen(true);
+        console.log("isPasswordModalOpen : ", isPasswordModalOpen);
       } else {
         await handleJoin();
       }
@@ -56,7 +60,6 @@ function LobbyItem({lobby}) {
       setIsErrorModalOpen(true);
     }
   };
-
 
   const handleErrorModalClose = useCallback(() => {
     setIsErrorModalOpen(false);
@@ -77,7 +80,7 @@ function LobbyItem({lobby}) {
         elevation={2}
         sx={{
           borderRadius: "8px",
-          m:1,
+          m: 1,
           minWidth: {
             xs: "10px", // Minimum genişlik - çok küçük ekranlar
             sm: "10px", // Tablet
@@ -87,133 +90,137 @@ function LobbyItem({lobby}) {
           flexDirection: "column",
           justifyContent: "flex-start",
           gap: "12px",
-          background:"rgba(255, 255, 255, 0.8)",
-          color:theme.palette.text.primary
-            ,
-          p: { xs: 1.5, sm: 1.5 } ,
-          padding:"8px 16px",
+          background: "rgba(255, 255, 255, 0.8)",
+          color: theme.palette.text.primary,
+          p: { xs: 1.5, sm: 1.5 },
+          padding: "8px 16px",
           transition: theme.transitions.create(["all"], {
             duration: theme.transitions.duration.standard,
           }),
           "&:hover": {
-            background:"rgba(255, 255, 255, 1)",
+            background: "rgba(255, 255, 255, 1)",
             transform: "translateY(-3px)",
           },
         }}
       >
-
-          <Stack spacing={2}>
-            <Box
+        <Stack spacing={2}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
+          >
+            <Typography
+              variant={isMobile ? "h6" : "subtitle1"}
               sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 1,
+                fontWeight: "bold",
+                fontSize: {
+                  xs: "0.9rem",
+                  sm: "1rem",
+                  md: "1.1rem",
+                },
+                color: theme.palette.text.primary,
+                flexGrow: 1,
               }}
             >
-              <Typography
-                variant={isMobile ? "h6" : "subtitle1"}
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: {
-                    xs: "0.9rem",
-                    sm: "1rem",
-                    md: "1.1rem",
-                  },
-                  color: theme.palette.text.primary,
-                  flexGrow: 1,
-                }}
-              >
-                {lobby.lobbyName || "Unnamed Lobby"}
-              </Typography>
+              {lobby.lobbyName || "Unnamed Lobby"}
+            </Typography>
+            <Chip
+              size={isMobile ? "small" : "medium"}
+              icon={lobby.lobbyType === "event" ? <Event /> : <Group />}
+              label={lobby.lobbyType === "event" ? "Event" : "Normal"}
+              color={lobby.lobbyType === "event" ? "secondary" : "primary"}
+              sx={{ flexShrink: 0 }}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "flex-start" : "center",
+              justifyContent: "space-between",
+              gap: 1.5,
+            }}
+          >
+            <Stack
+              direction={isMobile ? "column" : "row"}
+              spacing={1}
+              sx={{ width: isMobile ? "100%" : "auto" }}
+            >
               <Chip
                 size={isMobile ? "small" : "medium"}
-                icon={lobby.lobbyType === "event" ? <Event /> : <Group />}
-                label={lobby.lobbyType === "event" ? "Event" : "Normal"}
-                color={lobby.lobbyType === "event" ? "secondary" : "primary"}
-                sx={{ flexShrink: 0 }}
+                // Use membersByLobby for member count
+                label={membersByLobby[lobby.lobbyCode]?.length || 0}
+                icon={<People sx={{ fontSize: isMobile ? 14 : 16 }} />}
+                sx={{
+                  backgroundColor: theme.palette.warning.light,
+                  color: theme.palette.warning.contrastText,
+                  fontWeight: "bold",
+                }}
               />
-            </Box>
+              {lobby.lobbyType === "event" && (
+                <LobbyInfo
+                  startDate={startDate}
+                  startTime={startTime}
+                  endDate={endDate}
+                  endTime={endTime}
+                  eventStatus={eventStatus}
+                  isMobile={isMobile}
+                />
+              )}
+            </Stack>
             <Box
               sx={{
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                alignItems: isMobile ? "flex-start" : "center",
-                justifyContent: "space-between",
-                gap: 1.5,
+                gap: 1,
+                width: isMobile ? "100%" : "auto",
+                justifyContent: isMobile ? "flex-end" : "flex-start",
               }}
             >
-              <Stack
-                direction={isMobile ? "column" : "row"}
-                spacing={1}
-                sx={{ width: isMobile ? "100%" : "auto" }}
-              >
-                <Chip
-                  size={isMobile ? "small" : "medium"}
-                  // Use membersByLobby for member count
-                  label={membersByLobby[lobby.lobbyCode]?.length || 0}
-                  icon={<People sx={{ fontSize: isMobile ? 14 : 16 }} />}
-                  sx={{
-                    backgroundColor: theme.palette.warning.light,
-                    color: theme.palette.warning.contrastText,
-                    fontWeight: "bold",
-                  }}
-                />
-                {lobby.lobbyType === "event" && (
-                  <LobbyInfo
-                    startDate={startDate}
-                    startTime={startTime}
-                    endDate={endDate}
-                    endTime={endTime}
-                    eventStatus={eventStatus}
-                    isMobile={isMobile}
-                  />
-                )}
-              </Stack>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  width: isMobile ? "100%" : "auto",
-                  justifyContent: isMobile ? "flex-end" : "flex-start",
-                }}
-              >
-                <LobbyActions
-                  isJoined={isMember}
-                  isJoining={isJoining}
-                  isCreator={isCreator}
-                  lobbyCode={lobby.lobbyCode}
-                  existingLobbyCode={existingLobby?.lobbyCode}
-                  onDelete={(e) => handleDelete(lobby.lobbyCode, e)}
-                  onJoin={handleJoinClick}
-                  onNavigate={handleNavigate}
-                  isMobile={isMobile}
-                  onEdit={isCreator ? handleEditClick : undefined} 
-                  lobby={lobby}
-                  isDeleting={isDeleting}
-                />
-              </Box>
+              <LobbyActions
+                isJoined={isMember}
+                isJoining={isJoining}
+                isCreator={isCreator}
+                lobbyCode={lobby.lobbyCode}
+                existingLobbyCode={existingLobby?.lobbyCode}
+                onDelete={(e) => handleDelete(lobby.lobbyCode, e)}
+                onJoin={handleJoinClick}
+                onNavigate={handleNavigate}
+                isMobile={isMobile}
+                onEdit={isCreator ? handleEditClick : undefined}
+                lobby={lobby}
+                isDeleting={isDeleting}
+              />
             </Box>
-          </Stack>
-
-
+          </Box>
+        </Stack>
       </Paper>
 
       <LobbyPasswordModal
         open={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
         onSubmit={handleJoin}
+        lobbyDetails={{
+          isPasswordProtected: Boolean(lobby.password),
+          lobbyCode: lobby.lobbyCode,
+          lobbyName: lobby.lobbyName,
+        }}
+        theme={theme}
       />
-       <ErrorModal
+      <ErrorModal
         open={isErrorModalOpen}
         onClose={handleErrorModalClose}
-        errorMessage={isLobbyFull ? "Lobi Full!" : "There was an error joining the lobby."} // Dynamic message
+        errorMessage={
+          isLobbyFull ? "Lobi Full!" : "There was an error joining the lobby."
+        } 
       />
-       <LobbyEditModal
+      <LobbyEditModal
         open={isEditModalOpen}
         onClose={handleEditModalClose}
-        lobby={lobby} // Pass lobby data to the edit modal
+        lobby={lobby} 
       />
     </>
   );
