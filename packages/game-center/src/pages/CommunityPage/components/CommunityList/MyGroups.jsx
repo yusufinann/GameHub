@@ -103,7 +103,7 @@ const MyGroups = ({
                     )}
                   </Box>
                 }
-                secondary={`${group.members.length} members`}
+                secondary={`${group.members.length}/${group.maxMembers || '∞'} members`}
                 primaryTypographyProps={{ fontWeight: activeItem === group._id ? 'bold' : 'normal' }}
               />
               <Box sx={{ display: 'flex', alignItems: 'center' }}>

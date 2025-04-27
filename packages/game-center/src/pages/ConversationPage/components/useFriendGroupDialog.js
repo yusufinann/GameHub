@@ -57,7 +57,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
           groupName,
           description,
           password,
-          maxMembers: 50,
+          maxMembers: 8,
           invitedFriends, 
         },
         {

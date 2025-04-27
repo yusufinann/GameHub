@@ -19,7 +19,6 @@ const setupWebSocket = (server) => {
     const pingInterval = setupPing(connectedClients);
 
     wss.on("connection", (ws, request) => {
-        console.log("Incoming connection attempt...");
         if (!handleNewClient(ws, request, connectedClients)) {
             return; 
         }

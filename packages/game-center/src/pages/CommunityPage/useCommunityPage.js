@@ -279,11 +279,7 @@ export const useCommunityPage = () => {
               return group;
             });
           });
-          if (selectedGroup && selectedGroup._id === message.groupId) {
-            setSelectedGroup(null);
-          }
           break;
-
         case "GROUP_UPDATED_SUCCESS":
           setCommunityGroups((prevGroups) =>
             prevGroups.map((group) =>

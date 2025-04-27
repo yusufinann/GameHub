@@ -10,7 +10,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { Group as GroupIcon } from '@mui/icons-material';
+import { Group as GroupIcon, Lock as LockIcon } from '@mui/icons-material';
 
 const JoinableGroups = ({
   joinableGroups,
@@ -67,8 +67,21 @@ const JoinableGroups = ({
                 </Avatar>
               </ListItemIcon>
               <ListItemText
-                primary={group.groupName}
-                secondary={`${group.members.length} members`}
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {group.groupName}
+                    {group.hasPassword && (
+                      <LockIcon 
+                        sx={{ 
+                          ml: 1, 
+                          fontSize: 16,
+                          color: 'text.secondary'
+                        }} 
+                      />
+                    )}
+                  </Box>
+                }
+                secondary={`${group.members.length}/${group.maxMembers || '∞'} members`}
                 primaryTypographyProps={{ fontWeight: activeItem === group._id ? 'bold' : 'normal' }}
               />
               <Button
@@ -77,7 +90,7 @@ const JoinableGroups = ({
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onJoinGroupDialogOpen(group._id);
+                  onJoinGroupDialogOpen(group._id, group.hasPassword);
                 }}
               >
                 Join

@@ -66,6 +66,9 @@ function CommunityPage() {
     setIsPasswordProtected,
     setNewGroupPassword,
     setJoinPassword,
+    maxMembers, // <-- Receive prop
+    setMaxMembers, // <-- Receive prop
+    joinGroupRequiresPassword
   } = useGroupDialog();
 
   const handleCommunitySelect = () => {
@@ -114,6 +117,8 @@ function CommunityPage() {
         newGroupPassword={newGroupPassword}
         setNewGroupPassword={setNewGroupPassword}
         handleCreateGroup={handleCreateGroup} 
+        maxMembers={maxMembers} // <-- Receive prop
+        setMaxMembers={setMaxMembers} // <-- Receive prop
       />
 
       <JoinGroupDialog
@@ -122,6 +127,7 @@ function CommunityPage() {
         joinPassword={joinPassword}
         setJoinPassword={setJoinPassword}
         handleJoinGroup={handleJoinGroup}
+        requiresPassword={joinGroupRequiresPassword} // <-- Pass the prop to
       />
 
       <Box

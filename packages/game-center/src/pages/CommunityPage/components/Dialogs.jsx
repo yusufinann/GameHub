@@ -6,12 +6,11 @@ import {
   DialogActions,
   TextField,
   Button,
-  Typography,
   FormControlLabel,
   Checkbox,
+  Typography,
 } from "@mui/material";
 
-// Create New Group Dialog Component
 export const CreateGroupDialog = ({
   open,
   onClose,
@@ -23,10 +22,21 @@ export const CreateGroupDialog = ({
   setIsPasswordProtected,
   newGroupPassword,
   setNewGroupPassword,
+  maxMembers, 
+  setMaxMembers,
   handleCreateGroup,
 }) => {
+
+  const handleMaxMembersChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    if (e.target.value === '' || (!isNaN(value))) {
+       setMaxMembers(e.target.value === '' ? '' : Math.max(2, value));
+    }
+  };
+
+
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleCreateGroup(); } }}>
       <DialogTitle>Create New Gaming Group</DialogTitle>
       <DialogContent>
         <TextField
@@ -39,6 +49,7 @@ export const CreateGroupDialog = ({
           variant="standard"
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
+          required 
         />
         <TextField
           margin="dense"
@@ -51,6 +62,20 @@ export const CreateGroupDialog = ({
           rows={2}
           value={newGroupDescription}
           onChange={(e) => setNewGroupDescription(e.target.value)}
+        />
+         <TextField
+            margin="dense"
+            id="maxMembers"
+            label="Max Members (min 2)"
+            type="number"
+            fullWidth
+            variant="standard"
+            value={maxMembers}
+            onChange={handleMaxMembersChange}
+            InputProps={{ inputProps: { min: 2 } }} 
+            required 
+            helperText={maxMembers !== '' && Number(maxMembers) < 2 ? "Minimum 2 members required" : ""}
+            error={maxMembers !== '' && Number(maxMembers) < 2}
         />
         <FormControlLabel
           control={
@@ -71,12 +96,13 @@ export const CreateGroupDialog = ({
             variant="standard"
             value={newGroupPassword}
             onChange={(e) => setNewGroupPassword(e.target.value)}
+            required={isPasswordProtected}
           />
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleCreateGroup} variant="contained">
+        <Button onClick={handleCreateGroup} variant="contained" type="submit">
           Create
         </Button>
       </DialogActions>
@@ -84,36 +110,45 @@ export const CreateGroupDialog = ({
   );
 };
 
-// Join Group Dialog Component
 export const JoinGroupDialog = ({
   open,
   onClose,
   joinPassword,
   setJoinPassword,
   handleJoinGroup,
+  requiresPassword, 
 }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Join Protected Group</DialogTitle>
+    <Dialog open={open} onClose={onClose} PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleJoinGroup(); } }}>
+       <DialogTitle>{requiresPassword ? "Join Protected Group" : "Join Group"}</DialogTitle>
       <DialogContent>
-        <Typography>
-          This group is password protected. Please enter the password to join.
-        </Typography>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="password"
-          label="Password"
-          type="password"
-          fullWidth
-          variant="standard"
-          value={joinPassword}
-          onChange={(e) => setJoinPassword(e.target.value)}
-        />
+        {requiresPassword ? (
+          <>
+            <Typography>
+              This group is password protected. Please enter the password to join.
+            </Typography>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="join-password" 
+              label="Password"
+              type="password"
+              fullWidth
+              variant="standard"
+              value={joinPassword}
+              onChange={(e) => setJoinPassword(e.target.value)}
+              required
+            />
+          </>
+        ) : (
+          <Typography>
+            Click "Join Group" to become a member.
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleJoinGroup} variant="contained">
+        <Button onClick={handleJoinGroup} variant="contained" type="submit">
           Join Group
         </Button>
       </DialogActions>
