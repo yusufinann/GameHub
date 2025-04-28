@@ -1,6 +1,6 @@
 // ChatBox.jsx
 import React, { useState } from "react";
-import { Box, Paper, Typography, Button } from "@mui/material";
+import { Box, Paper, Typography, Button, CircularProgress } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ChatBoxHeader from "./ChatBoxHeader";
 import ChatMessageList from "./ChatMessageList";
@@ -30,6 +30,7 @@ const ChatBox = ({
   const theme = useTheme();
   const { socket } = useWebSocket();
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isJoiningGroup, setIsJoiningGroup] = useState(false);
   const { groupId } = useParams();
   const navigate = useNavigate();
 
@@ -40,13 +41,21 @@ const ChatBox = ({
     );
   }
   const handleJoinGroup = () => {
-    if (!socket) return;
-    const messagePayload = {
-      type: "ACCEPT_FRIEND_GROUP_INVITATION_WS",
-      acceptedGroupId: groupId,
-    };
-    socket.send(JSON.stringify(messagePayload));
-    navigate(`/conversation/all/friend-group/${groupId}`);
+    if (isJoiningGroup || !socket) return;
+
+    setIsJoiningGroup(true); 
+    try {
+      const messagePayload = {
+        type: "ACCEPT_FRIEND_GROUP_INVITATION_WS",
+        acceptedGroupId: groupId,
+      };
+      socket.send(JSON.stringify(messagePayload));
+      navigate(`/conversation/all/friend-group/${groupId}`);
+    } catch (error) {
+      console.error("Error sending join group message:", error);
+      setErrorMessage("Failed to send join request. Please try again.");
+      setIsJoiningGroup(false); 
+    }
   };
 
   const isJoinGroupViewVisible = chatType === "friendGroup" && !isMember;
@@ -72,7 +81,7 @@ const ChatBox = ({
         mt: 1,
       }}
     >
-      {isJoinGroupViewVisible ? (
+      {isJoinGroupViewVisible && selectedConversation ? (
         <Paper
           elevation={0}
           sx={{
@@ -82,12 +91,13 @@ const ChatBox = ({
             backgroundColor: "background.paper",
             overflow: "hidden",
             boxShadow: theme.shadows[3],
+            borderRadius: 2
           }}
         >
           <ChatBoxHeader
             chatType={chatType}
             chatTitle={selectedConversation?.groupName || "Group"}
-            selectedFriend={selectedFriend}
+            selectedFriend={null}
             selectedConversation={selectedConversation}
             currentUser={currentUser}
           />
@@ -100,6 +110,7 @@ const ChatBox = ({
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              textAlign: "center",
             }}
           >
             <Typography variant="h6" gutterBottom textAlign="center">
@@ -122,9 +133,20 @@ const ChatBox = ({
                 variant="contained"
                 color="primary"
                 onClick={handleJoinGroup}
+                disabled={isJoiningGroup || !socket}
+                sx={{ minWidth: '130px' }}
               >
-                JOIN GROUP
+                {isJoiningGroup ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "JOIN GROUP"
+                )}
               </Button>
+              {!socket && ( 
+                 <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
+                   Connection not available.
+                 </Typography>
+              )}
             </Box>
           </Box>
         </Paper>
@@ -138,6 +160,7 @@ const ChatBox = ({
             backgroundColor: "background.paper",
             overflow: "hidden",
             boxShadow: theme.shadows[3],
+            borderRadius: 2,
           }}
         >
           <ChatBoxHeader
@@ -176,6 +199,7 @@ const ChatBox = ({
               bgcolor: "background.paper",
               borderRadius: 2,
               boxShadow: theme.shadows[3],
+              textAlign: "center",
             }}
           >
             <MessageIcon
