@@ -128,17 +128,17 @@ export const LobbyProvider = ({ children }) => {
           );
         }
 
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "LOBBY_CREATED",
-              data: {
-                ...lobby,
-                createdBy: currentUser?.id,
-              },
-            })
-          );
-        }
+        // if (socket && socket.readyState === WebSocket.OPEN) {
+        //   socket.send(
+        //     JSON.stringify({
+        //       type: "LOBBY_CREATED",
+        //       data: {
+        //         ...lobby,
+        //         createdBy: currentUser?.id,
+        //       },
+        //     })
+        //   );
+        // }
 
         return response;
       } catch (error) {
@@ -147,7 +147,7 @@ export const LobbyProvider = ({ children }) => {
         setIsCreatingLobby(false);
       }
     },
-    [socket, isWebSocketUpdate, currentUser, existingLobby]
+    [isWebSocketUpdate,existingLobby]
   );
 
   const deleteLobby = useCallback(
@@ -155,14 +155,14 @@ export const LobbyProvider = ({ children }) => {
       try {
         await lobbyApi.deleteLobbyApi(lobbyCode);
 
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "LOBBY_DELETED",
-              lobbyCode,
-            })
-          );
-        }
+        // if (socket && socket.readyState === WebSocket.OPEN) {
+        //   socket.send(
+        //     JSON.stringify({
+        //       type: "LOBBY_DELETED",
+        //       lobbyCode,
+        //     })
+        //   );
+        // }
 
         setLobbies((prev) =>
           prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
@@ -183,7 +183,7 @@ export const LobbyProvider = ({ children }) => {
         throw error;
       }
     },
-    [socket, existingLobby]
+    [existingLobby]
   );
 
   const leaveLobby = useCallback(
@@ -191,15 +191,15 @@ export const LobbyProvider = ({ children }) => {
       try {
         await lobbyApi.leaveLobbyApi(lobbyCode, userId);
 
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: "USER_LEFT",
-              lobbyCode,
-              data: { userId },
-            })
-          );
-        }
+        // if (socket && socket.readyState === WebSocket.OPEN) {
+        //   socket.send(
+        //     JSON.stringify({
+        //       type: "USER_LEFT",
+        //       lobbyCode,
+        //       data: { userId },
+        //     })
+        //   );
+        // }
 
         setLobbies((prev) =>
           prev.map((lobby) =>
@@ -224,7 +224,7 @@ export const LobbyProvider = ({ children }) => {
         throw error;
       }
     },
-    [socket]
+    []
   );
 
   const clearDeletedLobbyInfo = useCallback(() => {

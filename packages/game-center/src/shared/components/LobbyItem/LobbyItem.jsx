@@ -66,7 +66,6 @@ function LobbyItem({ lobby }) {
     isMember,
     handleJoin,
     handleDelete,
-    eventStatus,
     isDeleting,
   } = useLobbyItem(lobby, currentUser);
   const [isLobbyFull, setIsLobbyFull] = useState(false);
@@ -254,7 +253,6 @@ function LobbyItem({ lobby }) {
                   startTime={startTime}
                   endDate={endDate}
                   endTime={endTime}
-                  eventStatus={eventStatus}
                   isMobile={isMobile}
                 />
               )}

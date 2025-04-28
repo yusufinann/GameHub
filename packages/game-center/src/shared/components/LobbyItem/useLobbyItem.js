@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
-import { useWebSocket } from "../../context/WebSocketContext/context";
 import { getLobbyDetails, joinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
 import { useLobbyContext } from "../../context/LobbyContext/context";
 
@@ -17,37 +16,9 @@ export const useLobbyItem = (lobby, currentUser) => {
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
-  const [eventStatus, setEventStatus] = useState(null);
-  const { socket } = useWebSocket();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    if (!socket) return;
-    const handleWebSocketMessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message:", data);
-
-      if (data.lobbyCode === lobby.lobbyCode) {
-        switch (data.type) {
-          case "EVENT_STATUS":
-            setEventStatus(data.status);
-            break;
-          case "LOBBY_EXPIRED":
-            showSnackbar({
-              message: "Event time expired, lobby closed.",
-              severity: "info",
-            });
-            break;
-          default:
-            console.warn("Unknown WebSocket message type:", data.type);
-            break;
-        }
-      }
-    };
-
-    socket.addEventListener("message", handleWebSocketMessage);
-    return () => socket.removeEventListener("message", handleWebSocketMessage);
-  }, [socket, lobby.lobbyCode, setMembersByLobby, deleteLobby, navigate, showSnackbar]);
+ 
 
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
     (member) => member.id === currentUser?.id
@@ -146,7 +117,6 @@ export const useLobbyItem = (lobby, currentUser) => {
     handleJoin,
     handleDelete,
     setError,
-    eventStatus,
     isDeleting
   };
 };

@@ -3,7 +3,6 @@ import React from 'react';
 import { Box, TextField } from '@mui/material';
 
 export const EventFields = ({ formData, handleChange }) => (
-  console.log("EventFields - formData:", formData), // Debugging line
   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
     <TextField
       fullWidth

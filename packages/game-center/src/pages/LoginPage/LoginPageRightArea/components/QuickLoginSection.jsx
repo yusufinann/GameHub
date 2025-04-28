@@ -10,7 +10,8 @@ const QuickLoginSection = ({
   showPassword, 
   handleClickShowPassword,
   handleUseDifferentAccount,
-  loading
+  loading,
+  error // Add error prop to receive authentication errors
 }) => {
   return (
     <Box 
@@ -26,20 +27,18 @@ const QuickLoginSection = ({
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
       }}
     >
-           <Avatar
-      
-                    src={savedUser.avatar || undefined}
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        bgcolor: 'primary.main',
-                        fontSize: '2rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                      }}
-                    >
-                      { !savedUser.avatar ? savedUser.name[0].toUpperCase() : null }
-                    </Avatar>
-      
+      <Avatar
+        src={savedUser.avatar || undefined}
+        sx={{
+          width: 80,
+          height: 80,
+          bgcolor: 'primary.main',
+          fontSize: '2rem',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        {!savedUser.avatar ? savedUser.name[0].toUpperCase() : null}
+      </Avatar>
       
       <Typography variant="h6" sx={{ color: 'black' }}>
         {savedUser.email}
@@ -51,10 +50,17 @@ const QuickLoginSection = ({
         value={password}
         onChange={handlePasswordChange}
         fullWidth
+        error={!!error} // Show error state if there's an error
+        helperText={error} // Display the error message
         sx={{
           '& .MuiOutlinedInput-root': {
             bgcolor: 'rgba(255, 255, 255, 0.09)',
             borderRadius: 2,
+          },
+          '& .MuiFormHelperText-root': {
+            color: 'error.main',
+            marginTop: 1,
+            fontSize: '0.85rem'
           }
         }}
         InputProps={{
@@ -70,7 +76,7 @@ const QuickLoginSection = ({
 
       <Button
         onClick={quickLogin}
-        disabled={!password}
+        disabled={!password || loading}
         variant="contained"
         fullWidth
         sx={{
@@ -83,15 +89,15 @@ const QuickLoginSection = ({
           }
         }}
       >
-       {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Login"
-              )}
+        {loading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          "Login"
+        )}
       </Button>
 
       <Button
-        onClick={handleUseDifferentAccount} // Add the onClick handler
+        onClick={handleUseDifferentAccount}
         variant="text"
         sx={{ 
           color: 'text.secondary',

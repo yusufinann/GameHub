@@ -2,7 +2,6 @@ import React from 'react';
 import { ListItem, Avatar, ListItemText, Typography, Box } from '@mui/material';
 
 function MemberItem({ member, index }) {
-  console.log('MemberItem:', member); // Debugging line to check member data
   return (
     <ListItem
       sx={{

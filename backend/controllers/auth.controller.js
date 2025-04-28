@@ -14,45 +14,63 @@ export const userLogin = async (req, res) => {
         const { email, password, rememberMe } = req.body;
         const user = await User.findOne({ email });
 
-        if (user && await bcrypt.compare(password, user.password)) {
+        const errorMessage = "Invalid email or password";
 
-            user.isOnline = true;
-            await user.save();
-            const userWithFriends = await User.findById(user._id).populate('friends', '_id');
-            if (userWithFriends && userWithFriends.friends) {
-                userWithFriends.friends.forEach(friend => {
-                    if (broadcastFriendEvent) {
-                        broadcastFriendEvent(friend._id, {
-                            type: 'FRIEND_STATUS_UPDATE',
-                            userId: user._id.toString(),
-                            isOnline: true
-                        });
-                    }
-                });
-            }
+        if (!user) {
+            return res.status(401).json({ message: errorMessage });
+        }
 
-            const token = jwt.sign({ id: user._id }, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
+        const passwordMatches = await bcrypt.compare(password, user.password);
+        if (!passwordMatches) {
+            return res.status(401).json({ message: errorMessage });
+        }
 
-            if (rememberMe) {
-                res.cookie("authToken", token, {
-                    maxAge: config.cookie.maxAge,
-                    httpOnly: config.cookie.httpOnly
-                });
-            }
+        user.isOnline = true;
+        await user.save();
 
-            return res.json({
-                message: "Login successful",
-                token,
-                user: { id: user._id, email: user.email, name: user.name ,username:user.username,avatar:user.avatar}
+        const userWithFriends = await User.findById(user._id).populate('friends', '_id');
+        if (userWithFriends?.friends) {
+            userWithFriends.friends.forEach(friend => {
+                if (broadcastFriendEvent) {
+                    broadcastFriendEvent(friend._id, {
+                        type: 'FRIEND_STATUS_UPDATE',
+                        userId: user._id.toString(),
+                        isOnline: true
+                    });
+                }
             });
         }
 
-        return res.status(401).json({ message: "Invalid credentials" });
+        const token = jwt.sign(
+            { id: user._id },
+            config.jwt.secret,
+            { expiresIn: config.jwt.expiresIn }
+        );
+
+        if (rememberMe) {
+            res.cookie("authToken", token, {
+                maxAge: config.cookie.maxAge,
+                httpOnly: config.cookie.httpOnly
+            });
+        }
+
+        return res.json({
+            message: "Login successful",
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                username: user.username,
+                avatar: user.avatar
+            }
+        });
     } catch (error) {
         console.error("Login error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 // Çıkış endpoint'i
 export const userLogout = async (req, res) => {

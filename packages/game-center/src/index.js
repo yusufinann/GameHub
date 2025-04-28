@@ -9,13 +9,13 @@ import { AppThemeProvider } from "./theme/context";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+ // <React.StrictMode>
     <AppThemeProvider>
       <AuthProvider>
         <AppRouter />
       </AuthProvider>
     </AppThemeProvider>
-  </React.StrictMode>
+ // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

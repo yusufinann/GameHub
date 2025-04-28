@@ -4,14 +4,10 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 
-const getTimeInfo = (startDate, startTime, endDate, endTime, eventStatus) => {
+const getTimeInfo = (startDate, startTime, endDate, endTime) => {
   const now = new Date();
   const eventStart = new Date(`${startDate}T${startTime}`);
   const eventEnd = new Date(`${endDate}T${endTime}`);
-
-  // WebSocket durumuna öncelik ver
-  if (eventStatus === 'started') return "The event continues";
-  if (eventStatus === 'ended') return "Event has ended";
 
   if (now > eventEnd) return "Event has ended";
   if (now > eventStart) return "The event continues";
@@ -41,20 +37,20 @@ const getTimeInfo = (startDate, startTime, endDate, endTime, eventStatus) => {
   }
 };
 
-export const LobbyInfo = ({ startDate, startTime, endDate, endTime, eventStatus,isMobile  }) => {
+export const LobbyInfo = ({ startDate, startTime, endDate, endTime,isMobile  }) => {
   const [timeInfo, setTimeInfo] = useState(() =>
-    getTimeInfo(startDate, startTime, endDate, endTime, eventStatus)
+    getTimeInfo(startDate, startTime, endDate, endTime)
   );
 
   useEffect(() => {
     const updateTimer = () => {
-      const newTimeInfo = getTimeInfo(startDate, startTime, endDate, endTime, eventStatus);
+      const newTimeInfo = getTimeInfo(startDate, startTime, endDate, endTime);
       setTimeInfo(newTimeInfo);
     };
 
     const timerId = setInterval(updateTimer, 1000);
     return () => clearInterval(timerId);
-  }, [startDate, startTime, endDate, endTime, eventStatus]);
+  }, [startDate, startTime, endDate, endTime]);
 
   const getIcon = () => {
     if (timeInfo.startsWith("Starts in") || timeInfo.startsWith("Starts on")) return <ScheduleIcon />; // "Starts on" da eklendi

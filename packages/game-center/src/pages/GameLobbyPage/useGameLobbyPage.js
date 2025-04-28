@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"; // Add useCallback
+import { useState, useEffect, useCallback, useMemo } from "react"; // Add useCallback
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchLobbyDetails} from "./api"; 
 import { joinLobby } from "../MainScreen/MainScreenMiddleArea/LobbiesArea/api";
@@ -148,12 +148,17 @@ export const useGameLobbyPage = () => {
       navigate("/");
     }
   }, [lobbyDetails, userId, navigate]);
+
+  const members = useMemo(() => {
+    console.log(`useGameLobbyPage: Calculating members for lobby ${link}`); // Ne zaman çalıştığını görmek için log
+    return membersByLobby[link] || [];
+  }, [membersByLobby, link]); // Sadece membersByLobby veya link değiştiğinde y
   return {
     lobbyDetails,
     loading,
     error,
     setError,
-    members: membersByLobby[link] || [],
+    members,
     userId,
     isPasswordModalOpen,
     setIsPasswordModalOpen,

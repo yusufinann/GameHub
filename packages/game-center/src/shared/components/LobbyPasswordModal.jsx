@@ -18,7 +18,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("Incorrect password or an error occurred.");
+  const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleErrorModalClose = useCallback(() => {
@@ -28,13 +28,13 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
   const handlePasswordSubmit = async () => {
     if (!password) return;
     setIsLoading(true);
-    setErrorMessage("Incorrect password or an error occurred.");
     try {
       await onSubmit(password);
       onClose();
     } catch (error) {
       console.error('Lobiye katılma hatası:', error);
       setIsErrorModalOpen(true);
+      setErrorMessage(error);
     } finally {
       setIsLoading(false);
     }
@@ -42,12 +42,12 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
 
   const handlePublicJoin = async () => {
     setIsLoading(true);
-    setErrorMessage("An error occurred while joining.");
     try {
       await onSubmit("");
     } catch (error) {
       console.error('Lobiye katılma hatası:', error);
       setIsErrorModalOpen(true);
+      setErrorMessage(error);
     } finally {
       setIsLoading(false);
     }
