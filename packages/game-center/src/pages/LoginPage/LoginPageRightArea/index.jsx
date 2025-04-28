@@ -1,6 +1,6 @@
 import { Box, useTheme, useMediaQuery } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import LoginForm from "./components/LoginForm";
+import LoginForm from "./LoginForm/LoginForm";
 
 const LoginPageRightArea = () => {
   const [isVisible, setIsVisible] = useState(false);

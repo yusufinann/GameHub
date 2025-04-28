@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { login, validateToken } from "./api"; 
 import { useNavigate } from "react-router-dom";
 import crypto from 'crypto-js';
-import { useAuthContext } from "../../../shared/context/AuthContext";
+import { useAuthContext } from "../../../../shared/context/AuthContext";
 
 const useLoginForm = () => {
   const navigate = useNavigate();
@@ -45,7 +45,9 @@ const useLoginForm = () => {
   }, [validateTokenFromAPI, isNavigating]);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    if (event && event.preventDefault) {
+      event.preventDefault();
+    }
     setLoading(true);
     setError(null);
 

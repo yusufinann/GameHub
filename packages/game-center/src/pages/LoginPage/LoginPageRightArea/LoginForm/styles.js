@@ -1,23 +1,6 @@
-import React from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  IconButton,
-  InputAdornment,
-  FormControlLabel,
-  Checkbox,
-  Link,
-  CircularProgress,
-  useTheme,
-  alpha,
-} from "@mui/material";
-import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import useLoginForm from "../useLoginForm";
-import QuickLoginSection from "./QuickLoginSection";
+import { alpha } from '@mui/material/styles';
 
-const createStyles = (theme) => {
+export const createStyles = (theme) => {
   const isDarkMode = theme.palette.mode === 'dark';
 
   const primaryMain = isDarkMode ? "#1d2e4a" : "#3f51b5";
@@ -33,8 +16,8 @@ const createStyles = (theme) => {
     : "linear-gradient(45deg, #ff6b6b 0%, rgb(78, 205, 133) 100%)";
 
   const autofillBgColor = isDarkMode
-    ? alpha(bgPaper, 0.15) 
-    : alpha(bgPaper, 0.9); 
+    ? alpha(bgPaper, 0.15)
+    : alpha(bgPaper, 0.9);
 
   return {
     pageContainer: {
@@ -64,7 +47,7 @@ const createStyles = (theme) => {
       background: isDarkMode
         ? "repeating-linear-gradient(45deg, rgba(29, 46, 74, 0.8), rgba(29, 46, 74, 0.8) 10px, rgba(22, 35, 57, 0.8) 10px, rgba(22, 35, 57, 0.8) 20px)"
         : "repeating-linear-gradient(45deg, rgba(63, 81, 181, 0.05), rgba(63, 81, 181, 0.05) 10px, rgba(129, 199, 132, 0.08) 10px, rgba(129, 199, 132, 0.08) 20px)",
-      borderRadius: "20px", 
+      borderRadius: "20px",
       boxShadow: isDarkMode
         ? "0 8px 32px rgba(0, 0, 0, 0.5)"
         : "0 8px 32px rgba(50, 135, 97, 0.25)",
@@ -84,7 +67,7 @@ const createStyles = (theme) => {
       },
     },
     form: {
-      padding: theme.spacing(5), 
+      padding: theme.spacing(5),
       borderRadius: "16px",
       position: "relative",
     },
@@ -96,7 +79,7 @@ const createStyles = (theme) => {
       background: textGradient,
       backgroundClip: "text",
       textFillColor: "transparent",
-      WebkitBackgroundClip: "text", 
+      WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
       letterSpacing: "0.5px",
       textShadow: isDarkMode
@@ -109,10 +92,10 @@ const createStyles = (theme) => {
         backgroundColor: isDarkMode
           ? alpha(bgPaper, 0.1)
           : alpha(bgPaper, 0.7),
-        borderRadius: "12px", 
+        borderRadius: "12px",
         overflow: "hidden",
         transition: "all 0.3s ease",
-        height: "56px", 
+        height: "56px",
         "& fieldset": {
           borderColor: isDarkMode
             ? alpha(primaryLight, 0.3)
@@ -138,10 +121,10 @@ const createStyles = (theme) => {
         color: textSecondary,
         fontWeight: 500,
       },
-      "& .MuiOutlinedInput-input": { 
+      "& .MuiOutlinedInput-input": {
         color: textPrimary,
-        height: "100%", 
-        padding: '16.5px 14px', 
+        height: "100%",
+        padding: '16.5px 14px',
         "&::placeholder": {
           color: isDarkMode
             ? alpha(textSecondary, 0.7)
@@ -149,11 +132,11 @@ const createStyles = (theme) => {
           opacity: 1,
         },
         "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active": {
-            WebkitBoxShadow: `0 0 0px 1000px ${autofillBgColor} inset !important`,
-            WebkitTextFillColor: `${textPrimary} !important`,
-            caretColor: `${textPrimary} !important`,
-            borderRadius: "inherit",
-            transition: 'background-color 5000s ease-in-out 0s',
+          WebkitBoxShadow: `0 0 0px 1000px ${autofillBgColor} inset !important`,
+          WebkitTextFillColor: `${textPrimary} !important`,
+          caretColor: `${textPrimary} !important`,
+          borderRadius: "inherit",
+          transition: 'background-color 5000s ease-in-out 0s',
         },
       },
     },
@@ -172,7 +155,7 @@ const createStyles = (theme) => {
     button: {
       marginTop: theme.spacing(3),
       padding: "12px",
-      borderRadius: "12px", 
+      borderRadius: "12px",
       fontWeight: 600,
       fontSize: "1.1rem",
       textTransform: "none",
@@ -215,10 +198,10 @@ const createStyles = (theme) => {
           ? `0 2px 10px ${alpha(primaryMain, 0.5)}`
           : `0 2px 10px ${alpha(successDark, 0.3)}`,
       },
-      "&.Mui-disabled": { 
-         background: theme.palette.action.disabledBackground,
-         boxShadow: 'none',
-         color: theme.palette.action.disabled,
+      "&.Mui-disabled": {
+        background: theme.palette.action.disabledBackground,
+        boxShadow: 'none',
+        color: theme.palette.action.disabled,
       }
     },
     checkboxLabel: {
@@ -260,16 +243,16 @@ const createStyles = (theme) => {
     errorMessage: {
       marginTop: theme.spacing(2),
       textAlign: "center",
-      color: isDarkMode ? "#f56565" : theme.palette.error.main, 
+      color: isDarkMode ? "#f56565" : theme.palette.error.main,
       fontWeight: 500,
-      padding: theme.spacing(1, 1.5), 
-      borderRadius: theme.shape.borderRadius, 
+      padding: theme.spacing(1, 1.5),
+      borderRadius: theme.shape.borderRadius,
       backgroundColor: isDarkMode
         ? alpha("#f56565", 0.1)
         : alpha(theme.palette.error.main, 0.08),
     },
     loadingIcon: {
-      color: "#FFFFFF", 
+      color: "#FFFFFF",
     },
     decorativeElement: {
       position: "absolute",
@@ -292,177 +275,3 @@ const createStyles = (theme) => {
     }
   };
 };
-
-function LoginForm() {
-  const theme = useTheme();
-  const styles = createStyles(theme);
-
-  const {
-    email,
-    password,
-    showPassword,
-    rememberMe,
-    loading,
-    error,
-    savedUser,
-    handleEmailChange,
-    handlePasswordChange,
-    handleRememberMeChange,
-    handleClickShowPassword,
-    handleSubmit,
-    quickLogin,
-    handleUseDifferentAccount,
-  } = useLoginForm();
-
-  const renderPasswordField = () => (
-    <TextField
-      type={showPassword ? "text" : "password"}
-      label="Password"
-      name="password"
-      value={password}
-      onChange={handlePasswordChange}
-      required
-      fullWidth
-      variant="outlined"
-      sx={styles.textField} 
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Lock sx={styles.inputIcon} />
-          </InputAdornment>
-        ),
-        endAdornment: (
-          <InputAdornment position="end">
-            <IconButton
-              onClick={handleClickShowPassword}
-              edge="end"
-              aria-label={showPassword ? "hide password" : "show password"}
-              sx={{ p: 1 }}
-            >
-              {showPassword ? (
-                <VisibilityOff sx={styles.visibilityIcon} />
-              ) : (
-                <Visibility sx={styles.visibilityIcon} />
-              )}
-            </IconButton>
-          </InputAdornment>
-        ),
-      }}
-    />
-  );
-
-  const renderEmailField = () => (
-    <TextField
-      type="email"
-      label="Email Address"
-      name="email"
-      value={email}
-      onChange={handleEmailChange}
-      required
-      fullWidth
-      variant="outlined"
-      sx={styles.textField} 
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Email sx={styles.inputIcon} />
-          </InputAdornment>
-        ),
-      }}
-      autoComplete="email"
-    />
-  );
-
-  const renderLoginButton = () => (
-    <Button
-      type="submit"
-      variant="contained"
-      fullWidth
-      sx={styles.button}
-      disabled={loading}
-      aria-label="Login"
-    >
-      {loading ? (
-        <CircularProgress size={24} sx={styles.loadingIcon} />
-      ) : (
-        "Login"
-      )}
-    </Button>
-  );
-
-  const renderErrorMessage = () => {
-    if (!error) return null;
-    return (
-      <Typography sx={styles.errorMessage}>
-        {error}
-      </Typography>
-    );
-  };
-
-  const renderLoginForm = () => (
-    <>
-      <Typography variant="h4" sx={styles.title}>
-        Login
-      </Typography>
-      <Box component="form" sx={styles.form} onSubmit={handleSubmit} noValidate>
-        {renderEmailField()}
-        {renderPasswordField()}
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={rememberMe}
-              onChange={handleRememberMeChange}
-              color="primary" 
-            />
-          }
-          label="Remember me"
-          sx={styles.checkboxLabel}
-        />
-        {renderLoginButton()}
-        {renderErrorMessage()}
-        <Box sx={styles.linkContainer}>
-          <Link href="#" sx={styles.link}>
-            Forgot password?
-          </Link>
-        </Box>
-
-        {/* Decorative elements */}
-        <Box sx={{...styles.decorativeElement, ...styles.decorativeTop}} />
-        <Box sx={{...styles.decorativeElement, ...styles.decorativeBottom}} />
-      </Box>
-    </>
-  );
-
-  return (
-    <Box sx={styles.pageContainer}>
-      <Box sx={styles.container}>
-        <Box sx={styles.formWrapper}>
-          <Box sx={styles.formBackground} />
-          {savedUser ? (
-            <QuickLoginSection
-              savedUser={savedUser}
-              quickLogin={quickLogin}
-              password={password}
-              handlePasswordChange={handlePasswordChange}
-              showPassword={showPassword}
-              handleClickShowPassword={handleClickShowPassword}
-              handleUseDifferentAccount={handleUseDifferentAccount}
-              loading={loading}
-              error={error}
-              textFieldStyles={styles.textField} 
-              visibilityIconStyles={styles.visibilityIcon}
-              inputIconStyles={styles.inputIcon}
-              buttonStyles={styles.button}
-              errorMessageStyles={styles.errorMessage}
-              loadingIconStyles={styles.loadingIcon}
-            />
-          ) : (
-            renderLoginForm()
-          )}
-        </Box>
-      </Box>
-    </Box>
-  );
-}
-
-export default LoginForm;
