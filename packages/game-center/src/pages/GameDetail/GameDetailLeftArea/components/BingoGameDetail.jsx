@@ -49,10 +49,6 @@ const BingoGameDetails = () => {
           }
         );
         setPlayerGameStats(response.data.playerGameStats);
-        console.log(
-          "Frontend'den gelen playerGameStats verisi:",
-          response.data.playerGameStats
-        ); // EKLE
       } catch (err) {
         console.error("Error fetching player game stats:", err);
         setError(err.response?.data?.message || "An error occurred.");

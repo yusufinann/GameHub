@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, memo } from "react";
 import {
   Box,
   Chip,
@@ -19,6 +19,43 @@ import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
 import { useLobbyContext } from "../../context/LobbyContext/context";
 
+// Memoize alt bileşenler gereksiz render'ları önlemek için
+const LobbyTypeChip = memo(function LobbyTypeChip({ lobbyType, isMobile }) {
+  return (
+    <Chip
+      size={isMobile ? "small" : "medium"}
+      icon={lobbyType === "event" ? <Event /> : <Group />}
+      label={lobbyType === "event" ? "Event" : "Normal"}
+      color={lobbyType === "event" ? "secondary" : "primary"}
+      sx={{ 
+        flexShrink: 0,
+        fontWeight: 500,
+        borderRadius: "16px",
+        "& .MuiChip-icon": {
+          color: "inherit"
+        }
+      }}
+    />
+  );
+});
+
+const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobile }) {
+  return (
+    <Chip
+      size={isMobile ? "small" : "medium"}
+      label={`${count || 0} ${maxMembers ? `/ ${maxMembers}` : ''}`}
+      icon={<People sx={{ fontSize: isMobile ? 16 : 18 }} />}
+      sx={{
+        backgroundColor: theme.palette.warning.main,
+        color: theme.palette.warning.contrastText || "#fff",
+        fontWeight: 600,
+        px: 0.5,
+        borderRadius: "16px",
+      }}
+    />
+  );
+});
+
 function LobbyItem({ lobby }) {
   const { membersByLobby, existingLobby } = useLobbyContext();
   const { currentUser } = useAuthContext();
@@ -36,11 +73,13 @@ function LobbyItem({ lobby }) {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Tarih ve zaman bilgilerini bir kez hesapla
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
   const [endDate, endTime] = lobby.endTime?.split("T") || [null, null];
 
   const isCreator = currentUser?.id === lobby.createdBy;
-  const handleJoinClick = async () => {
+  
+  const handleJoinClick = useCallback(async () => {
     try {
       const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
       if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers) {
@@ -51,7 +90,6 @@ function LobbyItem({ lobby }) {
 
       if (lobby.password) {
         setIsPasswordModalOpen(true);
-        console.log("isPasswordModalOpen : ", isPasswordModalOpen);
       } else {
         await handleJoin();
       }
@@ -59,48 +97,107 @@ function LobbyItem({ lobby }) {
       console.error("Error joining lobby:", error);
       setIsErrorModalOpen(true);
     }
-  };
+  }, [lobby, membersByLobby, handleJoin]);
 
   const handleErrorModalClose = useCallback(() => {
     setIsErrorModalOpen(false);
     setIsLobbyFull(false);
   }, []);
-  const handleEditClick = () => {
+  
+  const handleEditClick = useCallback(() => {
     setIsEditModalOpen(true);
-  };
-  const handleEditModalClose = () => {
+  }, []);
+  
+  const handleEditModalClose = useCallback(() => {
     setIsEditModalOpen(false);
-  };
-  const handleNavigate = () => navigate(`/lobby/${lobby.lobbyCode}`);
+  }, []);
+  
+  const handleNavigate = useCallback(() => 
+    navigate(`/lobby/${lobby.lobbyCode}`), 
+    [navigate, lobby.lobbyCode]
+  );
+  
+  const handleDeleteCallback = useCallback(
+    (e) => handleDelete(lobby.lobbyCode, e),
+    [handleDelete, lobby.lobbyCode]
+  );
+  
+  const closePasswordModal = useCallback(() => 
+    setIsPasswordModalOpen(false),
+    []
+  );
+  
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
+  const membersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
+  
+  const renderModals = () => {
+    return (
+      <>
+        {isPasswordModalOpen && (
+          <LobbyPasswordModal
+            open={isPasswordModalOpen}
+            onClose={closePasswordModal}
+            onSubmit={handleJoin}
+            lobbyDetails={{
+              isPasswordProtected: Boolean(lobby.password),
+              lobbyCode: lobby.lobbyCode,
+              lobbyName: lobby.lobbyName,
+            }}
+            theme={theme}
+          />
+        )}
+        
+        {isErrorModalOpen && (
+          <ErrorModal
+            open={isErrorModalOpen}
+            onClose={handleErrorModalClose}
+            errorMessage={
+              isLobbyFull ? "Lobby is full!" : "There was an error joining the lobby."
+            } 
+          />
+        )}
+        
+        {isEditModalOpen && (
+          <LobbyEditModal
+            open={isEditModalOpen}
+            onClose={handleEditModalClose}
+            lobby={lobby} 
+          />
+        )}
+      </>
+    );
+  };
+  
   return (
     <>
       <Paper
-        elevation={2}
+        elevation={3}
         sx={{
-          borderRadius: "8px",
+          borderRadius: "10px",
           m: 1,
-          minWidth: {
-            xs: "10px", // Minimum genişlik - çok küçük ekranlar
-            sm: "10px", // Tablet
-            md: "10px", // Desktop
-          },
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-start",
           gap: "12px",
-          background: "rgba(255, 255, 255, 0.8)",
+          background: theme.palette.background.paper,
           color: theme.palette.text.primary,
-          p: { xs: 1.5, sm: 1.5 },
-          padding: "8px 16px",
-          transition: theme.transitions.create(["all"], {
-            duration: theme.transitions.duration.standard,
-          }),
+          p: { xs: 2, sm: 2.5 },
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          transition: "box-shadow 0.3s ease, background-color 0.3s ease",
           "&:hover": {
-            background: "rgba(255, 255, 255, 1)",
-            transform: "translateY(-3px)",
+            backgroundColor: theme.palette.background.default,
           },
+          position: "relative",
+          overflow: "hidden",
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+          }
         }}
       >
         <Stack spacing={2}>
@@ -110,17 +207,17 @@ function LobbyItem({ lobby }) {
               flexDirection: isMobile ? "column" : "row",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 1,
+              gap: 1.5,
             }}
           >
             <Typography
-              variant={isMobile ? "h6" : "subtitle1"}
+              variant={isMobile ? "h6" : "h5"}
               sx={{
-                fontWeight: "bold",
+                fontWeight: 600,
                 fontSize: {
-                  xs: "0.9rem",
-                  sm: "1rem",
-                  md: "1.1rem",
+                  xs: "1rem",
+                  sm: "1.1rem",
+                  md: "1.2rem",
                 },
                 color: theme.palette.text.primary,
                 flexGrow: 1,
@@ -128,38 +225,28 @@ function LobbyItem({ lobby }) {
             >
               {lobby.lobbyName || "Unnamed Lobby"}
             </Typography>
-            <Chip
-              size={isMobile ? "small" : "medium"}
-              icon={lobby.lobbyType === "event" ? <Event /> : <Group />}
-              label={lobby.lobbyType === "event" ? "Event" : "Normal"}
-              color={lobby.lobbyType === "event" ? "secondary" : "primary"}
-              sx={{ flexShrink: 0 }}
-            />
+            <LobbyTypeChip lobbyType={lobby.lobbyType} isMobile={isMobile} />
           </Box>
+          
           <Box
             sx={{
               display: "flex",
               flexDirection: isMobile ? "column" : "row",
               alignItems: isMobile ? "flex-start" : "center",
               justifyContent: "space-between",
-              gap: 1.5,
+              gap: 2,
             }}
           >
             <Stack
               direction={isMobile ? "column" : "row"}
-              spacing={1}
+              spacing={1.5}
               sx={{ width: isMobile ? "100%" : "auto" }}
             >
-              <Chip
-                size={isMobile ? "small" : "medium"}
-                // Use membersByLobby for member count
-                label={membersByLobby[lobby.lobbyCode]?.length || 0}
-                icon={<People sx={{ fontSize: isMobile ? 14 : 16 }} />}
-                sx={{
-                  backgroundColor: theme.palette.warning.light,
-                  color: theme.palette.warning.contrastText,
-                  fontWeight: "bold",
-                }}
+              <MembersChip 
+                count={membersCount}
+                maxMembers={lobby.maxMembers}
+                theme={theme}
+                isMobile={isMobile}
               />
               {lobby.lobbyType === "event" && (
                 <LobbyInfo
@@ -172,12 +259,14 @@ function LobbyItem({ lobby }) {
                 />
               )}
             </Stack>
+            
             <Box
               sx={{
                 display: "flex",
-                gap: 1,
+                gap: 1.5,
                 width: isMobile ? "100%" : "auto",
                 justifyContent: isMobile ? "flex-end" : "flex-start",
+                mt: isMobile ? 1 : 0,
               }}
             >
               <LobbyActions
@@ -186,7 +275,7 @@ function LobbyItem({ lobby }) {
                 isCreator={isCreator}
                 lobbyCode={lobby.lobbyCode}
                 existingLobbyCode={existingLobby?.lobbyCode}
-                onDelete={(e) => handleDelete(lobby.lobbyCode, e)}
+                onDelete={handleDeleteCallback}
                 onJoin={handleJoinClick}
                 onNavigate={handleNavigate}
                 isMobile={isMobile}
@@ -199,31 +288,9 @@ function LobbyItem({ lobby }) {
         </Stack>
       </Paper>
 
-      <LobbyPasswordModal
-        open={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
-        onSubmit={handleJoin}
-        lobbyDetails={{
-          isPasswordProtected: Boolean(lobby.password),
-          lobbyCode: lobby.lobbyCode,
-          lobbyName: lobby.lobbyName,
-        }}
-        theme={theme}
-      />
-      <ErrorModal
-        open={isErrorModalOpen}
-        onClose={handleErrorModalClose}
-        errorMessage={
-          isLobbyFull ? "Lobi Full!" : "There was an error joining the lobby."
-        } 
-      />
-      <LobbyEditModal
-        open={isEditModalOpen}
-        onClose={handleEditModalClose}
-        lobby={lobby} 
-      />
+      {(isPasswordModalOpen || isErrorModalOpen || isEditModalOpen) && renderModals()}
     </>
   );
 }
 
-export default LobbyItem;
+export default memo(LobbyItem);
