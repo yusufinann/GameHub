@@ -7,6 +7,8 @@ import {
 import {
   KeyboardArrowLeft as CollapseIcon,
   Message as MessageIcon,
+  VisibilityOff as HideExpressionsIcon,
+  Visibility as ShowExpressionsIcon,
 } from "@mui/icons-material";
 import { useAuthContext } from "../../../shared/context/AuthContext";
 import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
@@ -16,13 +18,35 @@ import GameAreaHeader from "./components/GameAreaHeader/GameAreaHeader";
 import GameContentArea from "./components/GameContentArea/GameContentArea";
 import ChatArea from "./components/ChatArea/ChatArea";
 
+
+const SHOW_EXPRESSIONS_KEY = "showExpressions";
+
 const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby }) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const [expressions, setExpressions] = useState([]);
   const [centerExpressions, setCenterExpressions] = useState([]);
   const [isChatOpen, setIsChatOpen] = useState(true);
+  
+  
+  const [showExpressions, setShowExpressions] = useState(() => {
+    try {
+      const savedValue = localStorage.getItem(SHOW_EXPRESSIONS_KEY);
+      return savedValue === null ? true : JSON.parse(savedValue);
+    } catch (error) {
+      console.error("LocalStorage okuma hatası:", error);
+      return true; 
+    }
+  });
+  
   const { soundEnabled, toggleSound, soundEnabledRef } = useContext(GameSettingsContext);
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHOW_EXPRESSIONS_KEY, JSON.stringify(showExpressions));
+    } catch (error) {
+      console.error("LocalStorage yazma hatası:", error);
+    }
+  }, [showExpressions]);
 
   useEffect(() => {
     if (socket && lobbyInfo) {
@@ -30,7 +54,9 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         const message = JSON.parse(event.data);
         if (message.type === "RECEIVE_EXPRESSION") {
           setExpressions((prevExpressions) => [...prevExpressions, message.data]);
-          displayCenterExpression(message.data);
+          if (showExpressions) {
+            displayCenterExpression(message.data);
+          }
         } else if (message.type === "CHAT_HISTORY") {
           if (message.lobbyCode === lobbyInfo.lobbyCode) {
             setExpressions(message.history);
@@ -54,7 +80,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         socket.removeEventListener("message", messageHandler);
       };
     }
-  }, [socket, setExpressions, lobbyInfo]);
+  }, [socket, setExpressions, lobbyInfo, showExpressions]);
 
   const handleSendExpression = (expression) => {
     if (expression.trim()) {
@@ -69,6 +95,15 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
       };
       socket.send(JSON.stringify(messagePayload));
     }
+  };
+
+  // Debounce function for performance optimisation
+  const debounce = (func, delay) => {
+    let timer;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => func.apply(this, args), delay);
+    };
   };
 
   const displayCenterExpression = (expressionData) => {
@@ -90,6 +125,16 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };
+
+  const toggleExpressions = debounce(() => {
+    setShowExpressions((prev) => {
+      const newValue = !prev;
+      if (!newValue) {
+        setCenterExpressions([]);
+      }
+      return newValue;
+    });
+  }, 200); 
 
   return (
     <Paper
@@ -165,20 +210,45 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
             soundEnabled={soundEnabled}
             toggleSound={toggleSound}
             soundEnabledRef={soundEnabledRef}
-            centerExpressions={centerExpressions}
+            centerExpressions={showExpressions ? centerExpressions : []}
             onSendExpression={handleSendExpression}
             isChatOpen={isChatOpen}
           />
 
-          {/* Chat Toggle Button */}
+          {/* Control Buttons */}
           <Box
             sx={{
               position: 'relative',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
+              gap: 2,
               zIndex: 5
             }}
           >
+            <IconButton
+              onClick={toggleExpressions}
+              aria-label={showExpressions ? "İfadeleri Gizle" : "İfadeleri Göster"}
+              sx={{
+                borderRadius: "50%",
+                background: showExpressions
+                  ? "linear-gradient(135deg, #FF9800, #F57C00)"
+                  : "linear-gradient(135deg, #9E9E9E, #757575)",
+                boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+                "&:hover": {
+                  boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                  filter: "brightness(1.2)",
+                },
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                width: 40,
+                height: 40,
+                border: "2px solid white",
+                p: 0.5,
+              }}
+            >
+              {showExpressions ? <HideExpressionsIcon /> : <ShowExpressionsIcon />}
+            </IconButton>
+            
             <IconButton
               onClick={toggleChat}
               aria-label={isChatOpen ? "Sohbeti Gizle" : "Sohbeti Göster"}
@@ -190,7 +260,6 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
                 boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
                 "&:hover": {
                   boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
-                  transform: "translateY(-3px) scale(1.05)",
                   filter: "brightness(1.2)",
                 },
                 transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",

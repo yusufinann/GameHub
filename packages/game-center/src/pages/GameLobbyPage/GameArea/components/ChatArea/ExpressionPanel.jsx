@@ -8,6 +8,7 @@ import {
   styled,
   keyframes,
   alpha,
+  Tooltip,
 } from "@mui/material";
 
 import {
@@ -33,12 +34,12 @@ const expressionSlideUpFadeOut = keyframes`
   }
 `;
 
-const AnimatedExpressionBox = styled(Box)(({ theme }) => {
+const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
   const animations = {
     default: `${expressionSlideUpFadeOut} 3s ease-out forwards`,
   };
 
-  const selectedAnimation = animations.default;
+  const selectedAnimation = animations[$animationType] || animations.default;
 
   return {
     padding: theme.spacing(2, 4),
@@ -68,6 +69,11 @@ const AnimatedExpressionBox = styled(Box)(({ theme }) => {
 
 // Main Expression Panel Component
 const ExpressionPanel = ({ centerExpressions }) => {
+  // İfade kutularını göstermek için koşullu render
+  if (centerExpressions.length === 0) {
+    return null; // Hiç ifade yoksa veya ifadeler gizlenmişse hiçbir şey gösterme
+  }
+
   return (
     <Box
       sx={{
@@ -85,7 +91,7 @@ const ExpressionPanel = ({ centerExpressions }) => {
       {centerExpressions.map((expr) => (
         <AnimatedExpressionBox
           key={expr.id}
-          animationType={"default"}
+          $animationType={expr.animationtype || "default"}
         >
           <Box
             sx={{

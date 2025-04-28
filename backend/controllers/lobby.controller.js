@@ -314,7 +314,22 @@ export const joinLobby = async (req, res) => {
                         isHost: true,
                     }, otherMemberIds);
                 }
-
+                broadcastLobbyEvent(
+                    null, 
+                    "LOBBY_MEMBER_COUNT_UPDATED",
+                    {
+                        lobbyCode: lobby.lobbyCode,
+                        memberCount: lobby.members.length,
+                        maxMembers: lobby.maxMembers,
+                        members: lobby.members.map(m => ({ 
+                            id: m.id,
+                            name: m.name,
+                            avatar: m.avatar,
+                            isHost: m.isHost 
+                         }))
+                    },
+                    null
+                );
                 return res.status(200).json({
                     message: "Lobiye host olarak geri döndünüz.",
                     lobby: lobby.toObject(),
@@ -341,11 +356,10 @@ export const joinLobby = async (req, res) => {
         });
         await lobby.save();
 
-        // Best practice: Send USER_JOINED event only to other members in the lobby
         const lobbyMembersExceptNewUser = lobby.members.filter(member => member.id !== user.id);
         const memberIdsToNotify = lobbyMembersExceptNewUser.map(member => member.id);
 
-        if (memberIdsToNotify.length > 0) { // Only broadcast if there are other members to notify
+        if (memberIdsToNotify.length > 0) { 
             broadcastLobbyEvent(lobbyCode, "USER_JOINED", {
                 userId: user.id,
                 name: user.name,
@@ -353,7 +367,22 @@ export const joinLobby = async (req, res) => {
                 lobbyName: lobby.lobbyName,
             }, memberIdsToNotify); // Send to specific users (other members)
         }
-
+        broadcastLobbyEvent(
+            null, // Broadcast to everyone
+            "LOBBY_MEMBER_COUNT_UPDATED",
+            {
+                lobbyCode: lobby.lobbyCode,
+                memberCount: lobby.members.length,
+                maxMembers: lobby.maxMembers,
+                members: lobby.members.map(m => ({ 
+                    id: m.id,
+                    name: m.name,
+                    avatar: m.avatar,
+                    isHost: m.isHost
+                 })) 
+            },
+            null 
+        );
         res.status(200).json({
             message: "Lobiye başarıyla katıldınız.",
             lobby: lobby.toObject(),
@@ -396,7 +425,22 @@ export const leaveLobby = async (req, res) => {
              }, remainingMemberIds);
          }
 
-
+         broadcastLobbyEvent(
+            null,
+            "LOBBY_MEMBER_COUNT_UPDATED",
+            {
+                lobbyCode: lobby.lobbyCode,
+                memberCount: lobby.members.length,
+                maxMembers: lobby.maxMembers,
+                members: lobby.members.map(m => ({ // <-- ADD THIS ARRAY
+                    id: m.id,
+                    name: m.name,
+                    avatar: m.avatar,
+                    isHost: m.isHost
+                 }))
+            },
+            null
+        );
         if (wasHost && lobby.lobbyType === "normal") {
              if (lobby.members.length === 0) {
                  console.log(`Host ${lobbyCode} lobisinden ayrıldı ve lobi boş kaldı. Direkt siliniyor.`);

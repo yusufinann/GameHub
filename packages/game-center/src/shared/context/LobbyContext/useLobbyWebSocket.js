@@ -35,6 +35,9 @@ const useLobbyWebSocket = (
           case "USER_JOINED":
             handleUserJoined(data);
             break;
+            case "LOBBY_MEMBER_COUNT_UPDATED":
+            handleLobbyMemberCountUpdate(data.data);
+            break;
           case "USER_LEFT":
             handleUserLeft(data);
             break;
@@ -83,7 +86,6 @@ const useLobbyWebSocket = (
     const handleUserJoined = (data) => {
       const { lobbyCode, data: userData } = data;
 
-      // Global lobi listesini güncelle
       setLobbies((prev) =>
         prev.map((lobby) => {
           if (lobby.lobbyCode === lobbyCode) {
@@ -104,7 +106,6 @@ const useLobbyWebSocket = (
         })
       );
 
-      // İlgili lobinin üye listesini güncelle
       setMembersByLobby((prev) => ({
         ...prev,
         [lobbyCode]: [
@@ -118,7 +119,27 @@ const useLobbyWebSocket = (
         ],
       }));
     };
-
+    const handleLobbyMemberCountUpdate = (updateData) => {
+      const { lobbyCode,members } = updateData; 
+  
+      if (!lobbyCode || !members) {
+          console.error("LOBBY_MEMBER_COUNT_UPDATED event missing lobbyCode or members", updateData);
+          return;
+      }
+  
+      setLobbies((prevLobbies) =>
+          prevLobbies.map((lobby) =>
+              lobby.lobbyCode === lobbyCode
+                  ? { ...lobby, members: members} 
+                  : lobby
+          )
+      );
+  
+      setMembersByLobby((prevMembersByLobby) => ({
+          ...prevMembersByLobby,
+          [lobbyCode]: members || [], 
+      }));
+  };
     const handleUserLeft = (data) => {
       const {
         lobbyCode,
