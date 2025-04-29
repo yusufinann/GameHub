@@ -1,10 +1,28 @@
-import React from "react";
-import { Box } from "@mui/material";
-import ActiveGamesArea from "./ActiveGamesArea";
-import LobbiesArea from "./LobbiesArea";
-import BingoStatsSchema from "./ActiveGamesArea/BingoStatsSchema";
-import GameStories from "./ActiveGamesArea/GameStories";
-import PopularGamesArea from "./PopularGamesArea";
+import React, { lazy, Suspense } from "react";
+import { Box, CircularProgress } from "@mui/material";
+
+// Lazy-loaded components
+const ActiveGamesArea = lazy(() => import("./ActiveGamesArea"));
+const LobbiesArea = lazy(() => import("./LobbiesArea"));
+const BingoStatsSchema = lazy(() => import("./ActiveGamesArea/BingoStatsSchema"));
+const GameStories = lazy(() => import("./ActiveGamesArea/GameStories"));
+const PopularGamesArea = lazy(() => import("./PopularGamesArea"));
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100%",
+      width: "100%",
+      minHeight: "200px",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
 
 function MainScreenMiddleArea() {
   return (
@@ -15,7 +33,6 @@ function MainScreenMiddleArea() {
         marginTop: "20px",
         height: "100%",
         width: "100%",
-        
       }}
     >
       <Box
@@ -30,19 +47,24 @@ function MainScreenMiddleArea() {
           width: "100%",
         }}
       >
-        <PopularGamesArea />
+        <Suspense fallback={<LoadingSpinner />}>
+          <PopularGamesArea />
+        </Suspense>
 
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
             width: "50vw",
-            height: "70vh",         
+            height: "70vh",
           }}
         >
-          <LobbiesArea />
+          <Suspense fallback={<LoadingSpinner />}>
+            <LobbiesArea />
+          </Suspense>
         </Box>
       </Box>
+
       <Box
         sx={{
           display: "flex",
@@ -63,9 +85,14 @@ function MainScreenMiddleArea() {
             width: "60vw",
           }}
         >
-          <ActiveGamesArea />
-          <GameStories />
+          <Suspense fallback={<LoadingSpinner />}>
+            <ActiveGamesArea />
+          </Suspense>
+          <Suspense fallback={<LoadingSpinner />}>
+            <GameStories />
+          </Suspense>
         </Box>
+
         {/* Alt Sağ */}
         <Box
           sx={{
@@ -76,7 +103,9 @@ function MainScreenMiddleArea() {
             width: "50vw",
           }}
         >
-          <BingoStatsSchema />
+          <Suspense fallback={<LoadingSpinner />}>
+            <BingoStatsSchema />
+          </Suspense>
         </Box>
       </Box>
     </Box>

@@ -144,11 +144,6 @@ const FeaturedGameItem = ({ title, thumbnail, openGiveawayUrl }) => {
           transform: 'skewX(-15deg)',
           transition: 'all 0.7s ease',
           opacity: isHovered ? 1 : 0,
-          animation: isHovered ? 'shine 1.5s ease' : 'none',
-          '@keyframes shine': {
-            '0%': { left: '-100%' },
-            '100%': { left: '200%' }
-          },
           zIndex: 2
         }}
       />

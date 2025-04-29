@@ -10,7 +10,7 @@ import {
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useGames } from "../../../../service/useGames";
-import TrendGameItem from "./FeaturedGameItem";
+import FeaturedGameItem from "./FeaturedGameItem";
 
 const HotAndNewList = () => {
   const theme = useTheme();
@@ -199,7 +199,7 @@ const HotAndNewList = () => {
                   },
                 }}
               >
-                <TrendGameItem
+                <FeaturedGameItem
                   title={game.title}
                   thumbnail={game.thumbnail}
                   openGiveawayUrl={game.open_giveaway_url}
