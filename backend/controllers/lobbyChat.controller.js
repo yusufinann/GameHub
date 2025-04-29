@@ -1,5 +1,3 @@
-// controllers/lobbyChat.controller.js
-
 const lobbyChats = new Map();
 
 /**
@@ -35,5 +33,3 @@ export const getChatHistory = (lobbyCode) => {
 export const clearChatHistory = (lobbyCode) => {
   lobbyChats.delete(lobbyCode);
 };
-
-console.log("Lobby Chat Controller başlatıldı.");
