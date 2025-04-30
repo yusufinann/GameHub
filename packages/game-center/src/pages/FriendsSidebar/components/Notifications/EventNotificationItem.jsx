@@ -11,12 +11,12 @@ useTheme,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 
-const EventNotificationItem = ({ notification, handleJoinEvent, removeNotification,palette }) => {
+const EventNotificationItem = ({ notification, handleJoinEvent, removeNotification}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <MenuItem key={notification.lobbyId} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor:palette.background.paper  }}>
+    <MenuItem key={notification.lobbyId} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor:theme.palette.background.paper  }}>
       <Box sx={{ display: 'flex', mb: isMobile ? 2 : 0 }}>
         <Avatar sx={{ bgcolor: "primary.light", mr: 2 }}>
           <EventIcon />

@@ -114,7 +114,7 @@ const GameStories = () => {
         }}>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, gap: 1 }}>
-          <Typography variant="h4" sx={{ color:'black', textShadow: '0 4px 6px rgba(0,0,0,0.2)',fontWeight: 800,filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+          <Typography variant="h4" sx={{color:'black', textShadow: '0 4px 6px rgba(0,0,0,0.2)',fontWeight: 800,filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
             Adventure Stories
           </Typography>
         </Box>

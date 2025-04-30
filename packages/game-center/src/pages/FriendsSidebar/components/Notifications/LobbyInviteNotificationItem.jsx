@@ -11,12 +11,12 @@ useTheme,
 } from "@mui/material";
 import GroupsIcon from '@mui/icons-material/Groups';
 
-const LobbyInviteNotificationItem = ({ notification, handleJoinEvent, removeNotification,palette }) => {
+const LobbyInviteNotificationItem = ({ notification, handleJoinEvent, removeNotification }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <MenuItem key={`lobby-invite-${notification.lobbyId}`} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor: palette.background.paper }}>
+    <MenuItem key={`lobby-invite-${notification.lobbyId}`} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor: theme.palette.background.paper }}>
       <Box sx={{ display: 'flex', mb: isMobile ? 2 : 0 }}>
         <Avatar sx={{ bgcolor: "secondary.light", mr: 2 }}>
           <GroupsIcon />

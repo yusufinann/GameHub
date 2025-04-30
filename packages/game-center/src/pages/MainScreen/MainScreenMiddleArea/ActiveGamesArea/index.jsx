@@ -61,30 +61,24 @@ function ActiveGamesArea() {
         }
       }}
     >
-      <Box sx={{
+  <Box
+      sx={{
         position: 'absolute',
         top: 10,
         left: 30,
         zIndex: 3,
         textAlign: 'left',
-      }}>
-        <Typography variant="h2" sx={{
-          fontFamily: '"Poppins", sans-serif',
-          fontWeight: 800,
-          background: theme.palette.text.gradient,
-          WebkitBackgroundClip: 'text',
-          textShadow: '0 4px 6px rgba(0,0,0,0.2)',
-          fontSize: '2.5rem',
-          letterSpacing: '-1px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}>
-          <Box component="span" sx={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}}>🎮</Box>
-          Game Paradise Awaits!
-          <Box component="span">🚀</Box>
-        </Typography>
-      </Box>
+      }}
+    >
+      <Typography variant="banner">
+        <Box component="span" sx={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+          🎮
+        </Box>
+        Game Paradise Awaits!
+        <Box component="span">🚀</Box>
+      </Typography>
+    </Box>
+
 
       <Box sx={{
         position: 'relative',

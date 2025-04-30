@@ -11,12 +11,12 @@ useTheme,
 } from "@mui/material";
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 
-const FriendGroupInviteNotificationItem = ({ notification, handleViewFriendGroup, removeNotification,palette }) => {
+const FriendGroupInviteNotificationItem = ({ notification, handleViewFriendGroup, removeNotification }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <MenuItem key={`friend-group-invite-${notification.groupId}`} disableRipple sx={{ display: 'block', py: 2, px: 1 ,backgroundColor:palette.background.paper }}>
+    <MenuItem key={`friend-group-invite-${notification.groupId}`} disableRipple sx={{ display: 'block', py: 2, px: 1 ,backgroundColor:theme.palette.background.paper }}>
       <Box sx={{ display: 'flex', mb: isMobile ? 2 : 0 }}>
         <Avatar sx={{ bgcolor: "secondary.light", mr: 2 }}>
           <GroupsRoundedIcon />
