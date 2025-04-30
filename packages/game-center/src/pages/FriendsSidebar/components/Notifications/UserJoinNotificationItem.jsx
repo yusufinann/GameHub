@@ -10,10 +10,10 @@ Box,
 } from "@mui/material";
 import GroupsIcon from '@mui/icons-material/Groups';
 
-const UserJoinNotificationItem = ({ notification, removeNotification }) => {
+const UserJoinNotificationItem = ({ notification, removeNotification ,palette}) => {
 
   return (
-    <MenuItem key={`user-join-${notification.lobbyCode}-${notification.userName}`} disableRipple sx={{ display: 'block', py: 2, px: 1 }}>
+    <MenuItem key={`user-join-${notification.lobbyCode}-${notification.userName}`} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor: palette.background.paper  }}>
       <Box sx={{ display: 'flex', mb: 2 }}>
         <Avatar sx={{ bgcolor: "secondary.light", mr: 2 }}>
           <GroupsIcon />

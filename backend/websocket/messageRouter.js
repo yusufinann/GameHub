@@ -75,7 +75,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
                 });
                 break;
             case "LOBBY_UPDATED":
-                broadcastToOthers(ws, {
+                broadcastToAll(ws, {
                     type: "LOBBY_UPDATED",
                     lobbyCode: data.lobbyCode,
                     data: data.data,

@@ -16,7 +16,7 @@ const FriendRequestNotificationItem = ({ request, handleAcceptFriendRequest, han
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <MenuItem key={request.id} disableRipple sx={{ display: 'block', py: 2, px: 1 }}>
+    <MenuItem key={request.id} disableRipple sx={{ display: 'block', py: 2, px: 1,backgroundColor: theme.palette.background.paper  }}>
       <Box sx={{ display: 'flex', mb: isMobile ? 2 : 0 }}>
         <Avatar sx={{ bgcolor: "secondary.light", mr: 2 }}>
           <PersonAddIcon />

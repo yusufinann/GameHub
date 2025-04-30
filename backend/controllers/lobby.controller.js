@@ -549,6 +549,11 @@ export const deleteLobby = async (req, res) => {
             }, lobby.members.map(member => member.id));
 
             delete bingoGames[lobbyCode];
+
+            broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
+                lobbyCode: lobby.lobbyCode,
+                message: "Lobi silindi."
+            });
         } else {
             broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
                 lobbyCode: lobby.lobbyCode,

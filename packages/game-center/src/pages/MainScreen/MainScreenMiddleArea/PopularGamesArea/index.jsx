@@ -17,8 +17,8 @@ const PopularGamesArea = () => {
     <Box
       sx={{
         display: "flex",
-        height: "50vh",
-        width: "40vw",
+        height: { xs: '100%', md: '50vh' },
+        width: { xs: '100%', md: '40vw' }
       }}
     >
       <GameShowcase />

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+// Keep the original imports from your project
 import {
   Card,
   CardContent,
@@ -9,13 +10,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   Paper,
   Box,
   CircularProgress,
   Alert,
   Chip,
   Avatar,
-  Grid,
   Divider,
   IconButton,
   Tooltip
@@ -25,7 +26,11 @@ import {
   AccessTime as TimeIcon,
   Numbers as NumbersIcon,
   Share as ShareIcon,
-  Info as InfoIcon
+  Info as InfoIcon,
+  FirstPage as FirstPageIcon,
+  LastPage as LastPageIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon
 } from '@mui/icons-material';
 
 const getRankColor = (rank) => {
@@ -53,7 +58,25 @@ const formatDuration = (durationMs) => {
 };
 
 const BingoGameHistory = ({ stats, loading, error }) => {
-  console.log(stats);
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // Calculate stats summary using useMemo to prevent unnecessary recalculations
+  const statsSummary = useMemo(() => {
+    if (!stats || !stats.games || stats.games.length === 0) {
+      return { totalScore: 0, bestRank: '-', totalDuration: 'N/A' };
+    }
+
+    const totalScore = stats.games.reduce((sum, game) => sum + game.score, 0);
+    const validRanks = stats.games.filter(game => game.finalRank).map(game => game.finalRank);
+    const bestRank = validRanks.length > 0 ? Math.min(...validRanks) : '-';
+    const totalDurationMs = stats.games.reduce((sum, game) => sum + (game.duration || 0), 0);
+    const formattedTotalDuration = formatDuration(totalDurationMs);
+
+    return { totalScore, bestRank, formattedTotalDuration };
+  }, [stats]);
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" p={4} minHeight="300px">
@@ -95,13 +118,12 @@ const BingoGameHistory = ({ stats, loading, error }) => {
     );
   }
 
-  const totalScore = stats.games.reduce((sum, game) => sum + game.score, 0);
-  const bestRank = Math.min(...stats.games.filter(game => game.finalRank).map(game => game.finalRank));
-
-  // Calculate total duration
-  const totalDurationMs = stats.games.reduce((sum, game) => sum + (game.duration || 0), 0);
-  const formattedTotalDuration = formatDuration(totalDurationMs);
-
+  // Calculate pagination
+  const totalGames = stats.games.length;
+  const totalPages = Math.ceil(totalGames / rowsPerPage);
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalGames);
+  const currentGames = stats.games.slice(startIndex, endIndex);
 
   return (
     <Card elevation={3} sx={{ borderRadius: 2, overflow: 'visible' }}>
@@ -117,33 +139,54 @@ const BingoGameHistory = ({ stats, loading, error }) => {
           </Tooltip>
         </Box>
 
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={12} sm={4}>
-            <Box p={2} textAlign="center" bgcolor="action.hover" borderRadius={2}>
-              <Typography variant="body2" color="text.secondary">Toplam Harcanan Süre</Typography>
-              <Typography variant="h6" fontWeight="bold">{formattedTotalDuration}</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box p={2} textAlign="center" bgcolor="action.hover" borderRadius={2}>
-              <Typography variant="body2" color="text.secondary">Toplam Puan</Typography>
-              <Typography variant="h6" fontWeight="bold">{totalScore.toLocaleString()}</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box p={2} textAlign="center" bgcolor="action.hover" borderRadius={2}>
-              <Typography variant="body2" color="text.secondary">En İyi Sıralama</Typography>
-              <Typography variant="h6" fontWeight="bold">
-                {Number.isFinite(bestRank) ? bestRank : '-'}
-                {bestRank === 1 && ' 🏆'}
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        {/* Stats summary boxes using Box instead of Grid */}
+        <Box 
+          display="flex" 
+          flexDirection={{ xs: 'column', sm: 'row' }} 
+          gap={2} 
+          mb={3}
+        >
+          <Box 
+            p={2} 
+            textAlign="center" 
+            bgcolor="action.hover" 
+            borderRadius={2}
+            flex={1}
+            width={{ xs: '100%', sm: 'auto' }}
+          >
+            <Typography variant="body2" color="text.secondary">Toplam Harcanan Süre</Typography>
+            <Typography variant="h6" fontWeight="bold">{statsSummary.formattedTotalDuration}</Typography>
+          </Box>
+          <Box 
+            p={2} 
+            textAlign="center" 
+            bgcolor="action.hover" 
+            borderRadius={2}
+            flex={1}
+            width={{ xs: '100%', sm: 'auto' }}
+          >
+            <Typography variant="body2" color="text.secondary">Toplam Puan</Typography>
+            <Typography variant="h6" fontWeight="bold">{statsSummary.totalScore.toLocaleString()}</Typography>
+          </Box>
+          <Box 
+            p={2} 
+            textAlign="center" 
+            bgcolor="action.hover" 
+            borderRadius={2}
+            flex={1}
+            width={{ xs: '100%', sm: 'auto' }}
+          >
+            <Typography variant="body2" color="text.secondary">En İyi Sıralama</Typography>
+            <Typography variant="h6" fontWeight="bold">
+              {statsSummary.bestRank}
+              {statsSummary.bestRank === 1 && ' 🏆'}
+            </Typography>
+          </Box>
+        </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+        <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2, mb: 2 }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: 'primary.light' }}>
@@ -155,7 +198,7 @@ const BingoGameHistory = ({ stats, loading, error }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {stats.games.map((game, index) => (
+              {currentGames.map((game) => (
                 <TableRow
                   key={game.gameId}
                   sx={{
@@ -217,9 +260,97 @@ const BingoGameHistory = ({ stats, loading, error }) => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination Controls - Simplified version */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+          <Box>
+            <Typography component="span" variant="body2" mr={1}>
+              Rows per page:
+            </Typography>
+            <Box
+              component={TablePagination}
+              count={totalGames}
+              page={page-1}
+              rowsPerPage={rowsPerPage}
+              onPageChange={(event, newPage) => setPage(newPage+1)}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(1);
+              }}
+              rowsPerPageOptions={[5, 10, 25]}
+              sx={{ display: 'inline', border: 'none' }}
+              labelDisplayedRows={() => ''}
+              backIconButtonProps={{style: {display: 'none'}}}
+              nextIconButtonProps={{style: {display: 'none'}}}
+              SelectProps={{
+                variant: 'outlined',
+                size: 'small'
+              }}
+            />
+          </Box>
+          
+          <Box display="flex" alignItems="center">
+            <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
+              {startIndex + 1}-{endIndex} / {totalGames} game
+            </Typography>
+            
+            {/* Simple Pagination */}
+            <Box display="flex" gap="8px">
+              <IconButton 
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                size="small"
+                sx={{
+                  border: '1px solid #ccc',
+                  opacity: page === 1 ? 0.5 : 1,
+                }}
+              >
+                <FirstPageIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+                size="small"
+                sx={{
+                  border: '1px solid #ccc',
+                  opacity: page === 1 ? 0.5 : 1,
+                }}
+              >
+                <ChevronLeftIcon fontSize="small" />
+              </IconButton>
+              
+              <Typography variant="body2" mx={1} display="flex" alignItems="center">
+                {page} / {totalPages}
+              </Typography>
+              
+              <IconButton
+                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={page === totalPages}
+                size="small"
+                sx={{
+                  border: '1px solid #ccc',
+                  opacity: page === totalPages ? 0.5 : 1,
+                }}
+              >
+                <ChevronRightIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                size="small"
+                sx={{
+                  border: '1px solid #ccc',
+                  opacity: page === totalPages ? 0.5 : 1,
+                }}
+              >
+                <LastPageIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );
 };
 
-export default BingoGameHistory;
+export default React.memo(BingoGameHistory);

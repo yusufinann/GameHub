@@ -33,6 +33,7 @@ const Notifications = () => {
     useFriendsContext();
   const showNotification = useNotification();
   const theme = useTheme();
+  const palette=theme.palette;
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleMessage = useCallback(
@@ -372,6 +373,7 @@ const Notifications = () => {
             request={request}
             handleAcceptFriendRequest={handleAcceptFriendRequest}
             handleRejectFriendRequest={handleRejectFriendRequest}
+            palette={palette}
           />
         );
       });
@@ -401,6 +403,7 @@ const Notifications = () => {
             notification={notification}
             handleJoinEvent={handleJoinEvent}
             removeNotification={removeNotification}
+            palette={palette}
           />
         );
       });
@@ -429,6 +432,7 @@ const Notifications = () => {
             key={`user-join-${notification.lobbyCode}-${notification.userName}`}
             notification={notification}
             removeNotification={removeNotification}
+            palette={palette}
           />
         );
       });
@@ -458,6 +462,7 @@ const Notifications = () => {
             notification={notification}
             handleViewFriendGroup={handleViewFriendGroup}
             removeNotification={removeNotification}
+            palette={palette}
           />
         );
       });

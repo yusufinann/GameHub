@@ -15,9 +15,11 @@ import {
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import HomeIcon from '@mui/icons-material/Home';
+import { paletteTokens } from "../../theme/palette";
 
-const LobbyDeletedModal = ({ open, reason, onClose }) => {
+const LobbyDeletedModal = ({ open, reason, onClose, isDark = false }) => {
   const [countdown, setCountdown] = useState(10);
+  const palette = isDark ? paletteTokens.dark : paletteTokens.light;
   
   useEffect(() => {
     if (!open) return;
@@ -58,7 +60,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
       <Paper 
         elevation={0}
         sx={{
-          borderTop: '6px solid #f44336',
+          borderTop: `6px solid ${palette.error.main}`,
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -69,19 +71,19 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
             display: "flex", 
             alignItems: "center", 
             justifyContent: "space-between",
-            bgcolor: "#f8f9fa",
-            borderBottom: "1px solid #e0e0e0"
+            bgcolor: palette.background.paper,
+            borderBottom: `1px solid ${palette.background.elevation[1]}`
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <ErrorOutlineIcon color="error" fontSize="large" />
-            <Typography variant="h6" fontWeight="600">
+            <ErrorOutlineIcon sx={{ color: palette.error.main }} fontSize="large" />
+            <Typography variant="h6" fontWeight="600" sx={{ color: palette.text.primary }}>
               Lobby No Longer Available
             </Typography>
           </Box>
           <IconButton 
             edge="end" 
-            color="inherit" 
+            sx={{ color: palette.text.secondary }}
             onClick={onClose}
             aria-label="close"
             size="small"
@@ -98,7 +100,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: '#fff'
+            bgcolor: palette.background.paper
           }}
         >
           <Box 
@@ -114,7 +116,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
               value={(countdown / 10) * 100}
               size={80}
               thickness={3}
-              sx={{ color: '#f44336' }}
+              sx={{ color: palette.error.main }}
             />
             <Box
               sx={{
@@ -128,7 +130,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="h5" component="div" fontWeight="medium" color="text.secondary">
+              <Typography variant="h5" component="div" fontWeight="medium" sx={{ color: palette.text.secondary }}>
                 {countdown}
               </Typography>
             </Box>
@@ -140,7 +142,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
             sx={{ 
               mb: 2,
               fontWeight: 500,
-              color: '#333'
+              color: palette.text.primary
             }}
           >
             {reason || "The lobby has been deleted by the host."}
@@ -148,7 +150,7 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
           
           <Typography 
             variant="body2" 
-            color="text.secondary" 
+            sx={{ color: palette.text.secondary }}
             align="center"
           >
             You will be redirected to the main screen in {countdown} seconds.
@@ -158,26 +160,28 @@ const LobbyDeletedModal = ({ open, reason, onClose }) => {
         <DialogActions 
           sx={{ 
             p: 2.5, 
-            bgcolor: '#f8f9fa',
-            borderTop: "1px solid #e0e0e0",
+            bgcolor: palette.background.paper,
+            borderTop: `1px solid ${palette.background.elevation[1]}`,
             justifyContent: 'center'
           }}
         >
           <Button 
             onClick={onClose} 
             variant="contained" 
-            color="primary"
-            startIcon={<HomeIcon />}
             sx={{ 
               px: 4,
               py: 1,
               borderRadius: 1.5,
               boxShadow: 2,
               fontWeight: 500,
+              bgcolor: palette.primary.main,
+              color: palette.primary.contrastText,
               '&:hover': {
+                bgcolor: palette.primary.dark,
                 boxShadow: 4
               }
             }}
+            startIcon={<HomeIcon />}
           >
             Return to Main Screen
           </Button>

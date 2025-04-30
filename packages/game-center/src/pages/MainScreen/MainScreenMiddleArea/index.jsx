@@ -1,14 +1,12 @@
 import React, { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
 
-// Lazy-loaded components
 const ActiveGamesArea = lazy(() => import("./ActiveGamesArea"));
 const LobbiesArea = lazy(() => import("./LobbiesArea"));
 const BingoStatsSchema = lazy(() => import("./ActiveGamesArea/BingoStatsSchema"));
 const GameStories = lazy(() => import("./ActiveGamesArea/GameStories"));
 const PopularGamesArea = lazy(() => import("./PopularGamesArea"));
 
-// Loading spinner component
 const LoadingSpinner = () => (
   <Box
     sx={{
@@ -33,6 +31,7 @@ function MainScreenMiddleArea() {
         marginTop: "20px",
         height: "100%",
         width: "100%",
+        gap: "20px",
       }}
     >
       <Box
@@ -42,21 +41,22 @@ function MainScreenMiddleArea() {
             xs: "column",
             md: "row",
           },
-          gap: "10px",
-          height: "100%",
+          gap: "20px",
           width: "100%",
         }}
       >
-        <Suspense fallback={<LoadingSpinner />}>
-          <PopularGamesArea />
-        </Suspense>
+        <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <PopularGamesArea />
+          </Suspense>
+        </Box>
 
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "50vw",
-            height: "70vh",
+            width: { xs: '100%', md: '60%' },
+            height: { xs: 'auto', md: '70vh' },
           }}
         >
           <Suspense fallback={<LoadingSpinner />}>
@@ -72,17 +72,17 @@ function MainScreenMiddleArea() {
             xs: "column",
             md: "row",
           },
-          gap: "10px",
+          gap: "20px",
+          width: "100%",
         }}
       >
-        {/* Alt Sol */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: "10px",
-            height: "100vh",
-            width: "60vw",
+            gap: "20px",
+            width: { xs: '100%', md: '60%' },
+            height: 'auto',
           }}
         >
           <Suspense fallback={<LoadingSpinner />}>
@@ -93,14 +93,12 @@ function MainScreenMiddleArea() {
           </Suspense>
         </Box>
 
-        {/* Alt Sağ */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: "10px",
-            height: "100vh",
-            width: "50vw",
+            width: { xs: '100%', md: '40%' },
+            height: 'auto',
           }}
         >
           <Suspense fallback={<LoadingSpinner />}>
