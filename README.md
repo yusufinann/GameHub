@@ -313,6 +313,149 @@ Our platform supports your lobby management operations with instant notification
 
 ---
 
+<h2 id="installation-and-setup">🔧 Installation and Setup</h2>
+
+Follow these steps to get the Game Center running on your local machine:
+
+### Prerequisites
+
+*   **Node.js:** Ensure you have Node.js (v16 or higher recommended) and Yarn installed.
+*   **Git:** Required for cloning the repository.
+*   **MongoDB:** You need a running instance of MongoDB (local or cloud).
+*   **(Optional) API Client:** A tool like [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/), or familiarity with `curl` command line tool to create initial users.
+
+### Steps
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/yusufinann/GameHub.git
+    cd GameHub
+    ```
+
+2.  **Install Dependencies:**
+    Install dependencies for the entire project from the root directory using Yarn.
+    ```bash
+    yarn install
+    ```
+
+3.  **Configure Backend Environment Variables:**
+    *   Navigate to the backend directory: `cd backend`
+    *   **Create a `.env` file** in this `backend` directory.
+    *   Copy the structure below and **replace values with your own configuration**:
+
+        ```dotenv
+        # .env file in backend directory
+        PORT=3001
+        FRONTEND_URL=http://localhost:3000
+        MONGO_DB_URI=YOUR_MONGO_DB_CONNECTION_STRING_HERE # Replace with your MongoDB connection string
+        SESSION_SECRET=your_strong_random_session_secret_key # Replace with a unique random string
+        JWT_SECRET=your_different_strong_random_jwt_secret_key # Replace with a different unique random string
+        ```
+    *   **Crucially, set your `MONGO_DB_URI`, `SESSION_SECRET`, and `JWT_SECRET`.** Use `3001` for `PORT` unless that port is taken.
+
+4.  **Ensure MongoDB is Running:**
+    Make sure your MongoDB server instance (specified in your `MONGO_DB_URI`) is running and accessible.
+
+5.  **Run the Backend Server:**
+    *   While in the `backend` directory:
+        ```bash
+        yarn start
+        ```
+    *   The backend server should now be running (e.g., on `http://localhost:3001`). **Keep this terminal window open.**
+
+6.  **(IMPORTANT) Create Sample Users:**
+    *   Since there is no registration screen, manually create users using an API client (like Postman) or `curl`.
+    *   Send **POST** requests to your running backend: `http://localhost:3001/api/users/` (use the port set in `backend/.env`).
+    *   Set `Content-Type` header to `application/json`.
+    *   Use the following JSON data in the request body for each user:
+
+        **User 1:**
+        ```json
+        {
+          "email": "user1@example.com",
+          "password": "password1",
+          "name": "John Doe",
+          "username": "johndoe",
+          "avatar": "https://mighty.tools/mockmind-api/content/human/112.jpg"
+        }
+        ```
+        **User 2:**
+         ```json
+        {
+          "email": "user2@example.com",
+          "password": "password2",
+          "name": "Jane Smith",
+          "username": "janesmith",
+          "avatar": "https://mighty.tools/mockmind-api/content/human/79.jpg"
+        }
+        ```
+        **User 3:**
+        ```json
+        {
+          "email": "user3@example.com",
+          "password": "password3",
+          "name": "Alice Johnson",
+          "username": "alicejohnson",
+          "avatar": "https://mighty.tools/mockmind-api/content/human/124.jpg"
+        }
+        ```
+        **User 4:**
+        ```json
+        {
+          "email": "user4@example.com",
+          "password": "password4",
+          "name": "Bob Brown",
+          "username": "bobbrown",
+          "avatar": "https://mighty.tools/mockmind-api/content/human/102.jpg"
+        }
+        ```
+        **User 5:**
+        ```json
+        {
+          "email": "user5@example.com",
+          "password": "password5",
+          "name": "Charlie Davis",
+          "username": "charliedavis",
+          "avatar": "https://mighty.tools/mockmind-api/content/human/5.jpg"
+        }
+        ```
+    *   Ensure you get a successful response (e.g., 201 Created) for each user.
+
+7.  **Configure Frontend API Connection (If Necessary):**
+    *   The frontend connects to the backend API at the address specified by the `REACT_APP_API_BASE_URL` environment variable, defaulting to `http://localhost:3001`.
+    *   **If you kept the backend `PORT` as `3001` in `backend/.env`, you don't need to do anything here.**
+    *   **If you changed the backend `PORT`** (e.g., to `5000`), you **must** tell the frontend the new address:
+        *   Create a file named `.env` in the **project root directory** (the main `GameHub` folder, where the top-level `package.json` is).
+        *   Add the following line to this **root** `.env` file, replacing `5000` with the actual port you set for the backend:
+            ```dotenv
+            # .env file in the project ROOT directory
+            REACT_APP_API_BASE_URL=http://localhost:5000
+            ```
+
+8.  **Run the Frontend Application:**
+    *   Open a **new terminal window** or tab.
+    *   Navigate to the **root** directory of the project (`cd ..` if you're in `backend`, otherwise navigate to `GameHub`).
+    *   Start the React development server **from the root directory**:
+        ```bash
+        yarn start
+        ```
+    *   **(If you created/modified a root `.env` file in the previous step, you might need to stop and restart this `yarn start` command for the changes to take effect).**
+    *   The application should open automatically in your browser, typically at `http://localhost:3000`.
+
+### Logging In
+
+Once the frontend application is running (and the backend server is also running with users created in your database via **Step 6**), you can log in using the credentials of the users you created:
+
+*   **Email:** `user1@example.com` / **Password:** `password1`
+*   **Email:** `user2@example.com` / **Password:** `password2`
+*   **Email:** `user3@example.com` / **Password:** `password3`
+*   **Email:** `user4@example.com` / **Password:** `password4`
+*   **Email:** `user5@example.com` / **Password:** `password5`
+
+*(Note: Ensure the backend server is running, accessible, and you have successfully created users via the API before attempting to log in.)*
+
+---
+
 <div align="center">
   <p>
     <a href="#">
