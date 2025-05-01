@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Gamepad, Star, Timer, ChevronLeft, ChevronRight, Construction, EmojiEvents } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { GAMES } from '../../../../utils/constants';
+import Header from '../../MainScreenBottomArea/Header';
 
 function ActiveGamesArea() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -41,12 +42,10 @@ function ActiveGamesArea() {
         height: "50vh",
         background: 'transparent',
         marginTop: "20px",
-        borderRadius: '25px',
         position: 'relative',
         overflow: 'hidden',
-        justifyContent: 'center',
-        alignItems: 'center',
         display: 'flex',
+        flexDirection: 'column',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -61,30 +60,19 @@ function ActiveGamesArea() {
         }
       }}
     >
-  <Box
-      sx={{
-        position: 'absolute',
-        top: 10,
-        left: 30,
-        zIndex: 3,
-        textAlign: 'left',
-      }}
-    >
-      <Typography variant="banner">
-        <Box component="span" sx={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
-          🎮
-        </Box>
-        Game Paradise Awaits!
-        <Box component="span">🚀</Box>
-      </Typography>
-    </Box>
-
+         {/* Use the reusable Header component */}
+         <Header
+        title="Game Paradise Awaits"
+        // Choose your icon:
+        icon={<Gamepad />} 
+        variant="default"
+        theme={theme}    
+      />
 
       <Box sx={{
         position: 'relative',
         height: '40vh',
-        mt: 10,
-        width: '90%',
+        width: '100%',
         zIndex: 2
       }}>
         {/* Navigation Arrows */}
@@ -122,7 +110,7 @@ function ActiveGamesArea() {
             bgcolor: theme.palette.background.dot,
             backdropFilter: 'blur(5px)',
             '&:hover': {
-              bgcolor: 'rgba(255, 255, 255, 0.7)',
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
               transform: 'translateY(-50%) scale(1.1)',
             },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -255,7 +243,6 @@ function ActiveGamesArea() {
                     color: '#fff',
                     mb: 1,
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
                     textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                   }}>
                     {game.title}

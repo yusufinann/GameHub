@@ -45,7 +45,7 @@ function MainScreenMiddleArea() {
           width: "100%",
         }}
       >
-        <Box sx={{ width: { xs: '100%', md: '50%' } }}>
+        <Box sx={{ width: { xs: '100%', md: '50%'} }}>
           <Suspense fallback={<LoadingSpinner />}>
             <PopularGamesArea />
           </Suspense>
@@ -56,7 +56,7 @@ function MainScreenMiddleArea() {
             display: "flex",
             flexDirection: "column",
             width: { xs: '100%', md: '60%' },
-            height: { xs: 'auto', md: '70vh' },
+            height: { xs: '100%', md: '70vh' },
           }}
         >
           <Suspense fallback={<LoadingSpinner />}>

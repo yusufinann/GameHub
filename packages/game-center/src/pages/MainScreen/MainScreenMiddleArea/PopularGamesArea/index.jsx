@@ -12,12 +12,13 @@ const PopularGamesArea = () => {
         xs: "column",
         md: "column",
       },
+      height: { xs: '100%', md: '70vh' },
     }}
   >
     <Box
       sx={{
         display: "flex",
-        height: { xs: '100%', md: '50vh' },
+        height: { xs: '100%', md: '40vh' },
         width: { xs: '100%', md: '40vw' }
       }}
     >
@@ -25,7 +26,8 @@ const PopularGamesArea = () => {
     </Box>
     <Box
       sx={{
-        height: "20vh",
+        height: "40vh",
+        mt:2,
         width: "40vw",
         display: "flex",
         alignItems: "center",

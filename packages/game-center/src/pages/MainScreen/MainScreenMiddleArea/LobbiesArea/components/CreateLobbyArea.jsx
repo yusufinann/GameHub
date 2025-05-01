@@ -34,7 +34,18 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
         <Typography 
           variant="h6" 
           fontWeight="bold" 
-          color={theme.palette.primary.text}       
+          color={theme.palette.primary.text}    
+          sx={{
+            borderRadius: 2,
+            py: 1,
+            px: 2,
+            fontWeight: 'bold',
+            boxShadow: 3,
+            background: (theme) =>
+              `linear-gradient(45deg, 
+                ${theme.palette.primary.main} 30%,  
+                ${theme.palette.primary.light} 90%)`,
+          }}   
         >
           Lobby Creator
         </Typography>

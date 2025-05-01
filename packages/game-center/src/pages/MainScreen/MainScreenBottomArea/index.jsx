@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Box, CircularProgress, useTheme } from "@mui/material";
 import Header from "./Header";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
+//import WhatshotIcon from "@mui/icons-material/Whatshot";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
@@ -28,14 +28,14 @@ function MainScreenBottomArea() {
   );
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%",mt:4 }}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <Suspense fallback={<LoadingSpinner />}>
-          <Header
+          {/* <Header
             title={"Highlights and Recommended"}
             theme={theme}
             icon={<WhatshotIcon />}
-          />
+          /> */}
           <HighlightsSection />
         </Suspense>
 

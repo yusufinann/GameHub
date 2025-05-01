@@ -96,7 +96,8 @@ const BrowseGames = () => {
         display: 'flex',
         height: 'calc(40vh - 100px)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        justifyContent: 'center', 
       }}>
         <IconButton
           sx={{

@@ -6,6 +6,7 @@ import { useAuthContext } from "../../../../../shared/context/AuthContext";
 
 export const LobbyList = ({ lobbies = [], activeTab }) => { 
   const { currentUser } = useAuthContext(); 
+  const theme = useTheme();
 
   const filteredLobbies = useMemo(() => {
     let filtered = [...lobbies];
@@ -47,75 +48,81 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
     });
   }, [filteredLobbies]);
 
-  const theme = useTheme();
-
   return (
     <Box
-          sx={{
-            [theme.breakpoints.up('md')]: {
-              width: '100%', },
-            [theme.breakpoints.down('md')]: { width: '100%' },
-            position: 'relative',
-            height: '65vh',
-            transition: 'width 0.3s ease',
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: theme.palette.background.stripeBg,
-          }}
-        >
-    <Card
       sx={{
-        background: theme.palette.background.stripe,
-        height: "100%",
-        overflow: "auto",
-        position: "relative",
-        boxShadow: theme.shadows[4],
-        transition: "transform 0.3s, box-shadow 0.3s",
-        "&:hover": {
-          boxShadow: theme.shadows[8], 
-
+        [theme.breakpoints.up('md')]: {
+          width: '100%', 
         },
-        p: 0,
+        [theme.breakpoints.down('md')]: { 
+          width: '100%' 
+        },
+        position: 'relative',
+        height: '65vh',
+        transition: 'width 0.3s ease',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: theme.palette.primary.main,
+        borderRadius: 2,
       }}
     >
-      {sortedLobbies.length > 0 ? (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'rgba(255,255,255,0.1)', 
-            height: '100%'
-          }}
-        >
-          {sortedLobbies.map((lobby, index) => (
-            <React.Fragment key={lobby.lobbyCode || index}>
-              <LobbyItem lobby={lobby} />
-              {index < sortedLobbies.length - 1 && (
-                <Divider
-                  sx={{
-                    backgroundColor: 'rgba(50,135,97,0.3)',                     
-                  }}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.2)' 
-          }}
-        >
-          <NoActiveLobbies />
-        </Box>
-      )}
-    </Card>
+      <Card
+        sx={{
+          background: theme.palette.background.stripeBg,
+          height: "100%",
+          overflow: "auto",
+          position: "relative",
+          boxShadow: theme.shadows[4],
+          transition: "all 0.3s ease",
+          "&:hover": {
+            boxShadow: theme.shadows[8],
+          },
+          p: 0,
+          borderRadius: 2,
+        }}
+      >
+        {sortedLobbies.length > 0 ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundColor: `${theme.palette.background.paper}20`,
+              height: '100%',
+            }}
+          >
+            {sortedLobbies.map((lobby, index) => (
+              <React.Fragment key={lobby.lobbyCode || index}>
+               
+                  <LobbyItem lobby={lobby} />
+         
+                {index < sortedLobbies.length - 1 && (
+                  <Divider
+                    sx={{
+                      backgroundColor: `${theme.palette.primary.darker}50`,
+                      mx: 2,                     
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: `${theme.palette.background.paper}40`,
+              padding: 3
+            }}
+          >
+            <NoActiveLobbies />
+          </Box>
+        )}
+      </Card>
     </Box>
   );
 };

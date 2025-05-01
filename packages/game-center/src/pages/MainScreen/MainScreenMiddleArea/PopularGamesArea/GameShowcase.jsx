@@ -7,7 +7,6 @@ import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import StarIcon from '@mui/icons-material/Star';
 
 const GameShowcase = () => {
-  // Oyun verileri ve görselleri
   const games = [
     { 
       id: 1, 
@@ -53,8 +52,8 @@ const GameShowcase = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const theme=useTheme();
-  // Otomatik slayt değişimi
+  const theme = useTheme();
+
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % games.length);
@@ -75,76 +74,77 @@ const GameShowcase = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
         width: '100%',
         backgroundColor: theme.palette.background.app, 
         borderRadius: 2,
         overflow: 'hidden',
         position: 'relative',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        
+        height: '40vh'
       }}
     >
-      {/* Üst Başlık */}
       <Box 
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: 0,
-          backgroundColor: 'rgba(255,255,255,0.7)', // Yarı şeffaf beyaz
+          py: 0.5, 
+          px: 1.5,
+          backgroundColor: 'rgba(255,255,255,0.7)',
           borderBottom: '1px solid rgba(0,0,0,0.05)'
         }}
       >
         <Typography 
-          variant="h5" 
+          variant="h2" 
           sx={{ 
             color: '#333333', 
             display: 'flex', 
             alignItems: 'center',
-            fontWeight: 600
+            fontWeight: 600,
+            fontSize: '1.3rem' 
           }}
         >
-          <GamesIcon sx={{ mr: 1, color: games[activeIndex].color }} /> Popular Games
+          <GamesIcon sx={{ mr: 1, fontSize: '1.4rem', color: games[activeIndex].color }} /> Popular Games
         </Typography>
         <Box>
           <IconButton 
             onClick={handlePrev}
-            sx={{ color: games[activeIndex].color }}
+            sx={{ color: games[activeIndex].color, p: 0.5 }}
+            size="small"
           >
-            <KeyboardArrowLeftIcon />
+            <KeyboardArrowLeftIcon fontSize="small" />
           </IconButton>
           <IconButton 
             onClick={handleNext}
-            sx={{ color: games[activeIndex].color }}
+            sx={{ color: games[activeIndex].color, p: 0.5 }}
+            size="small"
           >
-            <KeyboardArrowRightIcon />
+            <KeyboardArrowRightIcon fontSize="small" />
           </IconButton>
         </Box>
       </Box>
       
-      {/* Ana İçerik */}
       <Box 
         sx={{
           display: 'flex',
-          flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 2,
+          padding: 1.5,
           position: 'relative',
-          background: theme.palette.background.gradient
+          background: theme.palette.background.gradient,
+          height: '35vh'
         }}
       >
-        {/* Arka plan dekoratif elementleri */}
         <Box 
           sx={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            zIndex: 0
+            zIndex: 0,
           }}
         />
         
-        {/* Oyun kartları karuseli */}
         <Box 
           sx={{
             display: 'flex',
@@ -163,13 +163,13 @@ const GameShowcase = () => {
             return (
               <Paper
                 key={game.id}
-                elevation={isActive ? 10 : 3}
+                elevation={isActive ? 8 : 2}
                 onMouseEnter={() => setHoveredCard(game.id)}
                 onMouseLeave={() => setHoveredCard(null)}
                 sx={{
-                  width: isActive ? '260px' : '180px',
-                  height: isActive ? '220px' : '160px',
-                  margin: '0 10px',
+                  width: isActive ? '240px' : '170px',
+                  height: isActive ? '190px' : '150px', 
+                  margin: '0 8px',
                   display: isActive || isNext || isPrev ? 'flex' : 'none',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -182,12 +182,11 @@ const GameShowcase = () => {
                   overflow: 'hidden',
                   order: isActive ? 0 : (isNext ? 1 : -1),
                   zIndex: isActive ? 2 : 1,
-                  background: theme.palette.background.card, // Uygulamanın rengine uyumlu kart arka planı
+                  background: theme.palette.background.card,
                   borderRadius: 2,
-                  border: isActive ? `3px solid ${game.color}` : 'none',
+                  border: isActive ? `2px solid ${game.color}` : 'none', 
                 }}
               >
-                {/* Oyun görseli */}
                 <Box 
                   sx={{
                     position: 'absolute',
@@ -210,21 +209,30 @@ const GameShowcase = () => {
                   }}
                 />
                 
-                <Box sx={{ zIndex: 1, position: 'relative', p: 1.5 }}>
+                <Box sx={{ zIndex: 1, position: 'relative', p: 1 }}>
                   <Typography 
-                    variant="subtitle2" 
+                    variant="caption" 
                     sx={{ 
                       backgroundColor: theme.palette.background.offwhite,
                       color: game.color,
-                      padding: '2px 8px',
+                      padding: '1px 6px',
                       borderRadius: 4,
                       display: 'inline-block',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      fontSize: '0.75rem'
                     }}
                   >
                     {game.category}
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, textShadow: '1px 1px 3px rgba(0,0,0,0.5)' }}>
+                  <Typography 
+                    variant="subtitle1" 
+                    sx={{ 
+                      fontWeight: 'bold', 
+                      mb: 0.5, 
+                      textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+                      fontSize: '1rem'
+                    }}
+                  >
                     {game.title}
                   </Typography>
                 </Box>
@@ -235,7 +243,7 @@ const GameShowcase = () => {
                     justifyContent: 'space-between', 
                     alignItems: 'center',
                     zIndex: 1,
-                    p: 1.5,
+                    p: 1,
                     position: 'relative'
                   }}
                 >
@@ -243,24 +251,24 @@ const GameShowcase = () => {
                     display: 'flex', 
                     alignItems: 'center',
                     backgroundColor: theme.palette.background.offwhite,
-                    padding: '2px 8px',
+                    padding: '1px 6px',
                     borderRadius: 4,
                   }}>
-                    <StarIcon sx={{ fontSize: 18, color: '#ff9800' }} />
-                    <Typography variant="body2" sx={{ ml: 0.5, color: '#333' }}>
+                    <StarIcon sx={{ fontSize: 16, color: '#ff9800' }} />
+                    <Typography variant="caption" sx={{ ml: 0.3, color: '#333', fontSize: '0.8rem' }}>
                       {game.rating}
                     </Typography>
                   </Box>
                   <Box sx={{ 
-                    backgroundColor:theme.palette.background.offwhite,
-                    width: 28,
-                    height: 28,
+                    backgroundColor: theme.palette.background.offwhite,
+                    width: 26,
+                    height: 26,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '50%'
                   }}>
-                    <SportsEsportsIcon sx={{ fontSize: 18, color: game.color }} />
+                    <SportsEsportsIcon sx={{ fontSize: 16, color: game.color }} />
                   </Box>
                 </Box>
                 
@@ -272,7 +280,7 @@ const GameShowcase = () => {
                       left: 0,
                       width: '100%',
                       background: `linear-gradient(transparent, ${game.color})`,
-                      padding: 1,
+                      padding: 0.8,
                       transform: 'translateY(0)',
                       transition: 'transform 0.3s ease',
                       zIndex: 2
@@ -280,16 +288,17 @@ const GameShowcase = () => {
                   >
                     <Typography 
                       align="center" 
-                      variant="button" 
+                      variant="caption" 
                       sx={{ 
                         fontWeight: 'bold',
                         color: theme.palette.text.contrast,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        fontSize: '0.85rem'
                       }}
                     >
-                      <SportsEsportsIcon sx={{ mr: 1, fontSize: 16 }} />
+                      <SportsEsportsIcon sx={{ mr: 0.5, fontSize: 16 }} />
                       HEMEN OYNA
                     </Typography>
                   </Box>
@@ -299,14 +308,14 @@ const GameShowcase = () => {
           })}
         </Box>
       </Box>
-      
-      {/* Nokta navigasyonu */}
+
       <Box 
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          padding: 1,
-          backgroundColor: theme.palette.background.offwhite, // Yarı şeffaf beyaz
+          padding: 0.5,
+          backgroundColor: theme.palette.background.offwhite,
+         
         }}
       >
         {games.map((game, index) => (
@@ -317,7 +326,7 @@ const GameShowcase = () => {
               width: 8,
               height: 8,
               borderRadius: '50%',
-              margin: '0 4px',
+              margin: '0 3px',
               backgroundColor: index === activeIndex ? game.color : '#e0e0e0',
               cursor: 'pointer',
               transition: 'all 0.3s ease'

@@ -88,7 +88,9 @@ const theme=useTheme();
             alignItems: 'center',
             width: 400,
             borderRadius: 2,
-            boxShadow: 3,   bgcolor: theme.palette.background.stripeBg, 
+         //   background: `repeating-linear-gradient(45deg, ${theme.palette.primary.main}60, ${theme.palette.primary.main}60 10px, ${theme.palette.primary.light}30 10px, ${theme.palette.primary.light}30 20px)`,
+         background:theme.palette.background.gradientFadeBg,
+             
           }}
         >
           <IconButton sx={{ p: '10px', color: theme.palette.primary.light }}>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, IconButton} from "@mui/material";
+import { Box, Typography, Button, IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import gameOfThrones from "../../../../assets/headerGame3.png";
 import fortnite from "../../../../assets/fortnite-removebg.png";
 import oblivion from "../../../../assets/oblivion-removebg.png";
-const MainScreenContent = ({theme}) => {
+
+const MainScreenContent = ({ theme }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     {
@@ -57,9 +58,10 @@ const MainScreenContent = ({theme}) => {
             opacity: index === currentSlide ? 1 : 0,
             transition: "opacity 0.5s ease-in-out",
             display: "flex",
-            bgcolor: theme.palette.background.stripeBg,
+            bgcolor: theme.palette.primary.main,
             borderRadius: 2,
-            overflow: "hidden"
+            overflow: "hidden",
+            boxShadow: theme.shadows[8]
           }}
         >
           {/* Background pattern */}
@@ -70,12 +72,26 @@ const MainScreenContent = ({theme}) => {
               left: 0,
               width: "100%",
               height: "100%",
-              background: theme.palette.background.stripe
+              background: theme.palette.background.stripeBg,
+              opacity: 0.8
+            }}
+          />
+
+          {/* Decorative gradient overlay */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: theme.palette.background.gradientFadeBg,
+              zIndex: 1
             }}
           />
 
           {/* Character image and floating icons */}
-          <Box sx={{ position: "relative", width: "40%", display: { xs: "none", sm: "block" } }}>
+          <Box sx={{ position: "relative", width: "40%", display: { xs: "none", sm: "block" }, zIndex: 2 }}>
             <Box
               sx={{
                 position: "absolute",
@@ -85,7 +101,8 @@ const MainScreenContent = ({theme}) => {
                 width: "auto",
                 maxWidth: "80%",
                 display: "flex",
-                justifyContent: "center"
+                justifyContent: "center",
+                filter: "drop-shadow(0 0 20px rgba(0,0,0,0.3))"
               }}
             >
               <img
@@ -93,7 +110,6 @@ const MainScreenContent = ({theme}) => {
                 alt="Game character"
                 style={{ height: "100%", width: "auto", objectFit: "contain" }}
               />
-
             </Box>
           </Box>
 
@@ -111,15 +127,18 @@ const MainScreenContent = ({theme}) => {
             }}
           >
             <Typography
-              variant="h3"
+              variant="h4"
               component="h2"
               sx={{
-                color:theme.palette.text.contrast,
                 fontWeight: "bold",
                 fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.75rem" },
                 mb: 4,
                 textAlign: { xs: "center", sm: "left" },
-                textShadow: "0 0 10px rgba(0,0,0,0.3)"
+                textShadow: "2px 2px 8px rgba(0,0,0,0.5)",
+                background: theme.palette.text.contrast,
+                WebkitBackgroundClip: "text", 
+                WebkitTextFillColor: "transparent",
+                display: "inline-block"
               }}
             >
               {slide.title}
@@ -128,16 +147,20 @@ const MainScreenContent = ({theme}) => {
             <Button
               variant="contained"
               sx={{
-                bgcolor: theme.palette.secondary.gold,
-                color: theme.palette.text.secondary,
+                background: `linear-gradient(45deg, ${theme.palette.secondary.gold} 30%, ${theme.palette.secondary.gold}CC 90%)`,
+                color: theme.palette.text.primary,
                 fontWeight: "bold",
                 fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
                 py: 1.5,
                 px: 4,
                 borderRadius: 10,
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.1)",
                 "&:hover": {
-                  bgcolor: "#FFC000"
-                }
+                  background: `linear-gradient(45deg, ${theme.palette.secondary.gold}E0 30%, ${theme.palette.secondary.gold} 90%)`,
+                  boxShadow: "0 6px 12px rgba(0,0,0,0.3)"
+                },
+                transition: "all 0.3s ease"
               }}
             >
               {slide.buttonText}
@@ -163,12 +186,13 @@ const MainScreenContent = ({theme}) => {
             key={i}
             onClick={() => setCurrentSlide(i)}
             sx={{
-              width: 12,
-              height: 12,
+              width: i === currentSlide ? 16 : 12,
+              height: i === currentSlide ? 16 : 12,
               borderRadius: "50%",
-              bgcolor: i === currentSlide ? "white" : theme.palette.background.dot,
+              bgcolor: i === currentSlide ? theme.palette.secondary.gold : theme.palette.primary.light,
               cursor: "pointer",
-              transition: "all 0.3s ease"
+              transition: "all 0.3s ease",
+              boxShadow: i === currentSlide ? "0 0 8px rgba(255,209,102,0.7)" : "none"
             }}
           />
         ))}
@@ -182,12 +206,14 @@ const MainScreenContent = ({theme}) => {
           left: 16,
           top: "50%",
           transform: "translateY(-50%)",
-          color: "white",
-          bgcolor: "rgba(0,0,0,0.3)",
+          color: theme.palette.common.white,
+          bgcolor: theme.palette.primary.darker + "80",
           "&:hover": {
-            bgcolor: theme.palette.text.primary
+            bgcolor: theme.palette.primary.darker,
+            transform: "translateY(-50%) scale(1.1)"
           },
-          zIndex: 10
+          zIndex: 10,
+          transition: "all 0.2s ease"
         }}
       >
         <ArrowBackIos />
@@ -200,12 +226,14 @@ const MainScreenContent = ({theme}) => {
           right: 16,
           top: "50%",
           transform: "translateY(-50%)",
-          color: "white",
-          bgcolor: "rgba(0,0,0,0.3)",
+          color: theme.palette.common.white,
+          bgcolor: theme.palette.primary.darker + "80",
           "&:hover": {
-            bgcolor:theme.palette.text.primary
+            bgcolor: theme.palette.primary.darker,
+            transform: "translateY(-50%) scale(1.1)"
           },
-          zIndex: 10
+          zIndex: 10,
+          transition: "all 0.2s ease"
         }}
       >
         <ArrowForwardIos />
@@ -217,13 +245,15 @@ const MainScreenContent = ({theme}) => {
           position: "absolute",
           top: 16,
           right: 16,
-          bgcolor: "rgba(0,0,0,0.5)",
-          color: "white",
+          bgcolor: theme.palette.primary.darker + "CC",
+          color: theme.palette.common.white,
           px: 1.5,
           py: 0.5,
-          borderRadius: 2,
+          borderRadius: 8,
           fontSize: "0.875rem",
-          zIndex: 10
+          zIndex: 10,
+          backdropFilter: "blur(5px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
         }}
       >
         {currentSlide + 1} / {slides.length}

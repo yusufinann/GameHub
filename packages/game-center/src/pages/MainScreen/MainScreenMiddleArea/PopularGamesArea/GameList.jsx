@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { gameData } from '../../../../utils/constants';
-import GameCardImage from './GameCardImage'; // We'll create this component next
+import GameCardImage from './GameCardImage'; 
 
 function GameList() {
   return (
@@ -9,9 +9,9 @@ function GameList() {
       width: '100%',
       height: '100%',
       display: 'flex',
-      flexDirection: 'row',
+      flexDirection: {xs:'column', md:'row'},
       alignItems: 'center',
-      gap: 1,
+      gap: 3,
       overflowX: 'auto',
     }}>
       {gameData.map((game) => (

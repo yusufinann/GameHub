@@ -69,7 +69,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
       >
         <CelebrationIcon sx={{ color: "rgba(253,187,45,1)", fontSize: 40 }} />
         <Typography
-          variant="h4"
+          variant="h3"
           sx={{
             fontWeight: 700,
             background: "linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))",
