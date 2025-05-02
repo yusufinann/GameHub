@@ -131,7 +131,6 @@ function CustomAvatarGroup({ members, gradient, max = 7, getInitials }) {
           sx={{ 
             fontWeight: 'bold', 
             color: 'text.primary',
-            fontFamily: '"Fredoka One", cursive',
           }}
         >
           {members.length}
@@ -237,7 +236,6 @@ function CustomAvatarGroup({ members, gradient, max = 7, getInitials }) {
                   variant="subtitle1" 
                   sx={{ 
                     fontWeight: 'bold', 
-                    fontFamily: '"Fredoka One", cursive',
                   }}
                 >
                   More Players

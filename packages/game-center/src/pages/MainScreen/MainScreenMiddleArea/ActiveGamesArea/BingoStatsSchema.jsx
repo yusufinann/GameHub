@@ -382,7 +382,6 @@ const BingoStatsSchema = () => {
           <Typography
             variant="h2"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
               fontWeight: 800,
               background: palette.text.title,
               WebkitBackgroundClip: 'text',

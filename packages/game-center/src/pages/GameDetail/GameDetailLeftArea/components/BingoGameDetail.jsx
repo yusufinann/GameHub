@@ -138,7 +138,7 @@ const BingoGameDetails = () => {
           mb: 2,
           p: 2,
           borderRadius: 2,
-          background:theme.palette.secondary.main,
+          background:theme.palette.primary.main,
           color: "white",
         }}
       >

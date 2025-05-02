@@ -10,11 +10,10 @@ function GameInfo({game, filteredLobbies }) {
         borderRadius: 4,
         boxShadow: '0 10px 40px rgba(34,193,195,0.2)',
         overflow: 'hidden',
-        mb: 4,
       }}
     >
       <GameInfoHeader game={game} filteredLobbies={filteredLobbies}/>
-      <Box sx={{ px: 3 }}>
+      <Box sx={{ px: 2 }}>
         <GameInfoDetails
           game={game}
           filteredLobbies={filteredLobbies}

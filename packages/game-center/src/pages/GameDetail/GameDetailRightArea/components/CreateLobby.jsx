@@ -1,30 +1,41 @@
 import React, { useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import { SportsEsports } from "@mui/icons-material";
+import { Box, Button, useTheme } from "@mui/material";
+import { Add, ArrowForward } from "@mui/icons-material";
 import { useLocation, useParams } from "react-router-dom";
 import ErrorModal from "../../../../shared/components/ErrorModal";
 import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
+import FingerPushingButton from "./FingerPushingButton";
 
-function CreateLobby({existingLobby}) {
+function CreateLobby({ existingLobby }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+
   const location = useLocation();
   const { gameId } = useParams();
+  const theme = useTheme();
 
-  // game-detail rotasında mıyız?
   const isGameDetailRoute = location.pathname.includes("game-detail");
-  // Eğer game-detail rotasındaysak, mevcut lobinin bu oyuna ait olup olmadığını kontrol et
   const hasLobbyForCurrentGame =
     isGameDetailRoute && existingLobby?.game === parseInt(gameId, 10);
 
   const handleOpenModal = () => {
-    if (isGameDetailRoute && existingLobby && !hasLobbyForCurrentGame) {
-      // Farklı oyuna ait aktif lobby varsa hata modalını göster
+    if (
+      (!isGameDetailRoute && existingLobby) ||
+      (isGameDetailRoute && hasLobbyForCurrentGame)
+    ) {
+      setIsModalOpen(true);
+    } else if (isGameDetailRoute && existingLobby && !hasLobbyForCurrentGame) {
       setIsErrorModalOpen(true);
     } else {
       setIsModalOpen(true);
     }
+
+    // Animation for button press
+    setIsPressed(true);
+    setTimeout(() => setIsPressed(false), 200);
   };
 
   const handleCloseModal = () => {
@@ -35,12 +46,11 @@ function CreateLobby({existingLobby}) {
     setIsErrorModalOpen(false);
   };
 
-  const getButtonText = () => {
-    if ((!isGameDetailRoute && existingLobby) || (isGameDetailRoute && hasLobbyForCurrentGame)) {
-      return "Go to Your Lobby";
-    }
-    return "Create A Lobby";
-  };
+  const isGoToLobbyAction =
+    (!isGameDetailRoute && existingLobby) ||
+    (isGameDetailRoute && hasLobbyForCurrentGame);
+  const buttonText = isGoToLobbyAction ? "Go to Your Lobby" : "Create A Lobby";
+  const ButtonIcon = isGoToLobbyAction ? ArrowForward : Add;
 
   return (
     <>
@@ -49,39 +59,41 @@ function CreateLobby({existingLobby}) {
           position: "relative",
           borderRadius: "20px",
           overflow: "hidden",
-          background: "linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(45,253,163,1) 100%)",
+          background:
+            theme.palette.mode === "light"
+              ? `linear-gradient(135deg, #d5f2e3 0%, ${theme.palette.primary.light} 100%)`
+              : `linear-gradient(135deg, #1a202c 0%, ${theme.palette.primary.dark} 100%)`,
           p: 4,
-          boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
+          boxShadow: `0px 10px 30px ${
+            theme.palette.mode === "light"
+              ? "rgba(43, 138, 106, 0.08)"
+              : "rgba(0, 0, 0, 0.3)"
+          }`,
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
           "&:hover": {
-            transform: "scale(1.02)",
-            boxShadow: "0px 15px 35px rgba(0, 0, 0, 0.3)",
+            boxShadow: `0px 15px 35px ${
+              theme.palette.mode === "light"
+                ? "rgba(43, 138, 106, 0.15)"
+                : "rgba(0, 0, 0, 0.4)"
+            }`,
           },
         }}
       >
-        {/* DummyImage in the upper left corner */}
         <Box
+          component="img"
+          src={DummyImage}
+          alt="Game Background Art"
           sx={{
             position: "absolute",
             top: 0,
-            left:0,
+            left: 0,
             zIndex: 0,
             width: "180px",
             height: "180px",
+            objectFit: "contain",
           }}
-        >
-          <img 
-            src={DummyImage} 
-            alt="Game" 
-            style={{ 
-              width: "100%", 
-              height: "100%", 
-              objectFit: "contain" 
-            }} 
-          />
-        </Box>
+        />
 
-        {/* Arka planda yaratıcı efekt için bulanık daire */}
         <Box
           sx={{
             position: "absolute",
@@ -89,13 +101,16 @@ function CreateLobby({existingLobby}) {
             right: "-40px",
             width: "120px",
             height: "120px",
-            background: "rgba(255, 255, 255, 0.1)",
+            background:
+              theme.palette.mode === "light"
+                ? "rgba(43, 138, 106, 0.15)"
+                : "rgba(255, 255, 255, 0.08)",
             borderRadius: "50%",
-            filter: "blur(50px)",
+            filter: "blur(60px)",
           }}
         />
 
-        {/* İçerik alanı */}
+        {/* Main Content Area */}
         <Box
           sx={{
             position: "relative",
@@ -105,42 +120,65 @@ function CreateLobby({existingLobby}) {
             alignItems: "center",
           }}
         >
-          <SportsEsports sx={{ fontSize: 50, color: "white", mb: 2 }} />
-          <Typography
-            variant="h4"
-            sx={{
-              color: "white",
-              fontWeight: "bold",
-              textAlign: "center",
-              mb: 3,
-              textShadow: "0px 2px 5px rgba(0,0,0,0.3)",
-            }}
-          >
-            {getButtonText()}
-          </Typography>
+          {/* Interactive Finger Animation */}
+          <FingerPushingButton
+            isHovering={isHovering || isPressed}
+            onClick={handleOpenModal}
+          />
+
+          {/* Action Button */}
           <Button
             onClick={handleOpenModal}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            variant="contained"
+            startIcon={<ButtonIcon sx={{ fontSize: "24px !important" }} />}
             sx={{
-              background: "linear-gradient(45deg, #ff6b6b, #ff9a9e)",
-              color: "white",
+              background:
+                theme.palette.mode === "light"
+                  ? `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`
+                  : `linear-gradient(45deg, ${theme.palette.secondary.main}, ${theme.palette.info.light})`,
+              color: theme.palette.common.white,
               fontWeight: "bold",
               textTransform: "uppercase",
+              fontSize: "0.9rem",
               px: 4,
               py: 1.5,
               borderRadius: "30px",
-              transition: "background 0.3s ease, transform 0.3s ease",
+              transition: "all 0.3s ease",
+              boxShadow:
+                theme.palette.mode === "light"
+                  ? "0px 4px 15px rgba(43, 138, 106, 0.3)"
+                  : "0px 4px 15px rgba(0, 0, 0, 0.4)",
               "&:hover": {
-                background: "linear-gradient(45deg, #ff9a9e, #ff6b6b)",
-                transform: "scale(1.05)",
+                background:
+                  theme.palette.mode === "light"
+                    ? `linear-gradient(45deg, ${theme.palette.primary.light}, ${theme.palette.primary.main})`
+                    : `linear-gradient(45deg, ${theme.palette.info.light}, ${theme.palette.secondary.main})`,
+                boxShadow:
+                  theme.palette.mode === "light"
+                    ? "0px 6px 20px rgba(43, 138, 106, 0.5)"
+                    : "0px 6px 20px rgba(80, 120, 230, 0.5)",
+              },
+              "&:active": {
+                transform: "translateY(0px) scale(1)",
+                boxShadow:
+                  theme.palette.mode === "light"
+                    ? "0px 2px 8px rgba(43, 138, 106, 0.4)"
+                    : "0px 2px 8px rgba(0, 0, 0, 0.5)",
+              },
+              transform: isPressed ? "scale(0.95)" : "scale(1)",
+              ".MuiButton-startIcon": {
+                marginRight: "10px",
               },
             }}
           >
-            {getButtonText()}
+            {buttonText}
           </Button>
         </Box>
       </Box>
 
-      {/* Modal bileşenleri */}
+      {/* Modals */}
       <CreateLobbyModal open={isModalOpen} onClose={handleCloseModal} />
       <ErrorModal
         open={isErrorModalOpen}

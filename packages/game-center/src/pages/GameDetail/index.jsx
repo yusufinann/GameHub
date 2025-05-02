@@ -1,10 +1,10 @@
-import { useParams } from "react-router-dom";
-import { Box, Typography, keyframes } from "@mui/material";
-import GameDetailLeftArea from "./GameDetailLeftArea";
-import GameDetailRightArea from "./GameDetailRightArea";
-import { GAMES } from "../../utils/constants";
-import { useEffect, useState } from "react";
-import { useLobbyContext } from "../../shared/context/LobbyContext/context";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, Typography, keyframes } from '@mui/material';
+import GameDetailLeftArea from './GameDetailLeftArea';
+import GameDetailRightArea from './GameDetailRightArea';
+import { GAMES } from '../../utils/constants';
+import { useLobbyContext } from '../../shared/context/LobbyContext/context';
 
 const GameDetail = () => {
   const { gameId } = useParams();
@@ -12,15 +12,15 @@ const GameDetail = () => {
   const [filteredLobbies, setFilteredLobbies] = useState([]);
 
   const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  `;
 
   useEffect(() => {
     if (lobbies) {
@@ -30,14 +30,6 @@ const GameDetail = () => {
   }, [lobbies, gameId]);
 
   const game = GAMES.find((g) => g.id.toString() === gameId);
-  
-  // const colorScheme = {
-  //   gradientBg: "linear-gradient(135deg, rgba(34,193,195,1) 0%, rgba(45,253,163,1) 100%)",
-  //   cardBg: "rgba(255, 255, 255, 0.8)",
-  //   accentGradient: "linear-gradient(135deg, #2dcbb0 0%, #2dccb0 100%)",
-  //   buttonGradient: "linear-gradient(135deg, #22c1c3 0%, #2dccb0 100%)",
-  //   hoverGradient: "linear-gradient(135deg, #20b1b3 0%, #25b69c 100%)",
-  // };
 
   if (!game) {
     return (
@@ -50,28 +42,26 @@ const GameDetail = () => {
   return (
     <Box
       sx={{
-        background: "transparent",
-        minHeight: "100vh",
-        display: "flex",
+        background: 'transparent',
+        minHeight: '100vh',
+        width: '100%',
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
         gap: 2,
-        flexWrap: "wrap",
+        flexWrap: 'wrap',
         animation: `${fadeIn} 0.6s ease-out 0.2s both`,
-        opacity: 0, 
-        animationFillMode: "forwards",
+        opacity: 0,
+        animationFillMode: 'forwards',
       }}
     >
       <GameDetailLeftArea
         game={game}
         filteredLobbies={filteredLobbies}
-        lobbies={lobbies}
-        existingLobby={existingLobby}
       />
       <GameDetailRightArea
-        game={game}
         lobbies={lobbies}
         existingLobby={existingLobby}
         filteredLobbies={filteredLobbies}
-        setFilteredLobbies={setFilteredLobbies}
       />
     </Box>
   );

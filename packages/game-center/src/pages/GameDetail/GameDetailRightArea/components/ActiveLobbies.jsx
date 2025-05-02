@@ -18,7 +18,6 @@ function ActiveLobbies({filteredLobbies}) {
         position: 'relative',
         transition: 'transform 0.3s, box-shadow 0.3s',
         '&:hover': {
-          transform: 'scale(1.02)',
           boxShadow: theme.shadows[12],
         },
       }}

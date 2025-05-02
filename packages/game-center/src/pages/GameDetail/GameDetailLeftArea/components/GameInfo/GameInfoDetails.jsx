@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -10,19 +10,216 @@ import {
   ListItem,
   ListItemText,
   useTheme,
+  Avatar,
+  AvatarGroup,
+  Paper,
+  Button,
+  Tooltip,
+  Fade,
+  Zoom
 } from '@mui/material';
 import {
   ExpandMore,
   SportsEsports,
   Help,
-  Star,
   EmojiEvents,
+  People,
+  Info,
+  AccessTime,
+  Favorite
 } from '@mui/icons-material';
-import CustomAvatarGroup from './CustomAvatarGroup';
 
-function GameInfoDetails({game, filteredLobbies }) {
+// Custom Avatar Group component that uses theme colors
+function CustomAvatarGroup({ members, max, getInitials }) {
   const theme = useTheme();
+  
+  return (
+    <AvatarGroup max={max} sx={{
+      '& .MuiAvatar-root': {
+        width: 38,
+        height: 38,
+        fontSize: '0.9rem',
+        border: `2px solid ${theme.palette.background.paper}`,
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.secondary.contrastText,
+        fontWeight: 'bold',
+        transition: 'transform 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.15)',
+          zIndex: 10,
+          boxShadow: `0 0 0 2px ${theme.palette.primary.light}`,
+        }
+      }
+    }}>
+      {members.map((member, index) => (
+        <Tooltip 
+          key={index} 
+          title={member.name} 
+          arrow 
+          placement="top"
+          TransitionComponent={Zoom}
+          TransitionProps={{ timeout: 600 }}
+        >
+          <Avatar 
+            alt={member.name} 
+            src={member.avatar}
+            sx={{
+              background: !member.avatar ? `${theme.palette.secondary.main}` : undefined,
+            }}
+          >
+            {!member.avatar && getInitials(member.name)}
+          </Avatar>
+        </Tooltip>
+      ))}
+    </AvatarGroup>
+  );
+}
 
+// Custom InfoChip component for better reusability
+function InfoChip({ icon, label, theme }) {
+  return (
+    <Tooltip title={label} arrow placement="top">
+      <Chip
+        icon={icon}
+        label={label}
+        sx={{
+          background: theme.palette.background.gradientFadeBg,
+          color: theme.palette.secondary.contrastText,
+          fontWeight: 'bold',
+          boxShadow: `0 2px 10px ${theme.palette.background.elevation[1]}`,
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          padding: '0 10px',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-3px)',
+            boxShadow: `0 4px 12px ${theme.palette.background.elevation[2]}`,
+          }
+        }}
+      />
+    </Tooltip>
+  );
+}
+
+// Game Mode Card component for reusability
+function GameModeCard({ mode, theme, isCompetition = false }) {
+  return (
+    <Paper elevation={3} sx={{
+      background: isCompetition 
+        ? theme.palette.background.gradient 
+        : theme.palette.background.gradientB,
+      borderRadius: '16px',
+      p: 2,
+      border: `2px solid ${theme.palette.background.offwhite}`,
+      transform: 'translateY(0)',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      position: 'relative',
+      overflow: 'hidden',
+      '&:hover': {
+        transform: 'translateY(-5px)',
+        boxShadow: `0 12px 20px ${theme.palette.background.elevation[2]}`,
+        '& .mode-highlight': {
+          width: '100%',
+          opacity: 1
+        }
+      },
+      '&:before': isCompetition ? {
+        content: '""',
+        position: 'absolute',
+        top: '-50%',
+        right: '-50%',
+        width: '100%',
+        height: '100%',
+        background: `linear-gradient(45deg, transparent, ${theme.palette.background.offwhite})`,
+        transform: 'rotate(30deg)',
+        opacity: 0.4
+      } : {}
+    }}>
+      <Box sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        height: '4px',
+        width: '30%',
+        background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+        transition: 'all 0.5s ease',
+        opacity: 0.7,
+        className: 'mode-highlight'
+      }} />
+      
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        mb: 1
+      }}>
+        <Typography variant="h5" sx={{
+          fontSize: '2rem',
+          filter: 'drop-shadow(2px 2px 1px rgba(0,0,0,0.3))'
+        }}>
+          {mode.icon}
+        </Typography>
+        <Typography variant="h6" sx={{
+          color: theme.palette.text.primary,
+          fontWeight: 'bold',
+          textShadow: `1px 1px 1px ${theme.palette.background.elevation[1]}`
+        }}>
+          {mode.title}
+        </Typography>
+      </Box>
+      
+      {mode.speed && (
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          mb: 1
+        }}>
+          <AccessTime sx={{ 
+            color: theme.palette.secondary.main,
+            fontSize: '1rem'
+          }} />
+          <Typography variant="body2" sx={{
+            color: theme.palette.text.secondary,
+            fontWeight: 600
+          }}>
+            {mode.speed}
+          </Typography>
+        </Box>
+      )}
+      
+      <Box component="ul" sx={{
+        pl: 2,
+        '& li': {
+          color: theme.palette.text.primary,
+          fontSize: '0.9rem',
+          mb: 0.5,
+          position: 'relative',
+          paddingLeft: isCompetition ? '15px' : '0',
+          '&:before': {
+            content: isCompetition ? '"▹"' : '"•"',
+            color: theme.palette.secondary.main,
+            marginRight: '8px',
+            fontSize: isCompetition ? '1rem' : '1.2rem',
+            position: isCompetition ? 'absolute' : 'static',
+            left: isCompetition ? 0 : 'auto'
+          }
+        }
+      }}>
+        {mode.features.map((feature, idx) => (
+          <li key={idx}>{feature}</li>
+        ))}
+      </Box>
+    </Paper>
+  );
+}
+
+function GameInfoDetails({ game, filteredLobbies }) {
+  const theme = useTheme();
+  const [activeTab, setActiveTab] = useState('bingo'); // State for active game mode tab
+  const [expanded1, setExpanded1] = useState(true); // State for first accordion
+  const [expanded2, setExpanded2] = useState(true); // State for second accordion
+  
   const allMemberAvatars = filteredLobbies
     .flatMap(lobby => lobby.members)
     .filter((member, index, self) =>
@@ -36,7 +233,7 @@ function GameInfoDetails({game, filteredLobbies }) {
       .join('')
       .toUpperCase();
 
-  // Oyun modları verisi
+  // Game modes data
   const gameModes = {
     bingo: [
       {
@@ -44,24 +241,21 @@ function GameInfoDetails({game, filteredLobbies }) {
         title: "Classic Bingo",
         icon: "🔹",
         speed: "5s/number",
-        features: ["Standard rules", "Live marking only", "No history"],
-        color: "#4A90E2"
+        features: ["Standard rules", "Live marking only", "No history"]
       },
       {
         mode: "extended",
         title: "Extended Time",
         icon: "🕒",
-        speed: "5s/number",
-        features: ["10s visibility", "2 numbers visible", "Mark history"],
-        color: "#50E3C2"
+        speed: "10s/number",
+        features: ["10s visibility", "2 numbers visible", "Mark history"]
       },
       {
         mode: "superfast",
         title: "Super Fast",
         icon: "⚡",
         speed: "3s/number",
-        features: ["Quick decisions", "3s visibility", "Penalty system"],
-        color: "#FF6B6B"
+        features: ["Quick decisions", "3s visibility", "Penalty system"]
       }
     ],
     competition: [
@@ -69,388 +263,503 @@ function GameInfoDetails({game, filteredLobbies }) {
         mode: "competitive",
         title: "Competitive Mode",
         icon: "🏆",
-        features: ["Ranked play", "Full game duration", "Score tracking"],
-        color: "#FFD700"
+        features: ["Ranked play", "Full game duration", "Score tracking"]
       },
       {
         mode: "non-competitive",
         title: "Casual Mode",
         icon: "🎉",
-        features: ["First win ends game", "Friendly play", "Quick matches"],
-        color: "#7ED321"
+        features: ["First win ends game", "Friendly play", "Quick matches"]
       }
     ]
   };
 
+  // Render section title with custom styling
+  const renderSectionTitle = (icon, text) => (
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 2,
+      position: 'relative',
+      zIndex: 1
+    }}>
+      {icon}
+      <Typography variant="subtitle1" sx={{
+        fontWeight: 'bold',
+        fontSize: '1.4rem',
+        color: theme.palette.secondary.contrastText
+      }}>
+        {text}
+      </Typography>
+    </Box>
+  );
+
+  // Handle game mode tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  // Handle accordion change
+  const handleAccordion1Change = () => {
+    setExpanded1(!expanded1);
+  };
+
+  const handleAccordion2Change = () => {
+    setExpanded2(!expanded2);
+  };
+
   return (
-    <Box sx={{ pt: 3 }}>
-      {/* Aktif Oyuncular ve Bilgiler */}
+    <Box sx={{ 
+      pt: 3,
+      position: 'relative',
+    }}>
+      {/* Active Players and Info */}
       <Box sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between',
         gap: 2,
-        mb: 2,
+        mb: 3,
+        p: 2,
+        borderRadius: '16px',
+        background: theme.palette.background.gradientB,
+        boxShadow: `0 4px 12px ${theme.palette.background.elevation[1]}`,
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: 2,
+          flex: 1
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            pb: 1,
+            borderBottom: `1px solid ${theme.palette.background.offwhite}`,
+          }}>
+            <People sx={{ 
+              color: theme.palette.secondary.gold,
+              fontSize: '28px'
+            }} />
+            <Typography variant="h6" sx={{
+              fontWeight: 'bold',
+              color: theme.palette.text.primary,
+              letterSpacing: '1.5px'
+            }}>
+              Active Players
+            </Typography>
+          </Box>
+
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            flexWrap: 'wrap'
+          }}>
+            <CustomAvatarGroup
+              members={allMemberAvatars}
+              max={7}
+              getInitials={getInitials}
+            />
+            <Typography variant="body2" sx={{
+              color: theme.palette.text.secondary,
+              fontStyle: 'italic',
+              borderLeft: `2px solid ${theme.palette.background.offwhite}`,
+              pl: 1,
+              display: { xs: 'none', sm: 'block' }
+            }}>
+              {allMemberAvatars.length} players active
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Game Info Chips */}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          flex: 1,
+          alignItems: { xs: 'flex-start', sm: 'flex-end' }
+        }}>
           <Typography variant="h6" sx={{
             fontWeight: 'bold',
             color: theme.palette.text.primary,
-            fontFamily: '"Bangers", cursive',
-            letterSpacing: '1.5px'
+            letterSpacing: '1.5px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            pb: 1,
+            borderBottom: `1px solid ${theme.palette.background.offwhite}`,
+            width: '100%'
           }}>
-            Active Players
+            <Info sx={{ 
+              color: theme.palette.secondary.gold,
+              fontSize: '24px'
+            }} />
+            Game Info
           </Typography>
-          <CustomAvatarGroup
-            members={allMemberAvatars}
-            max={7}
-            getInitials={getInitials}
-          />
-        </Box>
-
-        {/* Oyun Bilgi Chipleri */}
-        <Box sx={{
-          display: 'flex',
-          gap: 1,
-          flexWrap: 'wrap',
-          '& .MuiChip-root': {
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            padding: '0 10px'
-          }
-        }}>
-          <Chip
-            icon={<SportsEsports sx={{ color: 'white !important' }} />}
-            label={`Type: ${game.genre}`}
-            sx={{
-              background: theme.palette.secondary.main,
-              color: 'white',
-              fontWeight: 'bold',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-            }}
-          />
-          <Chip
-            icon={<Star sx={{ color: 'white !important' }} />}
-            label={`${game.rating}/5`}
-            sx={{
-              background: theme.palette.secondary.main,
-              color: 'white',
-              fontWeight: 'bold',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-            }}
-          />
-          <Chip
-            icon={<EmojiEvents sx={{ color: 'white !important' }} />}
-            label="Competitive"
-            sx={{
-              background: theme.palette.secondary.main,
-              color: 'white',
-              fontWeight: 'bold',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-            }}
-          />
+          
+          <Box sx={{
+            display: 'flex',
+            gap: 1,
+            flexWrap: 'wrap',
+            justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+            width: '100%'
+          }}>
+            <InfoChip 
+              icon={<SportsEsports sx={{ color: theme.palette.secondary.contrastText }} />} 
+              label={`Type: ${game.genre}`} 
+              theme={theme} 
+            />
+            <InfoChip 
+              icon={<EmojiEvents sx={{ color: theme.palette.secondary.contrastText }} />} 
+              label="Competitive" 
+              theme={theme} 
+            />
+            <InfoChip 
+              icon={<Favorite sx={{ color: theme.palette.secondary.contrastText }} />} 
+              label={`${filteredLobbies.length} Lobbies`} 
+              theme={theme} 
+            />
+          </Box>
         </Box>
       </Box>
 
-      {/* Oyun Açıklaması */}
-      <Typography
-        variant="body1"
-        paragraph
-        sx={{
-          color: theme.palette.text.primary,
-          lineHeight: 1.6,
-          fontFamily: '"Nunito", sans-serif',
-          backgroundColor: 'rgba(0,0,0,0.05)',
-          padding: 3,
-          borderRadius: '16px',
-          borderLeft: `4px solid ${theme.palette.secondary.main}`
-        }}
-      >
-        {game.description}
-      </Typography>
+      {/* Game Description */}
+      <Paper elevation={3} sx={{
+        backgroundColor: theme.palette.background.paper,
+        padding: { xs: 2, sm: 3 },
+        borderRadius: '16px',
+        borderLeft: `4px solid ${theme.palette.primary.main}`,
+        mb: 3,
+        position: 'relative',
+        overflow: 'hidden',
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '100px',
+          height: '100px',
+          background: `radial-gradient(circle, ${theme.palette.background.offwhite} 0%, transparent 70%)`,
+          opacity: 0.4,
+          zIndex: 0
+        }
+      }}>
+        <Typography
+          variant="body1"
+          paragraph
+          sx={{
+            color: theme.palette.text.primary,
+            lineHeight: 1.6,
+            margin: 0,
+            position: 'relative',
+            zIndex: 1
+          }}
+        >
+          {game.description}
+        </Typography>
+      </Paper>
 
-      {/* Oyun Modları Bölümü */}
+      {/* Game Modes Section - UPDATED ACCORDION */}
       <Accordion
-        defaultExpanded // Accordion initially expanded
+        expanded={expanded1}
+        onChange={handleAccordion1Change}
         sx={{
           mt: 3,
           background: 'transparent',
           '&:before': { display: 'none' },
+          boxShadow: 'none',
+          borderRadius: '12px',
+          overflow: 'hidden'
         }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMore sx={{ color: 'white' }} />}
           sx={{
-            background: theme.palette.secondary.main,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.medium || theme.palette.primary.main} 100%)`,
             borderRadius: '12px',
-            color: 'white',
-            px: 2,
-            py: 1,
+            color: theme.palette.secondary.contrastText,
+            minHeight: '64px !important',
+            height: '64px',
+            '&:hover': {
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+            }
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <EmojiEvents sx={{ fontSize: '28px' }} />
-            <Typography variant="subtitle1" sx={{
-              fontWeight: 'bold',
-              fontFamily: '"Bubblegum Sans", cursive',
-              fontSize: '1.4rem'
-            }}>
-              Game Modes & Rules
-            </Typography>
-          </Box>
+          {renderSectionTitle(
+            <EmojiEvents sx={{ fontSize: '28px' }} />,
+            "Game Modes & Rules"
+          )}
+          <ExpandMore 
+            sx={{ 
+              color: theme.palette.secondary.contrastText,
+              transition: 'transform 0.3s ease',
+              transform: expanded1 ? 'rotate(180deg)' : 'rotate(0deg)',
+              position: 'absolute',
+              right: '16px'
+            }} 
+          />
         </AccordionSummary>
         <AccordionDetails sx={{
-          background: theme.palette.secondary.paper,
+          background: theme.palette.background.paper,
           borderRadius: '16px',
           mt: 1,
-          padding: 3
+          padding: { xs: 2, sm: 3 },
+          boxShadow: `0 4px 20px ${theme.palette.background.elevation[2]}`
         }}>
-          {/* Bingo Modları */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h5" sx={{
-              color: '#FFE14C',
-              fontFamily: '"Bangers", cursive',
-              fontSize: '1.8rem',
-              letterSpacing: '1px',
-              mb: 3,
-              textShadow: '2px 2px 0 #000',
-              position: 'relative',
-              '&:after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-8px',
-                left: 0,
-                width: '60px',
-                height: '4px',
-                borderRadius: '2px'
-              }
-            }}>
+          {/* Game Mode Tab Navigation */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            mb: 3,
+            borderBottom: `1px solid ${theme.palette.background.offwhite}`,
+            pb: 1
+          }}>
+            <Button 
+              variant={activeTab === 'bingo' ? 'contained' : 'outlined'}
+              onClick={() => handleTabChange('bingo')}
+              sx={{
+                borderRadius: '20px',
+                textTransform: 'none',
+                px: 3,
+                py: 0.5,
+                fontWeight: 'bold',
+                backgroundColor: activeTab === 'bingo' ? theme.palette.primary.main : 'transparent',
+                borderColor: theme.palette.primary.main,
+                color: activeTab === 'bingo' ? theme.palette.primary.contrastText : theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: activeTab === 'bingo' ? theme.palette.primary.medium || theme.palette.primary.main : theme.palette.background.offwhite,
+                  transform: 'translateY(-2px)',
+                  boxShadow: activeTab === 'bingo' ? `0 4px 8px ${theme.palette.background.elevation[1]}` : 'none'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
               Bingo Modes
-            </Typography>
-
-            <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
-              gap: 3,
-            }}>
-              {gameModes.bingo.map((mode) => (
-                <Box key={mode.mode} sx={{
-                  background: `linear-gradient(145deg, ${mode.color})`,
-                  borderRadius: '16px',
-                  p: 2,
-                  boxShadow: 3,
-                  border: '2px solid rgba(255,255,255,0.2)',
-                  transform: 'translateY(0)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: 6
-                  }
-                }}>
-                  <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 1
-                  }}>
-                    <Typography variant="h5" sx={{
-                      fontSize: '2rem',
-                      filter: 'drop-shadow(2px 2px 1px rgba(0,0,0,0.3))'
-                    }}>
-                      {mode.icon}
-                    </Typography>
-                    <Typography variant="h6" sx={{
-                      color: 'white',
-                      fontFamily: '"Bubblegum Sans", cursive',
-                      fontWeight: 'bold',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                    }}>
-                      {mode.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    fontFamily: '"Nunito", sans-serif',
-                    mb: 1,
-                    fontWeight: 600
-                  }}>
-                    ⏱️ {mode.speed}
-                  </Typography>
-                  <Box component="ul" sx={{
-                    pl: 2,
-                    '& li': {
-                      color: 'rgba(255,255,255,0.9)',
-                      fontFamily: '"Nunito", sans-serif',
-                      fontSize: '0.9rem',
-                      mb: 0.5,
-                      position: 'relative',
-                      '&:before': {
-                        content: '"•"',
-                        color: mode.color,
-                        marginRight: '8px',
-                        fontSize: '1.2rem'
-                      }
-                    }
-                  }}>
-                    {mode.features.map((feature, idx) => (
-                      <li key={idx}>{feature}</li>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-
-          {/* Rekabet Modları */}
-          <Box>
-            <Typography variant="h5" sx={{
-              color: '#FFE14C',
-              fontFamily: '"Bangers", cursive',
-              fontSize: '1.8rem',
-              letterSpacing: '1px',
-              mb: 3,
-              textShadow: '2px 2px 0 #000',
-              position: 'relative',
-              '&:after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-8px',
-                left: 0,
-                width: '60px',
-                height: '4px',
-                borderRadius: '2px'
-              }
-            }}>
+            </Button>
+            <Button 
+              variant={activeTab === 'competition' ? 'contained' : 'outlined'}
+              onClick={() => handleTabChange('competition')}
+              sx={{
+                borderRadius: '20px',
+                textTransform: 'none',
+                px: 3,
+                py: 0.5,
+                fontWeight: 'bold',
+                backgroundColor: activeTab === 'competition' ? theme.palette.primary.main : 'transparent',
+                borderColor: theme.palette.primary.main,
+                color: activeTab === 'competition' ? theme.palette.primary.contrastText : theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: activeTab === 'competition' ? theme.palette.primary.medium || theme.palette.primary.main : theme.palette.background.offwhite,
+                  transform: 'translateY(-2px)',
+                  boxShadow: activeTab === 'competition' ? `0 4px 8px ${theme.palette.background.elevation[1]}` : 'none'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
               Competition Styles
-            </Typography>
-
-            <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-              gap: 3,
-            }}>
-              {gameModes.competition.map((mode) => (
-                <Box key={mode.mode} sx={{
-                  background: `linear-gradient(145deg, ${mode.color} 30%, ${theme.palette.background.paper} 100%)`,
-                  borderRadius: '16px',
-                  p: 2,
-                  boxShadow: 3,
-                  border: '2px solid rgba(255,255,255,0.2)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&:before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: '-50%',
-                    right: '-50%',
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.1))',
-                    transform: 'rotate(30deg)'
-                  }
-                }}>
-                  <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                  }}>
-                    <Typography variant="h5" sx={{
-                      fontSize: '2rem',
-                      filter: 'drop-shadow(2px 2px 1px rgba(0,0,0,0.3))'
-                    }}>
-                      {mode.icon}
-                    </Typography>
-                    <Typography variant="h6" sx={{
-                      color: 'white',
-                      fontFamily: '"Bubblegum Sans", cursive',
-                      fontWeight: 'bold',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                    }}>
-                      {mode.title}
-                    </Typography>
-                  </Box>
-                  <Box component="ul" sx={{
-                    pl: 2,
-                    mt: 1,
-                    '& li': {
-                      color: 'rgba(255,255,255,0.9)',
-                      fontFamily: '"Nunito", sans-serif',
-                      fontSize: '0.9rem',
-                      position: 'relative',
-                      '&:before': {
-                        content: '"▹"',
-                        color: mode.color,
-                        marginRight: '8px',
-                        position: 'absolute',
-                        left: '-15px'
-                      }
-                    }
-                  }}>
-                    {mode.features.map((feature, idx) => (
-                      <li key={idx}>{feature}</li>
-                    ))}
-                  </Box>
-                </Box>
-              ))}
-            </Box>
+            </Button>
           </Box>
+
+          {/* Bingo Modes */}
+          <Fade in={activeTab === 'bingo'} timeout={500}>
+            <Box sx={{ display: activeTab === 'bingo' ? 'block' : 'none' }}>
+              <Typography variant="h5" sx={{
+                color: theme.palette.secondary.gold,
+                fontSize: '1.8rem',
+                letterSpacing: '1px',
+                mb: 3,
+                textShadow: `1px 1px 1px ${theme.palette.background.elevation[3]}`,
+                position: 'relative',
+                display: 'inline-block',
+                '&:after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: '-8px',
+                  left: 0,
+                  width: '100%',
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: `linear-gradient(90deg, ${theme.palette.secondary.main}, transparent)`,
+                }
+              }}>
+                Bingo Modes
+              </Typography>
+
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+                gap: 3,
+              }}>
+                {gameModes.bingo.map((mode) => (
+                  <GameModeCard 
+                    key={mode.mode} 
+                    mode={mode} 
+                    theme={theme} 
+                  />
+                ))}
+              </Box>
+            </Box>
+          </Fade>
+
+          {/* Competition Modes */}
+          <Fade in={activeTab === 'competition'} timeout={500}>
+            <Box sx={{ display: activeTab === 'competition' ? 'block' : 'none' }}>
+              <Typography variant="h5" sx={{
+                color: theme.palette.secondary.gold,
+                fontSize: '1.8rem',
+                letterSpacing: '1px',
+                mb: 3,
+                textShadow: `1px 1px 1px ${theme.palette.background.elevation[3]}`,
+                position: 'relative',
+                display: 'inline-block',
+                '&:after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: '-8px',
+                  left: 0,
+                  width: '100%',
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: `linear-gradient(90deg, ${theme.palette.secondary.main}, transparent)`,
+                }
+              }}>
+                Competition Styles
+              </Typography>
+
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                gap: 3,
+              }}>
+                {gameModes.competition.map((mode) => (
+                  <GameModeCard 
+                    key={mode.mode} 
+                    mode={mode} 
+                    theme={theme} 
+                    isCompetition={true} 
+                  />
+                ))}
+              </Box>
+            </Box>
+          </Fade>
         </AccordionDetails>
       </Accordion>
 
-      {/* Nasıl Oynanır Bölümü */}
+      {/* How to Play Section - UPDATED ACCORDION */}
       <Accordion
-        defaultExpanded // Accordion initially expanded
+        expanded={expanded2}
+        onChange={handleAccordion2Change}
         sx={{
           mt: 3,
           background: 'transparent',
           '&:before': { display: 'none' },
+          boxShadow: 'none',
+          borderRadius: '12px',
+          overflow: 'hidden'
         }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMore sx={{ color: 'white' }} />}
           sx={{
-            background:theme.palette.secondary.main,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.medium || theme.palette.primary.main} 100%)`,
             borderRadius: '12px',
-            color: 'white',
-            px: 2,
-            py: 1,
+            color: theme.palette.secondary.contrastText,
+            minHeight: '64px !important',
+            height: '64px',
+            '&:hover': {
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+            }
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Help sx={{ fontSize: '28px' }} />
-            <Typography variant="subtitle1" sx={{
-              fontWeight: 'bold',
-              fontFamily: '"Bubblegum Sans", cursive',
-              fontSize: '1.4rem'
-            }}>
-              How to Play?
-            </Typography>
-          </Box>
+          {renderSectionTitle(
+            <Help sx={{ fontSize: '28px' }} />,
+            "How to Play?"
+          )}
+          <ExpandMore 
+            sx={{ 
+              color: theme.palette.secondary.contrastText,
+              transition: 'transform 0.3s ease',
+              transform: expanded2 ? 'rotate(180deg)' : 'rotate(0deg)',
+              position: 'absolute',
+              right: '16px'
+            }} 
+          />
         </AccordionSummary>
         <AccordionDetails sx={{
-          background:  theme.palette.secondary.paper,
+          background: theme.palette.background.paper,
           borderRadius: '16px',
           mt: 1,
-          padding: 3
+          padding: { xs: 2, sm: 3 },
+          boxShadow: `0 4px 20px ${theme.palette.background.elevation[2]}`,
+          position: 'relative',
+          overflow: 'hidden',
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '150px',
+            height: '150px',
+            background: theme.palette.background.stripeBg,
+            opacity: 0.05,
+            borderRadius: '0 0 0 100%',
+            zIndex: 0
+          }
         }}>
-          <List>
+          <List sx={{ position: 'relative', zIndex: 1 }}>
             {game.howToPlay.map((step, index) => (
               <ListItem key={index} sx={{
-                py: 0.5,
+                py: 1,
+                position: 'relative',
+                pl: 4,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  background: theme.palette.background.offwhite,
+                  borderRadius: '8px'
+                },
                 '&:before': {
                   content: '""',
-                  width: '8px',
-                  height: '8px',
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '24px',
+                  height: '24px',
                   borderRadius: '50%',
-                  mr: 2
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: theme.palette.primary.contrastText,
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  boxShadow: `0 2px 4px ${theme.palette.background.elevation[1]}`
+                },
+                '&:after': {
+                  content: `"${index + 1}"`,
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: theme.palette.primary.contrastText,
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  zIndex: 1
                 }
               }}>
                 <ListItemText
                   primaryTypographyProps={{
                     color: theme.palette.text.primary,
-                    fontFamily: '"Nunito", sans-serif',
-                    fontSize: '1.1rem'
+                    fontSize: '1.1rem',
+                    fontWeight: 500
                   }}
-                  primary={`${index + 1}. ${step}`}
+                  primary={step}
                 />
               </ListItem>
             ))}

@@ -12,7 +12,7 @@ import CelebrationIcon from "@mui/icons-material/Celebration";
 import hallowenBingo from "../../../../../assets/hallowenBingo.png";
 import { LobbyInfo } from "../../../../../shared/components/LobbyItem/LobbyInfo";
 
-function GameInfoHeader({game, filteredLobbies }) {
+function GameInfoHeader({ game, filteredLobbies }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const upcomingEvents = filteredLobbies.filter(
@@ -30,7 +30,7 @@ function GameInfoHeader({game, filteredLobbies }) {
         borderRadius: { xs: "30px", sm: "50px" },
         background:
           "radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.05) 70%)",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
       {!isMobile && (
@@ -46,7 +46,6 @@ function GameInfoHeader({game, filteredLobbies }) {
               left: "5%",
               top: "10%",
               opacity: 0.8,
-              display: { xs: "none", sm: "block" },
               zIndex: 2,
             }}
           />
@@ -61,7 +60,6 @@ function GameInfoHeader({game, filteredLobbies }) {
               left: "15%",
               top: "25%",
               opacity: 0.7,
-              display: { xs: "none", sm: "block" },
               zIndex: 2,
             }}
           />
@@ -77,7 +75,7 @@ function GameInfoHeader({game, filteredLobbies }) {
               top: "8%",
               opacity: 0.6,
               display: { xs: "none", md: "block" },
-              zIndex: 2, 
+              zIndex: 2,
             }}
           />
           <Box
@@ -91,47 +89,47 @@ function GameInfoHeader({game, filteredLobbies }) {
               left: "8%",
               top: "30%",
               opacity: 0.8,
-              display: { xs: "none", sm: "block" },
               zIndex: 2,
             }}
           />
         </>
       )}
+
       <Box
         sx={{
+          position: "relative",
           height: { xs: "10vh", sm: "12vh" },
           width: "100%",
-          backgroundColor: "transparent",
-          position: "relative",
-          zIndex: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
           mb: { xs: 1, sm: 0 },
+          overflow: "visible",
+          zIndex: 10,
         }}
       >
         <Typography
           variant="h2"
           sx={{
-            color: "#FFE14C",
+            position: "absolute",
+            top: "50%",
+            left: "5%",
+            transform: "translateY(-50%) rotate(-3deg)",
+            transformOrigin: "center center",
+            whiteSpace: "nowrap",
             fontWeight: "bold",
-            fontSize: { xs: "3rem", sm: "4rem", md: "5rem", lg: "6rem" },
-            fontFamily: '"Bangers", cursive', 
-            letterSpacing: "0.08em",
-            transform: "rotate(-3deg)",
+            fontSize: "clamp(3rem, 8vw, 6rem)",
+            color: theme.palette.secondary.gold,
             textShadow: {
               xs: "2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 3px 3px 0px rgba(0,0,0,0.3)",
               sm: "3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 4px 4px 0px rgba(0,0,0,0.3)",
               md: "4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 6px 6px 0px rgba(0,0,0,0.3)",
             },
             WebkitTextStroke: { xs: "1px black", sm: "2px black" },
-            position: "relative",
-            whiteSpace: "nowrap",
-            overflow: "visible",
             "&:before": {
               content: '""',
               position: "absolute",
-              width: "110%",
+              width: "100%",
               height: "10px",
               background: "rgba(0,0,0,0.2)",
               bottom: "-10px",
@@ -148,17 +146,20 @@ function GameInfoHeader({game, filteredLobbies }) {
 
         <CelebrationIcon
           sx={{
+            position: "absolute",
+            top: "50%",
+            left: "calc(5% + 100%)",
+            transform: "translateY(-50%)",
             fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-            color: "#FF5252",
-            ml: { xs: 1, sm: 2 },
+            color: theme.palette.error.main,
             display: { xs: "none", sm: "block" },
           }}
         />
       </Box>
+
       <Box
         sx={{
-          background:
-          theme.palette.background.gradientB,
+          background: theme.palette.background.gradientFadeBg,
           width: "100%",
           borderRadius: "20px",
           display: "flex",
@@ -175,7 +176,7 @@ function GameInfoHeader({game, filteredLobbies }) {
             left: 0,
             right: 0,
             height: "8px",
-            background: "linear-gradient(90deg, #FFE14C, transparent, #FFE14C)",
+            background: `linear-gradient(90deg, ${theme.palette.secondary.gold}, transparent, ${theme.palette.secondary.gold})`,
             borderRadius: "20px 20px 0 0",
           },
         }}
@@ -183,9 +184,8 @@ function GameInfoHeader({game, filteredLobbies }) {
         <Typography
           variant="h4"
           sx={{
-            fontFamily: '"Bangers", cursive',
             fontWeight: "bold",
-            color: "white",
+            color: theme.palette.text.primary,
             marginBottom: 2,
             textShadow: "2px 2px 0 #000",
             letterSpacing: "0.05em",
@@ -212,7 +212,7 @@ function GameInfoHeader({game, filteredLobbies }) {
                 borderRadius: "10px",
               },
               "&::-webkit-scrollbar-thumb": {
-                background: "#FFE14C",
+                background: theme.palette.secondary.gold,
                 borderRadius: "10px",
               },
             }}
@@ -240,7 +240,7 @@ function GameInfoHeader({game, filteredLobbies }) {
                   sx={{
                     width: "180px",
                     height: "160px",
-                    backgroundColor: "white",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: "16px",
                     boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
                     overflow: "hidden",
@@ -249,30 +249,29 @@ function GameInfoHeader({game, filteredLobbies }) {
                       transform: "translateY(-8px) scale(1.02)",
                       boxShadow: "0 12px 20px rgba(0,0,0,0.25)",
                     },
-                    border: "3px solid #FFE14C",
+                    border: `3px solid ${theme.palette.secondary.gold}`,
                     position: "relative",
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    justifyContent: 'space-between' 
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
                   }}
                 >
                   <Box
                     sx={{
                       height: "50px",
-                      background: "linear-gradient(90deg, #2e7d32, #388e3c)",
+                      background: `linear-gradient(90deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                      borderBottom: "2px dashed #f0f0f0",
+                      borderBottom: `2px dashed ${theme.palette.background.paper}`,
                     }}
                   >
                     <CalendarTodayIcon
-                      sx={{ color: "white", marginRight: 1 }}
+                      sx={{ color: theme.palette.text.contrast, marginRight: 1 }}
                     />
                     <Typography
                       sx={{
-                        color: "white",
-                        fontFamily: '"Boogaloo", cursive',
+                        color: theme.palette.text.contrast,
                         fontWeight: "bold",
                         fontSize: "1.1rem",
                       }}
@@ -284,22 +283,20 @@ function GameInfoHeader({game, filteredLobbies }) {
                   <Box sx={{ padding: 1.5 }}>
                     <Typography
                       sx={{
-                        fontFamily: '"Fredoka One", cursive',
                         fontWeight: "bold",
-                        fontSize: "16px",
-                        color: "#333",
+                        fontSize: "16px", 
+                        color: theme.palette.text.primary,
                       }}
                     >
                       {lobby.lobbyName}
                     </Typography>
-
 
                     <Box
                       sx={{
                         display: "flex",
                         alignItems: "center",
                         marginTop: 1,
-                        backgroundColor: "#e8f5e9",
+                        backgroundColor: theme.palette.background.offwhite,
                         padding: "4px 8px",
                         borderRadius: "16px",
                         width: "fit-content",
@@ -308,14 +305,14 @@ function GameInfoHeader({game, filteredLobbies }) {
                       <PeopleIcon
                         sx={{
                           fontSize: 16,
-                          color: "#2e7d32",
+                          color: theme.palette.success.main,
                           marginRight: 0.5,
                         }}
                       />
                       <Typography
                         sx={{
                           fontSize: "12px",
-                          color: "#2e7d32",
+                          color: theme.palette.success.main,
                           fontWeight: "bold",
                         }}
                       >
@@ -324,7 +321,7 @@ function GameInfoHeader({game, filteredLobbies }) {
                     </Box>
                   </Box>
 
-                  <Box sx={{ padding: 1 }}> 
+                  <Box sx={{ padding: 1 }}>
                     <LobbyInfo
                       startDate={startDate}
                       startTime={startTime}
@@ -334,6 +331,7 @@ function GameInfoHeader({game, filteredLobbies }) {
                       isMobile={isMobile}
                     />
                   </Box>
+
                   <Box
                     sx={{
                       position: "absolute",
@@ -349,7 +347,7 @@ function GameInfoHeader({game, filteredLobbies }) {
                         right: 0,
                         width: "30px",
                         height: "30px",
-                        background: "#FFE14C",
+                        background: theme.palette.secondary.gold,
                         transformOrigin: "100% 0%",
                         transform: "rotate(45deg) translateY(-15px)",
                       },
@@ -371,14 +369,14 @@ function GameInfoHeader({game, filteredLobbies }) {
               paddingLeft: 3,
               paddingRight: 3,
               textAlign: "center",
-              color: "white",
+              color: theme.palette.text.primary,
               minHeight: "150px",
             }}
           >
             <EventBusyIcon
               sx={{
                 fontSize: 60,
-                color: "white",
+                color: theme.palette.text.primary,
                 marginBottom: 2,
                 filter: "drop-shadow(2px 2px 2px rgba(0,0,0,0.3))",
               }}
@@ -386,7 +384,6 @@ function GameInfoHeader({game, filteredLobbies }) {
             <Typography
               variant="h6"
               sx={{
-                fontFamily: '"Bubblegum Sans", cursive',
                 fontWeight: "bold",
                 mb: 1,
                 textShadow: "1px 1px 2px rgba(0,0,0,0.4)",
@@ -397,8 +394,7 @@ function GameInfoHeader({game, filteredLobbies }) {
             <Typography
               variant="body1"
               sx={{
-                color: "rgba(255, 255, 255, 0.9)",
-                fontFamily: '"Nunito", sans-serif',
+                color: theme.palette.text.secondary,
               }}
             >
               You can follow new events from here when they are added.
@@ -412,7 +408,7 @@ function GameInfoHeader({game, filteredLobbies }) {
           height: { xs: "25vh", sm: "30vh", md: "40vh" },
           width: { xs: "35vw", sm: "30vw", md: "35vw" },
           backgroundImage: `url(${hallowenBingo})`,
-          backgroundSize: "contain", 
+          backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right",
           position: "absolute",
@@ -421,7 +417,7 @@ function GameInfoHeader({game, filteredLobbies }) {
           filter: "drop-shadow(5px 5px 10px rgba(0,0,0,0.3))",
           zIndex: 1,
         }}
-      ></Box>
+      />
     </Box>
   );
 }
