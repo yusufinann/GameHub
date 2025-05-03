@@ -6,6 +6,7 @@ import {
   Typography,
   Avatar,
   keyframes,
+  useTheme,
 } from "@mui/material";
 
 const fadeInSlideUp = keyframes`
@@ -21,33 +22,35 @@ const fadeInSlideUp = keyframes`
 
 const ExpressionHistory = ({ expressions }) => {
   const expressionsListRef = useRef(null);
+  const theme = useTheme();
 
   useEffect(() => {
     if (expressionsListRef.current) {
       expressionsListRef.current.scrollTop = expressionsListRef.current.scrollHeight;
     }
   }, [expressions]);
+  
   return (
     <Box
       ref={expressionsListRef}
       sx={{
         height: '70vh',
-        width:'100%', 
+        width: '100%', 
         overflowY: "auto",
-        borderTop: "1px solid rgba(26, 35, 126, 0.2)",
-        background: "linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(240, 240, 255, 0.6))",
+        borderTop: `1px solid ${theme.palette.background.elevation[1]}`,
+        background: theme.palette.background.gradientB,
         "::-webkit-scrollbar": {
           width: "6px",
         },
         "::-webkit-scrollbar-track": {
-          background: "rgba(0,0,0,0.05)",
+          background: theme.palette.background.elevation[1],
           borderRadius: "10px",
         },
         "::-webkit-scrollbar-thumb": {
-          background: "rgba(26, 35, 126, 0.3)",
+          background: theme.palette.primary.light,
           borderRadius: "10px",
           "&:hover": {
-            background: "rgba(26, 35, 126, 0.5)",
+            background: theme.palette.primary.medium || theme.palette.primary.main,
           },
         }
       }}
@@ -60,7 +63,7 @@ const ExpressionHistory = ({ expressions }) => {
             sx={{
               transition: "background-color 0.2s ease",
               "&:hover": {
-                backgroundColor: "rgba(0,0,0,0.03)",
+                backgroundColor: theme.palette.background.elevation[1],
               },
               animation: `${fadeInSlideUp} 0.3s ease-out`,
               animationDelay: `${Math.min(index, 5) * 0.05}s`,
@@ -68,20 +71,29 @@ const ExpressionHistory = ({ expressions }) => {
           >
             <Box sx={{ display: "flex", width: "100%" }}>
               <Avatar
-
-              src={expr.senderAvatar || undefined}
+                src={expr.senderAvatar || undefined}
                 sx={{
                   mr: 1,
-                  bgcolor: "primary.main",
+                  bgcolor: theme.palette.primary.main,
                   width: 36,
                   height: 36,
+                  color: theme.palette.primary.text,
                 }}
               >
-                { !expr.avatar ? expr.senderName.charAt(0).toUpperCase() : null }
+                {!expr.avatar ? expr.senderName.charAt(0).toUpperCase() : null}
               </Avatar>
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography variant="subtitle2" fontWeight="bold" color="primary.dark">
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight="bold" 
+                    color="primary.main"
+                    sx={{
+                      background: theme.palette.info.main,
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
                     {expr.senderName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
@@ -90,6 +102,7 @@ const ExpressionHistory = ({ expressions }) => {
                 </Box>
                 <Typography
                   variant="body1"
+                  color="text.primary"
                   sx={{
                     wordWrap: "break-word",
                     wordBreak: "break-word",

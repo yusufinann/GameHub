@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Snackbar, Alert, IconButton, Collapse } from '@mui/material';
+import { Box, Typography, Snackbar, Alert, IconButton, Collapse, useTheme } from '@mui/material';
 import {
   HourglassEmpty,
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import TimerIcon from '@mui/icons-material/Timer';
+
 const LobbyTimer = ({ lobbyInfo }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [showEndingSoon, setShowEndingSoon] = useState(false);
   const [eventStatus, setEventStatus] = useState('upcoming');
   const [isOpen, setIsOpen] = useState(true);
+  const theme = useTheme();
 
   const alertDismissedRef = useRef(false);
 
@@ -78,7 +80,6 @@ const LobbyTimer = ({ lobbyInfo }) => {
     setIsOpen(!isOpen);
   };
 
-
   if (lobbyInfo.lobbyType !== 'event') {
     return null;
   }
@@ -104,12 +105,11 @@ const LobbyTimer = ({ lobbyInfo }) => {
             bottom: isOpen ? 'auto' : -20,
             top: isOpen ? -20 : 'auto',
             left: '50%',
-
             background: isOpen
-            ? "linear-gradient(135deg, #328761, #4CAF50)"
-            : "linear-gradient(135deg, #b2ebf2, #80deea)",
-            color: 'white',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+              ? `linear-gradient(135deg, ${theme.palette.primary.darker}, ${theme.palette.success.main})`
+              : `linear-gradient(135deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+            color: theme.palette.text.contrast,
+            boxShadow: `0 2px 5px ${theme.palette.background.elevation[1]}`,
             width: 40,
             height: 40,
             '&:hover': {
@@ -126,9 +126,9 @@ const LobbyTimer = ({ lobbyInfo }) => {
         <Collapse in={isOpen} timeout={300} sx={{ width: '100%' }}>
           <Box
             sx={{
-              background: 'rgba(255,255,255,0.15)',
+              background: `${theme.palette.primary.light}20`,
               borderRadius: '12px',
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: `1px solid ${theme.palette.primary.light}30`,
               p: 1,
               display: 'flex',
               justifyContent: 'center',
@@ -139,7 +139,6 @@ const LobbyTimer = ({ lobbyInfo }) => {
               mt: 2
             }}
           >
-
             {/* Display countdown if time remaining */}
             {eventStatus !== 'ended' && timeRemaining?.total > 0 ? (
               <Box
@@ -153,7 +152,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                   pb: 1
                 }}
               >
-                <Typography variant="body2" sx={{ mr: 1, fontWeight: 'medium', color: 'white' }}>
+                <Typography variant="body2" sx={{ mr: 1, fontWeight: 'medium', color: theme.palette.text.contrast }}>
                   {eventStatus === 'upcoming' ? 'Event starts in:' : 'Event ends in:'}
                 </Typography>
 
@@ -164,12 +163,12 @@ const LobbyTimer = ({ lobbyInfo }) => {
                       component="span"
                       sx={{
                         fontWeight: 'bold',
-                        color: 'white'
+                        color: theme.palette.text.contrast
                       }}
                     >
                       {timeRemaining.days}
                     </Typography>
-                    <Typography variant="caption" display="block" sx={{ color: 'rgba(255,255,255,0.85)' }}>Gün</Typography>
+                    <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Gün</Typography>
                   </Box>
                 )}
 
@@ -179,15 +178,15 @@ const LobbyTimer = ({ lobbyInfo }) => {
                     component="span"
                     sx={{
                       fontWeight: 'bold',
-                      color: 'white'
+                      color: theme.palette.text.contrast
                     }}
                   >
                     {String(timeRemaining.hours).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: 'rgba(255,255,255,0.85)' }}>Saat</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Saat</Typography>
                 </Box>
 
-                <Typography variant="h6" sx={{ mx: -0.5, color: 'white' }}>:</Typography>
+                <Typography variant="h6" sx={{ mx: -0.5, color: theme.palette.text.contrast }}>:</Typography>
 
                 <Box sx={{ textAlign: 'center', px: { xs: 0.5, sm: 1 } }}>
                   <Typography
@@ -195,15 +194,15 @@ const LobbyTimer = ({ lobbyInfo }) => {
                     component="span"
                     sx={{
                       fontWeight: 'bold',
-                      color: 'white'
+                      color: theme.palette.text.contrast
                     }}
                   >
                     {String(timeRemaining.minutes).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: 'rgba(255,255,255,0.85)' }}>Dakika</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Dakika</Typography>
                 </Box>
 
-                <Typography variant="h6" sx={{ mx: -0.5, color: 'white' }}>:</Typography>
+                <Typography variant="h6" sx={{ mx: -0.5, color: theme.palette.text.contrast }}>:</Typography>
 
                 <Box sx={{ textAlign: 'center', px: { xs: 0.5, sm: 1 } }}>
                   <Typography
@@ -212,8 +211,8 @@ const LobbyTimer = ({ lobbyInfo }) => {
                     sx={{
                       fontWeight: 'bold',
                       color: timeRemaining.minutes < 5 && eventStatus === 'ongoing'
-                        ? '#ffcdd2'
-                        : 'white',
+                        ? theme.palette.error.light
+                        : theme.palette.text.contrast,
                       animation: timeRemaining.minutes < 5 && eventStatus === 'ongoing'
                         ? 'pulse 2s infinite'
                         : 'none'
@@ -221,16 +220,16 @@ const LobbyTimer = ({ lobbyInfo }) => {
                   >
                     {String(timeRemaining.seconds).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: 'rgba(255,255,255,0.85)' }}>Saniye</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Saniye</Typography>
                 </Box>
               </Box>
             ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 2 }}>
-                <HourglassEmpty sx={{ color: '#ffcdd2' }} />
+                <HourglassEmpty sx={{ color: theme.palette.error.light }} />
                 <Typography
                   variant="body1"
                   sx={{
-                    color: '#ffcdd2',
+                    color: theme.palette.error.light,
                     fontWeight: 'medium'
                   }}
                 >

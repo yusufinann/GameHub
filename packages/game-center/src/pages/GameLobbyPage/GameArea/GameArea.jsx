@@ -3,6 +3,7 @@ import {
   Box,
   Paper,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import {
   KeyboardArrowLeft as CollapseIcon,
@@ -27,7 +28,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
   const [expressions, setExpressions] = useState([]);
   const [centerExpressions, setCenterExpressions] = useState([]);
   const [isChatOpen, setIsChatOpen] = useState(true);
-  
+  const theme = useTheme();
   
   const [showExpressions, setShowExpressions] = useState(() => {
     try {
@@ -144,12 +145,12 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "rgba(202, 236, 213, 0.85)",
+        background: theme.palette.background.gradientB,
         backdropFilter: "blur(12px)",
         borderRadius: "24px",
         overflow: "hidden",
         position: "relative",
-        border: '2px solid rgba(255, 255, 255, 0.3)',
+        border: `2px solid ${theme.palette.background.elevation[1]}`,
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -172,7 +173,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
           right: 0,
           bottom: 0,
           left: 0,
-          background: 'linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(114, 203, 163, 0.1))',
+          background: theme.palette.background.gradientFadeBg,
           zIndex: -1,
           pointerEvents: 'none',
         },
@@ -232,18 +233,19 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
               sx={{
                 borderRadius: "50%",
                 background: showExpressions
-                  ? "linear-gradient(135deg, #FF9800, #F57C00)"
-                  : "linear-gradient(135deg, #9E9E9E, #757575)",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+                  ? `linear-gradient(135deg, ${theme.palette.warning.main}, ${theme.palette.warning.light})`
+                  : `linear-gradient(135deg, ${theme.palette.background.paper}, ${theme.palette.background.card})`,
+                boxShadow: `0 6px 16px ${theme.palette.background.elevation[2]}`,
                 "&:hover": {
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                  boxShadow: `0 8px 20px ${theme.palette.background.elevation[3]}`,
                   filter: "brightness(1.2)",
                 },
                 transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                 width: 40,
                 height: 40,
-                border: "2px solid white",
+                border: `2px solid ${theme.palette.background.offwhite}`,
                 p: 0.5,
+                color: showExpressions ? theme.palette.warning.contrastText : theme.palette.text.primary,
               }}
             >
               {showExpressions ? <HideExpressionsIcon /> : <ShowExpressionsIcon />}
@@ -255,18 +257,19 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
               sx={{
                 borderRadius: "50%",
                 background: isChatOpen
-                  ? "linear-gradient(135deg, #328761, #4CAF50)"
-                  : "linear-gradient(135deg, #b2ebf2, #80deea)",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+                  ? `linear-gradient(135deg, ${theme.palette.success.dark || theme.palette.success.main}, ${theme.palette.success.main})`
+                  : `linear-gradient(135deg, ${theme.palette.info.light}, ${theme.palette.info.main})`,
+                boxShadow: `0 6px 16px ${theme.palette.background.elevation[2]}`,
                 "&:hover": {
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                  boxShadow: `0 8px 20px ${theme.palette.background.elevation[3]}`,
                   filter: "brightness(1.2)",
                 },
                 transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                 width: 40,
                 height: 40,
-                border: "2px solid white",
+                border: `2px solid ${theme.palette.background.offwhite}`,
                 p: 0.5,
+                color: theme.palette.text.contrast,
               }}
             >
               {isChatOpen ? <CollapseIcon /> : <MessageIcon />}

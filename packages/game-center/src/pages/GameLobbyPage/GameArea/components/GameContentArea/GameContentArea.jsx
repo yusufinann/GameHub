@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { BingoGame } from "@gamecenter/bingo-game";
 import ExpressionPanel from "../ChatArea/ExpressionPanel";
 import QuickExpressionButtons from "./QuickExpressionButtons";
@@ -16,6 +16,8 @@ const GameContentArea = ({
   onSendExpression,
   isChatOpen
 }) => {
+  const theme = useTheme();
+  
   return (
     <Box 
       sx={{ 
@@ -48,9 +50,9 @@ const GameContentArea = ({
                 flexDirection: "column",
                 borderRadius: "24px",
                 overflow: "hidden",
-                boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                background: 'rgba(255, 255, 255, 0.7)',
+                boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
+                border: `1px solid ${theme.palette.background.offwhite}`,
+                background: `${theme.palette.background.paper}B3`, // B3 = 70% opacity
                 backdropFilter: 'blur(8px)',
               },
               "& .MuiCardContent-root": {
@@ -78,13 +80,20 @@ const GameContentArea = ({
             width: "100%",
             height: "100%",
             borderRadius: "24px",
-            background: 'rgba(255, 255, 255, 0.7)',
+            background: `${theme.palette.background.paper}B3`,
             backdropFilter: 'blur(8px)',
-            boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
+            border: `1px solid ${theme.palette.background.offwhite}`,
           }}
         >
-          <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
+          <Typography 
+            variant="h5" 
+            color="text.secondary" 
+            sx={{ 
+              fontWeight: 'bold', 
+              textShadow: `1px 1px 2px ${theme.palette.background.elevation[1]}` 
+            }}
+          >
             Diğer Oyun İçeriği Burada
           </Typography>
         </Box>

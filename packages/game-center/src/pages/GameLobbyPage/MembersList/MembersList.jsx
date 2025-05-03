@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Paper, List, Avatar, Tooltip, Stack } from '@mui/material';
+import { Paper, List, Avatar, Tooltip, Stack, useTheme } from '@mui/material';
 import { Person as PersonIcon } from '@mui/icons-material';
 import Header from './Header';
 import MemberItem from './MemberItem';
 
 function MembersList({ members }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const theme = useTheme();
 
   const handleToggle = () => setIsCollapsed(!isCollapsed);
 
@@ -16,7 +17,7 @@ function MembersList({ members }) {
         p: 1,
         width: isCollapsed ? '60px' : '250px',
         height: '100vh',
-        background: 'rgba(202, 236, 213, 0.9)', // Updated background color to rgba of #caecd5
+        background: `${theme.palette.background.default}`, 
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
         transition: 'all 0.3s ease',
@@ -38,8 +39,12 @@ function MembersList({ members }) {
                   width: 40,
                   height: 40,
                   fontSize: '1.1rem',
-                  bgcolor: member.isHost ? '#328761' : '#caecd5', // Updated Avatar colors
-                  color: member.isHost ? 'white' : 'rgba(0, 0, 0, 0.87)', // Ensuring good contrast for icons/text
+                  bgcolor: member.isHost 
+                    ? theme.palette.primary.main 
+                    : theme.palette.background.card,
+                  color: member.isHost 
+                    ? theme.palette.text.contrastText 
+                    : theme.palette.text.primary,
                   cursor: 'pointer',
                   '&:hover': {
                     transform: 'scale(1.1)',

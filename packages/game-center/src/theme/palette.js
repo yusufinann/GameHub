@@ -13,7 +13,7 @@ const lightSecondaryGold = "#FFD700";
 const lightShiningGold = "#fff08c"; 
 
 const lightBackgroundDefault = "#e0f5ea";
-const lightBackgroundPaper = "#ffffff";
+const lightBackgroundPaper = "#f5fbf8" ;
 const lightBackgroundApp = "#e8f5f0";
 const lightBackgroundCard = "#f1f9f6";
 

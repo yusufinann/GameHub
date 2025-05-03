@@ -8,7 +8,6 @@ import {
   styled,
   keyframes,
   alpha,
-  Tooltip,
 } from "@mui/material";
 
 import {
@@ -61,7 +60,10 @@ const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
       right: 0,
       bottom: 0,
       borderRadius: "24px",
-      background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.2)}, transparent)`,
+      background: `linear-gradient(135deg, ${alpha(
+        theme.palette.primary.light,
+        0.2
+      )}, transparent)`,
       zIndex: -1,
     },
   };
@@ -69,23 +71,20 @@ const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
 
 // Main Expression Panel Component
 const ExpressionPanel = ({ centerExpressions }) => {
-  // İfade kutularını göstermek için koşullu render
-  if (centerExpressions.length === 0) {
-    return null; // Hiç ifade yoksa veya ifadeler gizlenmişse hiçbir şey gösterme
-  }
+  if (centerExpressions.length === 0) return null;
 
   return (
     <Box
       sx={{
         position: "fixed",
-        top: "50%",
-        left: "50%",
+        top: "70%",     // Sayfanın daha aşağısı
+        left: "10%",    // Sayfanın daha sağı
         pointerEvents: "none",
         display: "flex",
         flexDirection: "column",
         zIndex: 1000,
         padding: 1,
-        transform: "translate(-50%, -50%)", 
+        transform: "translate(-50%, -50%)",
       }}
     >
       {centerExpressions.map((expr) => (
@@ -93,43 +92,19 @@ const ExpressionPanel = ({ centerExpressions }) => {
           key={expr.id}
           $animationType={expr.animationtype || "default"}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
               <Avatar
-               src={expr.senderAvatar || undefined}
-                sx={{
-                  bgcolor: "primary.main",
-                  border: "2px solid white",
-                  boxShadow: "0 3px 5px rgba(0,0,0,0.2)"
-                }}
+                src={expr.senderAvatar || undefined}
+                sx={{ bgcolor: "primary.main", border: "2px solid white", boxShadow: "0 3px 5px rgba(0,0,0,0.2)" }}
               >
-                    { !expr.avatar ? expr.senderName.charAt(0).toUpperCase() : null }
+                {!expr.senderAvatar && expr.senderName.charAt(0).toUpperCase()}
               </Avatar>
               <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: "bold",
-                    color: "primary.dark",
-                    textAlign: "center",
-                  }}
-                >
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "primary.dark", textAlign: "center" }}>
                   {expr.senderName}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    textAlign: "center",
-                    fontSize: "0.8em",
-                  }}
-                >
+                <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", fontSize: "0.8em" }}>
                   @{expr.senderUsername}
                 </Typography>
               </Box>
@@ -142,7 +117,7 @@ const ExpressionPanel = ({ centerExpressions }) => {
               textAlign: "center",
               marginTop: "8px",
               fontSize: "2rem",
-              fontWeight: expr.expression.length < 3 ? "bold" : "normal"
+              fontWeight: expr.expression.length < 3 ? "bold" : "normal",
             }}
           >
             {expr.expression}
@@ -196,7 +171,6 @@ const ExpressionInput = ({ onSendExpression }) => {
     };
   }, [emojiPickerOpen]);
 
-
   return (
     <Box
       sx={{
@@ -208,7 +182,6 @@ const ExpressionInput = ({ onSendExpression }) => {
         height:'10vh'
       }}
     >
-      {/* Emoji Picker Panel */}
       <EmojiPickerPanel
         emojiPickerOpen={emojiPickerOpen}
         setEmojiPickerOpen={setEmojiPickerOpen}
@@ -218,8 +191,7 @@ const ExpressionInput = ({ onSendExpression }) => {
         emojiPickerRef={emojiPickerRef}
       />
 
-      {/* Text Input Area */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1}}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <IconButton
           color="primary"
           aria-label="emoji"
@@ -265,9 +237,7 @@ const ExpressionInput = ({ onSendExpression }) => {
               },
             },
           }}
-          InputProps={{
-            sx: { pl: 2 }
-          }}
+          InputProps={{ sx: { pl: 2 } }}
         />
         <IconButton
           color="primary"
@@ -292,7 +262,6 @@ const ExpressionInput = ({ onSendExpression }) => {
     </Box>
   );
 };
-
 
 ExpressionPanel.Input = ExpressionInput;
 
