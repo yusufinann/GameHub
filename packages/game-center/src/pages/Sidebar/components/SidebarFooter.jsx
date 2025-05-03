@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Box, Popover,Typography, useTheme } from "@mui/material";
+import { Box, Popover, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import LanguageIcon from "@mui/icons-material/Language";
@@ -54,22 +54,25 @@ const ThemeOption = styled(Box)(({ theme, active }) => ({
   }
 }));
 
-const ThemePreview = styled(Box)(({ theme, isDark }) => ({
+const ThemePreview = styled(Box)(({ theme, isDark, isNeonOcean }) => ({
   width: "40px",
   height: "40px",
   borderRadius: "8px",
   marginRight: "12px",
   background: isDark 
     ? "linear-gradient(to bottom, #1d2e4a, #0f1924)" 
-    : "linear-gradient(to bottom, #caecd5, #fff)",
+    : isNeonOcean
+      ? "linear-gradient(to bottom, #48b6df, #1a6b99)"
+      : "linear-gradient(to bottom, #caecd5, #fff)",
   border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
   boxShadow: `0 4px 8px ${alpha(theme.palette.common.black, 0.1)}`
 }));
 
 function SidebarFooter() {
   const theme = useTheme();
-  const { mode, toggle } = useContext(ThemeContext);
+  const { mode, setSpecificTheme } = useContext(ThemeContext);
   const isDarkMode = mode === "dark";
+  const isNeonOceanMode = mode === "neonOcean";
   
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -83,9 +86,7 @@ function SidebarFooter() {
   };
 
   const handleThemeChange = (newMode) => {
-    if ((newMode === "dark" && !isDarkMode) || (newMode === "light" && isDarkMode)) {
-      toggle();
-    }
+    setSpecificTheme(newMode);
     handleClose();
   };
 
@@ -120,20 +121,35 @@ function SidebarFooter() {
           WebkitTextFillColor: "transparent",
         }}
       >
-        Tema Seçin
+        Choose Theme
       </Typography>
       
       <ThemeOption 
-        active={!isDarkMode} 
+        active={!isDarkMode && !isNeonOceanMode} 
         onClick={() => handleThemeChange("light")}
       >
-        <ThemePreview isDark={false} />
+        <ThemePreview isDark={false} isNeonOcean={false} />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Açık Tema
+            Light 
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Aydınlık görünüm
+            Light View
+          </Typography>
+        </Box>
+      </ThemeOption>
+      
+      <ThemeOption 
+        active={isNeonOceanMode} 
+        onClick={() => handleThemeChange("neonOcean")}
+      >
+        <ThemePreview isDark={false} isNeonOcean={true} />
+        <Box>
+          <Typography variant="body1" fontWeight="bold">
+            Neon Ocean 
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+          Neon and refreshing look
           </Typography>
         </Box>
       </ThemeOption>
@@ -142,13 +158,13 @@ function SidebarFooter() {
         active={isDarkMode} 
         onClick={() => handleThemeChange("dark")}
       >
-        <ThemePreview isDark={true} />
+        <ThemePreview isDark={true} isNeonOcean={false} />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Koyu Tema
+            Dark 
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Karanlık görünüm
+          Dark view
           </Typography>
         </Box>
       </ThemeOption>

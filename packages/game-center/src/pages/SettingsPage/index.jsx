@@ -10,6 +10,7 @@ const SettingsPage = () => {
   const {
     theme,
     isDarkMode,
+    isNeonOceanMode,
     handleThemeChange,
     language,
     handleLanguageChange,
@@ -71,6 +72,7 @@ const SettingsPage = () => {
         <Box sx={{ display: "flex", flexWrap: "wrap", mx: -2 }}>
           <ThemeCard
             isDarkMode={isDarkMode}
+            isNeonOceanMode={isNeonOceanMode}
             handleThemeChange={handleThemeChange}
             language={language}
             animateCards={animateCards}

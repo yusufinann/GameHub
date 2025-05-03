@@ -41,7 +41,7 @@ const MainScreenHeader = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          background: `repeating-linear-gradient(45deg, ${theme.palette.primary.main}60, ${theme.palette.primary.main}60 10px, ${theme.palette.primary.light}30 10px, ${theme.palette.primary.light}30 20px)`,
+          background: theme.palette.background.stripeBg,
               zIndex: 1,
           opacity: 0.8,
         }}

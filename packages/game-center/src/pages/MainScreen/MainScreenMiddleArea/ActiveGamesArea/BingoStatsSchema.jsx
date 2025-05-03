@@ -1,4 +1,3 @@
-// BingoStatsSchema.js
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -23,7 +22,6 @@ import {
   Leaderboard
 } from '@mui/icons-material';
 import { useAuthContext } from '../../../../shared/context/AuthContext';
-import { paletteTokens } from '../../../../theme/palette'; // Renk paletinizin olduğu dosyayı doğru şekilde import edin
 
 const BingoStatsSchema = () => {
   const [stats, setStats] = useState(null);
@@ -35,9 +33,6 @@ const BingoStatsSchema = () => {
   const theme = useTheme();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.id;
-  
-  // Temadan bağımsız ortak stil değişkenleri - doğrudan token'lardan alma
-  const palette = theme.palette.mode === 'dark' ? paletteTokens.dark : paletteTokens.light;
   
   // Fetch user stats on mount and when userId changes
   useEffect(() => {
@@ -104,8 +99,8 @@ const BingoStatsSchema = () => {
     if (!stats) return [];
     const winRate = (stats.wins / stats.totalGames) * 100 || 0;
     return [
-      { name: 'Wins', value: winRate, color: palette.success.main },
-      { name: 'Losses', value: 100 - winRate, color: palette.error.main }
+      { name: 'Wins', value: winRate, color: theme.palette.success.main },
+      { name: 'Losses', value: 100 - winRate, color: theme.palette.error.main }
     ];
   };
 
@@ -147,7 +142,7 @@ const BingoStatsSchema = () => {
                 key={index}
                 d={path}
                 fill={item.color}
-                stroke={palette.background.paper}
+                stroke={theme.palette.background.paper}
                 strokeWidth="1"
               />
             );
@@ -157,7 +152,7 @@ const BingoStatsSchema = () => {
           {data.map((item, index) => (
             <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
-              <Typography variant="body2" sx={{ color: palette.text.primary }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
                 {item.name}: {item.value.toFixed(1)}%
               </Typography>
             </Box>
@@ -191,7 +186,7 @@ const BingoStatsSchema = () => {
             y1={padding.top}
             x2={padding.left}
             y2={svgHeight - padding.bottom}
-            stroke={palette.text.secondary}
+            stroke={theme.palette.text.secondary}
             strokeWidth="1.5"
           />
           {/* X-Axis */}
@@ -200,7 +195,7 @@ const BingoStatsSchema = () => {
             y1={svgHeight - padding.bottom}
             x2={svgWidth - padding.right}
             y2={svgHeight - padding.bottom}
-            stroke={palette.text.secondary}
+            stroke={theme.palette.text.secondary}
             strokeWidth="1.5"
           />
           {/* Y-Axis Tick & Labels */}
@@ -213,14 +208,14 @@ const BingoStatsSchema = () => {
                   y1={y}
                   x2={padding.left}
                   y2={y}
-                  stroke={palette.text.secondary}
+                  stroke={theme.palette.text.secondary}
                   strokeWidth="1.5"
                 />
                 <text
                   x={padding.left - 15}
                   y={y + 6}
                   textAnchor="end"
-                  fill={palette.text.primary}
+                  fill={theme.palette.text.primary}
                   fontSize="14"
                   fontWeight="bold"
                 >
@@ -242,9 +237,9 @@ const BingoStatsSchema = () => {
                   y={svgHeight - padding.bottom - scoreHeight}
                   width={barWidth}
                   height={scoreHeight}
-                  fill={palette.secondary.main}
+                  fill={theme.palette.secondary.main}
                   rx={3}
-                  stroke={palette.secondary.dark}
+                  stroke={theme.palette.secondary.dark}
                   strokeWidth="1"
                 />
                 {/* Rank Bar */}
@@ -253,9 +248,9 @@ const BingoStatsSchema = () => {
                   y={svgHeight - padding.bottom - rankHeight}
                   width={barWidth}
                   height={rankHeight}
-                  fill={palette.secondary.gold}
+                  fill={theme.palette.secondary.gold}
                   rx={3}
-                  stroke={palette.warning.main}
+                  stroke={theme.palette.warning.main}
                   strokeWidth="1"
                 />
                 {/* X-Axis Label */}
@@ -263,7 +258,7 @@ const BingoStatsSchema = () => {
                   x={x + barWidth + 2}
                   y={svgHeight - padding.bottom + 30}
                   textAnchor="middle"
-                  fill={palette.text.primary}
+                  fill={theme.palette.text.primary}
                   fontSize="14"
                   fontWeight="bold"
                   transform={`rotate(-45 ${x + barWidth + 2} ${svgHeight - padding.bottom + 30})`}
@@ -274,12 +269,12 @@ const BingoStatsSchema = () => {
             );
           })}
           {/* Legend */}
-          <rect x={svgWidth - 170} y={padding.top} width={15} height={15} fill={palette.secondary.main} stroke={palette.secondary.dark} strokeWidth="1" />
-          <text x={svgWidth - 150} y={padding.top + 12} fill={palette.text.primary} fontSize="14" fontWeight="bold">
+          <rect x={svgWidth - 170} y={padding.top} width={15} height={15} fill={theme.palette.secondary.main} stroke={theme.palette.secondary.dark} strokeWidth="1" />
+          <text x={svgWidth - 150} y={padding.top + 12} fill={theme.palette.text.primary} fontSize="14" fontWeight="bold">
             Score
           </text>
-          <rect x={svgWidth - 80} y={padding.top} width={15} height={15} fill={palette.secondary.gold} stroke={palette.warning.main} strokeWidth="1" />
-          <text x={svgWidth - 60} y={padding.top + 12} fill={palette.text.primary} fontSize="14" fontWeight="bold">
+          <rect x={svgWidth - 80} y={padding.top} width={15} height={15} fill={theme.palette.secondary.gold} stroke={theme.palette.warning.main} strokeWidth="1" />
+          <text x={svgWidth - 60} y={padding.top + 12} fill={theme.palette.text.primary} fontSize="14" fontWeight="bold">
             Rank
           </text>
         </svg>
@@ -287,12 +282,12 @@ const BingoStatsSchema = () => {
     );
   };
 
-  // Custom card gradient backgrounds for different cards
+  // Card gradient backgrounds for different cards
   const getCardBackground = (index) => {
     const gradients = [
-      `linear-gradient(135deg, ${palette.secondary.light} 0%, ${palette.secondary.main} 100%)`,
-      `linear-gradient(135deg, ${palette.success.light} 0%, ${palette.success.main} 100%)`,
-      `linear-gradient(135deg, ${palette.warning.light} 0%, ${palette.warning.main} 100%)`
+      `linear-gradient(135deg, ${theme.palette.secondary.light} 0%, ${theme.palette.secondary.main} 100%)`,
+      `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.main} 100%)`,
+      `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`
     ];
     return gradients[index % gradients.length];
   };
@@ -307,13 +302,13 @@ const BingoStatsSchema = () => {
         p={4}
         height="80vh"
         sx={{
-          background: palette.background.gradientB,
+          background: theme.palette.background.gradientB,
           borderRadius: '25px',
           overflow: 'hidden',
           marginTop: '20px',
         }}
       >
-        <CircularProgress size={60} thickness={4} sx={{ color: palette.primary.main }} />
+        <CircularProgress size={60} thickness={4} sx={{ color: theme.palette.primary.main }} />
       </Box>
     );
   }
@@ -324,7 +319,7 @@ const BingoStatsSchema = () => {
       <Box
         p={4}
         sx={{
-          background: `linear-gradient(135deg, ${palette.error.light}20 0%, ${palette.error.main}30 100%)`,
+          background: `linear-gradient(135deg, ${theme.palette.error.light}20 0%, ${theme.palette.error.main}30 100%)`,
           borderRadius: '25px',
           overflow: 'hidden',
           marginTop: '20px',
@@ -342,7 +337,7 @@ const BingoStatsSchema = () => {
       sx={{
         height: '100%',
         width: '100%',
-        background: palette.background.gradient,
+        background: theme.palette.background.gradient,
         marginTop: '20px',
         borderRadius: '25px',
         position: 'relative',
@@ -358,7 +353,7 @@ const BingoStatsSchema = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: palette.background.stripeBg,
+          background: theme.palette.background.stripeBg,
           backgroundSize: '15px 15px',
           zIndex: 1
         }
@@ -383,7 +378,7 @@ const BingoStatsSchema = () => {
             variant="h2"
             sx={{
               fontWeight: 800,
-              background: palette.text.title,
+              background: theme.palette.text.title,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textShadow: '0 4px 6px rgba(0,0,0,0.2)',
@@ -394,15 +389,15 @@ const BingoStatsSchema = () => {
               gap: '12px',
             }}
           >
-            <Leaderboard sx={{ fontSize: 40, color: palette.primary.main, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+            <Leaderboard sx={{ fontSize: 40, color: theme.palette.primary.main, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
             Bingo Stats
           </Typography>
         </Zoom>
         <IconButton
           onClick={refreshStats}
           sx={{
-            backgroundColor: palette.background.offwhite,
-            '&:hover': { backgroundColor: `${palette.background.offwhite}CC` }
+            backgroundColor: theme.palette.background.offwhite,
+            '&:hover': { backgroundColor: `${theme.palette.background.offwhite}CC` }
           }}
         >
           <Refresh />
@@ -435,13 +430,13 @@ const BingoStatsSchema = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: `0 8px 16px ${palette.background.elevation[2]}`,
+                  boxShadow: `0 8px 16px ${theme.palette.background.elevation[2]}`,
                   transition: 'transform 0.3s ease',
                   '&:hover': { transform: 'translateY(-5px)' }
                 }}
               >
-                <EmojiEvents sx={{ fontSize: 40, color: palette.text.contrast, mb: 1 }} />
-                <Typography variant="h4" sx={{ color: palette.text.contrast, fontWeight: 'bold' }}>
+                <EmojiEvents sx={{ fontSize: 40, color: theme.palette.text.contrast, mb: 1 }} />
+                <Typography variant="h4" sx={{ color: theme.palette.text.contrast, fontWeight: 'bold' }}>
                   {stats?.totalGames}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -463,13 +458,13 @@ const BingoStatsSchema = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: `0 8px 16px ${palette.background.elevation[2]}`,
+                  boxShadow: `0 8px 16px ${theme.palette.background.elevation[2]}`,
                   transition: 'transform 0.3s ease',
                   '&:hover': { transform: 'translateY(-5px)' }
                 }}
               >
-                <SportsScore sx={{ fontSize: 40, color: palette.text.contrast, mb: 1 }} />
-                <Typography variant="h4" sx={{ color: palette.text.contrast, fontWeight: 'bold' }}>
+                <SportsScore sx={{ fontSize: 40, color: theme.palette.text.contrast, mb: 1 }} />
+                <Typography variant="h4" sx={{ color: theme.palette.text.contrast, fontWeight: 'bold' }}>
                   {stats?.wins}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -491,13 +486,13 @@ const BingoStatsSchema = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: `0 8px 16px ${palette.background.elevation[2]}`,
+                  boxShadow: `0 8px 16px ${theme.palette.background.elevation[2]}`,
                   transition: 'transform 0.3s ease',
                   '&:hover': { transform: 'translateY(-5px)' }
                 }}
               >
-                <Timeline sx={{ fontSize: 40, color: palette.text.contrast, mb: 1 }} />
-                <Typography variant="h4" sx={{ color: palette.text.contrast, fontWeight: 'bold' }}>
+                <Timeline sx={{ fontSize: 40, color: theme.palette.text.contrast, mb: 1 }} />
+                <Typography variant="h4" sx={{ color: theme.palette.text.contrast, fontWeight: 'bold' }}>
                   {stats?.averageScore ? stats.averageScore.toFixed(1) : '0'}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -514,28 +509,28 @@ const BingoStatsSchema = () => {
             display: 'flex',
             flexDirection: 'column',
             height: '80%',
-            backgroundColor: palette.background.offwhite,
+            backgroundColor: theme.palette.background.offwhite,
             borderRadius: '15px',
             backdropFilter: 'blur(10px)',
             position: 'relative'
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, px: 2 }}>
-            <Typography variant="h6" sx={{ color: palette.text.primary, fontWeight: 'bold' }}>
+            <Typography variant="h6" sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
               Performance Metrics
             </Typography>
             <Box>
               <IconButton
                 onClick={() => setChartType('pie')}
                 color={chartType === 'pie' ? 'primary' : 'default'}
-                sx={{ backgroundColor: chartType === 'pie' ? palette.background.offwhite : 'transparent' }}
+                sx={{ backgroundColor: chartType === 'pie' ? theme.palette.background.offwhite : 'transparent' }}
               >
                 <PieChartIcon />
               </IconButton>
               <IconButton
                 onClick={() => setChartType('bar')}
                 color={chartType === 'bar' ? 'primary' : 'default'}
-                sx={{ backgroundColor: chartType === 'bar' ? palette.background.offwhite : 'transparent' }}
+                sx={{ backgroundColor: chartType === 'bar' ? theme.palette.background.offwhite : 'transparent' }}
               >
                 <ShowChart />
               </IconButton>

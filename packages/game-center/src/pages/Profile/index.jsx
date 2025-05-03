@@ -197,10 +197,9 @@ const Profile = () => {
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h2" sx={{
               mb: 2,
-              background: theme.palette.text.title,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
-              color: 'transparent',
+              color: theme.palette.text.primary,
               fontWeight: 700
             }}>
               {user.username}
@@ -284,7 +283,7 @@ const Profile = () => {
             '& .MuiTab-root': {
               color: 'text.secondary',
               '&.Mui-selected': {
-                color: 'text.primary',
+                color: 'text.contrast',
                 bgcolor: theme.palette.mode === 'light' 
                   ? 'primary.light' 
                   : 'secondary.main'

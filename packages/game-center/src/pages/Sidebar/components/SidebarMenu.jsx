@@ -10,20 +10,18 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const StyledList = styled(List)(({ theme }) => ({
   flexGrow: 1,
   marginTop: '1rem',
-  color: '#6e7f71',
+  color: theme.palette.text.secondary,
 }));
 
 const StyledListItem = styled(ListItem, {
-  shouldForwardProp: (prop) => prop !== 'button'
+  shouldForwardProp: (prop) => prop !== 'button' && prop !== 'selected'
 })(({ theme, selected }) => ({
   height: '5vh',
-  color: selected ? '#ff726f' : '#6e7f71',
-  '& .MuiListItemIcon-root': {
-    color: selected ? 'red' : '#6e7f71'
-  },
+  color: selected ? theme.palette.primary.main : theme.palette.text.secondary,
   '&:hover': {
+    backgroundColor: theme.palette.background.elevation[1],
     '& .MuiListItemIcon-root': {
-      color: '#fff'
+      color: theme.palette.text.primary
     },
   },
   cursor: 'pointer',
@@ -31,7 +29,7 @@ const StyledListItem = styled(ListItem, {
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme, selected }) => ({
   minWidth: '40px',
-  color: selected ? '#fff' : '#6e7f71',
+  color: selected ? theme.palette.primary.main : theme.palette.text.secondary,
   justifyContent: 'center',
 }));
 
@@ -59,7 +57,6 @@ function SidebarMenu() {
         return (
           <StyledListItem
             key={item.name}
-            button
             selected={isSelected}
             onClick={() => handleItemClick(item.to)}
           >

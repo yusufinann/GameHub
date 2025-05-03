@@ -492,19 +492,42 @@ const Notifications = () => {
 
   return (
     <>
-      <IconButton
-        onClick={handleClick}
-        size="small"
-        sx={{
-          color: "white",
-          position: "relative",
-          zIndex: 1900,
-        }}
-      >
-        <Badge badgeContent={totalNotifications} color="error">
-          <NotificationsIcon />
-        </Badge>
-      </IconButton>
+ <IconButton
+  onClick={handleClick}
+  size="medium"
+  sx={{
+    color: theme.palette.text.contrast,
+    position: "relative",
+    zIndex: 1900,
+    padding: "8px",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+      boxShadow: `0 0 8px ${theme.palette.primary.light}`,
+    },
+    transition: "all 0.2s ease-in-out",
+  }}
+>
+  <Badge 
+    badgeContent={totalNotifications} 
+    color="error"
+    sx={{
+      "& .MuiBadge-badge": {
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.error.contrastText,
+        fontWeight: "bold",
+        fontSize: "0.75rem",
+      }
+    }}
+  >
+    <NotificationsIcon 
+      sx={{ 
+        color: theme.palette.text.contrast,
+        filter: `drop-shadow(0px 0px 2px ${theme.palette.secondary.main})`,
+        fontSize: "28px", // Increased from default size
+      }}
+    />
+  </Badge>
+</IconButton>
 
       <Menu
         anchorEl={anchorEl}
@@ -514,12 +537,13 @@ const Notifications = () => {
           sx: {
             width: isMobile ? "95vw" : 340,
             maxHeight: isMobile ? "80vh" : 500,
-            backgroundColor: "white",
-            color: "black",
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
             mt: 1,
             zIndex: 2000,
             overflowY: "auto",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            boxShadow: `0 4px 20px ${theme.palette.background.elevation[2]}`,
+            border: `1px solid ${theme.palette.primary.light}`,
           },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}

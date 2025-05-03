@@ -67,6 +67,44 @@ const darkSuccessMain = "#48bb78"; // Yeşil
 const darkSuccessLight = "#68d391"; // Açık Yeşil
 const darkSuccessDark = "#38a169"; // Koyu Yeşil
 
+// --- Neon Ocean Theme Color Variables ---
+const neonOceanPrimaryMain = "#00FFE0"; // Elektrik Mavisi
+const neonOceanPrimaryLight = "#6BFFFB"; // Polar Işığı
+const neonOceanPrimaryDarker = "#00B4AA"; // Derin Neon
+const neonOceanPrimaryDark = "#007A74"; // Glow in the Dark
+
+const neonOceanSecondaryMain = "#FF3F8E"; // Neon Pembe
+const neonOceanSecondaryLight = "#FF6EB4"; // Bubblegum
+const neonOceanSecondaryPaper = "#FFECF5"; // Blush
+const neonOceanSecondaryDark = "#D6005C"; // Kırmızı Alarm
+const neonOceanSecondaryGold = "#FFEA00"; // Elektrik Sarısı
+const neonOceanShiningGold = "#FFF46B"; // Lazer Limonu
+
+const neonOceanBackgroundDefault = "#0A0F2B"; // Gece Oyun Alanı
+const neonOceanBackgroundPaper = "#1A1F40"; // Holografik Panel
+const neonOceanBackgroundApp = "#131832"; // Uzay Karanlığı
+const neonOceanBackgroundCard = "#21264D"; // Cyborg Grid
+
+const neonOceanTextPrimary = "#E0E0FF"; // UFO Işığı
+const neonOceanTextSecondary = "#A0A0FF"; // Hologram Yazı
+const neonOceanTextContrast = "#000000"; // Neon renkler üzerinde okunabilirlik için siyah
+const neonOceanTextDisabled = "rgba(160,160,255,0.4)";
+
+const neonOceanErrorMain = "#FF1744"; // LED Kırmızı
+const neonOceanErrorLight = "#FF616F"; // Neon Kızıl
+const neonOceanErrorDark = "#C40027"; // Error Glitch
+
+const neonOceanWarningMain = "#FFC400"; // Sarı Flaş
+const neonOceanWarningLight = "#FFD740"; // Amber Alarm
+
+const neonOceanInfoMain = "#00B8D4"; // Cyborg Mavi
+const neonOceanInfoLight = "#00E5FF"; // Neon Akış
+const neonOceanInfoDark = "#008BA3"; // Derin Data
+
+const neonOceanSuccessMain = "#00F0A3"; // Yeşil Işın
+const neonOceanSuccessLight = "#5FFFD7"; // Matrix Yeşili
+const neonOceanSuccessDark = "#00C582"; // Hacker Onay
+
 export const paletteTokens = {
   light: {
     primary: {
@@ -90,7 +128,7 @@ export const paletteTokens = {
       default: lightBackgroundDefault,
       paper: lightBackgroundPaper,
       offwhite: "rgba(255,255,255,0.92)",
-      dot: `rgba(${parseInt(lightPrimaryMain.slice(1, 3), 16)}, ${parseInt(lightPrimaryMain.slice(3, 5), 16)}, ${parseInt(lightPrimaryMain.slice(5, 7), 16)}, 0.1)`, // Ana renkten türetildi
+      dot: `rgba(${parseInt(lightPrimaryMain.slice(1, 3), 16)}, ${parseInt(lightPrimaryMain.slice(3, 5), 16)}, ${parseInt(lightPrimaryMain.slice(5, 7), 16)}, 0.1)`, 
       app: lightBackgroundApp,
       card: lightBackgroundCard,
       gradient: `linear-gradient(135deg, #d5f2e3 0%, ${lightPrimaryLight} 100%)`,
@@ -188,7 +226,7 @@ export const paletteTokens = {
     warning: {
       main: darkWarningMain,
       light: darkWarningLight,
-      contrastText: darkTextContrast // Kontrastı sağlamak için #1A202C gibi koyu bir renk de düşünülebilir
+      contrastText: darkTextContrast 
     },
     info: {
       main: darkInfoMain,
@@ -201,6 +239,72 @@ export const paletteTokens = {
       light: darkSuccessLight,
       dark: darkSuccessDark, 
       contrastText: darkTextContrast
+    },
+  },
+  neonOcean: { 
+    primary: {
+      main: neonOceanPrimaryMain,
+      light: neonOceanPrimaryLight,
+      darker: neonOceanPrimaryDarker,
+      dark: neonOceanPrimaryDark,
+      text: neonOceanTextContrast, 
+      contrastText: neonOceanTextContrast,
+    },
+    secondary: {
+      main: neonOceanSecondaryMain,
+      light: neonOceanSecondaryLight,
+      paper: neonOceanSecondaryPaper,
+      dark: neonOceanSecondaryDark,
+      gold: neonOceanSecondaryGold,
+      contrastText: neonOceanTextContrast,
+    },
+    background: {
+      default: neonOceanBackgroundDefault,
+      paper: neonOceanBackgroundPaper,
+      offwhite: "rgba(255,255,255,0.12)", // Kept consistent with dark for potential subtle elements
+      dot: `rgba(0,255,224,0.15)`, // Elektrik Mavisi noktacıklar (Hardcoded based on original)
+      app: neonOceanBackgroundApp,
+      card: neonOceanBackgroundCard,
+      gradient: `linear-gradient(135deg, ${neonOceanPrimaryMain} 0%, ${neonOceanSecondaryMain} 100%)`, // Mavi-Pembe çarpışması
+      gradientB: `linear-gradient(45deg, ${neonOceanBackgroundDefault} 30%, ${neonOceanPrimaryMain} 150%)`, // Derin uzay efekti
+      stripeBg: `repeating-linear-gradient(45deg, ${neonOceanPrimaryMain}60, ${neonOceanSecondaryMain}60 10px, ${neonOceanPrimaryLight}30 10px, ${neonOceanPrimaryLight}30 20px)`,
+      gradientFadeBg: `linear-gradient(135deg, ${neonOceanPrimaryDark}90 0%, transparent 40%, transparent 60%, ${neonOceanPrimaryDark}80 100%)`,
+      elevation: {
+        1: `rgba(0,255,224,0.1)`, // Elektrik mavisi gölge
+        2: `rgba(0,255,224,0.2)`,
+        3: `rgba(0,255,224,0.3)`,
+      }
+    },
+    text: {
+      primary: neonOceanTextPrimary,
+      secondary: neonOceanTextSecondary,
+      contrast: neonOceanTextContrast, 
+      gradient: `linear-gradient(45deg, ${neonOceanSecondaryGold} 0%, ${neonOceanShiningGold} 100%)`, // Altın yazı efekti
+      disabled: neonOceanTextDisabled,
+      title:`linear-gradient(45deg, ${neonOceanBackgroundDefault} 30%, ${neonOceanPrimaryMain} 150%)` 
+    },
+    error: {
+      main: neonOceanErrorMain,
+      light: neonOceanErrorLight,
+      dark: neonOceanErrorDark,
+      contrastText: neonOceanTextContrast 
+    },
+    warning: {
+      main: neonOceanWarningMain,
+      light: neonOceanWarningLight,
+      contrastText: neonOceanBackgroundDefault // Using dark background for contrast against bright warning
+    },
+    info: {
+      main: neonOceanInfoMain,
+      light: neonOceanInfoLight,
+      dark: neonOceanInfoDark,
+      contrastText: neonOceanTextContrast // Using the specific contrast text for this theme
+    },
+    success: {
+      main: neonOceanSuccessMain,
+      light: neonOceanSuccessLight,
+      dark: neonOceanSuccessDark,
+      contrastText: neonOceanBackgroundDefault // Using dark background for contrast against bright success
     },
   },
 };

@@ -4,8 +4,9 @@ import { ThemeContext } from "../../theme/context";
 
 const useSettingsPage = () => {
   const theme = useTheme();
-  const { mode, toggle } = useContext(ThemeContext);
+  const { mode, setSpecificTheme } = useContext(ThemeContext);
   const isDarkMode = mode === "dark";
+  const isNeonOceanMode = mode === "neonOcean";
 
   // States
   const [language, setLanguage] = useState(() => {
@@ -27,8 +28,15 @@ const useSettingsPage = () => {
     setAnimateCards(true);
   }, []);
 
-  const handleThemeChange = () => {
-    toggle();
+  const handleThemeChange = (newTheme) => {
+    
+    if ((newTheme === 'light' && !isDarkMode && !isNeonOceanMode) ||
+        (newTheme === 'dark' && isDarkMode) ||
+        (newTheme === 'neonOcean' && isNeonOceanMode)) {
+      console.log("Theme already set to", newTheme);
+      return;
+    }
+    setSpecificTheme(newTheme);
     triggerSaveIndicator();
   };
 
@@ -61,20 +69,24 @@ const useSettingsPage = () => {
 
   const primary = theme.palette.primary;
   const secondary = theme.palette.secondary;
-
-  const decorationGradient = isDarkMode
-    ? `linear-gradient(135deg, ${alpha(primary.main, 0.4)} 0%, ${alpha(
-        secondary.main,
-        0.4
-      )} 100%)`
-    : `linear-gradient(135deg, ${alpha(primary.light, 0.5)} 0%, ${alpha(
-        secondary.light,
-        0.5
-      )} 100%)`;
+  
+  // Custom gradient for each theme
+  let decorationGradient;
+  if (isDarkMode) {
+    decorationGradient = `linear-gradient(135deg, ${alpha(primary.main, 0.4)} 0%, ${alpha(
+      secondary.main, 0.4)} 100%)`;
+  } else if (isNeonOceanMode) {
+    decorationGradient = `linear-gradient(135deg, ${alpha('#1a6b99', 0.4)} 0%, ${alpha(
+      '#48b6df', 0.4)} 100%)`;
+  } else {
+    decorationGradient = `linear-gradient(135deg, ${alpha(primary.light, 0.5)} 0%, ${alpha(
+      secondary.light, 0.5)} 100%)`;
+  }
 
   return {
     theme,
     isDarkMode,
+    isNeonOceanMode,
     handleThemeChange,
     language,
     handleLanguageChange,

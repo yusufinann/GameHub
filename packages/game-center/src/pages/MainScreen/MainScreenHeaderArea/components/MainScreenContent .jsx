@@ -58,7 +58,6 @@ const MainScreenContent = ({ theme }) => {
             opacity: index === currentSlide ? 1 : 0,
             transition: "opacity 0.5s ease-in-out",
             display: "flex",
-            bgcolor: theme.palette.primary.main,
             borderRadius: 2,
             overflow: "hidden",
             boxShadow: theme.shadows[8]
@@ -72,7 +71,6 @@ const MainScreenContent = ({ theme }) => {
               left: 0,
               width: "100%",
               height: "100%",
-              background: theme.palette.background.stripeBg,
               opacity: 0.8
             }}
           />
@@ -85,7 +83,6 @@ const MainScreenContent = ({ theme }) => {
               left: 0,
               width: "100%",
               height: "100%",
-              background: theme.palette.background.gradientFadeBg,
               zIndex: 1
             }}
           />

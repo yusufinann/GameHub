@@ -23,19 +23,13 @@ const Header = ({ title, icon, variant = 'default', theme }) => {
           height: '3px',
           background: `linear-gradient(90deg, ${theme.palette.secondary.gold}, ${theme.palette.secondary.main}, ${theme.palette.secondary.gold})`,
           backgroundSize: '200% 100%',
-          animation: 'shimmer 2s infinite linear',
-        },
-        '@keyframes shimmer': {
-          '0%': { backgroundPosition: '0% 0%' },
-          '100%': { backgroundPosition: '200% 0%' },
         },
       },
       title: {
         fontWeight: 900,
         background: theme.palette.text.title,
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        textTransform: 'uppercase',
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
         letterSpacing: '1px',
       },
       icon: {
@@ -79,11 +73,6 @@ const Header = ({ title, icon, variant = 'default', theme }) => {
           height: '100%',
           background: `linear-gradient(90deg, transparent, ${theme.palette.secondary.light}22, transparent)`,
           transform: 'skewX(-15deg)',
-          animation: 'flash 3s infinite',
-        },
-        '@keyframes flash': {
-          '0%': { transform: 'translateX(-150%) skewX(-15deg)' },
-          '100%': { transform: 'translateX(150%) skewX(-15deg)' },
         },
       },
       title: {
@@ -99,12 +88,7 @@ const Header = ({ title, icon, variant = 'default', theme }) => {
         color: theme.palette.secondary.gold,
         mr: 2,
         filter: `drop-shadow(0 0 8px ${theme.palette.background.elevation[2]})`,
-        animation: 'pulse 2s infinite',
-        '@keyframes pulse': {
-          '0%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.1)' },
-          '100%': { transform: 'scale(1)' },
-        }
+       
       },
       divider: {
         mt: 2,

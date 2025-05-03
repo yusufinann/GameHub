@@ -20,9 +20,7 @@ const ChatMessageItem = ({ message, currentUser, formatMessageListTimestamp }) =
             borderRadius: '20px 20px 4px 20px',
         },
         otherUser: {
-            bgcolor: theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.background.paper,
+            bgcolor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderRadius: '4px 20px 20px 20px',
         },

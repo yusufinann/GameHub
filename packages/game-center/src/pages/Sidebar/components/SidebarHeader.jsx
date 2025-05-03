@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Avatar, Box, IconButton, Tooltip, CircularProgress } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled} from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../shared/context/AuthContext';
@@ -22,29 +22,28 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   height: '60px',
   marginBottom: '5px',
   marginTop: '1rem',
-  border: '2px solid #d5fdcd',
-  backgroundColor: '#3f51b5',
+  border: `2px solid ${theme.palette.primary.light}`,
+  backgroundColor: theme.palette.secondary.main,
   fontSize: '1.5rem',
   fontWeight: 'bold',
 }));
 
 const StyledLogoutButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: '#ff726f',
-  color: '#fff',
+  backgroundColor: theme.palette.error.main,
+  color: theme.palette.text.contrast,
   marginTop: '1rem',
   transition: 'background-color 0.3s ease, transform 0.3s ease',
   width: '40px',
   height: '40px',
   '&:hover': {
-    backgroundColor: '#ff4d4a',
-    transform: 'scale(1.1)',
+    backgroundColor: theme.palette.error.dark,
   },
   '&.Mui-disabled': {
-    backgroundColor: '#ffa8a6',
+    backgroundColor: theme.palette.error.light,
     cursor: 'not-allowed',
     pointerEvents: 'auto',
     transform: 'none',
-    color: '#fff',
+    color: theme.palette.text.contrast,
   },
 }));
 
@@ -77,19 +76,17 @@ function SidebarHeader() {
       </StyledAvatar>
 
       <Tooltip title={tooltipTitle} placement="right">
-        <span>
-          <StyledLogoutButton
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            aria-label={tooltipTitle}
-          >
-            {isLoggingOut ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <LogoutIcon />
-            )}
-          </StyledLogoutButton>
-        </span>
+        <StyledLogoutButton
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          aria-label={tooltipTitle}
+        >
+          {isLoggingOut ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            <LogoutIcon />
+          )}
+        </StyledLogoutButton>
       </Tooltip>
     </StyledHeader>
   );

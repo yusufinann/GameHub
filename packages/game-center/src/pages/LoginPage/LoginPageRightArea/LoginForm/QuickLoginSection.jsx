@@ -7,7 +7,8 @@ import {
   Typography, 
   IconButton, 
   InputAdornment, 
-  CircularProgress 
+  CircularProgress,
+  useTheme
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -20,9 +21,10 @@ const QuickLoginSection = ({
   handleClickShowPassword,
   handleUseDifferentAccount,
   loading,
-  error,
-  styles
+  error
 }) => {
+  const theme = useTheme();
+  
   const handleSubmit = (event) => {
     event.preventDefault();
     quickLogin();
@@ -36,10 +38,10 @@ const QuickLoginSection = ({
         alignItems: 'center',
         gap: 2,
         p: 3,
-        bgcolor: 'rgba(255, 255, 255, 0.15)',
+        bgcolor: theme.palette.background.paper,
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+        boxShadow: `0 4px 20px ${theme.palette.background.elevation[1]}`,
       }}
     >
       <Avatar
@@ -47,15 +49,15 @@ const QuickLoginSection = ({
         sx={{
           width: 80,
           height: 80,
-          bgcolor: 'primary.main',
+          bgcolor: theme.palette.primary.main,
           fontSize: '2rem',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          boxShadow: `0 4px 12px ${theme.palette.background.elevation[1]}`
         }}
       >
         {!savedUser.avatar ? savedUser.name[0].toUpperCase() : null}
       </Avatar>
 
-      <Typography variant="h6" sx={{ color: 'black' }}>
+      <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
         {savedUser.email}
       </Typography>
 
@@ -80,11 +82,11 @@ const QuickLoginSection = ({
           autoComplete="current-password"
           sx={{
             '& .MuiOutlinedInput-root': {
-              bgcolor: 'rgba(255, 255, 255, 0.09)',
+              bgcolor: theme.palette.background.offwhite,
               borderRadius: 2,
             },
             '& .MuiFormHelperText-root': {
-              color: 'error.main',
+              color: theme.palette.error.main,
               marginTop: 1,
               fontSize: '0.85rem'
             }
@@ -94,8 +96,8 @@ const QuickLoginSection = ({
               <InputAdornment position="end">
                 <IconButton onClick={handleClickShowPassword} edge="end">
                   {showPassword ? 
-                    <VisibilityOff sx={styles.visibilityIcon} /> : 
-                    <Visibility sx={styles.visibilityIcon} />
+                    <VisibilityOff sx={{ color: theme.palette.text.secondary }} /> : 
+                    <Visibility sx={{ color: theme.palette.text.secondary }} />
                   }
                 </IconButton>
               </InputAdornment>
@@ -109,13 +111,14 @@ const QuickLoginSection = ({
           variant="contained"
           fullWidth
           sx={{
-            background: 'linear-gradient(45deg, #43a047 30%, #66bb6a 90%)',
+            background: theme.palette.background.gradient,
             py: 1.5,
             borderRadius: 2,
             marginTop: 2,
             textTransform: 'none',
+            color: theme.palette.primary.contrastText,
             '&:hover': {
-              background: 'linear-gradient(45deg, #2e7d32 30%, #43a047 90%)',
+              background: `linear-gradient(45deg, ${theme.palette.primary.darker} 30%, ${theme.palette.primary.main} 90%)`,
             }
           }}
         >
@@ -131,9 +134,9 @@ const QuickLoginSection = ({
         onClick={handleUseDifferentAccount}
         variant="text"
         sx={{ 
-          color: 'text.secondary',
+          color: theme.palette.text.secondary,
           textTransform: 'none',
-          '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
+          '&:hover': { bgcolor: theme.palette.background.offwhite }
         }}
       >
         Use a different account

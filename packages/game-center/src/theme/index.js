@@ -1,88 +1,113 @@
 import { createTheme } from '@mui/material/styles';
-// paletteTokens'un doğru yoldan import edildiğini varsayıyoruz
 import { paletteTokens } from './palette';
-// Arka plan resmi importu - Başka bir yerde veya dark modda kullanılabilir.
-import backgroundImage from '../assets/bg-green.png';
 
 export const buildTheme = (mode) => {
-  // Seçilen moda göre palet renklerini al
   const palette = paletteTokens[mode];
 
-  // MUI createTheme fonksiyonu ile tema nesnesini oluştur
   return createTheme({
-    // Renk paleti ayarları
     palette: {
-      mode,       // 'light' veya 'dark'
-      ...palette, // paletteTokens'dan gelen renkleri ekle
+      mode: mode === 'neonOcean' ? 'light' : mode,
+      ...palette,
     },
-    // Bileşen bazında stil özelleştirmeleri
+    
     components: {
-      // Global CSS sıfırlamaları ve temel stiller için
       MuiCssBaseline: {
         styleOverrides: (themeParam) => `
-          /*
-           * Google Fonts @import KURALI BURADA OLMAMALI!
-           * Fontlar public/index.html içerisindeki <link> ile yükleniyor.
-           */
-
           body {
-            /* Temanın varsayılan arkaplan rengini uygula */
+            /* Apply theme's default background color */
             background-color: ${themeParam.palette.background.default};
-            /* Geçiş efekti (isteğe bağlı, tema değişimini yumuşatır) */
+            /* Transition effect for smooth theme changes */
             transition: background-color 0.3s ease-in-out, background 0.3s ease-in-out;
-            min-height: 100vh; /* Sayfanın en az ekran yüksekliğinde olmasını sağla */
-            margin: 0; /* Tarayıcı varsayılan margin'ini sıfırla */
-            font-family: ${themeParam.typography.fontFamily}; /* Body için varsayılan fontu uygula */
+            min-height: 100vh; /* Ensure page is at least screen height */
+            margin: 0; /* Reset browser default margin */
+            padding: 0; /* Reset browser default padding */
+            width: 100vw; /* Full viewport width */
+            font-family: ${themeParam.typography.fontFamily}; /* Apply default font for body */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
 
-            /* Sadece light modda gradient arka plan uygula */
+            /* Apply different backgrounds based on theme */
             ${mode === 'light'
               ? `
                  background: linear-gradient(135deg, #9cdeaf 0%, #42b781 100%);
-                 background-attachment: fixed; /* Arka planın kaymasını engelle */
+                 background-attachment: fixed; /* Prevent background from scrolling */
                 `
-              : `
-                 /* Dark mod için farklı bir arka plan veya sadece renk isterseniz buraya ekleyin */
-                 /* Örneğin: background-image: url(${backgroundImage}); */
-                 /* Veya sadece koyu renk: background-color: ${themeParam.palette.background.default}; */
+              : mode === 'dark'
+              ? `
+                 /* Dark mode background */
+                 background-color: ${themeParam.palette.background.default};
                 `
+              : mode === 'neonOcean'
+              ? `
+                 /* neonOcean theme background */
+                 background: ${themeParam.palette.background.default};
+                 background-attachment: fixed;
+                `
+              : ''
             }
           }
 
-          /* Diğer global stiller (gerekirse) */
+          /* Scrollbar Styling with theme-specific colors */
+          ::-webkit-scrollbar {
+            width: 8px; /* Scrollbar width */
+          }
+
+          ::-webkit-scrollbar-track {
+            background: ${mode === 'light' 
+              ? `rgba(${parseInt(themeParam.palette.primary.main.slice(1, 3), 16)}, 
+                ${parseInt(themeParam.palette.primary.main.slice(3, 5), 16)}, 
+                ${parseInt(themeParam.palette.primary.main.slice(5, 7), 16)}, 0.1)`
+              : mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.1)'
+              : mode === 'neonOcean'
+              ? `rgba(0, 255, 224, 0.1)` // Using neonOcean primary color
+              : 'rgba(0, 0, 0, 0.1)'
+            };
+            border-radius: 4px; /* Rounded corners */
+          }
+
+          ::-webkit-scrollbar-thumb {
+            background: ${themeParam.palette.primary.main}; /* Theme-specific scrollbar thumb color */
+            border-radius: 4px; /* Rounded corners */
+            transition: background 0.3s ease; /* Smooth transition effect */
+          }
+
+          ::-webkit-scrollbar-thumb:hover {
+            background: ${themeParam.palette.primary.medium || themeParam.palette.primary.darker || themeParam.palette.primary.dark}; /* Hover state */
+          }
+
+          ::-webkit-scrollbar-thumb:active {
+            background: ${themeParam.palette.primary.dark}; /* Active state */
+          }
+
+          /* Other global styles */
           * {
-            box-sizing: border-box; /* Genellikle MuiCssBaseline zaten yapar */
+            box-sizing: border-box;
           }
         `,
       },
-      // Diğer MUI bileşenleri için override'lar buraya eklenebilir
-      // Örn: MuiButton, MuiAppBar vb.
     },
-    // Tipografi (Yazı Tipi) Ayarları
-    typography: {
-      /*
-       * Font aileleri burada tanımlanır. Fontların kendisi index.html'den yüklenir.
-       */
 
-      // Genel gövde metni ve varsayılan font ailesi
-      fontFamily: "'Exo 2', sans-serif", // index.html'de yüklendi
+    typography: {
+      // General body text and default font family
+      fontFamily: "'Exo 2', sans-serif", 
       body1: {
         fontSize: '1rem',
         lineHeight: 1.6,
-        fontFamily: "'Exo 2', sans-serif", // Gerekirse tekrar belirtilebilir
+        fontFamily: "'Exo 2', sans-serif",
       },
       body2: {
         fontSize: '0.9rem',
         lineHeight: 1.5,
         fontFamily: "'Exo 2', sans-serif",
       },
-      // Başlıklar
+      // Headings
       h1: {
-        fontFamily: "'Press Start 2P', cursive", // index.html'de yüklendi
+        fontFamily: "'Press Start 2P', cursive", 
         fontSize: '3rem',
         letterSpacing: '2px',
       },
       h2: {
-        fontFamily: "'Orbitron', sans-serif", // index.html'de yüklendi (700 weight ile)
+        fontFamily: "'Orbitron', sans-serif", 
         fontWeight: 700,
         fontSize: '2.25rem',
         letterSpacing: '1.5px',
@@ -94,20 +119,19 @@ export const buildTheme = (mode) => {
       },
       h4: {
         fontFamily: "'Press Start 2P', cursive",
-        // 3rem h1 ile aynı, genellikle h4 daha küçük olur. Ayarlandı:
         fontSize: '1.5rem',
       },
       h5: {
-        fontFamily: "'Luckiest Guy', cursive", // index.html'de yüklendi
+        fontFamily: "'Luckiest Guy', cursive", 
         fontSize: '1.25rem',
       },
       h6: {
         fontFamily: "'Press Start 2P', cursive",
         fontSize: '1rem',
       },
-      // Diğer metin türleri
+    
       subtitle1: {
-        fontFamily: "'VT323', monospace", // index.html'de yüklendi
+        fontFamily: "'VT323', monospace", 
         fontSize: '1.1rem',
       },
       subtitle2: {
@@ -128,29 +152,32 @@ export const buildTheme = (mode) => {
         fontSize: '0.7rem',
         textTransform: 'none',
       },
-      // Özel 'banner' tipografi varyantı
+
       banner: {
-        fontFamily: "'Righteous', cursive", // index.html'de yüklendi
+        fontFamily: "'Righteous', cursive", 
         fontSize: '2.5rem',
-        // Righteous genellikle sadece 400 ağırlığında gelir. 800 yerine 400 kullanmak daha doğru.
         fontWeight: 400,
         letterSpacing: '-1px',
         textShadow: '0 4px 6px rgba(0,0,0,0.2)',
-        // display: flex yerine inline-block daha esnek olabilir veya hiç belirtmeyebilirsiniz.
         display: 'inline-block',
-        // gap: '12px', // display: flex olmadan gap çalışmaz.
 
-        /* Gradient metin rengi */
-        background: `linear-gradient(
-          45deg,
-          ${palette.primary.light} 0%,
-          ${palette.primary.main} 50%,
-          ${palette.secondary.main} 100%
-        )`,
-        WebkitBackgroundClip: 'text', // Gradyanı metne uygula (WebKit)
-        backgroundClip: 'text',      // Gradyanı metne uygula (Standart)
-        WebkitTextFillColor: 'transparent', // Metnin rengini şeffaf yap (WebKit)
-        color: 'transparent', // Metnin rengini şeffaf yap (Standart)
+        background: mode === 'neonOcean'
+          ? `linear-gradient(
+              45deg,
+              ${palette.primary.light} 0%,
+              ${palette.primary.main} 50%,
+              ${palette.secondary.main} 100%
+            )`
+          : `linear-gradient(
+              45deg,
+              ${palette.primary.light} 0%,
+              ${palette.primary.main} 50%,
+              ${palette.secondary.main} 100%
+            )`,
+        WebkitBackgroundClip: 'text',
+        backgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        color: 'transparent',
       },
     },
   });
