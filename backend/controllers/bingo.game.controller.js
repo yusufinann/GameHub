@@ -85,16 +85,10 @@ function broadcastToGame(game, data) {
   });
 }
 function broadcastGameStatus(game) {
-  const completedPlayers = Object.entries(game.players)
-    .filter(([, player]) => player.completedAt)
-    .map(([id, player]) => ({
-      id: id,
-      userName: player.userName
-    }));
-
+  const completedPlayersList = getCompletedPlayersList(game);
   broadcastToGame(game, {
     type: "BINGO_GAME_STATUS",
-    completedPlayers: completedPlayers
+    completedPlayers: completedPlayersList
   });
 }
 /**
@@ -374,7 +368,7 @@ export const startGame = (ws, data) => {
   game.gameEnded = false;
   game.gameStarted = false;
   game.gameId = new mongoose.Types.ObjectId();
-  game.competitionMode = competitionMode || 'competitive'; // Default to competitive if not provided
+  game.competitionMode = competitionMode || 'competitive'; 
 
   if (game.autoDrawInterval) {
       clearInterval(game.autoDrawInterval);
@@ -416,7 +410,8 @@ export const startGame = (ws, data) => {
                   playerId: playerId,
                   ticket: game.players[playerId].ticket
               })),
-              competitionMode: game.competitionMode
+              competitionMode: game.competitionMode,
+              completedPlayers: []
           });
 
           if (drawMode === "auto") {
@@ -500,19 +495,31 @@ export const joinGame = async (ws, data) => {
     player.ws = ws;
     player.userName = userInfo.username;
     player.name = userInfo.name;
-
+    const hasCompleted = player.completedBingo || false;
     return ws.send(JSON.stringify({
       type: "BINGO_JOIN",
       message: "Already in game",
       ticket: player.ticket,
       markedNumbers: player.markedNumbers || [],
       isHost: game.host === ws.userId,
-      players: Object.keys(game.players),
+      // players: Object.keys(game.players), // Sadece ID yerine daha fazla bilgi göndermek daha iyi olabilir
+       players: Object.values(game.players).map(p => ({ // Oyuncu detaylarını göndermek için örnek
+           id: p.userId, // veya ws.userId hangisi kullanılıyorsa
+           userName: p.userName,
+           name: p.name,
+           completed: p.completedBingo || false 
+       })),
       gameStarted: game.gameStarted,
       drawnNumbers: game.drawnNumbers,
       activeNumbers: game.activeNumbers,
       drawMode: game.drawMode,
-      drawer: game.drawer
+      drawer: game.drawer,
+      completedBingo: hasCompleted, 
+      completedPlayers: getCompletedPlayersList(game),
+      bingoMode: game.bingoMode,
+      competitionMode: game.competitionMode,
+      gameId: game.gameId,
+      rankings: game.rankings || getGameRankings(game), // Mevcut sıralamayı da gönder
     }));
   }
 
@@ -524,10 +531,10 @@ export const joinGame = async (ws, data) => {
     markedNumbers: [],
     userName: userInfo.username,
     name: userInfo.name,
-    userId: ws.userId
+    userId: ws.userId,
+    completedBingo: false
   };
 
-  // Broadcast new player joined with proper user info
   broadcastToGame(game, {
     type: "BINGO_PLAYER_JOINED",
     player: {
@@ -537,7 +544,6 @@ export const joinGame = async (ws, data) => {
     }
   });
 
-  // Send join confirmation with all necessary data
   ws.send(JSON.stringify({
     type: "BINGO_JOIN",
     message: "Joined the game",
@@ -555,9 +561,11 @@ export const joinGame = async (ws, data) => {
       userName: userInfo.username
     },
     completedBingo: false, // Oyuncu henüz bingo yapmadı
-    completedPlayers: Object.entries(game.players)
-      .filter(([id, player]) => player.completedAt)
-      .map(([id]) => id) // Tamamlayan oyuncuların ID'lerini gönder
+    completedPlayers: getCompletedPlayersList(game),
+    bingoMode: game.bingoMode,
+    competitionMode: game.competitionMode,
+    gameId: game.gameId,
+    rankings: game.rankings || [],
   }));
 };
 
@@ -650,145 +658,149 @@ async function saveGameStatsToDB(game) {
     console.error("Oyun istatistikleri kaydedilirken hata oluştu:", error);
   }
 }
+
+function getCompletedPlayersList(game) {
+  if (!game || !game.players) {
+      return [];
+  }
+  return Object.entries(game.players)
+      .filter(([, player]) => player && player.completedAt)
+      .map(([id, player]) => ({
+          id: id, 
+          userId: player.userId, 
+          userName: player.userName
+      }));
+}
+
+
 export const checkBingo = (ws, data) => {
   const { lobbyCode } = data;
   const game = bingoGames[lobbyCode];
 
-  if (!game || !game.players[ws.userId]) {
-      return ws.send(JSON.stringify({
-          type: "BINGO_ERROR",
-          message: "Invalid game or player"
-      }));
+  if (!game) {
+      console.error(`checkBingo Hatası: ${lobbyCode} için oyun bulunamadı.`);
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun bulunamadı." }));
+  }
+
+  if (!game.gameStarted) {
+       console.warn(`checkBingo Uyarısı: ${lobbyCode} için oyun aktif değil (başlamadı veya bitti).`);
+       return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun aktif değil."}));
   }
 
   const player = game.players[ws.userId];
+
+  if (!player) {
+      console.error(`checkBingo Hatası: Oyuncu (${ws.userId}) ${lobbyCode} oyununda bulunamadı.`);
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyuncu bilgisi bulunamadı." }));
+  }
+
+  if (player.completedBingo) {
+       console.log(`checkBingo Bilgi: Oyuncu (${player.userName}) zaten Bingo yapmış.`);
+       // İsteğe bağlı olarak tekrar Bingo yapmaya çalışanlara hata yerine mevcut durumu gönderebilirsiniz.
+       // Örneğin, kişisel sıralama bilgisi tekrar gönderilebilir.
+       // Şimdilik geçersiz sayıyoruz:
+       return ws.send(JSON.stringify({ type: "BINGO_INVALID", message: "Zaten Bingo yaptınız." }));
+  }
+
   const { ticket } = player;
 
-  // Check if all numbers in ticket are drawn
-  const isAllTicketNumbersDrawn = ticket.every((num) => game.drawnNumbers.includes(num));
+  if (!Array.isArray(ticket) || ticket.length === 0) {
+      console.error(`checkBingo Hatası: Oyuncu (${player.userName}) için bilet geçersiz.`);
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bilet bilgisi geçersiz." }));
+  }
+  if (!Array.isArray(game.drawnNumbers)) {
+       console.error(`checkBingo Hatası: ${lobbyCode} için çekilen sayılar listesi geçersiz.`);
+       game.drawnNumbers = []; // Güvenlik için boş dizi ata
+  }
+   if (!Array.isArray(player.markedNumbers)) {
+       player.markedNumbers = [];
+       console.warn(`checkBingo Uyarısı: Oyuncu (${player.userName}) için işaretlenen sayılar listesi yoktu, oluşturuldu.`);
+  }
 
-  // **Yeni Kontrol:** Check if all numbers in ticket are marked by the player
+  const isAllTicketNumbersDrawn = ticket.every((num) => game.drawnNumbers.includes(num));
   const isAllTicketNumbersMarked = ticket.every(num => player.markedNumbers.includes(num));
 
-  if (isAllTicketNumbersDrawn && isAllTicketNumbersMarked) { // **Kombine kontrol**
-      // Record completion time if not already recorded
+  if (isAllTicketNumbersDrawn && isAllTicketNumbersMarked) {
       if (!player.completedAt) {
           player.completedAt = Date.now();
-          player.completedBingo = true; // Bingo tamamlandı işaretleme
+          player.completedBingo = true;
       }
 
-      // Calculate current rankings
-      const rankings = getGameRankings(game);
-      const playerRank = rankings.findIndex(r => r.playerId === ws.userId) + 1;
+      const currentRankings = getGameRankings(game);
+      const playerRankInfo = currentRankings.find(r => r.playerId === ws.userId);
+      const playerRank = playerRankInfo ? playerRankInfo.rank : null;
 
-        // Tamamlayan oyuncuların listesini oluştur
-        const completedPlayers = Object.entries(game.players)
-  .filter(([, player]) => player.completedAt)
-  .map(([id, player]) => ({
-    id: id,
-    userName: player.userName // Kullanıcı adını ekle
-  }));
-  console.log("checkBingo - completedPlayers:", completedPlayers);
+      const currentCompletedPlayers = getCompletedPlayersList(game);
 
-      if (game.competitionMode === 'non-competitive') { // Non-competitive mode logic
-          game.gameEnded = true;
-          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
-          const nonCompetitiveRankings = [{ // Create rankings with only the winner
-              playerId: ws.userId,
-              userName: player.userName,
-              score: calculatePlayerScore(player, game.drawnNumbers),
-              completedAt: player.completedAt
-          }];
-          broadcastToGame(game, {
-              type: "BINGO_GAME_OVER",
-              message: `${player.userName} BINGO! Oyunu Kazandı!`, // Custom message for non-competitive mode
-              finalRankings: nonCompetitiveRankings,
-              gameId: game.gameId
-          });
-          saveGameStatsToDB(game);
-          clearInterval(game.autoDrawInterval); // Stop auto draw if running
-          game.gameStarted = false; // Ensure gameStarted is false after game over in non-competitive mode.
-          return; // Exit function after non-competitive bingo win
-      } else { // Competitive Mode Logic (Existing logic, slightly modified for clarity)
-          // Two player game scenario - end game immediately after first bingo
-          if (Object.keys(game.players).length <= 2) {
-              const finalRankings = getGameRankings(game);
-              game.gameEnded = true;
-              game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
-              broadcastToGame(game, {
-                  type: "BINGO_GAME_OVER",
-                  message: "Game Over - Final Rankings",
-                  finalRankings: finalRankings,
-                  gameId: game.gameId // gameId eklendi
-              });
-              saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-          } else {
-              // For 3+ players, check if all players have completed or numbers are finished
-              const completedPlayersCount = rankings.filter(r => r.completedAt).length;
-              const allNumbersDrawn = game.numberPool.length === 0;
-              const allPlayersCompleted = completedPlayersCount === Object.keys(game.players).length;
+      const numberOfPlayers = Object.keys(game.players).length;
+      const allNumbersDrawn = game.numberPool && game.numberPool.length === 0;
+      const allPlayersCompleted = currentCompletedPlayers.length === numberOfPlayers;
 
+      let shouldGameEnd = false;
+      let gameOverReason = "";
 
-              if (allNumbersDrawn || allPlayersCompleted) {
-                  const finalRankings = getGameRankings(game);
-                  game.gameEnded = true;
-                  game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
-                  broadcastToGame(game, {
-                      type: "BINGO_GAME_OVER",
-                      message: "Game Over - Final Rankings",
-                      finalRankings: finalRankings,
-                      gameId: game.gameId // gameId eklendi
-                  });
-                  saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-              } else if (completedPlayersCount === 1) {
-                  // First bingo in a multi-player game, update rankings but game continues
-                  broadcastToGame(game, {
-                      type: "BINGO_CALL_SUCCESS",
-                      playerId: ws.userId,
-                      playerName: player.userName,
-                      rank: playerRank,
-                      rankings: rankings,
-                      ticket: player.ticket,
-                      gameEnded: false ,// Oyun devam ediyor
-                      gameId: game.gameId ,// gameId eklendi
-                  });
-              } else {
-                   // Subsequent bingo calls in multi-player, update rankings and check game end again if needed.
-                   broadcastToGame(game, {
-                      type: "BINGO_CALL_SUCCESS",
-                      playerId: ws.userId,
-                      playerName: player.userName,
-                      rank: playerRank,
-                      rankings: rankings,
-                      ticket: player.ticket,
-                      gameEnded: false ,// Oyun devam ediyor
-                      gameId: game.gameId // gameId eklendi
-                  });
-                   const completedPlayersCountAfterCall = rankings.filter(r => r.completedAt).length;
-                   const allPlayersCompletedAfterCall = completedPlayersCountAfterCall === Object.keys(game.players).length;
-                   if(allPlayersCompletedAfterCall) {
-                      const finalRankings = getGameRankings(game);
-                      game.gameEnded = true;
-                      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
-                      broadcastToGame(game, {
-                          type: "BINGO_GAME_OVER",
-                          message: "Game Over - Final Rankings",
-                          finalRankings: finalRankings,
-                          gameId: game.gameId // gameId eklendi
-                      });
-                      saveGameStatsToDB(game); // <--- BURAYA EKLEDİ
-                   }
-              }
+      if (game.competitionMode === 'non-competitive') {
+          shouldGameEnd = true;
+          gameOverReason = `${player.userName} BINGO! Oyunu Kazandı!`;
+      } else {
+          if (numberOfPlayers <= 2) {
+              shouldGameEnd = true;
+              gameOverReason = "Oyun Bitti - Final Sıralaması";
+          } else if (allPlayersCompleted) {
+              shouldGameEnd = true;
+              gameOverReason = "Oyun Bitti - Tüm Oyuncular Tamamladı";
+          } else if (allNumbersDrawn) {
+              shouldGameEnd = true;
+              gameOverReason = "Oyun Bitti - Tüm Numaralar Çekildi";
           }
       }
 
+      if (shouldGameEnd) {
+          game.gameEnded = true;
+          game.gameStarted = false;
+          if (game.autoDrawInterval) {
+              clearInterval(game.autoDrawInterval);
+              game.autoDrawInterval = null;
+          }
+
+          const finalRankings = getGameRankings(game);
+          broadcastToGame(game, {
+              type: "BINGO_GAME_OVER",
+              message: gameOverReason,
+              finalRankings: finalRankings,
+              gameId: game.gameId,
+              completedPlayers: currentCompletedPlayers
+          });
+          saveGameStatsToDB(game).catch(err => console.error("saveGameStatsToDB Hatası (Oyun Sonu):", err));
+
+      } else {
+          broadcastToGame(game, {
+              type: "BINGO_CALL_SUCCESS",
+              playerId: ws.userId,
+              playerName: player.userName,
+              rank: playerRank,
+              rankings: currentRankings,
+              gameEnded: false,
+              gameId: game.gameId,
+              completedPlayers: currentCompletedPlayers
+          });
+      }
+
   } else {
+      let invalidReason = "Geçersiz Bingo çağrısı.";
+      if (!isAllTicketNumbersDrawn) {
+          invalidReason = "Biletinizdeki tüm numaralar henüz çekilmedi.";
+      } else if (!isAllTicketNumbersMarked) {
+          invalidReason = "Biletinizdeki tüm numaraları işaretlemediniz.";
+      }
+
       ws.send(JSON.stringify({
           type: "BINGO_INVALID",
-          message: "Invalid bingo call - Biletindeki tüm numaraları işaretlemelisin." // Updated message
+          message: invalidReason
       }));
   }
 };
+
 
 /**
  * GET /api/bingo/stats

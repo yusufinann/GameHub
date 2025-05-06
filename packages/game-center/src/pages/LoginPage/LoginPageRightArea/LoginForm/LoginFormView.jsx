@@ -81,6 +81,7 @@ function LoginFormView({
       marginBottom: theme.spacing(4),
       fontSize: "2.2rem",
       fontWeight: 700,
+      m:2,
       textAlign: "center",
       background: theme.palette.text.title,
       backgroundClip: "text",
@@ -341,7 +342,7 @@ function LoginFormView({
 
   return (
     <>
-      <Typography variant="h4" sx={styles.title}>
+      <Typography variant="h2" sx={styles.title}>
         Login
       </Typography>
       <Box component="form" sx={styles.form} onSubmit={handleSubmit} noValidate>
