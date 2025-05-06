@@ -14,7 +14,7 @@ import {
   alpha,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-
+import { useTranslation } from "react-i18next";
 function LoginFormView({
   email,
   password,
@@ -29,7 +29,7 @@ function LoginFormView({
   handleSubmit
 }) {
   const theme = useTheme();
-  
+  const { t } = useTranslation();
   // Define styles using theme tokens directly
   const styles = {
     pageContainer: {
@@ -257,7 +257,7 @@ function LoginFormView({
   const renderPasswordField = () => (
     <TextField
       type={showPassword ? "text" : "password"}
-      label="Password"
+      label={t("Password")}
       name="password"
       value={password}
       onChange={handlePasswordChange}
@@ -295,7 +295,7 @@ function LoginFormView({
   const renderEmailField = () => (
     <TextField
       type="email"
-      label="Email Address"
+      label={t("Email Address")}
       name="email"
       value={email}
       onChange={handleEmailChange}
@@ -326,7 +326,7 @@ function LoginFormView({
       {loading ? (
         <CircularProgress size={24} sx={styles.loadingIcon} />
       ) : (
-        "Login"
+        t("Login")
       )}
     </Button>
   );
@@ -343,7 +343,7 @@ function LoginFormView({
   return (
     <>
       <Typography variant="h2" sx={styles.title}>
-        Login
+        {t("Login")}
       </Typography>
       <Box component="form" sx={styles.form} onSubmit={handleSubmit} noValidate>
         {renderEmailField()}
@@ -356,14 +356,14 @@ function LoginFormView({
               color="primary" 
             />
           }
-          label="Remember me"
+          label={t("Remember me")}
           sx={styles.checkboxLabel}
         />
         {renderLoginButton()}
         {renderErrorMessage()}
         <Box sx={styles.linkContainer}>
           <Link href="#" sx={styles.link}>
-            Forgot password?
+            {t("Forgot password")}?
           </Link>
         </Box>
 

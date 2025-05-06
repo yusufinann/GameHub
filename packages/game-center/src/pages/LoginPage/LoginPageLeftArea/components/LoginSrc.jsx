@@ -9,6 +9,7 @@ import {
   IconButton
 } from '@mui/material';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 function LoginSrc() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -17,7 +18,7 @@ function LoginSrc() {
     "https://cdn.pixabay.com/photo/2024/10/03/14/13/orc-9093828_1280.jpg",
     "https://cdn.pixabay.com/photo/2024/03/02/15/41/ai-generated-8608836_1280.png",
   ];
-
+const{t}=useTranslation();
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -100,7 +101,7 @@ function LoginSrc() {
                 mb: 7,
               }}
             >
-              Discover Your Next
+              {t("Discover Your Next")}
             </Typography>
             <Typography
               variant="h3"
@@ -111,7 +112,7 @@ function LoginSrc() {
                 mb: 5,
               }}
             >
-              Gaming Adventure
+              {t("Gaming Adventure")}
             </Typography>
             <Typography
               variant="h6"
@@ -121,7 +122,7 @@ function LoginSrc() {
                 textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
               }}
             >
-              Access thousands of games in one place
+              {t("Access thousands of games in one place")}
             </Typography>
           </Box>
 
@@ -144,7 +145,7 @@ function LoginSrc() {
                 },
               }}
             >
-              Explore Games
+              {t("Explore Games")}
             </Button>
             <Button
               variant="outlined"
@@ -160,7 +161,7 @@ function LoginSrc() {
                 },
               }}
             >
-              Learn More
+              {t("Learn More")}
             </Button>
           </Stack>
 

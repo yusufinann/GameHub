@@ -1,26 +1,29 @@
 import { useState, useEffect, useContext } from "react";
 import { useTheme, alpha } from "@mui/material";
 import { ThemeContext } from "../../theme/context";
+import { useTranslation } from 'react-i18next'; 
 
 const useSettingsPage = () => {
   const theme = useTheme();
   const { mode, setSpecificTheme } = useContext(ThemeContext);
+  const { i18n } = useTranslation(); 
+
   const isDarkMode = mode === "dark";
   const isNeonOceanMode = mode === "neonOcean";
 
-  // States
+
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("language") || "tr";
   });
-  
+
   const [soundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem("soundEnabled") !== "false";
   });
-  
+
   const [soundVolume, setSoundVolume] = useState(() => {
     return parseInt(localStorage.getItem("soundVolume") || "75");
   });
-  
+
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   const [animateCards, setAnimateCards] = useState(false);
 
@@ -28,8 +31,13 @@ const useSettingsPage = () => {
     setAnimateCards(true);
   }, []);
 
+  useEffect(() => {
+    if (i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
+
   const handleThemeChange = (newTheme) => {
-    
     if ((newTheme === 'light' && !isDarkMode && !isNeonOceanMode) ||
         (newTheme === 'dark' && isDarkMode) ||
         (newTheme === 'neonOcean' && isNeonOceanMode)) {
@@ -41,8 +49,9 @@ const useSettingsPage = () => {
   };
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-    localStorage.setItem("language", lang);
+    setLanguage(lang); 
+    localStorage.setItem("language", lang); 
+    i18n.changeLanguage(lang); 
     triggerSaveIndicator();
   };
 
@@ -69,18 +78,17 @@ const useSettingsPage = () => {
 
   const primary = theme.palette.primary;
   const secondary = theme.palette.secondary;
-  
-  // Custom gradient for each theme
+
   let decorationGradient;
   if (isDarkMode) {
     decorationGradient = `linear-gradient(135deg, ${alpha(primary.main, 0.4)} 0%, ${alpha(
-      secondary.main, 0.4)} 100%)`;
+          secondary.main, 0.4)} 100%)`;
   } else if (isNeonOceanMode) {
     decorationGradient = `linear-gradient(135deg, ${alpha('#1a6b99', 0.4)} 0%, ${alpha(
-      '#48b6df', 0.4)} 100%)`;
+          '#48b6df', 0.4)} 100%)`;
   } else {
     decorationGradient = `linear-gradient(135deg, ${alpha(primary.light, 0.5)} 0%, ${alpha(
-      secondary.light, 0.5)} 100%)`;
+          secondary.light, 0.5)} 100%)`;
   }
 
   return {
@@ -88,7 +96,7 @@ const useSettingsPage = () => {
     isDarkMode,
     isNeonOceanMode,
     handleThemeChange,
-    language,
+    language, 
     handleLanguageChange,
     soundEnabled,
     soundVolume,

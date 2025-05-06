@@ -11,6 +11,7 @@ import {
   useTheme
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 const QuickLoginSection = ({
   savedUser,
@@ -24,7 +25,7 @@ const QuickLoginSection = ({
   error
 }) => {
   const theme = useTheme();
-  
+  const {t}=useTranslation();
   const handleSubmit = (event) => {
     event.preventDefault();
     quickLogin();
@@ -73,7 +74,7 @@ const QuickLoginSection = ({
 
         <TextField
           type={showPassword ? "text" : "password"}
-          placeholder="Enter your password"
+          placeholder={t("Enter your password")}
           value={password}
           onChange={handlePasswordChange}
           fullWidth
@@ -125,7 +126,7 @@ const QuickLoginSection = ({
           {loading ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            "Login"
+            t("Login")
           )}
         </Button>
       </Box>
@@ -139,7 +140,7 @@ const QuickLoginSection = ({
           '&:hover': { bgcolor: theme.palette.background.offwhite }
         }}
       >
-        Use a different account
+        {t("Use a different account")}
       </Button>
     </Box>
   );

@@ -6,7 +6,7 @@ import AppRouter from "./router/index";
 import reportWebVitals from "./reportWebVitals";
 import { AuthProvider } from "./shared/context/AuthContext";
 import { AppThemeProvider } from "./theme/context";
-
+import './locales/index';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
  // <React.StrictMode>

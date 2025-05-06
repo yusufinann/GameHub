@@ -2,7 +2,6 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import LoadingFallback from "./components/LoadingFallback.jsx";
-
 const MainContainer = lazy(() => import("../pages/MainContainer"));
 const MainScreen = lazy(() => import("../pages/MainScreen"));
 const SettingsPage = lazy(() => import("../pages/SettingsPage"));
