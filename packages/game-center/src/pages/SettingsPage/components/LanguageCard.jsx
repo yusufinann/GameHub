@@ -143,7 +143,7 @@ const LanguageCard = ({ language,handleLanguageChange, animateCards }) => {
                     fontSize: '2.5rem',
                     mb: 2
                   }}>
-                    🇬🇧
+                   🇺🇸
                   </Box>
                   <Typography variant="h6" fontWeight="bold" textAlign="center">
                     {t('languageCard.english')}

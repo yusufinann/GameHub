@@ -436,7 +436,10 @@
     "turkish": "Turkish",
     "english": "English",
     "preferenceNote": "Your preferred language will be applied to all interface texts."
-  }
+  },
+  "Neon and refreshing look":"Neon and refreshing look",
+  "Dark view":"Dark view",
+  "Light View":"Light View"
 
   
 }

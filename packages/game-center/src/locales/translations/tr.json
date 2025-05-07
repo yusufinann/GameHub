@@ -435,7 +435,12 @@
     "turkish": "Türkçe",
     "english": "İngilizce",
     "preferenceNote": "Tercih ettiğiniz dil tüm arayüz metinlerine uygulanacaktır."
-  }           
+  },
+  "Neon and refreshing look":"Neon ve ferahlatıcı görünüm",
+  "Dark view":"Koyu görünüm",
+   "Light View":"Açık görünüm"
+  
+
   
   
 }

@@ -6,6 +6,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import PaletteIcon from "@mui/icons-material/Palette";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import { ThemeContext } from "../../../theme/context";
+import { useTranslation } from "react-i18next";
 
 const StyledFooter = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -46,7 +47,7 @@ const ThemeOption = styled(Box)(({ theme, active }) => ({
   borderRadius: "12px",
   cursor: "pointer",
   backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : "transparent",
-  border: active ? `2px solid ${theme.palette.primary.main}` : `2px solid transparent`,
+  border: active ? `2px solid ${theme.palette.primary.main}` : "2px solid transparent",
   transition: "all 0.2s ease-in-out",
   "&:hover": {
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
@@ -59,11 +60,40 @@ const ThemePreview = styled(Box)(({ theme, isDark, isNeonOcean }) => ({
   height: "40px",
   borderRadius: "8px",
   marginRight: "12px",
-  background: isDark 
-    ? "linear-gradient(to bottom, #1d2e4a, #0f1924)" 
+  background: isDark
+    ? "linear-gradient(to bottom, #1d2e4a, #0f1924)"
     : isNeonOcean
       ? "linear-gradient(to bottom, #48b6df, #1a6b99)"
       : "linear-gradient(to bottom, #caecd5, #fff)",
+  border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
+  boxShadow: `0 4px 8px ${alpha(theme.palette.common.black, 0.1)}`
+}));
+
+const LanguageOption = styled(Box)(({ theme, active }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "10px 16px",
+  margin: "8px",
+  borderRadius: "12px",
+  cursor: "pointer",
+  backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : "transparent",
+  border: active ? `2px solid ${theme.palette.primary.main}` : "2px solid transparent",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    transform: "translateY(-2px)"
+  }
+}));
+
+const LanguageFlag = styled(Box)(({ theme }) => ({
+  width: "40px",
+  height: "30px",
+  borderRadius: "8px",
+  marginRight: "12px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "1.5rem",
   border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
   boxShadow: `0 4px 8px ${alpha(theme.palette.common.black, 0.1)}`
 }));
@@ -73,46 +103,73 @@ function SidebarFooter() {
   const { mode, setSpecificTheme } = useContext(ThemeContext);
   const isDarkMode = mode === "dark";
   const isNeonOceanMode = mode === "neonOcean";
+  const { t, i18n } = useTranslation();
   
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [themeAnchorEl, setThemeAnchorEl] = useState(null);
+  const themeOpen = Boolean(themeAnchorEl);
   
+  const [langAnchorEl, setLangAnchorEl] = useState(null);
+  const langOpen = Boolean(langAnchorEl);
+  
+  const currentLanguage = i18n.language || "tr";
+
   const handleThemeClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    setThemeAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleThemeClose = () => {
+    setThemeAnchorEl(null);
+  };
+
+  const handleLanguageClick = (event) => {
+    setLangAnchorEl(event.currentTarget);
+  };
+
+  const handleLanguageClose = () => {
+    setLangAnchorEl(null);
   };
 
   const handleThemeChange = (newMode) => {
     setSpecificTheme(newMode);
-    handleClose();
+    handleThemeClose();
+  };
+  
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
+    handleLanguageClose();
   };
 
   const bottomOptions = [
-    { name: "Language", icon: <LanguageIcon />, action: () => {} },
     { 
-      name: "Theme", 
-      icon: <PaletteIcon />, 
-      action: handleThemeClick 
+      name: "Language", 
+      icon: <LanguageIcon />, 
+      action: handleLanguageClick 
     },
-    { name: "AI Magic", icon: <AutoFixHighIcon />, action: () => {} },
+    {
+      name: "Theme",
+      icon: <PaletteIcon />,
+      action: handleThemeClick
+    },
+    { 
+      name: "AI Magic", 
+      icon: <AutoFixHighIcon />, 
+      action: () => {} 
+    },
   ];
 
-  // Tema popover'ının içeriği
   const themePopoverContent = (
-    <Box sx={{ 
-      p: 1, 
+    <Box sx={{
+      p: 1,
       width: "280px",
       backgroundColor: theme.palette.background.card,
       borderRadius: "16px",
       boxShadow: `0 10px 25px ${alpha(theme.palette.common.black, 0.2)}`
     }}>
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          p: 1, 
+      <Typography
+        variant="h6"
+        sx={{
+          p: 1,
           fontWeight: "bold",
           textAlign: "center",
           background: theme.palette.text.gradient,
@@ -121,9 +178,9 @@ function SidebarFooter() {
           WebkitTextFillColor: "transparent",
         }}
       >
-        Choose Theme
+        {t('themeCard.title')}
       </Typography>
-      
+
       <ThemeOption 
         active={!isDarkMode && !isNeonOceanMode} 
         onClick={() => handleThemeChange("light")}
@@ -131,10 +188,10 @@ function SidebarFooter() {
         <ThemePreview isDark={false} isNeonOcean={false} />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Light 
+            {t('themeCard.lightThemeAriaLabel')} 
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Light View
+            {t("Light View")}
           </Typography>
         </Box>
       </ThemeOption>
@@ -146,10 +203,10 @@ function SidebarFooter() {
         <ThemePreview isDark={false} isNeonOcean={true} />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Neon Ocean 
+            {t('themeCard.neonOceanThemeAriaLabel')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-          Neon and refreshing look
+            {t("Neon and refreshing look")}
           </Typography>
         </Box>
       </ThemeOption>
@@ -161,13 +218,68 @@ function SidebarFooter() {
         <ThemePreview isDark={true} isNeonOcean={false} />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Dark 
+            {t("themeCard.darkThemeAriaLabel")} 
           </Typography>
           <Typography variant="body2" color="text.secondary">
-          Dark view
+            {t("Dark view")}
           </Typography>
         </Box>
       </ThemeOption>
+    </Box>
+  );
+  
+  const languagePopoverContent = (
+    <Box sx={{
+      p: 1,
+      width: "280px",
+      backgroundColor: theme.palette.background.card,
+      borderRadius: "16px",
+      boxShadow: `0 10px 25px ${alpha(theme.palette.common.black, 0.2)}`
+    }}>
+      <Typography
+        variant="h6"
+        sx={{
+          p: 1,
+          fontWeight: "bold",
+          textAlign: "center",
+          background: theme.palette.text.gradient,
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {t('languageCard.title')}
+      </Typography>
+
+      <LanguageOption 
+        active={currentLanguage.startsWith('tr')} 
+        onClick={() => handleLanguageChange("tr")}
+      >
+        <LanguageFlag>🇹🇷</LanguageFlag>
+        <Box>
+          <Typography variant="body1" fontWeight="bold">
+            {t('languageCard.turkish')} 
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Türkçe
+          </Typography>
+        </Box>
+      </LanguageOption>
+      
+      <LanguageOption 
+        active={currentLanguage.startsWith('en')} 
+        onClick={() => handleLanguageChange("en")}
+      >
+        <LanguageFlag>🇺🇸</LanguageFlag>
+        <Box>
+          <Typography variant="body1" fontWeight="bold">
+            {t('languageCard.english')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            English
+          </Typography>
+        </Box>
+      </LanguageOption>
     </Box>
   );
 
@@ -182,11 +294,12 @@ function SidebarFooter() {
           {option.icon}
         </StyledFooterItem>
       ))}
-      
+
+      {/* Theme Popover */}
       <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
+        open={themeOpen}
+        anchorEl={themeAnchorEl}
+        onClose={handleThemeClose}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
@@ -215,6 +328,41 @@ function SidebarFooter() {
         }}
       >
         {themePopoverContent}
+      </Popover>
+      
+      {/* Language Popover */}
+      <Popover
+        open={langOpen}
+        anchorEl={langAnchorEl}
+        onClose={handleLanguageClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        sx={{
+          "& .MuiPopover-paper": { 
+            borderRadius: "16px",
+            overflow: "visible",
+            mt: "-10px",
+            "&:before": {
+              content: '""',
+              position: "absolute",
+              bottom: "-8px",
+              left: "10%",
+              transform: "translateX(-50%) rotate(45deg)",
+              width: "16px",
+              height: "16px",
+              backgroundColor: theme.palette.background.card,
+              zIndex: 0
+            }
+          }
+        }}
+      >
+        {languagePopoverContent}
       </Popover>
     </StyledFooter>
   );
