@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogActions,
@@ -6,14 +6,15 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-  CircularProgress
-} from '@mui/material';
+  CircularProgress,
+} from "@mui/material";
 
 const DeleteConfirmDialog = ({
   open,
   onClose,
   onConfirm,
   isGroupDeleting,
+  t, 
 }) => {
   return (
     <Dialog
@@ -23,20 +24,28 @@ const DeleteConfirmDialog = ({
       aria-describedby="alert-dialog-description"
     >
       <DialogTitle id="alert-dialog-title">
-        {"Delete Group?"}
+        {t("deleteGroupDialogTitle")}
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
-          Are you sure you want to delete this group? This action cannot be undone.
+          {t("deleteGroupDialogMessage")}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary" disabled={isGroupDeleting}>
-          Cancel
+          {t("Cancel")}
         </Button>
-        <Button onClick={onConfirm} color="error" autoFocus disabled={isGroupDeleting}>
-          Delete
-          {isGroupDeleting && <CircularProgress size={20} sx={{ ml: 1, color: 'error' }} />}
+        <Button
+          onClick={onConfirm}
+          color="error"
+          autoFocus
+          disabled={isGroupDeleting}
+        >
+          {t("deleteButtonLabel")}
+          {isGroupDeleting && (
+            <CircularProgress size={20} sx={{ ml: 1, color: "error.main" }} />
+          )}{" "}
+          {/* Changed color to 'error.main' for consistency */}
         </Button>
       </DialogActions>
     </Dialog>

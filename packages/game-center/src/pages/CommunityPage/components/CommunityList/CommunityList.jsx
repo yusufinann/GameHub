@@ -16,7 +16,8 @@ const CommunityList = ({
   onDeleteGroup,
   isGroupListLoading,
   isGroupDeleting,
-  currentUser 
+  currentUser,
+  t 
 }) => {
   const [activeItem, setActiveItem] = useState('global');
   const [joinableGroups, setJoinableGroups] = useState([]);
@@ -39,7 +40,7 @@ const CommunityList = ({
     setActiveItem(communityId);
     if (onCommunitySelect) {
       if (communityId === 'global') {
-        onCommunitySelect({ id: 'global', name: 'Global Community' });
+        onCommunitySelect({ id: 'global', name: t('globalCommunityTitle') });
       } else {
         const group = groups.find(g => g._id === communityId) || allGroups.find(g => g._id === communityId);
         if (group) onCommunitySelect(group);
@@ -54,7 +55,7 @@ const CommunityList = ({
   const handleLeaveGroupClick = (groupId) => {
     onLeaveGroup(groupId);
     setActiveItem('global');
-    onCommunitySelect({ id: 'global', name: 'Global Community' });
+    onCommunitySelect({ id: 'global', name: t('globalCommunityTitle') });
   };
 
   const handleDeleteGroupClick = (groupId) => {
@@ -69,7 +70,7 @@ const CommunityList = ({
     }
     setDeleteConfirmationOpen(false);
     setActiveItem('global');
-    onCommunitySelect({ id: 'global', name: 'Global Community' });
+    onCommunitySelect({ id: 'global', name: t('globalCommunityTitle') });
   };
 
   const cancelDeleteGroup = () => {
@@ -95,7 +96,7 @@ const CommunityList = ({
     >
       <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
         <List disablePadding>
-          <Header activeItem={activeItem} handleSelectCommunity={handleSelectCommunity} theme={theme}/>
+          <Header activeItem={activeItem} handleSelectCommunity={handleSelectCommunity} theme={theme} t={t}/>
         </List>
 
         <Divider sx={{ 
@@ -117,6 +118,7 @@ const CommunityList = ({
           currentUser={currentUser}
           isGroupListLoading={isGroupListLoading}
           isGroupDeleting={isGroupDeleting}
+          t={t}
         />
 
         <Divider sx={{ 
@@ -133,6 +135,7 @@ const CommunityList = ({
           activeItem={activeItem}
           onJoinGroupDialogOpen={onJoinGroupDialogOpen}
           isGroupListLoading={isGroupListLoading}
+          t={t}
         />
       </Box>
 
@@ -142,6 +145,7 @@ const CommunityList = ({
         onClose={cancelDeleteGroup}
         onConfirm={confirmDeleteGroup}
         isGroupDeleting={isGroupDeleting}
+        t={t}
       />
     </Box>
   );

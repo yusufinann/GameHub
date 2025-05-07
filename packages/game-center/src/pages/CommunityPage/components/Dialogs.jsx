@@ -25,6 +25,7 @@ export const CreateGroupDialog = ({
   maxMembers, 
   setMaxMembers,
   handleCreateGroup,
+  t
 }) => {
 
   const handleMaxMembersChange = (e) => {
@@ -37,13 +38,13 @@ export const CreateGroupDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleCreateGroup(); } }}>
-      <DialogTitle>Create New Gaming Group</DialogTitle>
+      <DialogTitle>{t("Create Community Group")}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           margin="dense"
           id="name"
-          label="Group Name"
+          label={t("Group Name")}
           type="text"
           fullWidth
           variant="standard"
@@ -54,7 +55,7 @@ export const CreateGroupDialog = ({
         <TextField
           margin="dense"
           id="description"
-          label="Group Description (Optional)"
+          label={t("Group Description (Optional)")}
           type="text"
           fullWidth
           variant="standard"
@@ -66,7 +67,7 @@ export const CreateGroupDialog = ({
          <TextField
             margin="dense"
             id="maxMembers"
-            label="Max Members (min 2)"
+            label={t("Max Members (min 2)")}
             type="number"
             fullWidth
             variant="standard"
@@ -84,13 +85,13 @@ export const CreateGroupDialog = ({
               onChange={(e) => setIsPasswordProtected(e.target.checked)}
             />
           }
-          label="Password Protect?"
+          label={t("Password Protect?")}
         />
         {isPasswordProtected && (
           <TextField
             margin="dense"
             id="password"
-            label="Password"
+            label={t("Password")}
             type="password"
             fullWidth
             variant="standard"
@@ -101,9 +102,9 @@ export const CreateGroupDialog = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t("Cancel")}</Button>
         <Button onClick={handleCreateGroup} variant="contained" type="submit">
-          Create
+          {t("Create")}
         </Button>
       </DialogActions>
     </Dialog>
@@ -116,22 +117,35 @@ export const JoinGroupDialog = ({
   joinPassword,
   setJoinPassword,
   handleJoinGroup,
-  requiresPassword, 
+  requiresPassword,
+  t 
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleJoinGroup(); } }}>
-       <DialogTitle>{requiresPassword ? "Join Protected Group" : "Join Group"}</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        component: 'form',
+        onSubmit: (e) => {
+          e.preventDefault();
+          handleJoinGroup();
+        }
+      }}
+    >
+      <DialogTitle>
+        {requiresPassword ? t('joinProtectedGroupTitle') : t('joinGroupTitle')}
+      </DialogTitle>
       <DialogContent>
         {requiresPassword ? (
           <>
-            <Typography>
-              This group is password protected. Please enter the password to join.
+            <Typography sx={{ mb: 2 }}> 
+              {t('protectedGroupPrompt')}
             </Typography>
             <TextField
               autoFocus
               margin="dense"
-              id="join-password" 
-              label="Password"
+              id="join-password"
+              label={t('passwordLabel')}
               type="password"
               fullWidth
               variant="standard"
@@ -142,14 +156,14 @@ export const JoinGroupDialog = ({
           </>
         ) : (
           <Typography>
-            Click "Join Group" to become a member.
+            {t('joinGroupPromptNoPassword')}
           </Typography>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('Cancel')}</Button> 
         <Button onClick={handleJoinGroup} variant="contained" type="submit">
-          Join Group
+          {t('joinGroup')} 
         </Button>
       </DialogActions>
     </Dialog>

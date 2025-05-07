@@ -14,6 +14,7 @@ import ChatBox from "../../shared/components/ChatBox/ChatBox";
 import { useFriendsContext } from "../../shared/context/FriendsContext/context";
 import ErrorModal from "../../shared/components/ErrorModal";
 import UpdateFriendGroupDialog from "./components/UpdateFriendGroup";
+import { useTranslation } from "react-i18next";
 
 function ConversationPage() {
   const {
@@ -23,7 +24,7 @@ function ConversationPage() {
     handleSnackbarClose,
     showSnackbar,
   } = useSnackbar();
-
+const{t}=useTranslation()
   const { currentUser } = useAuthContext();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [friendGroups, setFriendGroups] = useState([]);
@@ -230,6 +231,7 @@ function ConversationPage() {
         setFriendGroupPassword={setFriendGroupPassword}
         handleCreateFriendGroup={handleCreateFriendGroup}
         friends={friends}
+        t={t}
       />
 
       {/* Main Content */}
@@ -254,7 +256,7 @@ function ConversationPage() {
         >
           <GroupIcon sx={{ color: "#fd5959", mr: 1 }} />
           <Typography variant="h6" component="div">
-            CONVERSATIONS
+            {t("Conversations")}
           </Typography>
         </Box>
 
@@ -288,6 +290,7 @@ function ConversationPage() {
             friends={friends}
             incomingRequests={incomingRequests}
             onEditFriendGroup={openUpdateDialog}
+            t={t}
           />
 
           <ChatBox
@@ -331,6 +334,7 @@ function ConversationPage() {
                 onClose={closeUpdateDialog}
                 group={groupToUpdate}
                 onUpdate={handleUpdateFriendGroup}
+                t={t}
              />
       </Box>
     </Box>

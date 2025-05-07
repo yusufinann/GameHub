@@ -12,7 +12,7 @@ EmojiEmotions as EmojiIcon,
 } from "@mui/icons-material";
 import { useTheme } from '@mui/material/styles';
 
-const ChatInput = ({ newMessage, setNewMessage, handleSendMessage, isMessagingLoading }) => {
+const ChatInput = ({ newMessage, setNewMessage, handleSendMessage, isMessagingLoading,t }) => {
   const theme = useTheme();
 
   return (
@@ -24,7 +24,7 @@ const ChatInput = ({ newMessage, setNewMessage, handleSendMessage, isMessagingLo
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="Type your message..."
+        placeholder={t('typeYourMessagePlaceholder')}
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}
         onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendMessage())}

@@ -26,6 +26,7 @@ const MyGroups = ({
   currentUser,
   isGroupListLoading,
   isGroupDeleting,
+  t // The translation function
 }) => {
   const filteredMyGroups = groups?.filter(group =>
     group.groupName.toLowerCase().includes(myGroupSearch.toLowerCase())
@@ -42,17 +43,19 @@ const MyGroups = ({
           justifyContent: 'space-between'
         }}
       >
-        <Box sx={{ fontWeight: 'bold', color: 'text.secondary' }}>MY GROUPS</Box>
+        <Box sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+          {t('myGroupsTitle')}
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <TextField
             value={myGroupSearch}
             onChange={(e) => setMyGroupSearch(e.target.value)}
-            placeholder="Search..."
+            placeholder={t('searchPlaceholder')}
             size="small"
             variant="outlined"
             sx={{ mr: 1 }}
           />
-          <Tooltip title="Create new group">
+          <Tooltip title={t('createNewGroupTooltip')}>
             <IconButton size="small" sx={{ color: '#fd5959' }} onClick={onCreateGroupDialogOpen}>
               <AddIcon />
             </IconButton>
@@ -89,7 +92,7 @@ const MyGroups = ({
                     {group.host._id === currentUser?.id && (
                       <Chip
                         icon={<HostIcon />}
-                        label="Host"
+                        label={t('hostChipLabel')}
                         size="small"
                         sx={{
                           ml: 1,
@@ -103,11 +106,11 @@ const MyGroups = ({
                     )}
                   </Box>
                 }
-                secondary={`${group.members.length}/${group.maxMembers || '∞'} members`}
+                secondary={t('membersCountLabel', { count: group.members.length, max: group.maxMembers || '∞' })}
                 primaryTypographyProps={{ fontWeight: activeItem === group._id ? 'bold' : 'normal' }}
               />
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Tooltip title="Leave Group">
+                <Tooltip title={t('leaveGroupTooltip')}>
                   <IconButton
                     size="small"
                     sx={{ ml: 1, color: 'grey' }}
@@ -120,10 +123,10 @@ const MyGroups = ({
                   </IconButton>
                 </Tooltip>
                 {group.host._id === currentUser?.id && (
-                  <Tooltip title="Delete Group">
+                  <Tooltip title={t('deleteGroupTooltip')}>
                     <IconButton
                       size="small"
-                      sx={{ ml: 1, color: 'error' }}
+                      sx={{ ml: 1, color: 'error' }} // Consider theme.palette.error.main
                       onClick={(e) => {
                         e.stopPropagation();
                         onDeleteGroupClick(group._id);

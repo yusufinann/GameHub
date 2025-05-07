@@ -38,7 +38,7 @@ const GlowingIndicator = () => {
   );
 };
 
-const Header = ({ activeItem, handleSelectCommunity }) => {
+const Header = ({ activeItem, handleSelectCommunity,t }) => {
   const theme = useTheme();
 
   return (
@@ -56,7 +56,7 @@ const Header = ({ activeItem, handleSelectCommunity }) => {
             color: theme.palette.text.primary
           }}
         >
-          Communities
+          {t("Communities")}
         </Typography>
       </Box>
 
@@ -87,8 +87,8 @@ const Header = ({ activeItem, handleSelectCommunity }) => {
           </Avatar>
         </ListItemIcon>
         <ListItemText
-          primary="Global Community"
-          secondary="All members"
+          primary={t("globalCommunityTitle")} 
+          secondary={t("All users")}
           primaryTypographyProps={{ 
             fontWeight: activeItem === 'global' ? 'bold' : 'normal',
             color: theme.palette.text.primary

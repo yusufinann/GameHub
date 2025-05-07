@@ -8,7 +8,7 @@ import { useGroupDialog } from "./components/useGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import ChatBox from "../../shared/components/ChatBox/ChatBox"; 
-
+import { useTranslation } from 'react-i18next';
 function CommunityPage() {
   const {
     snackbarOpen,
@@ -18,7 +18,7 @@ function CommunityPage() {
   } = useSnackbar();
 
   const { currentUser } = useAuthContext();
-
+  const{t}=useTranslation();
   const {
     communityMessages,
     newCommunityMessage,
@@ -66,21 +66,18 @@ function CommunityPage() {
     setIsPasswordProtected,
     setNewGroupPassword,
     setJoinPassword,
-    maxMembers, // <-- Receive prop
-    setMaxMembers, // <-- Receive prop
+    maxMembers, 
+    setMaxMembers, 
     joinGroupRequiresPassword
   } = useGroupDialog();
 
   const handleCommunitySelect = () => {
-      handleGroupSelect(null); // Deselect any active group
-      //setCommunityPage(1);
-      //setHasMoreCommunity(false); // Reset hasMoreCommunity when selecting the community
-      // No need to call fetchCommunityChatHistory here,
-      // useCommunityPage handles initial load and selection changes internally now.
-      // If you need an explicit refresh button, you could call fetchCommunityChatHistory(1).
+      handleGroupSelect(null); 
   };
 
-
+  const translatedChatTitle = selectedGroup
+  ? selectedGroup.groupName // Group names are usually dynamic and don't need translation
+  : t("globalCommunityTitle");
   return (
     <Box
       sx={{
@@ -117,8 +114,9 @@ function CommunityPage() {
         newGroupPassword={newGroupPassword}
         setNewGroupPassword={setNewGroupPassword}
         handleCreateGroup={handleCreateGroup} 
-        maxMembers={maxMembers} // <-- Receive prop
-        setMaxMembers={setMaxMembers} // <-- Receive prop
+        maxMembers={maxMembers}
+        setMaxMembers={setMaxMembers} 
+        t={t}
       />
 
       <JoinGroupDialog
@@ -127,7 +125,8 @@ function CommunityPage() {
         joinPassword={joinPassword}
         setJoinPassword={setJoinPassword}
         handleJoinGroup={handleJoinGroup}
-        requiresPassword={joinGroupRequiresPassword} // <-- Pass the prop to
+        requiresPassword={joinGroupRequiresPassword} 
+        t={t}
       />
 
       <Box
@@ -151,7 +150,7 @@ function CommunityPage() {
         >
           <ForumIcon sx={{ color: " #fd5959", mr: 1 }} />
           <Typography variant="h6" component="div">
-            COMMUNITY
+            {t("COMMUNITY")}
           </Typography>
         </Box>
         <Box
@@ -178,10 +177,11 @@ function CommunityPage() {
             isGroupDeleting={isGroupDeleting}
             currentUser={currentUser}
             selectedGroupId={selectedGroup?._id} 
+            t={t}
           />
           <ChatBox
             chatType={selectedGroup ? "group" : "community"}
-            chatTitle={selectedGroup ? selectedGroup.groupName : "Global Community"}
+            chatTitle={translatedChatTitle}
             selectedConversation={selectedGroup}
             messages={selectedGroup ? groupMessages : communityMessages}
             newMessage={selectedGroup ? newGroupMessage : newCommunityMessage}

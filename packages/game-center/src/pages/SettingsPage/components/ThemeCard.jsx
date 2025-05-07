@@ -1,308 +1,417 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
+import React from "react";
+import {
+  Box,
+  Typography,
+  Paper,
   ToggleButtonGroup,
   ToggleButton,
   useTheme,
   alpha,
-  Grow
-} from '@mui/material';
-import { 
-  DarkMode as DarkModeIcon, 
+  Grow,
+} from "@mui/material";
+import {
+  DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
-  WaterDrop as WaterDropIcon
-} from '@mui/icons-material';
+  WaterDrop as WaterDropIcon,
+} from "@mui/icons-material";
+import { useTranslation } from "react-i18next"; 
 
-const ThemeCard = ({ isDarkMode, isNeonOceanMode, handleThemeChange, language, animateCards }) => {
+const ThemeCard = ({
+  isDarkMode,
+  isNeonOceanMode,
+  handleThemeChange,
+  animateCards,
+}) => {
   const theme = useTheme();
+  const { t } = useTranslation(); 
   const primary = theme.palette.primary;
   const secondary = theme.palette.secondary;
   const bg = theme.palette.background;
-  
-  // Enhanced glow based on current theme
-  const cardBgGlow = isDarkMode 
-    ? `0 0 25px ${alpha(primary.dark, 0.5)}, 0 0 15px ${alpha(secondary.main, 0.3)}` 
-    : isNeonOceanMode
-      ? `0 0 25px ${alpha('#1a6b99', 0.5)}, 0 0 15px ${alpha('#48b6df', 0.3)}`
-      : `0 0 25px ${alpha(primary.main, 0.15)}, 0 0 15px ${alpha(secondary.main, 0.1)}`;
 
-  // Current theme mode text
-  const currentThemeText = isDarkMode 
-    ? (language === 'tr' ? 'Koyu Tema' : 'Dark Theme')
+  const cardBgGlow = isDarkMode
+    ? `0 0 25px ${alpha(primary.dark, 0.5)}, 0 0 15px ${alpha(
+        secondary.main,
+        0.3
+      )}`
     : isNeonOceanMode
-      ? (language === 'tr' ? 'Neon Ocean Tema' : 'Neon Ocean Theme')
-      : (language === 'tr' ? 'Açık Tema' : 'Light Theme');
+    ? `0 0 25px ${alpha("#1a6b99", 0.5)}, 0 0 15px ${alpha("#48b6df", 0.3)}`
+    : `0 0 25px ${alpha(primary.main, 0.15)}, 0 0 15px ${alpha(
+        secondary.main,
+        0.1
+      )}`;
 
-  // Current theme icon
-  const ThemeIcon = isDarkMode 
-    ? DarkModeIcon 
+  const currentThemeText = isDarkMode
+    ? t("themeCard.currentThemeDark")
     : isNeonOceanMode
-      ? WaterDropIcon
-      : LightModeIcon;
+    ? t("themeCard.currentThemeNeonOcean")
+    : t("themeCard.currentThemeLight");
 
-  // Helper function to determine current theme value
+  const ThemeIcon = isDarkMode
+    ? DarkModeIcon
+    : isNeonOceanMode
+    ? WaterDropIcon
+    : LightModeIcon;
+
   const getCurrentThemeValue = () => {
-    if (isDarkMode) return 'dark';
-    if (isNeonOceanMode) return 'neonOcean';
-    return 'light';
+    if (isDarkMode) return "dark";
+    if (isNeonOceanMode) return "neonOcean";
+    return "light";
   };
 
   return (
-    <Box sx={{ width: { xs: '100%', md: '50%' }, p: 2 }}>
+    <Box sx={{ width: { xs: "100%", md: "50%" }, p: 2 }}>
       <Grow in={animateCards} timeout={300}>
-        <Paper 
+        <Paper
           elevation={6}
-          sx={{ 
+          sx={{
             borderRadius: 4,
-            overflow: 'hidden',
-            position: 'relative',
-            height: '100%',
+            overflow: "hidden",
+            position: "relative",
+            height: "100%",
             background: alpha(bg.card, 0.8),
-            backdropFilter: 'blur(10px)',
+            backdropFilter: "blur(10px)",
             boxShadow: cardBgGlow,
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-            '&:hover': {
-              transform: 'translateY(-5px)',
-              boxShadow: `0 10px 30px ${alpha(primary.main, 0.2)}`
-            }
+            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-5px)",
+              boxShadow: `0 10px 30px ${alpha(primary.main, 0.2)}`,
+            },
           }}
         >
-          <Box sx={{ 
-            background: isNeonOceanMode
-              ? 'linear-gradient(135deg, #1a6b99 0%, #48b6df 100%)'
-              : `linear-gradient(135deg, ${primary.main} 0%, ${secondary.main} 100%)`,
-            p: 3,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{ 
-              width: 50, 
-              height: 50, 
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)'
-            }}>
+          <Box
+            sx={{
+              background: isNeonOceanMode
+                ? "linear-gradient(135deg, #1a6b99 0%, #48b6df 100%)"
+                : `linear-gradient(135deg, ${primary.main} 0%, ${secondary.main} 100%)`,
+              p: 3,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+              }}
+            >
               <ThemeIcon fontSize="large" />
             </Box>
             <Typography variant="h5" fontWeight="bold" color="white">
-              {language === 'tr' ? 'TEMA' : 'THEME'}
+              {t("themeCard.title")}
             </Typography>
           </Box>
           <Box sx={{ p: 3 }}>
             {/* Theme toggle UI with toggle buttons for 3 themes */}
-            <Box sx={{ 
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              mb: 2
-            }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                mb: 2,
+              }}
+            >
               <Typography variant="body1" fontWeight="medium" mb={1}>
                 {currentThemeText}
               </Typography>
-              
+
               <ToggleButtonGroup
                 value={getCurrentThemeValue()}
                 exclusive
                 onChange={(e, newValue) => {
-                  // Only apply if a valid value is selected and it's different from current
                   if (newValue !== null) {
                     handleThemeChange(newValue);
                   }
                 }}
-                aria-label="theme selection"
+                aria-label={t("themeCard.themeSelectionAriaLabel")}
                 fullWidth
                 sx={{
-                  '& .MuiToggleButtonGroup-grouped': {
+                  "& .MuiToggleButtonGroup-grouped": {
                     border: 1,
                     borderColor: alpha(theme.palette.text.primary, 0.12),
-                    '&.Mui-selected': {
-                      backgroundColor: isNeonOceanMode 
-                        ? alpha('#48b6df', 0.2) 
+                    "&.Mui-selected": {
+                      backgroundColor: isNeonOceanMode
+                        ? alpha("#48b6df", 0.2)
                         : alpha(primary.main, 0.2),
-                      color: isNeonOceanMode 
-                        ? '#1a6b99' 
-                        : primary.main
+                      color: isNeonOceanMode ? "#1a6b99" : primary.main,
                     },
                   },
                 }}
               >
-                <ToggleButton value="light" aria-label="light theme">
+                <ToggleButton
+                  value="light"
+                  aria-label={t("themeCard.lightThemeAriaLabel")}
+                >
                   <LightModeIcon sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {language === 'tr' ? 'Açık' : 'Light'}
+                    {t("themeCard.lightThemeLabel")}
                   </Typography>
                 </ToggleButton>
-                <ToggleButton value="neonOcean" aria-label="neonOcean theme">
+                <ToggleButton
+                  value="neonOcean"
+                  aria-label={t("themeCard.neonOceanThemeAriaLabel")}
+                >
                   <WaterDropIcon sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {language === 'tr' ? 'Neon Ocean' : 'Neon Ocean'}
+                    {t("themeCard.neonOceanThemeLabel")}
                   </Typography>
                 </ToggleButton>
-                <ToggleButton value="dark" aria-label="dark theme">
+                <ToggleButton
+                  value="dark"
+                  aria-label={t("themeCard.darkThemeAriaLabel")}
+                >
                   <DarkModeIcon sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {language === 'tr' ? 'Koyu' : 'Dark'}
+                    {t("themeCard.darkThemeLabel")}
                   </Typography>
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
 
             {/* Theme Preview Cards */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2,
-              mt: 4,
-              p: 1,
-              flexWrap: { xs: 'wrap', sm: 'nowrap' }
-            }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                mt: 4,
+                p: 1,
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+              }}
+            >
               {/* Light Theme Preview */}
-              <Box 
-                onClick={() => handleThemeChange('light')}
-                sx={{ 
-                  width: { xs: '30%', sm: 80 }, 
-                  height: { xs: 120, sm: 140 }, 
+              <Box
+                onClick={() => handleThemeChange("light")}
+                sx={{
+                  width: { xs: "30%", sm: 80 },
+                  height: { xs: 120, sm: 140 },
                   borderRadius: 3,
-                  background: 'linear-gradient(to bottom, #caecd5, #fff)',
-                  position: 'relative',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease',
-                  transform: (!isDarkMode && !isNeonOceanMode) ? 'scale(1.05)' : 'scale(1)',
-                  border: (!isDarkMode && !isNeonOceanMode) ? `2px solid ${primary.main}` : 'none',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
+                  background: "linear-gradient(to bottom, #caecd5, #fff)",
+                  position: "relative",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease",
+                  transform:
+                    !isDarkMode && !isNeonOceanMode
+                      ? "scale(1.05)"
+                      : "scale(1)",
+                  border:
+                    !isDarkMode && !isNeonOceanMode
+                      ? `2px solid ${primary.main}`
+                      : "none",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
                 }}
+                aria-label={t("themeCard.lightThemePreviewAriaLabel")}
               >
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '10%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '80%',
-                  height: '10px',
-                  borderRadius: '3px',
-                  backgroundColor: '#7cccc4' 
-                }} />
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '25%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '60%',
-                  height: '60px',
-                  borderRadius: '3px',
-                  backgroundColor: 'white',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  p: 1
-                }}>
-                  <Box sx={{ width: '70%', height: 3, backgroundColor: '#ddd', borderRadius: 1 }} />
-                  <Box sx={{ width: '50%', height: 3, backgroundColor: '#ddd', borderRadius: 1 }} />
-                  <Box sx={{ width: '60%', height: 3, backgroundColor: '#ddd', borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80%",
+                    height: "10px",
+                    borderRadius: "3px",
+                    backgroundColor: "#7cccc4",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "25%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "60%",
+                    height: "60px",
+                    borderRadius: "3px",
+                    backgroundColor: "white",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    p: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "70%",
+                      height: 3,
+                      backgroundColor: "#ddd",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "50%",
+                      height: 3,
+                      backgroundColor: "#ddd",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "60%",
+                      height: 3,
+                      backgroundColor: "#ddd",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
               </Box>
 
               {/* Neon Ocean Theme Preview */}
-              <Box 
-                onClick={() => handleThemeChange('neonOcean')}
-                sx={{ 
-                  width: { xs: '30%', sm: 80 }, 
-                  height: { xs: 120, sm: 140 }, 
+              <Box
+                onClick={() => handleThemeChange("neonOcean")}
+                sx={{
+                  width: { xs: "30%", sm: 80 },
+                  height: { xs: 120, sm: 140 },
                   borderRadius: 3,
-                  background: 'linear-gradient(to bottom, #48b6df, #1a6b99)',
-                  position: 'relative',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease',
-                  transform: isNeonOceanMode ? 'scale(1.05)' : 'scale(1)',
-                  border: isNeonOceanMode ? `2px solid #48b6df` : 'none',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
+                  background: "linear-gradient(to bottom, #48b6df, #1a6b99)",
+                  position: "relative",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease",
+                  transform: isNeonOceanMode ? "scale(1.05)" : "scale(1)",
+                  border: isNeonOceanMode ? `2px solid #48b6df` : "none",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
                 }}
+                aria-label={t("themeCard.neonOceanThemePreviewAriaLabel")}
               >
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '10%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '80%',
-                  height: '10px',
-                  borderRadius: '3px',
-                  backgroundColor: '#81d4fa' 
-                }} />
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '25%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '60%',
-                  height: '60px',
-                  borderRadius: '3px',
-                  backgroundColor: '#b3e5fc',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  p: 1
-                }}>
-                  <Box sx={{ width: '70%', height: 3, backgroundColor: '#4fc3f7', borderRadius: 1 }} />
-                  <Box sx={{ width: '50%', height: 3, backgroundColor: '#4fc3f7', borderRadius: 1 }} />
-                  <Box sx={{ width: '60%', height: 3, backgroundColor: '#4fc3f7', borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80%",
+                    height: "10px",
+                    borderRadius: "3px",
+                    backgroundColor: "#81d4fa",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "25%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "60%",
+                    height: "60px",
+                    borderRadius: "3px",
+                    backgroundColor: "#b3e5fc",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    p: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "70%",
+                      height: 3,
+                      backgroundColor: "#4fc3f7",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "50%",
+                      height: 3,
+                      backgroundColor: "#4fc3f7",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "60%",
+                      height: 3,
+                      backgroundColor: "#4fc3f7",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
               </Box>
 
               {/* Dark Theme Preview */}
-              <Box 
-                onClick={() => handleThemeChange('dark')}
-                sx={{ 
-                  width: { xs: '30%', sm: 80 }, 
-                  height: { xs: 120, sm: 140 }, 
+              <Box
+                onClick={() => handleThemeChange("dark")}
+                sx={{
+                  width: { xs: "30%", sm: 80 },
+                  height: { xs: 120, sm: 140 },
                   borderRadius: 3,
-                  background: 'linear-gradient(to bottom, #1d2e4a, #0f1924)',
-                  position: 'relative',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease',
-                  transform: isDarkMode ? 'scale(1.05)' : 'scale(1)',
-                  border: isDarkMode ? `2px solid ${primary.darker || primary.dark}` : 'none',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
+                  background: "linear-gradient(to bottom, #1d2e4a, #0f1924)",
+                  position: "relative",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease",
+                  transform: isDarkMode ? "scale(1.05)" : "scale(1)",
+                  border: isDarkMode
+                    ? `2px solid ${primary.darker || primary.dark}`
+                    : "none",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
                 }}
+                aria-label={t("themeCard.darkThemePreviewAriaLabel")}
               >
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '10%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '80%',
-                  height: '10px',
-                  borderRadius: '3px',
-                  backgroundColor: '#2c5282' 
-                }} />
-                <Box sx={{ 
-                  position: 'absolute', 
-                  top: '25%', 
-                  left: '50%', 
-                  transform: 'translateX(-50%)',
-                  width: '60%',
-                  height: '60px',
-                  borderRadius: '3px',
-                  backgroundColor: '#2d3748',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  p: 1
-                }}>
-                  <Box sx={{ width: '70%', height: 3, backgroundColor: '#4a5568', borderRadius: 1 }} />
-                  <Box sx={{ width: '50%', height: 3, backgroundColor: '#4a5568', borderRadius: 1 }} />
-                  <Box sx={{ width: '60%', height: 3, backgroundColor: '#4a5568', borderRadius: 1 }} />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "80%",
+                    height: "10px",
+                    borderRadius: "3px",
+                    backgroundColor: "#2c5282",
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "25%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "60%",
+                    height: "60px",
+                    borderRadius: "3px",
+                    backgroundColor: "#2d3748",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    p: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "70%",
+                      height: 3,
+                      backgroundColor: "#4a5568",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "50%",
+                      height: 3,
+                      backgroundColor: "#4a5568",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "60%",
+                      height: 3,
+                      backgroundColor: "#4a5568",
+                      borderRadius: 1,
+                    }}
+                  />
                 </Box>
               </Box>
             </Box>

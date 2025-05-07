@@ -4,7 +4,9 @@ import {
     Save as SaveIcon,
     Settings as SettingsIcon,
   } from '@mui/icons-material';
-const Header = ({language,theme,showSaveIndicator}) => {
+import { useTranslation } from 'react-i18next';
+const Header = ({theme,showSaveIndicator}) => {
+  const{t}=useTranslation();
   return (
     <Box sx={{ 
         display: 'flex', 
@@ -29,10 +31,10 @@ const Header = ({language,theme,showSaveIndicator}) => {
               }}
             >
               <SettingsIcon sx={{ fontSize: 40 }} />
-              {language === 'tr' ? 'AYARLAR' : 'SETTINGS'}
+              {t("Settings")}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {language === 'tr' ? 'Tercihlerinizi özelleştirin' : 'Customize your preferences'}
+            {t("Customize your preferences")}
             </Typography>
           </Box>
         </Box>
@@ -50,7 +52,7 @@ const Header = ({language,theme,showSaveIndicator}) => {
           }}>
             <SaveIcon />
             <Typography variant="body2" fontWeight="bold">
-              {language === 'tr' ? 'Kaydedildi!' : 'Saved!'}
+              {t("Saved")}!
             </Typography>
           </Box>
         </Zoom>

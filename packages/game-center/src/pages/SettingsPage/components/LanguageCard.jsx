@@ -10,11 +10,11 @@ import {
 import {
   Language as LanguageIcon,
 } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next'; // i18next hook'unu import et
+import { useTranslation } from 'react-i18next'; 
 
-const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
+const LanguageCard = ({ language,handleLanguageChange, animateCards }) => {
   const theme = useTheme();
-  const { t } = useTranslation(); // t fonksiyonunu al
+  const { t } = useTranslation(); 
 
   const primary = theme.palette.primary;
   const secondary = theme.palette.secondary;
@@ -23,6 +23,8 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
   const cardBgGlow = theme.palette.mode === 'dark'
     ? `0 0 25px ${alpha(primary.dark, 0.5)}, 0 0 15px ${alpha(secondary.main, 0.3)}`
     : `0 0 25px ${alpha(primary.main, 0.15)}, 0 0 15px ${alpha(secondary.main, 0.1)}`;
+
+  const currentLanguage = language; 
 
   return (
     <Box sx={{ width: { xs: '100%', md: '50%' }, p: 2 }}>
@@ -45,7 +47,7 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
           }}
         >
           <Box sx={{
-            background: `linear-gradient(135deg, ${secondary.main} 0%, ${primary.light} 100%)`,
+            background: `linear-gradient(135deg, ${secondary.main} 0%, ${primary.light || primary.main} 100%)`, 
             p: 3,
             display: 'flex',
             alignItems: 'center',
@@ -63,7 +65,7 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
               <LanguageIcon fontSize="large" />
             </Box>
             <Typography variant="h5" fontWeight="bold" color="white">
-              {t('Language')} {/* Çeviri eklendi */}
+              {t('languageCard.title')}
             </Typography>
           </Box>
           <Box sx={{ p: 3 }}>
@@ -71,15 +73,17 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
               <Box sx={{ width: '50%', p: 1.5 }}>
                 <Paper
                   onClick={() => handleLanguageChange('tr')}
+                  elevation={currentLanguage.startsWith('tr') ? 8 : 3} 
                   sx={{
                     backgroundColor: alpha(bg.default, 0.5),
                     p: 2,
                     borderRadius: 3,
                     cursor: 'pointer',
-                    border: language === 'tr' ? `2px solid ${primary.main}` : 'none', // Aktif dil için border
-                    transition: 'transform 0.2s ease',
+                    border: currentLanguage.startsWith('tr') ? `2px solid ${primary.main}` : `2px solid transparent`,
+                    transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
                     '&:hover': {
-                      transform: 'translateY(-5px)'
+                      transform: 'translateY(-5px)',
+                      borderColor: primary.main, 
                     },
                     height: '100%',
                     display: 'flex',
@@ -102,22 +106,24 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
                     🇹🇷
                   </Box>
                   <Typography variant="h6" fontWeight="bold" textAlign="center">
-                    {t('Turkish')} {/* Çeviri eklendi */}
+                    {t('languageCard.turkish')}
                   </Typography>
                 </Paper>
               </Box>
               <Box sx={{ width: '50%', p: 1.5 }}>
                 <Paper
                   onClick={() => handleLanguageChange('en')}
+                  elevation={currentLanguage.startsWith('en') ? 8 : 3} 
                   sx={{
                     backgroundColor: alpha(bg.default, 0.5),
                     p: 2,
                     borderRadius: 3,
                     cursor: 'pointer',
-                    border: language === 'en' ? `2px solid ${primary.main}` : 'none', // Aktif dil için border
-                    transition: 'transform 0.2s ease',
+                    border: currentLanguage.startsWith('en') ? `2px solid ${primary.main}` : `2px solid transparent`, 
+                    transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
                     '&:hover': {
-                      transform: 'translateY(-5px)'
+                      transform: 'translateY(-5px)',
+                      borderColor: primary.main, 
                     },
                     height: '100%',
                     display: 'flex',
@@ -140,7 +146,7 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
                     🇬🇧
                   </Box>
                   <Typography variant="h6" fontWeight="bold" textAlign="center">
-                    {t('English')} {/* Çeviri eklendi */}
+                    {t('languageCard.english')}
                   </Typography>
                 </Paper>
               </Box>
@@ -151,10 +157,10 @@ const LanguageCard = ({ language, handleLanguageChange, animateCards }) => {
               p: 2,
               backgroundColor: alpha(bg.default, 0.3),
               borderRadius: 2,
-              border: `1px dashed ${alpha(textPalette.primary, 0.1)}`, // textPalette kullandım
+              border: `1px dashed ${alpha(textPalette.primary, 0.1)}`,
             }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center' }}>
-                {t('Your preferred language will be applied to all interface texts')} {/* Çeviri eklendi */}
+                {t('languageCard.preferenceNote')}
               </Typography>
             </Box>
           </Box>

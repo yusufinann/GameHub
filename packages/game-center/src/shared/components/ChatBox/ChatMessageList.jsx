@@ -27,6 +27,7 @@ const ChatMessageList = ({
   loadMoreMessages,
   hasMore,
   isLoadingMore,
+  t
 }) => {
   const { formatMessageListTimestamp, processedMessages } = useChatMessageList({
     messages,
@@ -263,7 +264,7 @@ const ChatMessageList = ({
               alignItems: "center",
             }}
           >
-            <Typography color="text.secondary">Mesaj bulunmuyor.</Typography>
+            <Typography color="text.secondary">{t("noMessage")}</Typography>
           </Box>
         ) : (
           <AutoSizer>

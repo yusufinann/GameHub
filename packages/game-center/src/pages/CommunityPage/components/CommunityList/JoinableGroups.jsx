@@ -19,6 +19,7 @@ const JoinableGroups = ({
   activeItem,
   onJoinGroupDialogOpen,
   isGroupListLoading,
+  t
 }) => {
   const filteredJoinableGroups = joinableGroups?.filter(group =>
     group.groupName.toLowerCase().includes(joinableGroupSearch.toLowerCase())
@@ -35,11 +36,11 @@ const JoinableGroups = ({
           justifyContent: 'space-between'
         }}
       >
-        <Box sx={{ fontWeight: 'bold', color: 'text.secondary' }}>JOIN GROUPS</Box>
+        <Box sx={{ fontWeight: 'bold', color: 'text.secondary' }}>{t("JOIN GROUPS")}</Box>
         <TextField
           value={joinableGroupSearch}
           onChange={(e) => setJoinableGroupSearch(e.target.value)}
-          placeholder="Search..."
+          placeholder={t("searchPlaceholder")}
           size="small"
           variant="outlined"
         />
@@ -93,7 +94,7 @@ const JoinableGroups = ({
                   onJoinGroupDialogOpen(group._id, group.hasPassword);
                 }}
               >
-                Join
+                {t("Join")}
               </Button>
             </ListItem>
           ))

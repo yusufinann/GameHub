@@ -10,6 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ErrorModal from "../ErrorModal";
 import { useWebSocket } from "../../context/WebSocketContext/context";
 import GroupMemberList from "./GroupMemberList";
+import { useTranslation } from "react-i18next";
 
 const ChatBox = ({
   chatType,
@@ -28,6 +29,7 @@ const ChatBox = ({
   isLoadingMore,
 }) => {
   const theme = useTheme();
+  const{t}=useTranslation();
   const { socket } = useWebSocket();
   const [errorMessage, setErrorMessage] = useState(null);
   const [isJoiningGroup, setIsJoiningGroup] = useState(false);
@@ -96,10 +98,11 @@ const ChatBox = ({
         >
           <ChatBoxHeader
             chatType={chatType}
-            chatTitle={selectedConversation?.groupName || "Group"}
+            chatTitle={selectedConversation?.groupName || t("groupFallbackTitle")}
             selectedFriend={null}
             selectedConversation={selectedConversation}
             currentUser={currentUser}
+            t={t}
           />
           <Box
             sx={{
@@ -114,10 +117,10 @@ const ChatBox = ({
             }}
           >
             <Typography variant="h6" gutterBottom textAlign="center">
-              You are not member this group
+            {t("notMemberOfGroupMessage")}
             </Typography>
             <Typography variant="subtitle1" gutterBottom textAlign="center">
-              Group : {selectedConversation?.groupName}
+            {t("groupNameLabel", { groupName: selectedConversation?.groupName })}
             </Typography>
             <Typography
               variant="body2"
@@ -125,9 +128,9 @@ const ChatBox = ({
               textAlign="center"
               sx={{ mt: 2 }}
             >
-              Group Members :
+               {t("groupMembersLabel")}
             </Typography>
-            <GroupMemberList members={selectedConversation?.members} />
+            <GroupMemberList members={selectedConversation?.members} t={t}/>
             <Box sx={{ mt: 3 }}>
               <Button
                 variant="contained"
@@ -139,12 +142,12 @@ const ChatBox = ({
                 {isJoiningGroup ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  "JOIN GROUP"
+                  t("joinGroupButtonLabel")
                 )}
               </Button>
               {!socket && ( 
                  <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
-                   Connection not available.
+                    {t("connectionNotAvailableError")}
                  </Typography>
               )}
             </Box>
@@ -169,6 +172,7 @@ const ChatBox = ({
             selectedFriend={selectedFriend}
             selectedConversation={selectedConversation}
             currentUser={currentUser}
+            t={t} 
           />
           <ChatMessageList
             messages={messages}
@@ -178,12 +182,14 @@ const ChatBox = ({
             loadMoreMessages={loadMoreMessages}
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}
+            t={t} 
           />
           <ChatInput
             newMessage={newMessage}
             setNewMessage={setNewMessage}
             handleSendMessage={handleSendMessage}
             isMessagingLoading={isMessagingLoading}
+            t={t}
           />
         </Paper>
       ) : (
@@ -207,7 +213,7 @@ const ChatBox = ({
               sx={{ fontSize: 60, mb: 2, color: "text.secondary" }}
             />
             <Typography variant="subtitle1" color="textSecondary">
-              Sohbete başlamak için bir arkadaş veya grup seçin
+            {t("selectChatPlaceholder")}
             </Typography>
           </Paper>
         )
