@@ -3,7 +3,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import ExpressionHistory from "./ExpressionHistory";
 import ExpressionPanel from "./ExpressionPanel";
 
-const ChatArea = ({ expressions, onSendExpression, isChatOpen }) => {
+const ChatArea = ({ expressions, onSendExpression, isChatOpen,t }) => {
   const theme = useTheme();
   
   if (!isChatOpen) {
@@ -34,7 +34,7 @@ const ChatArea = ({ expressions, onSendExpression, isChatOpen }) => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Chat
+          {t("Chat")}
         </Typography>
       </Box>
       
@@ -52,7 +52,7 @@ const ChatArea = ({ expressions, onSendExpression, isChatOpen }) => {
         }}
       >
         <ExpressionHistory expressions={expressions} />
-        <ExpressionPanel.Input onSendExpression={onSendExpression} />
+        <ExpressionPanel.Input onSendExpression={onSendExpression} t={t}/>
       </Box>
     </Box>
   );

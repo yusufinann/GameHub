@@ -20,9 +20,9 @@ const GameAreaHeader = ({
   onLeave, 
   isDeletingLobby, 
   isLeavingLobby,
+  t
 }) => {
   const theme = useTheme();
-  
   return (
     <Box
       sx={{
@@ -68,7 +68,7 @@ const GameAreaHeader = ({
               }}
             >
               <StarsIcon fontSize="large" />
-              {lobbyInfo.game === "1" ? "Bingo Oyunu" : "Diğer Oyun"}
+              {lobbyInfo.game === "1" ? t("Bingo Game") : t("Other Game")}
             </Typography>
           </Typography>
           
@@ -95,7 +95,7 @@ const GameAreaHeader = ({
                 },
               }}
             >
-              {isDeletingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : 'Delete Lobby'}
+              {isDeletingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : t('Delete Lobby')}
             </Button>
           )}
           <Button
@@ -121,7 +121,7 @@ const GameAreaHeader = ({
             }}
             onClick={onLeave}
           >
-            {isLeavingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : 'Leave Lobby'}
+            {isLeavingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : t('Leave Lobby')}
           </Button>
         </Box>
       </Box>
@@ -135,7 +135,7 @@ const GameAreaHeader = ({
             mt: 0.5
           }}
         >
-          <LobbyTimer lobbyInfo={lobbyInfo} />
+          <LobbyTimer lobbyInfo={lobbyInfo} t={t}/>
         </Box>
       )}
     </Box>

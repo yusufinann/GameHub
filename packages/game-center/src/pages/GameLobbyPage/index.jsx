@@ -20,7 +20,7 @@ import { useGameLobbyPage } from "./useGameLobbyPage";
 import LobbyPasswordModal from "../../shared/components/LobbyPasswordModal";
 import LobbyDeletedModal from "./LobbyDeletedModal";
 import { useLobbyContext } from "../../shared/context/LobbyContext/context";
-
+import { useTranslation } from "react-i18next";
 const GameLobbyPage = () => {
   const { link } = useParams();
   const navigate = useNavigate();
@@ -41,6 +41,7 @@ const GameLobbyPage = () => {
   const [isDeletingLobby, setIsDeletingLobby] = useState(false);
   const [isLeavingLobby, setIsLeavingLobby] = useState(false);
 
+  const{t}=useTranslation();
   const {
     lobbyDetails,
     loading,
@@ -156,7 +157,7 @@ const GameLobbyPage = () => {
   }
 
   if (error) {
-    return <ErrorScreen error={error} navigate={navigate} />;
+    return <ErrorScreen error={error} navigate={navigate} t={t} />;
   }
 
   if (!lobbyDetails) {
@@ -165,12 +166,11 @@ const GameLobbyPage = () => {
 
   if (!userIsMember) {
     return (
-      <AccessDeniedScreen navigate={navigate} />
+      <AccessDeniedScreen navigate={navigate} t={t}/>
     );
   }
 
   const isHost = lobbyDetails.createdBy === userId;
-
   return (
     <>
       <Box
@@ -206,7 +206,7 @@ const GameLobbyPage = () => {
             {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Tooltip>
-        <MembersList members={members} />
+        <MembersList members={members} t={t} />
         <GameArea
           lobbyInfo={lobbyDetails}
           link={link}
@@ -216,6 +216,7 @@ const GameLobbyPage = () => {
           onLeave={handleLeaveLobby}
           isDeletingLobby={isDeletingLobby}
           isLeavingLobby={isLeavingLobby}
+          t={t}
         />
       </Box>
       <Snackbar
@@ -241,7 +242,7 @@ const GameLobbyPage = () => {
             justifyContent: 'center'
           }}
         >
-          {userLeftInfo?.name} lobiden ayrıldı!
+          {userLeftInfo?.name} {t("lobiden ayrıldı")}!
         </Alert>
       </Snackbar>
     </>
@@ -261,7 +262,7 @@ const LoadingScreen = () => (
   </Box>
 );
 
-const ErrorScreen = ({ error, navigate }) => (
+const ErrorScreen = ({ error, navigate,t }) => (
   <Box
     sx={{
       display: "flex",
@@ -276,12 +277,12 @@ const ErrorScreen = ({ error, navigate }) => (
       {error}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
-      Go Main Screen
+      {t("Go Main Screen")}
     </Button>
   </Box>
 );
 
-const AccessDeniedScreen = ({ navigate }) => (
+const AccessDeniedScreen = ({ navigate,t }) => (
   <Box
     sx={{
       display: "flex",
@@ -293,13 +294,13 @@ const AccessDeniedScreen = ({ navigate }) => (
     }}
   >
     <Typography variant="h5" color="error">
-      Access Denied
+      {t("Access Denied")}
     </Typography>
     <Typography variant="body1">
-      You're not a member of this lobby. Please join the lobby first.
+      {t("You're not a member of this lobby. Please join the lobby first")}.
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
-      Go to Main Screen
+      {t("Go to Main Screen")}
     </Button>
   </Box>
 );

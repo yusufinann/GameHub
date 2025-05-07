@@ -306,7 +306,19 @@
   "joinLobbyError": "Lobiye katılırken bir hata oluştu.",
   "Settings":"Ayarlar",
   "Sound Effects":"Ses Efektleri",
-  "Notifications":"Bildirimler"
+  "Notifications":"Bildirimler",
+  "Bingo Game":"Tombala Oyunu",
+  "Other Game":"Diğer Oyun",
+  "Leave Lobby":"Lobiden Ayrıl",
+  "Members":"Üyeler",
+  "This event is over":"Bu etkinlik sona erdi",
+  "Event starts in":"Etkinlik başlıyor",
+  "Hours":"Saat",
+  "Minute":"Dakika",
+  "Second":"Saniye",
+  "Host":"Kurucu",
+  "Chat":"Sohbet",
+  "sendMessagePlaceholder": "Bir ifade gönderin..."
 
   
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, EmojiEvents as TrophyIcon } from '@mui/icons-material';
 
-function Header({ count, isCollapsed, onToggle }) {
+function Header({ count, isCollapsed, onToggle,t }) {
   return (
     <Box
       sx={{
@@ -26,7 +26,7 @@ function Header({ count, isCollapsed, onToggle }) {
               gap: 0.5,
             }}
           >
-            <TrophyIcon fontSize="small" /> Members
+            <TrophyIcon fontSize="small" /> {t("Members")}
           </Typography>
           <Typography
             variant="caption"

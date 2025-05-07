@@ -304,5 +304,17 @@
   "joinLobbyError": "There was an error joining the lobby.",
   "Sound Effects":"Sound Effects",
   "Settings":"Settings",
-  "Notifications":"Notifications"
+  "Notifications":"Notifications",
+  "Bingo Game":"Bingo Game",
+  "Other Game":"Other Game",
+  "Leave Lobby":"Leave Lobby",
+  "Members":"Members",
+  "This event is over":"This event is over",
+  "Event starts in":"Event starts in",
+  "Hours":"Hours",
+  "Minute":"Minute",
+  "Host":"Host",
+  "Chat":"Chat",
+  "sendMessagePlaceholder": "Send an expression..."
+  
 }

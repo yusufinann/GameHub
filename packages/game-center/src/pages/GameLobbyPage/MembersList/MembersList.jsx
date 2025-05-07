@@ -4,7 +4,7 @@ import { Person as PersonIcon } from '@mui/icons-material';
 import Header from './Header';
 import MemberItem from './MemberItem';
 
-function MembersList({ members }) {
+function MembersList({ members,t }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const theme = useTheme();
 
@@ -28,6 +28,7 @@ function MembersList({ members }) {
         count={members.length}
         isCollapsed={isCollapsed}
         onToggle={handleToggle}
+        t={t}
       />
       {isCollapsed ? (
         <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
@@ -60,7 +61,7 @@ function MembersList({ members }) {
       ) : (
         <List sx={{ p: 0 }}>
           {members.map((member, index) => (
-            <MemberItem key={member.id} member={member} index={index} />
+            <MemberItem key={member.id} member={member} index={index} t={t} />
           ))}
         </List>
       )}

@@ -16,6 +16,7 @@ import {
 } from "@mui/icons-material";
 
 import EmojiPickerPanel from "./EmojiPickerPanel";
+import { useTranslation } from "react-i18next";
 
 // Animation
 const expressionSlideUpFadeOut = keyframes`
@@ -70,7 +71,7 @@ const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
 });
 
 // Main Expression Panel Component
-const ExpressionPanel = ({ centerExpressions }) => {
+const ExpressionPanel = ({ centerExpressions}) => {
   if (centerExpressions.length === 0) return null;
 
   return (
@@ -128,13 +129,12 @@ const ExpressionPanel = ({ centerExpressions }) => {
   );
 };
 
-// Input Component
-const ExpressionInput = ({ onSendExpression }) => {
+
+const ExpressionInput = ({ onSendExpression,t}) => {
   const [expressionInput, setExpressionInput] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const emojiPickerRef = useRef(null);
-
   const handleSendExpression = (expressionToSend) => {
     const expression = expressionToSend || expressionInput;
     if (expression.trim()) {
@@ -211,7 +211,7 @@ const ExpressionInput = ({ onSendExpression }) => {
         </IconButton>
         <TextField
           fullWidth
-          placeholder="Bir ifade gönderin..."
+          placeholder={t('sendMessagePlaceholder')}
           variant="outlined"
           size="medium"
           value={expressionInput}

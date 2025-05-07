@@ -1,7 +1,7 @@
 import React from 'react';
 import { ListItem, Avatar, ListItemText, Typography, Box, useTheme } from '@mui/material';
 
-function MemberItem({ member, index }) {
+function MemberItem({ member, index,t }) {
   const theme = useTheme();
 
   return (
@@ -64,7 +64,7 @@ function MemberItem({ member, index }) {
                   borderRadius: '5px',
                 }}
               >
-                Host
+                {t("Host")}
               </Typography>
             )}
           </Box>

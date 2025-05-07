@@ -6,7 +6,7 @@ import {
 } from '@mui/icons-material';
 import TimerIcon from '@mui/icons-material/Timer';
 
-const LobbyTimer = ({ lobbyInfo }) => {
+const LobbyTimer = ({ lobbyInfo,t }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [showEndingSoon, setShowEndingSoon] = useState(false);
   const [eventStatus, setEventStatus] = useState('upcoming');
@@ -153,7 +153,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                 }}
               >
                 <Typography variant="body2" sx={{ mr: 1, fontWeight: 'medium', color: theme.palette.text.contrast }}>
-                  {eventStatus === 'upcoming' ? 'Event starts in:' : 'Event ends in:'}
+                  {eventStatus === 'upcoming' ? t('Event starts in') : t('Event ends in')}
                 </Typography>
 
                 {timeRemaining.days > 0 && (
@@ -183,7 +183,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                   >
                     {String(timeRemaining.hours).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Saat</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>{t("Hours")}</Typography>
                 </Box>
 
                 <Typography variant="h6" sx={{ mx: -0.5, color: theme.palette.text.contrast }}>:</Typography>
@@ -199,7 +199,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                   >
                     {String(timeRemaining.minutes).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Dakika</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>{t("Minute")}</Typography>
                 </Box>
 
                 <Typography variant="h6" sx={{ mx: -0.5, color: theme.palette.text.contrast }}>:</Typography>
@@ -220,7 +220,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                   >
                     {String(timeRemaining.seconds).padStart(2, '0')}
                   </Typography>
-                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>Saniye</Typography>
+                  <Typography variant="caption" display="block" sx={{ color: `${theme.palette.text.contrast}D9` }}>{t("Second")}</Typography>
                 </Box>
               </Box>
             ) : (
@@ -233,7 +233,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
                     fontWeight: 'medium'
                   }}
                 >
-                  Bu etkinlik sona erdi
+                  {t("This event is over")}
                 </Typography>
               </Box>
             )}
@@ -260,7 +260,7 @@ const LobbyTimer = ({ lobbyInfo }) => {
             }
           }}
         >
-          Etkinlik 5 dakika içinde sona erecek!
+           {t("The event will end in 5 minutes")}!
         </Alert>
       </Snackbar>
     </>

@@ -22,7 +22,7 @@ import ChatArea from "./components/ChatArea/ChatArea";
 
 const SHOW_EXPRESSIONS_KEY = "showExpressions";
 
-const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby }) => {
+const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby,t }) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const [expressions, setExpressions] = useState([]);
@@ -187,6 +187,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         onLeave={onLeave}
         isDeletingLobby={isDeletingLobby}
         isLeavingLobby={isLeavingLobby}
+        t={t}
       />
 
       {/* Main Content Area */}
@@ -292,6 +293,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
               expressions={expressions}
               onSendExpression={handleSendExpression}
               isChatOpen={isChatOpen}
+              t={t}
             />
           </Box>
         </Box>
