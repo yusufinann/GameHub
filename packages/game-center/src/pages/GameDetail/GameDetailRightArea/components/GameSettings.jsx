@@ -3,11 +3,12 @@ import { Card, CardContent, Box, Typography, Switch, FormControlLabel, useTheme 
 import { Settings } from '@mui/icons-material';
 import { GameSettingsContext } from '../context';
 import DummyArea from './DummyArea';
+import { useTranslation } from 'react-i18next';
 
 function GameSettings({ settings, onSettingsChange }) {
   const { soundEnabled, toggleSound } = useContext(GameSettingsContext);
   const theme = useTheme();
-  
+  const{t}=useTranslation();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
       <Box>
@@ -32,7 +33,7 @@ function GameSettings({ settings, onSettingsChange }) {
                 fontSize: 30,
                 color: theme.palette.primary.main
               }} />
-              <Typography variant="h5">Settings</Typography>
+              <Typography variant="h5">{t("Settings")}</Typography>
             </Box>
             <FormControlLabel
               control={
@@ -42,7 +43,7 @@ function GameSettings({ settings, onSettingsChange }) {
                   color="primary"
                 />
               }
-              label="Sound Effects"
+              label={t("Sound Effects")}
               sx={{
                 color: theme.palette.text.primary,
                 '& .MuiSwitch-track': {
@@ -58,7 +59,7 @@ function GameSettings({ settings, onSettingsChange }) {
                   color="primary"
                 />
               }
-              label="Notifications"
+              label={t("Notifications")}
               sx={{
                 color: theme.palette.text.primary,
                 '& .MuiSwitch-track': {

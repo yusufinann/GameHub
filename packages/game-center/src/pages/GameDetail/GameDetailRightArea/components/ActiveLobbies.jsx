@@ -4,10 +4,11 @@ import { Card, CardContent, Typography, List, useTheme, Box } from '@mui/materia
 import { People } from '@mui/icons-material';
 import NoActiveLobbies from './NoActiveLobbies';
 import LobbyItem from '../../../../shared/components/LobbyItem/LobbyItem';
+import { useTranslation } from 'react-i18next';
 
 function ActiveLobbies({filteredLobbies}) {
   const theme = useTheme();
-
+  const{t}=useTranslation();
   return (
     <Card
       sx={{
@@ -38,7 +39,7 @@ function ActiveLobbies({filteredLobbies}) {
             }}
           >
             <People sx={{ mr: 1 }} />
-            Active Lobbies
+            {t("Active Lobbies")}
           </Typography>
           <List>
             {filteredLobbies.length > 0 ? (

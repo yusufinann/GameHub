@@ -11,9 +11,11 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CelebrationIcon from "@mui/icons-material/Celebration";
 import hallowenBingo from "../../../../../assets/hallowenBingo.png";
 import { LobbyInfo } from "../../../../../shared/components/LobbyItem/LobbyInfo";
+import { useTranslation } from "react-i18next";
 
 function GameInfoHeader({ game, filteredLobbies }) {
   const theme = useTheme();
+  const{t}=useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const upcomingEvents = filteredLobbies.filter(
     (lobby) => lobby.lobbyType === "event"
@@ -141,7 +143,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
             },
           }}
         >
-          {game.title}
+            {t(`games.${game.title}.title`, { fallback: game.title })}
         </Typography>
 
         <CelebrationIcon
@@ -191,7 +193,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
             letterSpacing: "0.05em",
           }}
         >
-          Upcoming Events
+          {t("Upcoming Events")}
         </Typography>
 
         {upcomingEvents.length > 0 ? (
@@ -316,7 +318,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
                           fontWeight: "bold",
                         }}
                       >
-                        {lobby.maxMembers} Person Capacity
+                        {lobby.maxMembers} {t("Person Capacity")}
                       </Typography>
                     </Box>
                   </Box>
@@ -389,7 +391,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
                 textShadow: "1px 1px 2px rgba(0,0,0,0.4)",
               }}
             >
-              There are no upcoming events.
+              {t("There are no upcoming events")}
             </Typography>
             <Typography
               variant="body1"
@@ -397,7 +399,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
                 color: theme.palette.text.secondary,
               }}
             >
-              You can follow new events from here when they are added.
+              {t("You can follow new events from here when they are added")}.
             </Typography>
           </Box>
         )}

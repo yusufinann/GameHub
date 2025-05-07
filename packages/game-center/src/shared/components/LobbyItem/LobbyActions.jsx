@@ -3,7 +3,7 @@ import { IconButton, CircularProgress, Button, Box, Tooltip } from "@mui/materia
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Visibility, Edit as EditIcon, Lock, LockOpen } from "@mui/icons-material";
-
+import { useTranslation } from 'react-i18next';
 export const LobbyActions = ({
   isJoined,
   isJoining,
@@ -17,11 +17,12 @@ export const LobbyActions = ({
   isDeleting
 }) => {
   const hasPassword = lobby && lobby.password != null;
+  const{t}=useTranslation()
   return (
     <>
       {isCreator && (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Tooltip title="Delete Lobby">
+          <Tooltip title={t("Delete Lobby")}>
             <IconButton
               onClick={onDelete}
               size="small"
@@ -42,7 +43,7 @@ export const LobbyActions = ({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Edit Lobby">
+          <Tooltip title={t("Edit Lobby")}>
             <IconButton
               size={isMobile ? 'small' : 'medium'}
               onClick={onEdit}
@@ -61,7 +62,7 @@ export const LobbyActions = ({
       )}
 
       {isJoined && (
-        <Tooltip title="Go to Lobby">
+        <Tooltip title={t("Go to Lobby")}>
           <IconButton
             onClick={onNavigate}
             size="small"
@@ -81,7 +82,7 @@ export const LobbyActions = ({
       {!isJoined && !isCreator && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {/* Password Indicator */}
-          <Tooltip title={hasPassword ? "Password Protected Lobby" : "Open Lobby"}>
+          <Tooltip title={hasPassword ? t("Password Protected Lobby") : t("Open Lobby")}>
             <IconButton
               size="small"
               sx={{
@@ -126,7 +127,7 @@ export const LobbyActions = ({
             {isJoining ? (
               <CircularProgress size={24} />
             ) : (
-              "Join"
+             t("Join")
             )}
           </Button>
         </Box>

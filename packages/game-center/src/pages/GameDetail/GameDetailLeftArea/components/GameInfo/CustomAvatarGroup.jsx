@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Avatar, styled, Tooltip, Zoom,Typography, Popover } from '@mui/material';
 import { People, Celebration } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 // Styled avatar with enhanced visual effects
 const StyledAvatar = styled(Avatar)(({ theme, gradient, isHovered }) => ({
@@ -65,7 +66,7 @@ function CustomAvatarGroup({ members, gradient, max = 7, getInitials }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  
+  const{t}=useTranslation();
   const displayedMembers = members.slice(0, max);
   const extraMembers = members.slice(max);
   const extraCount = members.length - max;
@@ -238,7 +239,7 @@ function CustomAvatarGroup({ members, gradient, max = 7, getInitials }) {
                     fontWeight: 'bold', 
                   }}
                 >
-                  More Players
+                  {t("More Players")}
                 </Typography>
               </Box>
               

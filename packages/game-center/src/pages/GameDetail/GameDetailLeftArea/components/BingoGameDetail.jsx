@@ -27,6 +27,7 @@ import {
   StarRate as StarIcon,
   History,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 const BingoGameDetails = () => {
   const [playerGameStats, setPlayerGameStats] = useState([]);
@@ -35,7 +36,7 @@ const BingoGameDetails = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const theme = useTheme();
-
+  const{t}=useTranslation();
   useEffect(() => {
     const fetchPlayerGameStats = async () => {
       try {
@@ -88,7 +89,7 @@ const BingoGameDetails = () => {
       >
         <CircularProgress size={60} thickness={4} />
         <Typography variant="h6" sx={{ mt: 2 }}>
-          Loading game statistics...
+          {t("Loading game statistics")}...
         </Typography>
       </Box>
     );
@@ -105,7 +106,7 @@ const BingoGameDetails = () => {
       >
         <CardContent>
           <Typography variant="h6" color="error" gutterBottom>
-            Error Loading Data
+            {t("Error Loading Data")}
           </Typography>
           <Typography variant="body2">{error}</Typography>
         </CardContent>
@@ -143,7 +144,7 @@ const BingoGameDetails = () => {
         }}
       >
         <History sx={{ mr: 1, fontSize: 30 }} />
-        <Typography variant="h5">Game History</Typography>
+        <Typography variant="h5">{t("Game History")}</Typography>
       </Box>
 
       <Divider />
@@ -152,13 +153,13 @@ const BingoGameDetails = () => {
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-              <TableCell sx={{ fontWeight: "bold" }}>Player</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Player")}</TableCell>
               {/* New Game ID Column */}
-              <TableCell sx={{ fontWeight: "bold" }}>Score</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Average</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Wins</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Rank</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Game Time</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Score")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Average")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Wins")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Rank")}</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{t("Game Time")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -209,7 +210,7 @@ const BingoGameDetails = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  <Tooltip title="Average score per game">
+                  <Tooltip title={t("Average score per game")}>
                     <Typography variant="body2">
                       {stat.averageScore.toFixed(2)}
                     </Typography>

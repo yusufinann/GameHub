@@ -6,16 +6,18 @@ import ErrorModal from "../../../../shared/components/ErrorModal";
 import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
 import FingerPushingButton from "./FingerPushingButton";
+import { useTranslation } from "react-i18next";
 
 function CreateLobby({ existingLobby }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
-
+ 
   const location = useLocation();
   const { gameId } = useParams();
   const theme = useTheme();
+  const{t}=useTranslation();
 
   const isGameDetailRoute = location.pathname.includes("game-detail");
   const hasLobbyForCurrentGame =
@@ -49,7 +51,7 @@ function CreateLobby({ existingLobby }) {
   const isGoToLobbyAction =
     (!isGameDetailRoute && existingLobby) ||
     (isGameDetailRoute && hasLobbyForCurrentGame);
-  const buttonText = isGoToLobbyAction ? "Go to Your Lobby" : "Create A Lobby";
+  const buttonText = isGoToLobbyAction ? t("Go to Your Lobby") : t("Create A Lobby");
   const ButtonIcon = isGoToLobbyAction ? ArrowForward : Add;
 
   return (

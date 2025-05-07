@@ -28,11 +28,11 @@ import {
   AccessTime,
   Favorite
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 // Custom Avatar Group component that uses theme colors
 function CustomAvatarGroup({ members, max, getInitials }) {
   const theme = useTheme();
-  
   return (
     <AvatarGroup max={max} sx={{
       '& .MuiAvatar-root': {
@@ -52,16 +52,16 @@ function CustomAvatarGroup({ members, max, getInitials }) {
       }
     }}>
       {members.map((member, index) => (
-        <Tooltip 
-          key={index} 
-          title={member.name} 
-          arrow 
+        <Tooltip
+          key={index}
+          title={member.name}
+          arrow
           placement="top"
           TransitionComponent={Zoom}
           TransitionProps={{ timeout: 600 }}
         >
-          <Avatar 
-            alt={member.name} 
+          <Avatar
+            alt={member.name}
             src={member.avatar}
             sx={{
               background: !member.avatar ? `${theme.palette.secondary.main}` : undefined,
@@ -76,9 +76,9 @@ function CustomAvatarGroup({ members, max, getInitials }) {
 }
 
 // Custom InfoChip component for better reusability
-function InfoChip({ icon, label, theme }) {
+function InfoChip({ icon, label, tooltipText, theme }) { // Added tooltipText prop
   return (
-    <Tooltip title={label} arrow placement="top">
+    <Tooltip title={tooltipText || label} arrow placement="top">
       <Chip
         icon={icon}
         label={label}
@@ -105,8 +105,8 @@ function InfoChip({ icon, label, theme }) {
 function GameModeCard({ mode, theme, isCompetition = false }) {
   return (
     <Paper elevation={3} sx={{
-      background: isCompetition 
-        ? theme.palette.background.gradient 
+      background: isCompetition
+        ? theme.palette.background.gradient
         : theme.palette.background.gradientB,
       borderRadius: '16px',
       p: 2,
@@ -146,7 +146,7 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
         opacity: 0.7,
         className: 'mode-highlight'
       }} />
-      
+
       <Box sx={{
         display: 'flex',
         alignItems: 'center',
@@ -164,10 +164,10 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
           fontWeight: 'bold',
           textShadow: `1px 1px 1px ${theme.palette.background.elevation[1]}`
         }}>
-          {mode.title}
+          {mode.title} {/* Assumes mode.title is pre-translated */}
         </Typography>
       </Box>
-      
+
       {mode.speed && (
         <Box sx={{
           display: 'flex',
@@ -175,7 +175,7 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
           gap: 1,
           mb: 1
         }}>
-          <AccessTime sx={{ 
+          <AccessTime sx={{
             color: theme.palette.secondary.main,
             fontSize: '1rem'
           }} />
@@ -183,11 +183,11 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
             color: theme.palette.text.secondary,
             fontWeight: 600
           }}>
-            {mode.speed}
+            {mode.speed} {/* Assumes mode.speed is pre-translated */}
           </Typography>
         </Box>
       )}
-      
+
       <Box component="ul" sx={{
         pl: 2,
         '& li': {
@@ -206,6 +206,7 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
           }
         }
       }}>
+        {/* Assumes mode.features is an array of pre-translated strings */}
         {mode.features.map((feature, idx) => (
           <li key={idx}>{feature}</li>
         ))}
@@ -216,10 +217,11 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
 
 function GameInfoDetails({ game, filteredLobbies }) {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState('bingo'); // State for active game mode tab
-  const [expanded1, setExpanded1] = useState(true); // State for first accordion
-  const [expanded2, setExpanded2] = useState(true); // State for second accordion
-  
+  const { t } = useTranslation(); // Initialize useTranslation
+  const [activeTab, setActiveTab] = useState('bingo');
+  const [expanded1, setExpanded1] = useState(true);
+  const [expanded2, setExpanded2] = useState(true);
+
   const allMemberAvatars = filteredLobbies
     .flatMap(lobby => lobby.members)
     .filter((member, index, self) =>
@@ -233,52 +235,52 @@ function GameInfoDetails({ game, filteredLobbies }) {
       .join('')
       .toUpperCase();
 
-  // Game modes data
-  const gameModes = {
+  // Game modes data - now using t() for translatable fields
+  const gameModesData = {
     bingo: [
       {
         mode: "classic",
-        title: "Classic Bingo",
-        icon: "🔹",
-        speed: "5s/number",
-        features: ["Standard rules", "Live marking only", "No history"]
+        title: t("gameModes.bingo.classic.title"),
+        icon: "🔹", // Icons are usually not translated
+        speed: t("gameModes.bingo.classic.speed"),
+        features: Object.values(t("gameModes.bingo.classic.features", { returnObjects: true }))
       },
       {
         mode: "extended",
-        title: "Extended Time",
+        title: t("gameModes.bingo.extended.title"),
         icon: "🕒",
-        speed: "10s/number",
-        features: ["10s visibility", "2 numbers visible", "Mark history"]
+        speed: t("gameModes.bingo.extended.speed"),
+        features: Object.values(t("gameModes.bingo.extended.features", { returnObjects: true }))
       },
       {
         mode: "superfast",
-        title: "Super Fast",
+        title: t("gameModes.bingo.superfast.title"),
         icon: "⚡",
-        speed: "3s/number",
-        features: ["Quick decisions", "3s visibility", "Penalty system"]
+        speed: t("gameModes.bingo.superfast.speed"),
+        features: Object.values(t("gameModes.bingo.superfast.features", { returnObjects: true }))
       }
     ],
     competition: [
       {
         mode: "competitive",
-        title: "Competitive Mode",
+        title: t("gameModes.competition.competitive.title"),
         icon: "🏆",
-        features: ["Ranked play", "Full game duration", "Score tracking"]
+        features: Object.values(t("gameModes.competition.competitive.features", { returnObjects: true }))
       },
       {
         mode: "non-competitive",
-        title: "Casual Mode",
+        title: t("gameModes.competition.non-competitive.title"),
         icon: "🎉",
-        features: ["First win ends game", "Friendly play", "Quick matches"]
+        features: Object.values(t("gameModes.competition.non-competitive.features", { returnObjects: true }))
       }
     ]
   };
 
-  // Render section title with custom styling
+
   const renderSectionTitle = (icon, text) => (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
       gap: 2,
       position: 'relative',
       zIndex: 1
@@ -294,12 +296,10 @@ function GameInfoDetails({ game, filteredLobbies }) {
     </Box>
   );
 
-  // Handle game mode tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  // Handle accordion change
   const handleAccordion1Change = () => {
     setExpanded1(!expanded1);
   };
@@ -309,7 +309,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
   };
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       pt: 3,
       position: 'relative',
     }}>
@@ -325,20 +325,20 @@ function GameInfoDetails({ game, filteredLobbies }) {
         background: theme.palette.background.gradientB,
         boxShadow: `0 4px 12px ${theme.palette.background.elevation[1]}`,
       }}>
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           flexDirection: 'column',
           gap: 2,
           flex: 1
         }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 2,
             pb: 1,
             borderBottom: `1px solid ${theme.palette.background.offwhite}`,
           }}>
-            <People sx={{ 
+            <People sx={{
               color: theme.palette.secondary.gold,
               fontSize: '28px'
             }} />
@@ -347,13 +347,13 @@ function GameInfoDetails({ game, filteredLobbies }) {
               color: theme.palette.text.primary,
               letterSpacing: '1.5px'
             }}>
-              Active Players
+              {t("activePlayersTitle")}
             </Typography>
           </Box>
 
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 2,
             flexWrap: 'wrap'
           }}>
@@ -369,7 +369,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
               pl: 1,
               display: { xs: 'none', sm: 'block' }
             }}>
-              {allMemberAvatars.length} players active
+              {t("playersActiveCount", { count: allMemberAvatars.length })}
             </Typography>
           </Box>
         </Box>
@@ -393,13 +393,13 @@ function GameInfoDetails({ game, filteredLobbies }) {
             borderBottom: `1px solid ${theme.palette.background.offwhite}`,
             width: '100%'
           }}>
-            <Info sx={{ 
+            <Info sx={{
               color: theme.palette.secondary.gold,
               fontSize: '24px'
             }} />
-            Game Info
+            {t("gameInfoTitle")}
           </Typography>
-          
+
           <Box sx={{
             display: 'flex',
             gap: 1,
@@ -407,20 +407,23 @@ function GameInfoDetails({ game, filteredLobbies }) {
             justifyContent: { xs: 'flex-start', sm: 'flex-end' },
             width: '100%'
           }}>
-            <InfoChip 
-              icon={<SportsEsports sx={{ color: theme.palette.secondary.contrastText }} />} 
-              label={`Type: ${game.genre}`} 
-              theme={theme} 
+            <InfoChip
+              icon={<SportsEsports sx={{ color: theme.palette.secondary.contrastText }} />}
+              label={t("gameChip.type", { genre: game.genre })} // Assuming game.genre is pre-translated
+              tooltipText={t("gameChip.typeTooltip", { genre: game.genre })}
+              theme={theme}
             />
-            <InfoChip 
-              icon={<EmojiEvents sx={{ color: theme.palette.secondary.contrastText }} />} 
-              label="Competitive" 
-              theme={theme} 
+            <InfoChip
+              icon={<EmojiEvents sx={{ color: theme.palette.secondary.contrastText }} />}
+              label={t("gameChip.competitive")}
+              tooltipText={t("gameChip.competitiveTooltip")}
+              theme={theme}
             />
-            <InfoChip 
-              icon={<Favorite sx={{ color: theme.palette.secondary.contrastText }} />} 
-              label={`${filteredLobbies.length} Lobbies`} 
-              theme={theme} 
+            <InfoChip
+              icon={<Favorite sx={{ color: theme.palette.secondary.contrastText }} />}
+              label={t("gameChip.lobbies", { count: filteredLobbies.length })}
+              tooltipText={t("gameChip.lobbiesTooltip", { count: filteredLobbies.length })}
+              theme={theme}
             />
           </Box>
         </Box>
@@ -458,7 +461,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
             zIndex: 1
           }}
         >
-          {game.description}
+         {t(game.description)} {/* Assumes game.description is pre-translated */}
         </Typography>
       </Paper>
 
@@ -483,22 +486,22 @@ function GameInfoDetails({ game, filteredLobbies }) {
             minHeight: '64px !important',
             height: '64px',
             '&:hover': {
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark || theme.palette.primary.main} 0%, ${theme.palette.primary.medium || theme.palette.primary.main} 100%)`,
             }
           }}
         >
           {renderSectionTitle(
             <EmojiEvents sx={{ fontSize: '28px' }} />,
-            "Game Modes & Rules"
+            t("accordionTitle.gameModesAndRules")
           )}
-          <ExpandMore 
-            sx={{ 
+          <ExpandMore
+            sx={{
               color: theme.palette.secondary.contrastText,
               transition: 'transform 0.3s ease',
               transform: expanded1 ? 'rotate(180deg)' : 'rotate(0deg)',
               position: 'absolute',
               right: '16px'
-            }} 
+            }}
           />
         </AccordionSummary>
         <AccordionDetails sx={{
@@ -509,14 +512,14 @@ function GameInfoDetails({ game, filteredLobbies }) {
           boxShadow: `0 4px 20px ${theme.palette.background.elevation[2]}`
         }}>
           {/* Game Mode Tab Navigation */}
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 2, 
+          <Box sx={{
+            display: 'flex',
+            gap: 2,
             mb: 3,
             borderBottom: `1px solid ${theme.palette.background.offwhite}`,
             pb: 1
           }}>
-            <Button 
+            <Button
               variant={activeTab === 'bingo' ? 'contained' : 'outlined'}
               onClick={() => handleTabChange('bingo')}
               sx={{
@@ -536,9 +539,9 @@ function GameInfoDetails({ game, filteredLobbies }) {
                 transition: 'all 0.3s ease'
               }}
             >
-              Bingo Modes
+              {t("tabs.bingoModes")}
             </Button>
-            <Button 
+            <Button
               variant={activeTab === 'competition' ? 'contained' : 'outlined'}
               onClick={() => handleTabChange('competition')}
               sx={{
@@ -558,7 +561,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
                 transition: 'all 0.3s ease'
               }}
             >
-              Competition Styles
+              {t("tabs.competitionStyles")}
             </Button>
           </Box>
 
@@ -584,7 +587,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
                   background: `linear-gradient(90deg, ${theme.palette.secondary.main}, transparent)`,
                 }
               }}>
-                Bingo Modes
+                {t("sectionTitle.bingoModes")}
               </Typography>
 
               <Box sx={{
@@ -592,11 +595,11 @@ function GameInfoDetails({ game, filteredLobbies }) {
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
                 gap: 3,
               }}>
-                {gameModes.bingo.map((mode) => (
-                  <GameModeCard 
-                    key={mode.mode} 
-                    mode={mode} 
-                    theme={theme} 
+                {gameModesData.bingo.map((mode) => (
+                  <GameModeCard
+                    key={mode.mode}
+                    mode={mode}
+                    theme={theme}
                   />
                 ))}
               </Box>
@@ -625,7 +628,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
                   background: `linear-gradient(90deg, ${theme.palette.secondary.main}, transparent)`,
                 }
               }}>
-                Competition Styles
+                {t("sectionTitle.competitionStyles")}
               </Typography>
 
               <Box sx={{
@@ -633,12 +636,12 @@ function GameInfoDetails({ game, filteredLobbies }) {
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
                 gap: 3,
               }}>
-                {gameModes.competition.map((mode) => (
-                  <GameModeCard 
-                    key={mode.mode} 
-                    mode={mode} 
-                    theme={theme} 
-                    isCompetition={true} 
+                {gameModesData.competition.map((mode) => (
+                  <GameModeCard
+                    key={mode.mode}
+                    mode={mode}
+                    theme={theme}
+                    isCompetition={true}
                   />
                 ))}
               </Box>
@@ -668,22 +671,22 @@ function GameInfoDetails({ game, filteredLobbies }) {
             minHeight: '64px !important',
             height: '64px',
             '&:hover': {
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark || theme.palette.primary.main} 0%, ${theme.palette.primary.medium || theme.palette.primary.main} 100%)`,
             }
           }}
         >
           {renderSectionTitle(
             <Help sx={{ fontSize: '28px' }} />,
-            "How to Play?"
+            t("accordionTitle.howToPlay")
           )}
-          <ExpandMore 
-            sx={{ 
+          <ExpandMore
+            sx={{
               color: theme.palette.secondary.contrastText,
               transition: 'transform 0.3s ease',
               transform: expanded2 ? 'rotate(180deg)' : 'rotate(0deg)',
               position: 'absolute',
               right: '16px'
-            }} 
+            }}
           />
         </AccordionSummary>
         <AccordionDetails sx={{
@@ -708,7 +711,8 @@ function GameInfoDetails({ game, filteredLobbies }) {
           }
         }}>
           <List sx={{ position: 'relative', zIndex: 1 }}>
-            {game.howToPlay.map((step, index) => (
+            {/* Assumes game.howToPlay is an array of pre-translated strings */}
+            {game.howToPlay.map((stepKey, index) => (
               <ListItem key={index} sx={{
                 py: 1,
                 position: 'relative',
@@ -759,7 +763,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
                     fontSize: '1.1rem',
                     fontWeight: 500
                   }}
-                  primary={step}
+                  primary={t(stepKey)}
                 />
               </ListItem>
             ))}

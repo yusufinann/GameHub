@@ -92,55 +92,6 @@
     }
   },
 
-  "games": {
-    "Bingo": {
-      "title": "Tombala",
-      "genre": "Macera",
-      "description": "Tombala eğlencesi sadece bir tık uzağınızda! Şanslı numaralarınızı işaretleyin ve heyecan içinde ilk 'Tombala!' diye bağıran siz olun!",
-      "howToPlay": [
-        "Her oyuncu rastgele bir Tombala kartı alır",
-        "Sunucu rastgele numaralar çeker",
-        "Söylenen numarayı kartınızda işaretleyin",
-        "Yatay, dikey veya çapraz olarak bir sırayı tamamlayan ilk kişi olun ve 'Tombala!' diye bağırarak kazanın"
-      ]
-    },
-    "Uno": {
-      "title": "Uno",
-      "genre": "Bilim Kurgu",
-      "description": "Uno ile hızlı tempolu bir eğlenceye hazır olun! Renkleri veya sayıları eşleştirin, aksiyon kartları oynayın ve tüm kartlarınızdan ilk kurtulan siz olun!",
-      "howToPlay": [
-        "Başlangıçta her oyuncuya 7 kart dağıtılır",
-        "Sırayla üstteki kartı renk veya sayı olarak eşleştirin",
-        "Atlama, ters çevirme veya kart çekme için aksiyon kartları kullanın",
-        "Bir kartınız kaldığında 'UNO!' diye bağırın",
-        "Tüm kartlarını ilk oynayan oyuncu kazanır"
-      ]
-    },
-    "Chess": {
-      "title": "Satranç",
-      "genre": "Fantezi",
-      "description": "Zamansız Satranç oyununda strateji ve mantığınızı test edin. Rakibinizi alt edin ve şahı mat ederek maçı kazanın!",
-      "howToPlay": [
-        "Her oyuncu 16 taşla başlar: piyonlar, atlar, filler, kaleler, bir vezir ve bir şah",
-        "Oyuncular sırayla her turda bir taş hareket ettirir",
-        "Şahınızı korumak ve rakibinizin taşlarına saldırmak için strateji kullanın",
-        "Taşları onların karesine hareket ederek yakalayn",
-        "Rakibin şahını kaçamayacağı bir pozisyona getirerek kazanın: şah mat"
-      ]
-    },
-    "HangMan": {
-      "title": "Adam Asmaca",
-      "genre": "Yarış",
-      "description": "Çöp adam tamamen çizilmeden önce kelimeyi tahmin edin! Gizli kelimeyi harf harf ortaya çıkarmak için mantık ve kelime dağarcığınızı kullanın.",
-      "howToPlay": [
-        "Bir oyuncu bir kelime düşünür ve her harf için boşluklar işaretler",
-        "Diğer oyuncu bir seferde bir harf tahmin eder",
-        "Doğru tahminler kelimede harfi ortaya çıkarır",
-        "Yanlış tahminler adam asmaca çizimine parçalar ekler",
-        "Tahmin eden oyuncu, adam asmaca tamamen çizilmeden kelimeyi ortaya çıkararak kazanır"
-      ]
-    }
-  },
 
   "gameData": {
     "Valorant": {
@@ -188,5 +139,174 @@
   "All":"Tümü",
   "Normal":"Normal",
   "Event":"Etkinlik",
-  "My Groups":"Gruplarım"
+  "My Groups":"Gruplarım",
+  "Error Loading Data":"Veri Yüklenirken Hata Oluştu",
+  "Player":"Oyuncu",
+  "Average":"Ortalama",
+  "Game Time":"Oyun Zamanı",
+  "Average score per game":"Oyun başı ortalama skor",
+  "Game History":"Oyun Geçmişi",
+  "More Players":"Daha Fazla Oyuncu",
+  "Upcoming Events":"Yaklaşan Etkinlikler",
+  "Person Capacity":"Kişi Kapasitesi",
+  "There are no upcoming events":"Yaklaşan etkinlk bulunmuyor",
+  "You can follow new events from here when they are added":"Yeni etkinlikler eklendiğinde buradan takip edebilirsiniz",
+  "Competition Styles":"Rekabet Stilleri",
+
+  "activePlayersTitle": "Aktif Oyuncular",
+  "playersActiveCount": "{{count}} oyuncu aktif",
+  "playersActiveCount_plural": "{{count}} oyuncu aktif",
+  "gameInfoTitle": "Oyun Bilgisi",
+  "gameChip": {
+    "type": "Tür: {{genre}}",
+    "typeTooltip": "Oyun Türü: {{genre}}",
+    "competitive": "Rekabetçi",
+    "competitiveTooltip": "Bu rekabetçi bir oyun modudur",
+    "lobbies": "{{count}} Lobi",
+    "lobbies_plural": "{{count}} Lobi",
+    "lobbiesTooltip": "{{count}} aktif lobi",
+    "lobbiesTooltip_plural": "{{count}} aktif lobi"
+  },
+  "accordionTitle": {
+    "gameModesAndRules": "Oyun Modları ve Kurallar",
+    "howToPlay": "Nasıl Oynanır?"
+  },
+  "tabs": {
+    "bingoModes": "Tombala Modları",
+    "competitionStyles": "Rekabet Stilleri"
+  },
+  "sectionTitle": {
+    "bingoModes": "Tombala Modları",
+    "competitionStyles": "Rekabet Stilleri"
+  },
+  "gameModes": {
+    "bingo": {
+      "classic": {
+        "title": "Klasik Bingo",
+        "speed": "5sn/sayı",
+        "features": {
+          "0": "Standart kurallar",
+          "1": "Sadece canlı işaretleme",
+          "2": "Geçmiş yok"
+        }
+      },
+      "extended": {
+        "title": "Uzatılmış Süre",
+        "speed": "10sn/sayı",
+        "features": {
+          "0": "10sn görünürlük",
+          "1": "2 sayı görünür",
+          "2": "İşaretleme geçmişi"
+        }
+      },
+      "superfast": {
+        "title": "Süper Hızlı",
+        "speed": "3sn/sayı",
+        "features": {
+          "0": "Hızlı kararlar",
+          "1": "3sn görünürlük",
+          "2": "Ceza sistemi"
+        }
+      }
+    },
+    "competition": {
+      "competitive": {
+        "title": "Rekabetçi Mod",
+        "features": {
+          "0": "Sıralamalı oyun",
+          "1": "Tam oyun süresi",
+          "2": "Skor takibi"
+        }
+      },
+      "non-competitive": {
+        "title": "Eğlencelik Mod",
+        "features": {
+          "0": "İlk kazanan oyunu bitirir",
+          "1": "Dostça oyun",
+          "2": "Hızlı maçlar"
+        }
+      }
+    }
+  },
+  "genres": {
+    "Adventure": "Macera",
+    "SciFi": "Bilim Kurgu",
+    "Fantasy": "Fantastik",
+    "Racing": "Yarış"
+  },
+  "games": {
+    "Bingo": {
+      "title": "Tombala",
+      "playTime": "20dk",
+      "description": "Tombala bir şans oyunudur. Sayılar çekildikçe kartınızdaki numaraları işaretleyin. Bir deseni ilk tamamlayan olup 'TOMBALA!' diye bağırarak kazanın. Çeşitli modların ve arkadaşlarınızla eğlencenin tadını çıkarın.",
+      "howToPlay": {
+        "0": "Bir Tombala lobisine katılın veya kendi lobinizi oluşturun.",
+        "1": "Size özel Tombala kartlarınızı alın.",
+        "2": "Oyun tarafından çekilen sayıları dinleyin.",
+        "3": "Çekilen bir sayı kartınızdakilerden biriyle eşleşirse işaretleyin."
+      }
+    },
+    "Uno": {
+      "title": "Uno",
+      "playTime": "15dk",
+      "description": "Uno, renkleri ve sayıları eşleştirmeye dayalı klasik bir kart oyunudur. Öğrenmesi kolay ama bırakması zordur! Oyunun yönünü değiştirmek için özel aksiyon kartlarını oynayın.",
+      "howToPlay": {
+        "0": "Her oyuncuya 7 kart dağıtılır.",
+        "1": "Atılan kart destesinin en üstündeki kartı sayı, renk veya aksiyona göre eşleştirin.",
+        "2": "Oynayamazsanız bir kart çekin.",
+        "3": "Aksiyon kartlarını (Pas Geç, Yön Değiştir, İki Kart Çek, Joker, Dört Kart Çektir Joker) stratejik olarak kullanın.",
+        "4": "Elinizde bir kart kaldığında 'UNO!' diye bağırın."
+      }
+    },
+    "Chess": {
+      "title": "Satranç",
+      "playTime": "25dk",
+      "description": "Satranç, iki oyuncu için bir strateji tahta oyunudur. Amaç, rakibin şahını mat etmek, yani kaçınılmaz bir tehdit altına sokmaktır.",
+      "howToPlay": {
+        "0": "Her taş belirli bir şekilde hareket eder (Piyon, Kale, At, Fil, Vezir, Şah).",
+        "1": "Beyaz önce başlar, sonra oyuncular sırayla hamle yapar.",
+        "2": "Rakibin taşlarını onların karesine gelerek alın.",
+        "3": "Oyun, bir şah mat olduğunda (kaçamayacak şekilde tehdit altında olduğunda) biter.",
+        "4": "Rok ve Geçerken Alma gibi özel hamleleri öğrenin."
+      }
+    },
+    "HangMan": {
+      "title": "Adam Asmaca",
+      "playTime": "10dk",
+      "description": "Adam Asmaca eğlenceli bir kelime tahmin oyunudur. Bir oyuncu bir kelime düşünür, diğeri ise sınırlı sayıda denemeyle harf önererek tahmin etmeye çalışır.",
+      "howToPlay": {
+        "0": "Boşluklarla temsil edilen gizli bir kelime seçilir.",
+        "1": "Kelimede olduğunu düşündüğünüz harfleri tahmin edin.",
+        "2": "Doğru tahminler harfin yerini/yerlerini ortaya çıkarır.",
+        "3": "Yanlış tahminler adam asmaca çizimine bir parça ekler.",
+        "4": "Kazanmak için adam tamamen çizilmeden önce kelimeyi tahmin edin!"
+      }
+    }
+  },
+  "Game Modes & Rules": "Oyun Modları ve Kurallar",
+  "Active Lobbies":"Aktif Lobiler",
+  "Rows per page":"Sayfa başına satır",
+  "eventEnded": "Etkinlik sona erdi",
+  "eventContinues": "Etkinlik devam ediyor",
+  "startsOnDate": "{{date}} tarihinde başlıyor",
+  "startsInTime": "{{time}} içinde başlıyor",
+  "hoursUnit": "sa",
+  "minutesUnit": "dk",
+  "secondsUnit": "sn",
+  "Open Lobby":"Şifresiz Lobi",
+  "Join":"Katıl",
+  "Delete Lobby":"Lobiyi Sil",
+  "Edit Lobby":"Lobiyi Güncelle",
+  "Go to Lobby":"Lobiye Git",
+  "lobbyTypeEvent": "Etkinlik",
+  "lobbyTypeNormal": "Normal",
+  "membersLabel": "{{count}}{{maxPart}} Üye",
+  "unnamedLobby": "İsimsiz Lobi",
+  "lobbyFullError": "Lobi dolu!",
+  "joinLobbyError": "Lobiye katılırken bir hata oluştu.",
+  "Settings":"Ayarlar",
+  "Sound Effects":"Ses Efektleri",
+  "Notifications":"Bildirimler"
+
+  
 }

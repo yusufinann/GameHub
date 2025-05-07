@@ -91,56 +91,6 @@
         "Preview Mode": "Preview Mode",
         "FULLY READY!": "FULLY READY!",
         
-        "games": {
-          "Bingo": {
-            "title": "Bingo",
-            "genre": "Adventure",
-            "description": "Bingo fun is just a click away! Mark off your lucky numbers and be the first to yell 'Bingo!' in all the excitement!",
-            "howToPlay": [
-              "Each player receives a random Bingo card",
-              "The host draws numbers at random",
-              "Mark the number on your card if it's been called",
-              "Be the first to complete a row horizontally, vertically, or diagonally and shout 'Bingo!' to win"
-            ]
-          },
-          "Uno": {
-            "title": "Uno",
-            "genre": "Sci-Fi",
-            "description": "Get ready for fast-paced fun with Uno! Match colors or numbers, play action cards, and be the first to get rid of all your cards!",
-            "howToPlay": [
-              "Each player is dealt 7 cards at the start",
-              "Take turns matching the top card by color or number",
-              "Use action cards to skip, reverse, or draw cards",
-              "When you have one card left, shout 'UNO!'",
-              "The first player to play all their cards wins"
-            ]
-          },
-          "Chess": {
-            "title": "Chess",
-            "genre": "Fantasy",
-            "description": "Test your strategy and logic in the timeless game of Chess. Outsmart your opponent and checkmate the king to win the match!",
-            "howToPlay": [
-              "Each player starts with 16 pieces: pawns, knights, bishops, rooks, a queen, and a king",
-              "Players take turns moving one piece per turn",
-              "Use strategy to protect your king and attack your opponent's pieces",
-              "Capture pieces by moving into their square",
-              "Win by putting the opponent's king in a position where it cannot escape: checkmate"
-            ]
-          },
-          "HangMan": {
-            "title": "HangMan",
-            "genre": "Racing",
-            "description": "Guess the word before the stick figure is fully drawn! Use logic and vocabulary to uncover the hidden word letter by letter.",
-            "howToPlay": [
-              "One player thinks of a word and marks blanks for each letter",
-              "The other player guesses letters one at a time",
-              "Correct guesses reveal the letter in the word",
-              "Incorrect guesses add parts to the hangman drawing",
-              "The guessing player wins by revealing the word before the hangman is fully drawn"
-            ]
-          }
-        },
-        
         "gameData": {
           "Valorant": {
             "title": "Valorant",
@@ -187,5 +137,172 @@
   "All":"All",
   "Normal":"Normal",
   "Event":"Event",
-  "My Groups":"My Groups"
+  "My Groups":"My Groups",
+  "Error Loading Data":"Error Loading Data",
+  "Player":"Player",
+  "Average":"Average",
+  "Game Time":"Game Time",
+  "Average score per game":"Average score per game",
+  "Game History":"Game History",
+  "More Players":"More Players",
+  "Upcoming Events":"Upcoming Events",
+  "Person Capacity":"Person Capacity",
+  "Competition Styles":"Competition Styles",
+  "There are no upcoming events":"There are no upcoming events",
+  "You can follow new events from here when they are added": "You can follow new events from here when they are added",
+   "activePlayersTitle": "Active Players",
+  "playersActiveCount": "{{count}} player active",
+  "playersActiveCount_plural": "{{count}} players active",
+  "gameInfoTitle": "Game Info",
+  "gameChip": {
+    "type": "Type: {{genre}}",
+    "typeTooltip": "Game Genre: {{genre}}",
+    "competitive": "Competitive",
+    "competitiveTooltip": "This is a competitive game mode",
+    "lobbies": "{{count}} Lobby",
+    "lobbies_plural": "{{count}} Lobbies",
+    "lobbiesTooltip": "{{count}} active lobby",
+    "lobbiesTooltip_plural": "{{count}} active lobbies"
+  },
+  "accordionTitle": {
+    "gameModesAndRules": "Game Modes & Rules",
+    "howToPlay": "How to Play?"
+  },
+  "tabs": {
+    "bingoModes": "Bingo Modes",
+    "competitionStyles": "Competition Styles"
+  },
+  "sectionTitle": {
+    "bingoModes": "Bingo Modes",
+    "competitionStyles": "Competition Styles"
+  },
+  "gameModes": {
+    "bingo": {
+      "classic": {
+        "title": "Classic Bingo",
+        "speed": "5s/number",
+        "features": {
+          "0": "Standard rules",
+          "1": "Live marking only",
+          "2": "No history"
+        }
+      },
+      "extended": {
+        "title": "Extended Time",
+        "speed": "10s/number",
+        "features": {
+          "0": "10s visibility",
+          "1": "2 numbers visible",
+          "2": "Mark history"
+        }
+      },
+      "superfast": {
+        "title": "Super Fast",
+        "speed": "3s/number",
+        "features": {
+          "0": "Quick decisions",
+          "1": "3s visibility",
+          "2": "Penalty system"
+        }
+      }
+    },
+    "competition": {
+      "competitive": {
+        "title": "Competitive Mode",
+        "features": {
+          "0": "Ranked play",
+          "1": "Full game duration",
+          "2": "Score tracking"
+        }
+      },
+      "non-competitive": {
+        "title": "Casual Mode",
+        "features": {
+          "0": "First win ends game",
+          "1": "Friendly play",
+          "2": "Quick matches"
+        }
+      }
     }
+  },
+  "genres": {
+    "Adventure": "Adventure",
+    "SciFi": "Sci-Fi",
+    "Fantasy": "Fantasy",
+    "Racing": "Racing"
+  },
+  "games": {
+    "Bingo": {
+      "title": "Bingo",
+      "playTime": "20min",
+      "description": "Bingo is a game of chance. Mark numbers on your card as they are called. Be the first to complete a pattern and shout 'BINGO!' to win. Enjoy various modes and fun with friends.",
+      "howToPlay": {
+        "0": "Join a Bingo lobby or create your own.",
+        "1": "Receive your unique Bingo card(s).",
+        "2": "Listen for numbers called out by the game.",
+        "3": "If a called number matches one on your card, mark it."
+      }
+    },
+    "Uno": {
+      "title": "Uno",
+      "playTime": "15min",
+      "description": "Uno is a classic card game of matching colors and numbers. It's easy to pick up but hard to put down! Play special action cards to change the game's direction.",
+      "howToPlay": {
+        "0": "Each player is dealt 7 cards.",
+        "1": "Match the top card on the discard pile by number, color, or action.",
+        "2": "If you can't play, draw a card.",
+        "3": "Use Action cards (Skip, Reverse, Draw Two, Wild, Wild Draw Four) strategically.",
+        "4": "Shout 'UNO!' when you have one card left."
+      }
+    },
+    "Chess": {
+      "title": "Chess",
+      "playTime": "25min",
+      "description": "Chess is a strategy board game for two players. The objective is to checkmate the opponent's king, putting it under an inescapable threat of capture.",
+      "howToPlay": {
+        "0": "Each piece moves in a specific way (Pawn, Rook, Knight, Bishop, Queen, King).",
+        "1": "White moves first, then players alternate turns.",
+        "2": "Capture opponent's pieces by landing on their square.",
+        "3": "The game ends when a king is in checkmate (cannot escape capture).",
+        "4": "Learn special moves like Castling and En Passant."
+      }
+    },
+    "HangMan": {
+      "title": "HangMan",
+      "playTime": "10min",
+      "description": "Hangman is a fun word-guessing game. One player thinks of a word, and the other tries to guess it by suggesting letters within a limited number of attempts.",
+      "howToPlay": {
+        "0": "A secret word is chosen, represented by blank spaces.",
+        "1": "Guess letters you think are in the word.",
+        "2": "Correct guesses reveal the letter's position(s).",
+        "3": "Incorrect guesses add a part to the hangman drawing.",
+        "4": "Guess the word before the hangman is fully drawn to win!"
+      }
+    }
+  },
+  "Game Modes & Rules":"Game Modes & Rules",
+  "Active Lobbies":"Active Lobbies",
+  "Rows per page":"Rows per page",
+  "eventEnded": "Event has ended",
+  "eventContinues": "The event continues",
+  "startsOnDate": "Starts on {{date}}",
+  "startsInTime": "Starts in {{time}}",
+  "hoursUnit": "h",
+  "minutesUnit": "m",
+  "secondsUnit": "s",
+  "Password Protected Lobby":"Password Protected Lobby",
+  "Open Lobby":"Open Lobby",
+  "Delete Lobby":"Delete Lobby",
+  "Edit Lobby":"Edit Lobby",
+  "Go to Lobby":"Go to Lobby",
+  "Join":"Join",
+  "lobbyTypeEvent": "Event",
+  "lobbyTypeNormal": "Normal",
+  "membersLabel": "{{count}}{{maxPart}} Members",
+  "unnamedLobby": "Unnamed Lobby",
+  "lobbyFullError": "Lobby is full!",
+  "joinLobbyError": "There was an error joining the lobby.",
+  "Sound Effects":"Sound Effects",
+  "Settings":"Settings",
+  "Notifications":"Notifications"
+}

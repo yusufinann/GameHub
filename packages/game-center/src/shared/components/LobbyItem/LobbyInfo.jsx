@@ -3,14 +3,16 @@ import { Chip } from "@mui/material";
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
-const getTimeInfo = (startDate, startTime, endDate, endTime) => {
+// Updated getTimeInfo utility function
+const getTimeInfo = (t, currentLanguage, startDate, startTime, endDate, endTime) => {
   const now = new Date();
   const eventStart = new Date(`${startDate}T${startTime}`);
   const eventEnd = new Date(`${endDate}T${endTime}`);
 
-  if (now > eventEnd) return "Event has ended";
-  if (now > eventStart) return "The event continues";
+  if (now > eventEnd) return { status: "ended", text: t('eventEnded') };
+  if (now > eventStart) return { status: "ongoing", text: t('eventContinues') };
 
   const diff = eventStart - now;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -19,55 +21,59 @@ const getTimeInfo = (startDate, startTime, endDate, endTime) => {
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
   if (days > 0) {
-    // Etkinlik 24 saatten fazla bir süre sonra ise sadece başlangıç tarihini göster
     const eventStartDate = new Date(startDate);
-    const formattedDate = eventStartDate.toLocaleDateString('en-US', { // You can adjust locale and options
+    const formattedDate = eventStartDate.toLocaleDateString(currentLanguage, { // Use currentLanguage
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-    return `Starts on ${formattedDate}`;
+    return { status: "upcomingFuture", text: t('startsOnDate', { date: formattedDate }) };
   } else {
-    // 24 saatten az kaldıysa saniyeyi ekle
     const timeParts = [];
-    if (hours > 0) timeParts.push(`${hours}h`);
-    timeParts.push(`${minutes}m`);
-    timeParts.push(`${seconds}s`);
-    return `Starts in ${timeParts.join(' ')}`;
+    if (hours > 0) timeParts.push(`${hours}${t('hoursUnit')}`);
+    timeParts.push(`${minutes}${t('minutesUnit')}`);
+    timeParts.push(`${seconds}${t('secondsUnit')}`);
+    return { status: "upcomingSoon", text: t('startsInTime', { time: timeParts.join(' ') }) };
   }
 };
 
-export const LobbyInfo = ({ startDate, startTime, endDate, endTime,isMobile  }) => {
+export const LobbyInfo = ({ startDate, startTime, endDate, endTime, isMobile }) => {
+  const { t, i18n } = useTranslation(); // Get t function and i18n instance
+  const currentLanguage = i18n.language;
+
   const [timeInfo, setTimeInfo] = useState(() =>
-    getTimeInfo(startDate, startTime, endDate, endTime)
+    getTimeInfo(t, currentLanguage, startDate, startTime, endDate, endTime)
   );
 
   useEffect(() => {
     const updateTimer = () => {
-      const newTimeInfo = getTimeInfo(startDate, startTime, endDate, endTime);
+      const newTimeInfo = getTimeInfo(t, currentLanguage, startDate, startTime, endDate, endTime);
       setTimeInfo(newTimeInfo);
     };
 
+    // Update immediately if language changes
+    updateTimer(); 
+
     const timerId = setInterval(updateTimer, 1000);
     return () => clearInterval(timerId);
-  }, [startDate, startTime, endDate, endTime]);
+  }, [t, currentLanguage, startDate, startTime, endDate, endTime]); // Add t and currentLanguage to dependencies
 
   const getIcon = () => {
-    if (timeInfo.startsWith("Starts in") || timeInfo.startsWith("Starts on")) return <ScheduleIcon />; // "Starts on" da eklendi
-    if (timeInfo === "The event continues") return <PlayCircleFilledIcon />;
-    return <CheckCircleIcon />;
+    if (timeInfo.status === "upcomingFuture" || timeInfo.status === "upcomingSoon") return <ScheduleIcon />;
+    if (timeInfo.status === "ongoing") return <PlayCircleFilledIcon />;
+    return <CheckCircleIcon />; // For "ended"
   };
 
   const getColor = () => {
-    if (timeInfo === "Event has ended") return "#ff6b6b";
-    if (timeInfo === "The event continues") return "#51cf66";
-    return "#fda085";
+    if (timeInfo.status === "ended") return "#ff6b6b";
+    if (timeInfo.status === "ongoing") return "#51cf66";
+    return "#fda085"; // For "upcomingFuture" and "upcomingSoon"
   };
 
   return (
     <Chip
       icon={getIcon()}
-      label={timeInfo}
+      label={timeInfo.text} // Use the translated text
       size={isMobile ? 'small' : 'medium'}
       sx={{
         minWidth: {
