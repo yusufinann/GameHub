@@ -4,6 +4,7 @@ import Header from "./Header";
 //import WhatshotIcon from "@mui/icons-material/Whatshot";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import { useTranslation } from "react-i18next";
 
 const HighlightsSection = lazy(() =>
   import("./HighlightsSection/HighlightsSection")
@@ -13,7 +14,7 @@ const TrendGamesList = lazy(() => import("./TrendGamesList/TrendGamesList"));
 
 function MainScreenBottomArea() {
   const theme = useTheme();
-
+  const {t}=useTranslation();
   const LoadingSpinner = () => (
     <Box
       sx={{
@@ -41,7 +42,7 @@ function MainScreenBottomArea() {
 
         <Suspense fallback={<LoadingSpinner />}>
           <Header
-            title={"Browse Games"}
+            title={t("Browse Games")}
             theme={theme}
             icon={<NewReleasesIcon />}
           />
@@ -50,7 +51,7 @@ function MainScreenBottomArea() {
 
         <Suspense fallback={<LoadingSpinner />}>
           <Header
-            title={"Trend Games"}
+            title={t("Trend Games")}
             theme={theme}
             icon={<TrendingUpIcon />}
           />

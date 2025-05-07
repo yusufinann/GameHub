@@ -11,9 +11,11 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useGames } from "../../../../service/useGames";
 import FeaturedGameItem from "./FeaturedGameItem";
+import { useTranslation } from "react-i18next";
 
 const HotAndNewList = () => {
   const theme = useTheme();
+  const {t}=useTranslation();
   const { data: games, loading, error } = useGames({ limit: 10, offset: 10 });
   const scrollContainerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -76,7 +78,7 @@ const HotAndNewList = () => {
   if (error)
     return (
       <Typography color="error" sx={{ textAlign: "center", my: 2 }}>
-        Hata: {error.message}
+        {t("Error")}: {error.message}
       </Typography>
     );
 
@@ -116,7 +118,7 @@ const HotAndNewList = () => {
             },
           }}
         >
-          Hot & New
+          {t("Hot & New")}
         </Typography>
 
         <Box sx={{ position: "relative", px: { xs: 0, sm: "40px" } }}>

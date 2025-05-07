@@ -2,10 +2,12 @@ import React, {useState} from 'react';
 import { Box, Button, Typography, Tabs, Tab, useTheme } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CreateLobbyModal from '../../../../../shared/components/CreateLobbyModal';
+import { useTranslation } from 'react-i18next';
 
 const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
+  const {t}=useTranslation();
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
   const handleTabChange = (e, newVal) => setActiveTab(newVal);
@@ -47,7 +49,7 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
                 ${theme.palette.primary.light} 90%)`,
           }}   
         >
-          Lobby Creator
+          {t("Lobby Creator")}
         </Typography>
 
         <Button
@@ -75,7 +77,7 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
             },
           }}
         >
-          {existingLobby ? 'Go to your Lobby' : 'Create A Lobby'}
+          {existingLobby ? t('Go to your Lobby') : t('Create A Lobby')}
         </Button>
       </Box>
 
@@ -99,10 +101,10 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
         variant="fullWidth"
         aria-label="lobby tabs"
       >
-        <Tab label="All" value="all" />
-        <Tab label="Normal" value="normal" />
-        <Tab label="Event" value="event" />
-        <Tab label="My Groups" value="myGroups" />
+        <Tab label={t("All")} value="all" />
+        <Tab label={t("Normal")} value="normal" />
+        <Tab label={t("Event")} value="event" />
+        <Tab label={t("My Groups")} value="myGroups" />
       </Tabs>
 
       <CreateLobbyModal

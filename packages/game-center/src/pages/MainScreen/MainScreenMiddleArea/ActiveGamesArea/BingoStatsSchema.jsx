@@ -22,6 +22,7 @@ import {
   Leaderboard
 } from '@mui/icons-material';
 import { useAuthContext } from '../../../../shared/context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const BingoStatsSchema = () => {
   const [stats, setStats] = useState(null);
@@ -33,7 +34,7 @@ const BingoStatsSchema = () => {
   const theme = useTheme();
   const { currentUser } = useAuthContext();
   const userId = currentUser?.id;
-  
+  const {t}=useTranslation();
   // Fetch user stats on mount and when userId changes
   useEffect(() => {
     const fetchStats = async () => {
@@ -94,17 +95,16 @@ const BingoStatsSchema = () => {
       });
   };
 
-  // Preparing pie chart data
+
   const preparePieData = () => {
     if (!stats) return [];
     const winRate = (stats.wins / stats.totalGames) * 100 || 0;
     return [
-      { name: 'Wins', value: winRate, color: theme.palette.success.main },
-      { name: 'Losses', value: 100 - winRate, color: theme.palette.error.main }
+      { name: t('Wins'), value: winRate, color: theme.palette.success.main },
+      { name: t('Losses'), value: 100 - winRate, color: theme.palette.error.main }
     ];
   };
 
-  // Preparing bar chart data (based on last 5 games)
   const prepareBarData = () => {
     if (!stats || !stats.games || stats.games.length === 0) return [];
     return stats.games
@@ -271,11 +271,11 @@ const BingoStatsSchema = () => {
           {/* Legend */}
           <rect x={svgWidth - 170} y={padding.top} width={15} height={15} fill={theme.palette.secondary.main} stroke={theme.palette.secondary.dark} strokeWidth="1" />
           <text x={svgWidth - 150} y={padding.top + 12} fill={theme.palette.text.primary} fontSize="14" fontWeight="bold">
-            Score
+            {t("Score")}
           </text>
           <rect x={svgWidth - 80} y={padding.top} width={15} height={15} fill={theme.palette.secondary.gold} stroke={theme.palette.warning.main} strokeWidth="1" />
           <text x={svgWidth - 60} y={padding.top + 12} fill={theme.palette.text.primary} fontSize="14" fontWeight="bold">
-            Rank
+            {t("Rank")}
           </text>
         </svg>
       </Box>
@@ -326,7 +326,7 @@ const BingoStatsSchema = () => {
         }}
       >
         <Alert severity="error" sx={{ borderRadius: '12px' }}>
-          Error loading stats: {error}
+          {t("Error loading stats")}: {error}
         </Alert>
       </Box>
     );
@@ -390,7 +390,7 @@ const BingoStatsSchema = () => {
             }}
           >
             <Leaderboard sx={{ fontSize: 40, color: theme.palette.primary.main, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-            Bingo Stats
+            {t("Bingo Stats")}
           </Typography>
         </Zoom>
         <IconButton
@@ -440,7 +440,7 @@ const BingoStatsSchema = () => {
                   {stats?.totalGames}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Total Games
+                  {t("Total Games")}
                 </Typography>
               </Paper>
             </Grow>
@@ -468,7 +468,7 @@ const BingoStatsSchema = () => {
                   {stats?.wins}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Wins
+                  {t("Wins")}
                 </Typography>
               </Paper>
             </Grow>
@@ -496,7 +496,7 @@ const BingoStatsSchema = () => {
                   {stats?.averageScore ? stats.averageScore.toFixed(1) : '0'}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Avg Score
+                  {t("Avg Score")}
                 </Typography>
               </Paper>
             </Grow>
@@ -517,7 +517,7 @@ const BingoStatsSchema = () => {
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, px: 2 }}>
             <Typography variant="h6" sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
-              Performance Metrics
+              {t("Performance Metrics")}
             </Typography>
             <Box>
               <IconButton

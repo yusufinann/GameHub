@@ -18,13 +18,14 @@ import InfoIcon from "@mui/icons-material/Info";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExtensionIcon from '@mui/icons-material/Extension';
+import { useTranslation } from "react-i18next";
 
 // Component for the section header
 const SectionHeader = ({ title, icon }) => {
   const theme = useTheme();
-  
+
   return (
-    <Box 
+    <Box
       sx={{
         display: "flex",
         alignItems: "center",
@@ -34,7 +35,7 @@ const SectionHeader = ({ title, icon }) => {
         px: 2,
       }}
     >
-      <Box 
+      <Box
         sx={{
           display: "flex",
           alignItems: "center",
@@ -66,8 +67,9 @@ const SectionHeader = ({ title, icon }) => {
 // Game Card Component
 const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handleMouseLeave }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const showInfo = hoverIndex === index;
-  
+
   return (
     <Box
       sx={{
@@ -87,8 +89,8 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
           zIndex: showInfo ? 50 : 1,
           transition: "all 0.3s ease",
           transform: showInfo ? "scale(1.05)" : "scale(1)",
-          boxShadow: showInfo 
-            ? `0 12px 24px ${theme.palette.background.elevation[3]}` 
+          boxShadow: showInfo
+            ? `0 12px 24px ${theme.palette.background.elevation[3]}`
             : `0 4px 12px ${theme.palette.background.elevation[1]}`,
           "&:hover": {
             cursor: "pointer",
@@ -110,7 +112,7 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
           <CardMedia
             component="img"
             image={game.image}
-            alt={game.title}
+            alt={t(game.titleKey)}
             sx={{
               height: 180,
               transition: "all 0.3s ease",
@@ -182,7 +184,7 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
                 }}
               />
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                CANLI
+                {t('game.live')}
               </Typography>
             </Box>
           )}
@@ -206,7 +208,7 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
               }}
               noWrap
             >
-              {game.title}
+              {t(game.titleKey)}
             </Typography>
           </CardContent>
         </Card>
@@ -304,17 +306,17 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
                         fontWeight: 700,
                       }}
                     >
-                      {game.title}
+                      {t(game.titleKey)}
                     </Typography>
                     <Typography
                       variant="body2"
                       display="block"
                       sx={{ color: theme.palette.text.secondary, mb: 1 }}
                     >
-                      {game.releaseInfo}
+                      {t('game.released')}: {game.releaseDate}
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                      {game.description}
+                      {t(game.descriptionKey)}
                     </Typography>
 
                     {/* Action Buttons */}
@@ -346,7 +348,7 @@ const GameCard = ({ game, index, isLastItem, hoverIndex, handleMouseEnter, handl
                           transition: "all 0.3s ease",
                         }}
                       >
-                        Oyna
+                        {t('game.play')}
                       </Button>
                       <IconButton
                         size="medium"
@@ -385,67 +387,63 @@ const GameStories = () => {
   const [hoverIndex, setHoverIndex] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const theme = useTheme();
+  const { t } = useTranslation();
   
+  // Updated games array with translation keys instead of hardcoded text
   const games = [
     {
       id: 1,
-      title: "Valheim",
-      image:
-        "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
-      releaseInfo: "Yayınlandı: 2 Şub 2021",
-      description:
-        "Efsanevi Viking savaşçılarının ölümden sonra yaşadığı mitolojik dünya Valheim'da hayatta kalmak için savaşın. Valhalla'ya layık olduğunuzu kanıtlamak için tehlikeli ormanları keşfedin ve dağları tırmanın.",
-      originalPrice: "$10.49",
-      discountedPrice: "$5.24 USD",
+      titleKey: "game.valheim.title",
+      image: "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
+      releaseDate: "2 Feb 2021",
+      descriptionKey: "game.valheim.description",
+      originalPrice: "10.49",
+      discountedPrice: "5.24 USD",
       discount: "-50%",
     },
     {
       id: 2,
-      title: "Half-Life: Alyx",
-      image:
-        "https://cdn.cloudflare.steamstatic.com/steam/apps/546560/header.jpg",
-      releaseInfo: "Yayınlandı: 23 Mar 2020",
-      description:
-        "Half-Life'ın sanal gerçeklik dünyasında geçen bu yeni bölümünde, Combine'ın artan gücüne karşı insanlığın tek umudu sizsiniz.",
-      originalPrice: "$59.99",
-      discountedPrice: "$8.09 USD",
+      titleKey: "game.halflife.title",
+      image: "https://cdn.cloudflare.steamstatic.com/steam/apps/546560/header.jpg",
+      releaseDate: "23 Mar 2020",
+      descriptionKey: "game.halflife.description",
+      originalPrice: "59.99",
+      discountedPrice: "8.09 USD",
       discount: "-85%",
     },
     {
       id: 3,
-      title: "Traffic Police",
+      titleKey: "game.traffic.title",
       image: "https://wallpapercave.com/wp/wp8747352.jpg",
-      releaseInfo: "Yayınlandı: 15 May 2023",
-      description:
-        "Trafik polisi olarak görev yapın, trafik kurallarını ihlal edenleri yakalayın ve şehrin düzenini sağlayın.",
-      originalPrice: "$14.99",
-      discountedPrice: "$7.34 USD",
+      releaseDate: "15 May 2023",
+      descriptionKey: "game.traffic.description",
+      originalPrice: "14.99",
+      discountedPrice: "7.34 USD",
       discount: "-51%",
       isLive: true,
     },
     {
       id: 4,
-      title: "Red Dead Redemption",
-      image:
-        "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/header.jpg",
-      releaseInfo: "Yayınlandı: 1 Jan 2023",
-      description: "Vahşi Batı'nın son günlerinde bir kanun kaçağı olarak hayatta kalma mücadelesi verin. İntikam, şeref ve bağlılık kavramlarının sınandığı bir epik macera.",
-      originalPrice: "$19.99",
-      discountedPrice: "$9.99 USD",
+      titleKey: "game.reddead.title",
+      image: "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/header.jpg",
+      releaseDate: "1 Jan 2023",
+      descriptionKey: "game.reddead.description",
+      originalPrice: "19.99",
+      discountedPrice: "9.99 USD",
       discount: "-50%",
     },
     {
       id: 5,
-      title: "Hogwarts Legacy",
-      image:
-        "https://cdn.cloudflare.steamstatic.com/steam/apps/990080/header.jpg",
-      releaseInfo: "Yayınlandı: 10 Feb 2023",
-      description: "Hogwarts Miras'ında sihir dünyasına adım atın. Büyücülük okulundaki maceranızda kendi karakterinizi yaratın ve kadim sırları keşfedin.",
-      originalPrice: "$59.99",
-      discountedPrice: "$29.99 USD",
+      titleKey: "game.hogwarts.title",
+      image: "https://cdn.cloudflare.steamstatic.com/steam/apps/990080/header.jpg",
+      releaseDate: "10 Feb 2023",
+      descriptionKey: "game.hogwarts.description",
+      originalPrice: "59.99",
+      discountedPrice: "29.99 USD",
       discount: "-50%",
     },
   ];
+  
   const displayedGames = games.slice(currentIndex, currentIndex + 3);
 
   const handlePrev = () => {
@@ -457,7 +455,6 @@ const GameStories = () => {
   };
 
   const handleMouseEnter = (index) => {
-    // use absolute index if needed: setHoverIndex(currentIndex + index);
     setHoverIndex(index);
   };
 
@@ -481,7 +478,7 @@ const GameStories = () => {
       }}
     >
       {/* Section Header */}
-      <SectionHeader title="Game Stories" icon={<ExtensionIcon />} />
+      <SectionHeader title={t("section.gameStories")} icon={<ExtensionIcon />} />
 
       {/* Game Carousel with Navigation */}
       <Box

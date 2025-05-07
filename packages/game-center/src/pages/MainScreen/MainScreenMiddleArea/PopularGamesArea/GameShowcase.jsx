@@ -5,6 +5,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import GamesIcon from '@mui/icons-material/Games';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import StarIcon from '@mui/icons-material/Star';
+import { useTranslation } from 'react-i18next';
 
 const GameShowcase = () => {
   const games = [
@@ -14,7 +15,7 @@ const GameShowcase = () => {
       rating: 4.8, 
       category: 'Action',
       imageUrl: 'https://images.unsplash.com/photo-1547025603-ef800f02690e?q=80&w=2100&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      color: '#4caf50' // Yeşil
+      color: '#4caf50' 
     },
     { 
       id: 2, 
@@ -22,7 +23,7 @@ const GameShowcase = () => {
       rating: 4.5, 
       category: 'RPG',
       imageUrl: 'https://wallpapercave.com/wp/wp10779455.jpg',
-      color: '#2196f3' // Mavi  
+      color: '#2196f3' 
     },
     { 
       id: 3, 
@@ -30,7 +31,7 @@ const GameShowcase = () => {
       rating: 4.2, 
       category: 'Sports',
       imageUrl: 'https://wallpapercave.com/uwp/uwp4701154.jpeg',
-      color: '#ff9800' // Turuncu  
+      color: '#ff9800' 
     },
     { 
       id: 4, 
@@ -38,7 +39,7 @@ const GameShowcase = () => {
       rating: 4.7, 
       category: 'Horror',
       imageUrl: 'https://wallpapercave.com/wp/wp10779462.jpg',
-      color: '#009688' // Turkuaz  
+      color: '#009688'   
     },
     { 
       id: 5, 
@@ -46,14 +47,14 @@ const GameShowcase = () => {
       rating: 4.0, 
       category: 'Adventure',
       imageUrl: 'https://wallpapercave.com/wp/wp10779479.jpg',
-      color: '#00bcd4' // Açık Turkuaz  
+      color: '#00bcd4' 
     },
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
   const theme = useTheme();
-
+  const{t}=useTranslation();
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % games.length);
@@ -105,7 +106,7 @@ const GameShowcase = () => {
             fontSize: '1.3rem' 
           }}
         >
-          <GamesIcon sx={{ mr: 1, fontSize: '1.4rem', color: games[activeIndex].color }} /> Popular Games
+          <GamesIcon sx={{ mr: 1, fontSize: '1.4rem', color: games[activeIndex].color }} /> {t("Popular Games")}
         </Typography>
         <Box>
           <IconButton 
@@ -222,7 +223,7 @@ const GameShowcase = () => {
                       fontSize: '0.75rem'
                     }}
                   >
-                    {game.category}
+                    {t(game.category)}
                   </Typography>
                   <Typography 
                     variant="subtitle1" 
@@ -233,7 +234,7 @@ const GameShowcase = () => {
                       fontSize: '1rem'
                     }}
                   >
-                    {game.title}
+                    {t(game.title)}
                   </Typography>
                 </Box>
                 
@@ -299,7 +300,7 @@ const GameShowcase = () => {
                       }}
                     >
                       <SportsEsportsIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                      HEMEN OYNA
+                      {t("Play Now")}
                     </Typography>
                   </Box>
                 )}

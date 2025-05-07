@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, Fade, Paper, useTheme } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { useTranslation } from 'react-i18next';
 
 const FeaturedGameItem = ({ title, thumbnail, openGiveawayUrl }) => {
   const [isHovered, setIsHovered] = useState(false);
   const theme = useTheme();
-
+  const {t}=useTranslation();
   return (
     <Paper
       elevation={isHovered ? 8 : 3}
@@ -112,7 +113,7 @@ const FeaturedGameItem = ({ title, thumbnail, openGiveawayUrl }) => {
               window.open(openGiveawayUrl, '_blank');
             }}
           >
-            Şimdi Oyna
+            {t("Play Now")}
           </Button>
         </Fade>
       </Box>

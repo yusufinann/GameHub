@@ -1,19 +1,192 @@
 {
-    
-      "Forgot password" :"Şifrimi Unuttum!",
-      "Use a different account":"Farklı bir hesap kullan",
-      "Your preferred language will be applied to all interface texts":"Tercih ettiğiniz dil tüm arayüz metinlerine uygulanacaktır",
-      "English":"İngilizce",
-      "Turkish":"Türkçe",
-      "Discover Your Next":"Sıradakini Keşfet",
-      "Gaming Adventure": "Oyun Macerası",
-      "Access thousands of games in one place":"Binlerce oyuna tek bir yerden erişin",
-      "Explore Games":"Oyunları Keşfedin",
-    "Learn More":"Daha Fazla Bilgi",
-    "Remember me":"Beni Hatırla",
-    "Login":"Giriş",
-    "Email Address": "E‑posta Adresi",
-    "Password":"Şifre",
-    "Enter your password":"Şifrenizi giriniz"
+  "Forgot password": "Şifrimi Unuttum!",
+  "Use a different account": "Farklı bir hesap kullan",
+  "Your preferred language will be applied to all interface texts": "Tercih ettiğiniz dil tüm arayüz metinlerine uygulanacaktır",
+  "English": "İngilizce",
+  "Turkish": "Türkçe",
+  "Discover Your Next": "Sıradakini Keşfet",
+  "Gaming Adventure": "Oyun Macerası",
+  "Access thousands of games in one place": "Binlerce oyuna tek bir yerden erişin",
+  "Explore Games": "Oyunları Keşfedin",
+  "Learn More": "Daha Fazla Bilgi",
+  "Remember me": "Beni Hatırla",
+  "Login": "Giriş",
+  "Email Address": "E‑posta Adresi",
+  "Password": "Şifre",
+  "Enter your password": "Şifrenizi giriniz",
+  "Hot & New": "En Yeni & En Sıcak",
+  "Error": "Hata",
+  "Featured Games": "Öne Çıkan Oyunlar",
+  "Play Now": "Şimdi Oyna",
+  "Browse Games": "Oyunlara Gözat",
+  "Welcome back": "Tekrar hoş geldiniz",
+  "Performance Metrics": "Performans Ölçütleri",
+  "Total Games": "Toplam Oyun",
+  "Avg Score": "Ortalama Skor",
+  "Wins": "Kazanma",
+  "Bingo Stats": "Tombala İstatistik",
+  "Losses": "Kaybetme",
+  "Score": "Skor",
+  "Rank": "Sıralama",
+  "Trend Games": "Trend Oyunlar",
+  "Game Stories": "Oyun Hikayeleri",
+  "Lobby Creator": "Lobi Oluşturucu",
+  "Go to your Lobby": "Lobiye Git",
+  "Create A Lobby": "Lobi Oluştur",
+  "Game Paradise Awaits": "Oyun Cenneti Sizi Bekliyor",
+  "Try Preview": "Önizlemeyi Deneyin",
+  "Preview Mode": "Önizleme Modu",
+  "FULLY READY!": "TAMAMEN HAZIR!",
+  "Popular Games": "Popüler Oyunlar",
+  "Search users...": "Kullanıcı Ara...",
 
-  }
+  "mainScreen": {
+    "slide1": {
+      "title": "Birlikte Oyna, Her Yerde Bağlan",
+      "buttonText": "ŞİMDİ KATIL"
+    },
+    "slide2": {
+      "title": "Canlı Lobiler, Anında Savaşlar",
+      "buttonText": "OYNAMAYA BAŞLA"
+    },
+    "slide3": {
+      "title": "Oyna. Bağlan. Fethet.",
+      "buttonText": "OYUN ALANINA GİR"
+    }
+  },
+  "alt": {
+    "gameCharacter": "Oyun karakteri"
+  },
+  "navigation": {
+    "previousSlide": "Önceki slayt",
+    "nextSlide": "Sonraki slayt",
+    "slideCounter": "{{current}} / {{total}}"
+  },
+  "section": {
+    "gameStories": "Oyun Hikayeleri"
+  },
+  "game": {
+    "live": "CANLI",
+    "released": "Yayınlandı",
+    "play": "Oyna",
+
+    "valheim": {
+      "title": "Valheim",
+      "description": "Efsanevi Viking savaşçılarının ölümden sonra yaşadığı mitolojik dünya Valheim'da hayatta kalmak için savaşın. Valhalla'ya layık olduğunuzu kanıtlamak için tehlikeli ormanları keşfedin ve dağları tırmanın."
+    },
+    "halflife": {
+      "title": "Half-Life: Alyx",
+      "description": "Half-Life'ın sanal gerçeklik dünyasında geçen bu yeni bölümünde, Combine'ın artan gücüne karşı insanlığın tek umudu sizsiniz."
+    },
+    "traffic": {
+      "title": "Traffic Police",
+      "description": "Trafik polisi olarak görev yapın, trafik kurallarını ihlal edenleri yakalayın ve şehrin düzenini sağlayın."
+    },
+    "reddead": {
+      "title": "Red Dead Redemption",
+      "description": "Vahşi Batı'nın son günlerinde bir kanun kaçağı olarak hayatta kalma mücadelesi verin. İntikam, şeref ve bağlılık kavramlarının sınandığı bir epik macera."
+    },
+    "hogwarts": {
+      "title": "Hogwarts Legacy",
+      "description": "Hogwarts Miras'ında sihir dünyasına adım atın. Büyücülük okulundaki maceranızda kendi karakterinizi yaratın ve kadim sırları keşfedin."
+    }
+  },
+
+  "games": {
+    "Bingo": {
+      "title": "Tombala",
+      "genre": "Macera",
+      "description": "Tombala eğlencesi sadece bir tık uzağınızda! Şanslı numaralarınızı işaretleyin ve heyecan içinde ilk 'Tombala!' diye bağıran siz olun!",
+      "howToPlay": [
+        "Her oyuncu rastgele bir Tombala kartı alır",
+        "Sunucu rastgele numaralar çeker",
+        "Söylenen numarayı kartınızda işaretleyin",
+        "Yatay, dikey veya çapraz olarak bir sırayı tamamlayan ilk kişi olun ve 'Tombala!' diye bağırarak kazanın"
+      ]
+    },
+    "Uno": {
+      "title": "Uno",
+      "genre": "Bilim Kurgu",
+      "description": "Uno ile hızlı tempolu bir eğlenceye hazır olun! Renkleri veya sayıları eşleştirin, aksiyon kartları oynayın ve tüm kartlarınızdan ilk kurtulan siz olun!",
+      "howToPlay": [
+        "Başlangıçta her oyuncuya 7 kart dağıtılır",
+        "Sırayla üstteki kartı renk veya sayı olarak eşleştirin",
+        "Atlama, ters çevirme veya kart çekme için aksiyon kartları kullanın",
+        "Bir kartınız kaldığında 'UNO!' diye bağırın",
+        "Tüm kartlarını ilk oynayan oyuncu kazanır"
+      ]
+    },
+    "Chess": {
+      "title": "Satranç",
+      "genre": "Fantezi",
+      "description": "Zamansız Satranç oyununda strateji ve mantığınızı test edin. Rakibinizi alt edin ve şahı mat ederek maçı kazanın!",
+      "howToPlay": [
+        "Her oyuncu 16 taşla başlar: piyonlar, atlar, filler, kaleler, bir vezir ve bir şah",
+        "Oyuncular sırayla her turda bir taş hareket ettirir",
+        "Şahınızı korumak ve rakibinizin taşlarına saldırmak için strateji kullanın",
+        "Taşları onların karesine hareket ederek yakalayn",
+        "Rakibin şahını kaçamayacağı bir pozisyona getirerek kazanın: şah mat"
+      ]
+    },
+    "HangMan": {
+      "title": "Adam Asmaca",
+      "genre": "Yarış",
+      "description": "Çöp adam tamamen çizilmeden önce kelimeyi tahmin edin! Gizli kelimeyi harf harf ortaya çıkarmak için mantık ve kelime dağarcığınızı kullanın.",
+      "howToPlay": [
+        "Bir oyuncu bir kelime düşünür ve her harf için boşluklar işaretler",
+        "Diğer oyuncu bir seferde bir harf tahmin eder",
+        "Doğru tahminler kelimede harfi ortaya çıkarır",
+        "Yanlış tahminler adam asmaca çizimine parçalar ekler",
+        "Tahmin eden oyuncu, adam asmaca tamamen çizilmeden kelimeyi ortaya çıkararak kazanır"
+      ]
+    }
+  },
+
+  "gameData": {
+    "Valorant": {
+      "title": "Valorant",
+      "description": "Hassas silah oyununun benzersiz ajan yetenekleriyle buluştuğu 5'e 5 karakter tabanlı taktiksel nişancı oyunu.",
+      "genre": "Taktiksel Nişancı"
+    },
+    "Cyberpunk": {
+      "title": "Cyberpunk 2077",
+      "description": "Güç, glamour ve vücut modifikasyonuna takıntılı bir megalopolis olan Night City'de geçen açık dünya aksiyon-macera RPG'si.",
+      "genre": "RPG"
+    }
+  },
+  "Action": "Aksiyon",
+  "RPG": "RYO",
+  "Sports": "Spor",
+  "Horror": "Korku",
+  "Adventure": "Macera",
+  "Space Adventure": "Uzay Macerası",
+  "Monster Hunter": "Canavar Avcısı",
+  "Racing Legends": "Yarış Efsaneleri",
+  "Zombie Survival": "Zombi Hayatta Kalma",
+  "Treasure Island": "Hazine Adası",
+  "featuredGames": {
+    "arma3": {
+      "title": "Arma 3"
+    },
+    "halfLife2": {
+      "title": "Half-Life 2"
+    },
+    "gtaV": {
+      "title": "GTA V"
+    }
+  },
+  "gameStatus": {
+    "released": "Yayınlandı"
+  },
+  "gameTags": {
+    "mostPlayed": "En Çok Oynanan"
+  },
+  "gameSlide": {
+    "thumbnailAltText": "{{title}} ekran görüntüsü {{number}}",
+    "browseButton": "Gözat"
+  },
+  "All":"Tümü",
+  "Normal":"Normal",
+  "Event":"Etkinlik",
+  "My Groups":"Gruplarım"
+}

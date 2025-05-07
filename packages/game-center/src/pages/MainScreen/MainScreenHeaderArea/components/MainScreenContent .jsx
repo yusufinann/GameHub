@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
+import { useTranslation } from 'react-i18next'; 
 import gameOfThrones from "../../../../assets/headerGame3.png";
 import fortnite from "../../../../assets/fortnite-removebg.png";
 import oblivion from "../../../../assets/oblivion-removebg.png";
 
 const MainScreenContent = ({ theme }) => {
+  const { t } = useTranslation(); 
   const [currentSlide, setCurrentSlide] = useState(0);
+
+
   const slides = [
     {
       id: 1,
-      title: "Play Together, Connect Everywhere",
-      buttonText: "JOIN NOW",
+      titleKey: "mainScreen.slide1.title", 
+      buttonTextKey: "mainScreen.slide1.buttonText", 
       characterImg: gameOfThrones
     },
     {
       id: 2,
-      title: "Live Lobbies, Instant Battles",
-      buttonText: "START PLAYING",
+      titleKey: "mainScreen.slide2.title",
+      buttonTextKey: "mainScreen.slide2.buttonText",
       characterImg: fortnite
     },
     {
       id: 3,
-      title: "Game. Connect. Conquer.",
-      buttonText: "ENTER GAME ZONE",
+      titleKey: "mainScreen.slide3.title", 
+      buttonTextKey: "mainScreen.slide3.buttonText", 
       characterImg: oblivion
     }
   ];
@@ -43,7 +47,7 @@ const MainScreenContent = ({ theme }) => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
-  
+
   return (
     <Box sx={{ position: "relative", flex: 1, overflow: "hidden" }}>
       {slides.map((slide, index) => (
@@ -63,7 +67,7 @@ const MainScreenContent = ({ theme }) => {
             boxShadow: theme.shadows[8]
           }}
         >
-          {/* Background pattern */}
+
           <Box
             sx={{
               position: "absolute",
@@ -75,7 +79,6 @@ const MainScreenContent = ({ theme }) => {
             }}
           />
 
-          {/* Decorative gradient overlay */}
           <Box
             sx={{
               position: "absolute",
@@ -87,7 +90,6 @@ const MainScreenContent = ({ theme }) => {
             }}
           />
 
-          {/* Character image and floating icons */}
           <Box sx={{ position: "relative", width: "40%", display: { xs: "none", sm: "block" }, zIndex: 2 }}>
             <Box
               sx={{
@@ -104,13 +106,12 @@ const MainScreenContent = ({ theme }) => {
             >
               <img
                 src={slide.characterImg}
-                alt="Game character"
+                alt={t('alt.gameCharacter')} 
                 style={{ height: "100%", width: "auto", objectFit: "contain" }}
               />
             </Box>
           </Box>
 
-          {/* Text and CTA content */}
           <Box
             sx={{
               flex: 1,
@@ -133,12 +134,12 @@ const MainScreenContent = ({ theme }) => {
                 textAlign: { xs: "center", sm: "left" },
                 textShadow: "2px 2px 8px rgba(0,0,0,0.5)",
                 background: theme.palette.text.contrast,
-                WebkitBackgroundClip: "text", 
+                WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 display: "inline-block"
               }}
             >
-              {slide.title}
+              {t(slide.titleKey)} 
             </Typography>
 
             <Button
@@ -160,13 +161,12 @@ const MainScreenContent = ({ theme }) => {
                 transition: "all 0.3s ease"
               }}
             >
-              {slide.buttonText}
+              {t(slide.buttonTextKey)} 
             </Button>
           </Box>
         </Box>
       ))}
 
-      {/* Navigation dots */}
       <Box
         sx={{
           position: "absolute",
@@ -195,9 +195,9 @@ const MainScreenContent = ({ theme }) => {
         ))}
       </Box>
 
-      {/* Arrow navigation */}
       <IconButton
         onClick={prevSlide}
+        aria-label={t('navigation.previousSlide')} 
         sx={{
           position: "absolute",
           left: 16,
@@ -218,6 +218,7 @@ const MainScreenContent = ({ theme }) => {
 
       <IconButton
         onClick={nextSlide}
+        aria-label={t('navigation.nextSlide')} // Accessibility
         sx={{
           position: "absolute",
           right: 16,
@@ -253,7 +254,7 @@ const MainScreenContent = ({ theme }) => {
           boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
         }}
       >
-        {currentSlide + 1} / {slides.length}
+        {t('navigation.slideCounter', { current: currentSlide + 1, total: slides.length })}
       </Box>
     </Box>
   );

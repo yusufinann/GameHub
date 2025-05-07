@@ -8,11 +8,12 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuthContext } from "../../../../shared/context/AuthContext";
 import UserSearch from "./UserSearch";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function Header() {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
-
+  const{t}=useTranslation();
   const handleProfileClick = () => {
     if (currentUser?.id) {
       navigate(`/profile/${currentUser.id}`);
@@ -36,7 +37,7 @@ function Header() {
           fontSize: { xs: "1.5rem", sm: "2rem" },
         }}
       >
-        Welcome back, {currentUser?.name}
+        {t("Welcome back")}, {currentUser?.name}
       </Typography>
       <Stack direction="row" spacing={2} alignItems="center">
         <UserSearch/>

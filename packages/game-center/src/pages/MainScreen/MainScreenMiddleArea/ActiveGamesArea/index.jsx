@@ -4,10 +4,12 @@ import { Gamepad, Star, Timer, ChevronLeft, ChevronRight, Construction, EmojiEve
 import { useNavigate } from 'react-router-dom';
 import { GAMES } from '../../../../utils/constants';
 import Header from '../../MainScreenBottomArea/Header';
+import { useTranslation } from 'react-i18next';
 
 function ActiveGamesArea() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const theme = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
 
@@ -60,9 +62,9 @@ function ActiveGamesArea() {
         }
       }}
     >
-         {/* Use the reusable Header component */}
-         <Header
-        title="Game Paradise Awaits"
+      {/* Use the reusable Header component */}
+      <Header
+        title={t("Game Paradise Awaits")}
         // Choose your icon:
         icon={<Gamepad />} 
         variant="default"
@@ -179,7 +181,7 @@ function ActiveGamesArea() {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                   }}>
                     <Construction fontSize="small" />
-                    <Typography variant="caption" fontWeight="bold">Preview Mode</Typography>
+                    <Typography variant="caption" fontWeight="bold">{t("Preview Mode")}</Typography>
                   </Box>
                 )}
 
@@ -187,7 +189,7 @@ function ActiveGamesArea() {
                 <Box
                   component="img"
                   src={game.image}
-                  alt={game.title}
+                  alt={t(`${game.translationKey}.title`)}
                   sx={{
                     width: '100%',
                     height: '100%',
@@ -222,7 +224,7 @@ function ActiveGamesArea() {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                   }}>
                     <EmojiEvents fontSize="small" />
-                    <Typography variant="caption" fontWeight="bold">FULLY READY!</Typography>
+                    <Typography variant="caption" fontWeight="bold">{t("FULLY READY!")}</Typography>
                   </Box>
                 )}
 
@@ -245,7 +247,7 @@ function ActiveGamesArea() {
                     fontWeight: 700,
                     textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                   }}>
-                    {game.title}
+                    {t(`${game.translationKey}.title`)}
                   </Typography>
 
                   {/* Game Info Icons */}
@@ -266,7 +268,7 @@ function ActiveGamesArea() {
                     <Box>
                       <Gamepad sx={{ color: '#4ECDC4', fontSize: 20 }} />
                       <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                        {game.genre}
+                        {t(`${game.translationKey}.genre`)}
                       </Typography>
                     </Box>
                     <Box>
@@ -308,7 +310,7 @@ function ActiveGamesArea() {
                       }
                     }}
                   >
-                    {fullyImplemented ? 'Play Now' : 'Try Preview'}
+                    {fullyImplemented ? t('Play Now') : t('Try Preview')}
                   </Button>
                 </Box>
               </Box>

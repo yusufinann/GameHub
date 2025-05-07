@@ -3,8 +3,11 @@ import { Box, Typography, IconButton, Chip, Button } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import LaunchIcon from "@mui/icons-material/Launch";
+import { useTranslation } from 'react-i18next';
 
 const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -16,6 +19,7 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
     >
       <IconButton
         onClick={handlePrevSlide}
+        aria-label={t('gameSlide.previousSlide', 'Previous Slide')}
         sx={{
           position: "absolute",
           left: 0,
@@ -71,18 +75,18 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
           }}
         >
           <Typography variant="h4" sx={{ color: "white", fontWeight: 600 }}>
-            {game.title}
+            {t(game.title)}
           </Typography>
           <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
             <Typography
               variant="body1"
               sx={{ color: theme.palette.secondary.gold }}
             >
-              {game.status}
+              {t(game.status)}
             </Typography>
             {game.tag && (
               <Chip
-                label={game.tag}
+                label={t(game.tag)}
                 size="small"
                 sx={{
                   backgroundColor: theme.palette.primary.darker,
@@ -117,7 +121,10 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
               <Box
                 component="img"
                 src={thumbnail}
-                alt={`${game.title} screenshot ${idx + 1}`}
+                alt={t('gameSlide.thumbnailAltText', {
+                  title: t(game.title),
+                  number: idx + 1
+                })}
                 sx={{
                   width: "100%",
                   height: "100%",
@@ -141,6 +148,7 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             {game.platforms.includes("windows") && (
               <Box
+                title={t('platform.windows', 'Windows')}
                 sx={{
                   width: "20px",
                   height: "20px",
@@ -169,6 +177,7 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
             )}
             {game.platforms.includes("mac") && (
               <Box
+                title={t('platform.mac', 'Mac OS')}
                 sx={{
                   width: "20px",
                   height: "20px",
@@ -196,6 +205,7 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
             )}
             {game.platforms.includes("linux") && (
               <Box
+                title={t('platform.linux', 'Linux')}
                 sx={{
                   width: "20px",
                   height: "20px",
@@ -242,12 +252,13 @@ const GameSlide = ({ game, theme, handlePrevSlide, handleNextSlide }) => {
               padding: "4px 12px",
             }}
           >
-            Browse
+            {t('gameSlide.browseButton')}
           </Button>
         </Box>
       </Box>
       <IconButton
         onClick={handleNextSlide}
+        aria-label={t('gameSlide.nextSlide', 'Next Slide')}
         sx={{
           position: "absolute",
           right: 0,

@@ -4,6 +4,7 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { useGames } from '../../../../service/useGames';
+import { useTranslation } from 'react-i18next';
 
 const truncateText = (text, maxLength) => {
   if (text.length <= maxLength) return text;
@@ -14,7 +15,7 @@ const BrowseGames = () => {
   const [activeStep, setActiveStep] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+  const {t}=useTranslation();
   const { data: games, loading, error } = useGames({ limit: 10, offset: 20 });
   
   const displayCount = isMobile ? 1 : 4;
@@ -42,7 +43,7 @@ const BrowseGames = () => {
       alignItems: 'center'
     }}>
       <Typography color="error" sx={{ textAlign: 'center', my: 2 }}>
-        Hata: {error.message}
+        {t("Error")}: {error.message}
       </Typography>
     </Box>
   );
@@ -89,7 +90,7 @@ const BrowseGames = () => {
           textTransform: 'uppercase'
         }}
       >
-        Browse Games
+        {t("Browse Games")}
       </Typography>
 
       <Box sx={{ 

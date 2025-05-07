@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const searchUsers = async (query) => {
   try {
@@ -45,6 +46,7 @@ const UserSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 const theme=useTheme();
+const{t}=useTranslation();
   const handleSearch = async (event) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -102,7 +104,7 @@ const theme=useTheme();
           </IconButton>
           <InputBase
             sx={{ ml: 1, flex: 1, color: 'white' }}
-            placeholder="Search users..."
+            placeholder={t("Search users...")}
             value={searchQuery}
             onChange={handleSearch}
           />

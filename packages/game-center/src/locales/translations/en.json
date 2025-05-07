@@ -13,5 +13,179 @@
      "Login":"Login",
      "Email Address": "Email Address",
      "Password":"Password",
-     "Enter your password":"Enter your password"
+     "Enter your password":"Enter your password",
+     "Hot & New":"Hot & New",
+     "Error":"Error",
+     "Featured Games":"Featured Games",
+     "Browse Games":"Browse Games",
+     "Welcome back":"Welcome back",
+     "mainScreen": {
+          "slide1": {
+            "title": "Play Together, Connect Everywhere",
+            "buttonText": "JOIN NOW"
+          },
+          "slide2": {
+            "title": "Live Lobbies, Instant Battles",
+            "buttonText": "START PLAYING"
+          },
+          "slide3": {
+            "title": "Game. Connect. Conquer.",
+            "buttonText": "ENTER GAME ZONE"
+          }
+        },
+        "alt": {
+          "gameCharacter": "Game character"
+        },
+        "navigation": {
+          "previousSlide": "Previous slide",
+          "nextSlide": "Next slide",
+          "slideCounter": "{{current}} / {{total}}"
+        },
+        "Performance Metrics":"Performance Metrics",
+        "Avg Score":"Avg Score",
+        "Total Games":"Total Games",
+        "Wins":"Wins",
+        "Losses":"Losses",
+        "Bingo Stats":"Bingo Stats",
+        "Score":"Score",
+        "Rank":"Rank",
+        "Trend Games":"Trend Games",
+        "Game Stories":"Game Stories",
+        "Lobby Creator":"Lobby Creator",
+        "Go to your Lobby":"Go to your Lobby",
+        "Create A Lobby":"Create A Lobby",
+        "Popular Games":"Popular Games",
+        "section": {
+          "gameStories": "Game Stories"
+        },
+        "game": {
+          "live": "LIVE",
+          "released": "Released",
+          "play": "Play",
+          
+          "valheim": {
+            "title": "Valheim",
+            "description": "Fight for survival in the mythical world of Valheim, where legendary Viking warriors live after death. Explore dangerous forests and climb mountains to prove you are worthy of Valhalla."
+          },
+          "halflife": {
+            "title": "Half-Life: Alyx",
+            "description": "In this new chapter of Half-Life set in virtual reality, you are humanity's only hope against the Combine's increasing power."
+          },
+          "traffic": {
+            "title": "Traffic Police",
+            "description": "Serve as a traffic police officer, catch those who violate traffic rules, and maintain order in the city."
+          },
+          "reddead": {
+            "title": "Red Dead Redemption",
+            "description": "Struggle to survive as an outlaw in the last days of the Wild West. An epic adventure where concepts of revenge, honor, and loyalty are tested."
+          },
+          "hogwarts": {
+            "title": "Hogwarts Legacy",
+            "description": "Step into the wizarding world in Hogwarts Legacy. Create your own character and discover ancient secrets in your adventure at the school of wizardry."
+          }
+        },
+        "Search users...":"Search users...",
+        "Game Paradise Awaits": "Game Paradise Awaits",
+        "Play Now": "Play Now",
+        "Try Preview": "Try Preview",
+        "Preview Mode": "Preview Mode",
+        "FULLY READY!": "FULLY READY!",
+        
+        "games": {
+          "Bingo": {
+            "title": "Bingo",
+            "genre": "Adventure",
+            "description": "Bingo fun is just a click away! Mark off your lucky numbers and be the first to yell 'Bingo!' in all the excitement!",
+            "howToPlay": [
+              "Each player receives a random Bingo card",
+              "The host draws numbers at random",
+              "Mark the number on your card if it's been called",
+              "Be the first to complete a row horizontally, vertically, or diagonally and shout 'Bingo!' to win"
+            ]
+          },
+          "Uno": {
+            "title": "Uno",
+            "genre": "Sci-Fi",
+            "description": "Get ready for fast-paced fun with Uno! Match colors or numbers, play action cards, and be the first to get rid of all your cards!",
+            "howToPlay": [
+              "Each player is dealt 7 cards at the start",
+              "Take turns matching the top card by color or number",
+              "Use action cards to skip, reverse, or draw cards",
+              "When you have one card left, shout 'UNO!'",
+              "The first player to play all their cards wins"
+            ]
+          },
+          "Chess": {
+            "title": "Chess",
+            "genre": "Fantasy",
+            "description": "Test your strategy and logic in the timeless game of Chess. Outsmart your opponent and checkmate the king to win the match!",
+            "howToPlay": [
+              "Each player starts with 16 pieces: pawns, knights, bishops, rooks, a queen, and a king",
+              "Players take turns moving one piece per turn",
+              "Use strategy to protect your king and attack your opponent's pieces",
+              "Capture pieces by moving into their square",
+              "Win by putting the opponent's king in a position where it cannot escape: checkmate"
+            ]
+          },
+          "HangMan": {
+            "title": "HangMan",
+            "genre": "Racing",
+            "description": "Guess the word before the stick figure is fully drawn! Use logic and vocabulary to uncover the hidden word letter by letter.",
+            "howToPlay": [
+              "One player thinks of a word and marks blanks for each letter",
+              "The other player guesses letters one at a time",
+              "Correct guesses reveal the letter in the word",
+              "Incorrect guesses add parts to the hangman drawing",
+              "The guessing player wins by revealing the word before the hangman is fully drawn"
+            ]
+          }
+        },
+        
+        "gameData": {
+          "Valorant": {
+            "title": "Valorant",
+            "description": "A 5v5 character-based tactical shooter where precise gunplay meets unique agent abilities.",
+            "genre": "Tactical Shooter"
+          },
+          "Cyberpunk": {
+            "title": "Cyberpunk 2077",
+            "description": "An open-world action-adventure RPG set in Night City, a megalopolis obsessed with power, glamour and body modification.",
+            "genre": "RPG"
+          }
+        },
+        "Action": "Action",
+  "RPG": "RPG",
+  "Sports": "Sports",
+  "Horror": "Horror",
+  "Adventure": "Adventure",
+  "Space Adventure": "Space Adventure",
+  "Monster Hunter": "Monster Hunter",
+  "Racing Legends": "Racing Legends",
+  "Zombie Survival": "Zombie Survival",
+  "Treasure Island": "Treasure Island",
+  "featuredGames": {
+    "arma3": {
+      "title": "Arma 3"
+    },
+    "halfLife2": {
+      "title": "Half-Life 2"
+    },
+    "gtaV": {
+      "title": "GTA V"
+    }
+  },
+  "gameStatus": {
+    "released": "Released"
+  },
+  "gameTags": {
+    "mostPlayed": "Most Played"
+  },
+  "gameSlide": {
+    "thumbnailAltText": "{{title}} screenshot {{number}}",
+    "browseButton": "Browse"
+  },
+  "All":"All",
+  "Normal":"Normal",
+  "Event":"Event",
+  "My Groups":"My Groups"
     }
