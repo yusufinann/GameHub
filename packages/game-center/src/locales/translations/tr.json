@@ -11,6 +11,8 @@
   "Learn More": "Daha Fazla Bilgi",
   "Remember me": "Beni Hatırla",
   "Login": "Giriş",
+  "Logout":"Çıkış",
+  "Logging out...":"Çıkış Yapılıyor...",
   "Email Address": "E‑posta Adresi",
   "Password": "Şifre",
   "Enter your password": "Şifrenizi giriniz",
@@ -438,7 +440,101 @@
   },
   "Neon and refreshing look":"Neon ve ferahlatıcı görünüm",
   "Dark view":"Koyu görünüm",
-   "Light View":"Açık görünüm"
+   "Light View":"Açık görünüm",
+ "profile": {
+    "errorPrefix": "Hata:",
+    "noUserFound": "Kullanıcı bulunamadı",
+    "removeFriendButton": "Arkadaşı Çıkar",
+    "requestSentButton": "İstek Gönderildi",
+    "addFriendButton": "Arkadaş Ekle",
+    "joinedSince": "Katılma tarihi: {{date}}",
+    "levelProgress": "Seviye İlerlemesi",
+    "stats": {
+      "totalGames": "Toplam Oyun",
+      "winRate": "Kazanma Oranı",
+      "longestStreak": "En Uzun Kazanma Serisi",
+      "friends": "Arkadaşlar"
+    },
+    "tabs": {
+      "statistics": "İstatistikler",
+      "history": "Geçmiş",
+      "achievements": "Başarılar"
+    }
+  },
+  "removeFriendConfirm": {
+    "title": "Arkadaşlıktan Çıkar",
+    "message": "Bu kullanıcıyı arkadaşlıktan çıkarmak istediğinizden emin misiniz?",
+    "message_with_name": "{{friendName}} adlı kullanıcıyı arkadaşlıktan çıkarmak istediğinizden emin misiniz?",
+    "confirmButton": "Arkadaşlıktan Çıkar"
+  },
+  "bingoHistory": {
+    "durationNA": "Yok",
+    "durationFormat": "{{minutes}} dk {{seconds}} sn",
+    "loadingHistory": "Oyun geçmişi yükleniyor...",
+    "errorLoadingStats": "Oyun istatistikleri yüklenirken hata oluştu: {{error}}",
+    "title": "Bingo Oyun Geçmişi",
+    "noHistory": "Henüz oyun geçmişi bulunmuyor. İlk Bingo oyununuzu oynayın!",
+    "shareTooltip": "Oyun geçmişini paylaş",
+    "summary": {
+      "totalDuration": "Toplam Harcanan Süre",
+      "totalScore": "Toplam Puan",
+      "bestRank": "En İyi Sıralama"
+    },
+    "table": {
+      "lobbyCode": "Lobi Kodu",
+      "gameId": "Oyun ID",
+      "date": "Tarih",
+      "score": "Puan",
+      "rank": "Sıralama"
+    },
+    "gameDetailsTooltip": "Oyun Detayları",
+    "pagination": {
+      "rowsPerPage": "Sayfa başına satır:",
+      "rowsPerPageAria": "sayfa başına satır seçici",
+      "displayingGames_one": "{{totalGames}} oyundan {{startIndex}}-{{endIndex}} arası",
+      "displayingGames_other": "{{totalGames}} oyundan {{startIndex}}-{{endIndex}} arası",
+      "pageInfo": "{{currentPage}} / {{totalPages}}",
+      "firstPage": "İlk Sayfa",
+      "firstPageAria": "ilk sayfa",
+      "previousPage": "Önceki Sayfa",
+      "previousPageAria": "önceki sayfa",
+      "nextPage": "Sonraki Sayfa",
+      "nextPageAria": "sonraki sayfa",
+      "lastPage": "Son Sayfa",
+      "lastPageAria": "son sayfa"
+    }
+  },
+  "bingoPlayerStats": {
+    "loading": "İstatistikler yükleniyor...",
+    "error": "İstatistikler yüklenirken hata oluştu: {{error}}",
+    "noStats": "Bu oyuncu için istatistik bulunmamaktadır.",
+    "overallTitle": "Bingo Genel İstatistikleri",
+    "totalGames": "Toplam Oyun",
+    "wins": "Kazanç",
+    "averageScore": "Ortalama Puan",
+    "notAvailable": "Yok",
+    "historyTitle": "Bingo Oyun Geçmişi",
+    "gameHistoryTableAria": "bingo oyun geçmişi tablosu",
+    "table": {
+      "lobbyCode": "Lobi Kodu",
+      "gameId": "Oyun ID",
+      "date": "Tarih",
+      "score": "Puan",
+      "rank": "Sıralama"
+    },
+    "notAvailableRank": "-",
+    "noGameHistory": "Oyun geçmişi bulunmamaktadır."
+  },
+ "bingoOverallStats": {
+    "loading": "Genel istatistikler yükleniyor...",
+    "error": "İstatistikler yüklenirken hata oluştu: {{error}}",
+    "noStats": "Henüz genel istatistik bulunmamaktadır.",
+    "title": "Bingo Genel İstatistikler",
+    "totalGames": "Toplam Oyun",
+    "wins": "Kazanma Sayısı",
+    "averageScore": "Ortalama Skor",
+    "notAvailable": "Yok"
+  }
   
 
   

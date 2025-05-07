@@ -11,6 +11,8 @@
      "Learn More":"Learn More",
      "Remember me":"Remember me",
      "Login":"Login",
+     "Logout":"Logout",
+     "Logging out...":"Logging out...",
      "Email Address": "Email Address",
      "Password":"Password",
      "Enter your password":"Enter your password",
@@ -439,7 +441,101 @@
   },
   "Neon and refreshing look":"Neon and refreshing look",
   "Dark view":"Dark view",
-  "Light View":"Light View"
+  "Light View":"Light View",
+  "profile": {
+    "errorPrefix": "Error:",
+    "noUserFound": "No user found",
+    "removeFriendButton": "Remove Friend",
+    "requestSentButton": "Request Sent",
+    "addFriendButton": "Add Friend",
+    "joinedSince": "Joined: {{date}}",
+    "levelProgress": "Level Progress",
+    "stats": {
+      "totalGames": "Total Games",
+      "winRate": "Win Rate",
+      "longestStreak": "Longest Streak",
+      "friends": "Friends"
+    },
+    "tabs": {
+      "statistics": "Statistics",
+      "history": "History",
+      "achievements": "Achievements"
+    }
+  },
+  "removeFriendConfirm": {
+    "title": "Remove Friend",
+    "message": "Are you sure you want to remove this user from your friends? This action cannot be undone and you will need to send a new request to become friends again.",
+    "message_with_name": "Are you sure you want to remove {{friendName}} from your friends?",
+    "confirmButton": "Remove Friend"
+  },
+  "bingoHistory": {
+    "durationNA": "N/A",
+    "durationFormat": "{{minutes}} min {{seconds}} sec",
+    "loadingHistory": "Loading game history...",
+    "errorLoadingStats": "Error loading game statistics: {{error}}",
+    "title": "Bingo Game History",
+    "noHistory": "No game history found yet. Play your first Bingo game!",
+    "shareTooltip": "Share game history",
+    "summary": {
+      "totalDuration": "Total Time Spent",
+      "totalScore": "Total Score",
+      "bestRank": "Best Rank"
+    },
+    "table": {
+      "lobbyCode": "Lobby Code",
+      "gameId": "Game ID",
+      "date": "Date",
+      "score": "Score",
+      "rank": "Rank"
+    },
+    "gameDetailsTooltip": "Game Details",
+    "pagination": {
+      "rowsPerPage": "Rows per page:",
+      "rowsPerPageAria": "rows per page selector",
+      "displayingGames_one": "{{startIndex}}-{{endIndex}} of {{totalGames}} game",
+      "displayingGames_other": "{{startIndex}}-{{endIndex}} of {{totalGames}} games",
+      "pageInfo": "{{currentPage}} / {{totalPages}}",
+      "firstPage": "First Page",
+      "firstPageAria": "first page",
+      "previousPage": "Previous Page",
+      "previousPageAria": "previous page",
+      "nextPage": "Next Page",
+      "nextPageAria": "next page",
+      "lastPage": "Last Page",
+      "lastPageAria": "last page"
+    }
+  },
+  "bingoPlayerStats": {
+    "loading": "Loading statistics...",
+    "error": "Error loading statistics: {{error}}",
+    "noStats": "No statistics available for this player.",
+    "overallTitle": "Bingo Overall Statistics",
+    "totalGames": "Total Games",
+    "wins": "Wins",
+    "averageScore": "Average Score",
+    "notAvailable": "N/A",
+    "historyTitle": "Bingo Game History",
+    "gameHistoryTableAria": "bingo game history table",
+    "table": {
+      "lobbyCode": "Lobby Code",
+      "gameId": "Game ID",
+      "date": "Date",
+      "score": "Score",
+      "rank": "Rank"
+    },
+    "notAvailableRank": "-",
+    "noGameHistory": "No game history available."
+  },
+"bingoOverallStats": {
+    "loading": "Loading overall statistics...",
+    "error": "Error loading statistics: {{error}}",
+    "noStats": "No overall statistics available yet.",
+    "title": "Bingo Overall Statistics",
+    "totalGames": "Total Games",
+    "wins": "Wins",
+    "averageScore": "Average Score",
+    "notAvailable": "N/A"
+  }
 
   
 }

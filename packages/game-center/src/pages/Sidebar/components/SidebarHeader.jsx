@@ -5,6 +5,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../../shared/context/AuthContext';
 import { logout } from '../api'; 
+import { useTranslation } from 'react-i18next';
 
 const StyledHeader = styled(Box)(({ theme }) => ({
   height: '25vh',
@@ -51,7 +52,7 @@ function SidebarHeader() {
   const navigate = useNavigate();
   const { logout: authLogout, currentUser } = useAuthContext();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
+  const{t}=useTranslation();
   const handleLogout = async () => {
     if (isLoggingOut) return;
 
@@ -67,7 +68,7 @@ function SidebarHeader() {
   };
 
   const initial = currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : '';
-  const tooltipTitle = isLoggingOut ? "Logging out..." : "Logout";
+  const tooltipTitle = isLoggingOut ? t("Logging out...") : t("Logout");
 
   return (
     <StyledHeader>

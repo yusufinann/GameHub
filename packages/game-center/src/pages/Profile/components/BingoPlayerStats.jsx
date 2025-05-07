@@ -14,11 +14,15 @@ import {
   TableRow,
   Paper,
   CircularProgress,
-  Alert
+  Alert,
+  useTheme // Import useTheme
 } from '@mui/material';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const BingoPlayerStats = () => {
   const { userId } = useParams();
+  const { t, i18n } = useTranslation(); 
+  const theme = useTheme(); 
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +35,8 @@ const BingoPlayerStats = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!response.ok) {
-          throw new Error('Failed to fetch stats');
+          const errorData = await response.json().catch(() => ({ message: response.statusText }));
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         setStats(data);
@@ -47,8 +52,11 @@ const BingoPlayerStats = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" p={4}>
+      <Box display="flex" justifyContent="center" alignItems="center" p={4} minHeight="200px">
         <CircularProgress />
+        <Typography ml={2} color="text.secondary">
+          {t('bingoPlayerStats.loading', 'Loading statistics...')}
+        </Typography>
       </Box>
     );
   }
@@ -56,63 +64,93 @@ const BingoPlayerStats = () => {
   if (error) {
     return (
       <Box p={4}>
-        <Alert severity="error">Error loading statistics: {error}</Alert>
+        <Alert severity="error">
+          {t('bingoPlayerStats.error', 'Error loading statistics: {{error}}', { error: error })}
+        </Alert>
       </Box>
     );
   }
 
+  if (!stats) {
+    return (
+      <Box p={4}>
+        <Alert severity="info">
+          {t('bingoPlayerStats.noStats', 'No statistics available for this player.')}
+        </Alert>
+      </Box>
+    )
+  }
+
   return (
-    <Box p={4} sx={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Card sx={{ mb: 4 }}>
+    <Box p={{ xs: 2, sm: 3, md: 4 }} sx={{ maxWidth: 1200, margin: '0 auto' }}>
+      <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Bingo Overall Statistics
+          <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            {t('bingoPlayerStats.overallTitle')}
           </Typography>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
+          <Grid container spacing={2}> 
+            <Grid item xs={12} sm={4}>
               <Paper
                 elevation={2}
                 sx={{
-                  p: 3,
-                  backgroundColor: '#bbdefb',
-                  textAlign: 'center'
+                  p: 2, 
+                  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.primary.light,
+                  color: theme.palette.primary.contrastText,
+                  textAlign: 'center',
+                  borderRadius: 2,
+                  height: '100%', 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
               >
-                <Typography variant="h4">{stats.totalGames}</Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                  Total Games
+                <Typography variant="h3" component="p" sx={{ fontWeight: 'bold' }}>{stats.totalGames.toLocaleString(i18n.language)}</Typography>
+                <Typography variant="subtitle1">
+                  {t('bingoPlayerStats.totalGames')}
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} sm={4}>
               <Paper
                 elevation={2}
                 sx={{
-                  p: 3,
-                  backgroundColor: '#c8e6c9',
-                  textAlign: 'center'
+                  p: 2,
+                  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.success.dark : theme.palette.success.light,
+                  color: theme.palette.success.contrastText,
+                  textAlign: 'center',
+                  borderRadius: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
               >
-                <Typography variant="h4">{stats.wins}</Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                  Wins
+                <Typography variant="h3" component="p" sx={{ fontWeight: 'bold' }}>{stats.wins.toLocaleString(i18n.language)}</Typography>
+                <Typography variant="subtitle1">
+                  {t('bingoPlayerStats.wins', 'Wins')}
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} sm={4}>
               <Paper
                 elevation={2}
                 sx={{
-                  p: 3,
-                  backgroundColor: '#e1bee7',
-                  textAlign: 'center'
+                  p: 2,
+                  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.secondary.dark : theme.palette.secondary.light,
+                  color: theme.palette.secondary.contrastText,
+                  textAlign: 'center',
+                  borderRadius: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
               >
-                <Typography variant="h4">
-                  {stats.averageScore.toFixed(1)}
+                <Typography variant="h3" component="p" sx={{ fontWeight: 'bold' }}>
+                  {typeof stats.averageScore === 'number' ? stats.averageScore.toFixed(1) : t('bingoPlayerStats.notAvailable', 'N/A')}
                 </Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                  Average Score
+                <Typography variant="subtitle1">
+                  {t('bingoPlayerStats.averageScore', 'Average Score')}
                 </Typography>
               </Paper>
             </Grid>
@@ -120,37 +158,48 @@ const BingoPlayerStats = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ borderRadius: 2, boxShadow: 3 }}>
         <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Bingo Game History
+          <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            {t('bingoPlayerStats.historyTitle')}
           </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Lobby Code</TableCell>
-                  <TableCell>Game ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell align="right">Score</TableCell>
-                  <TableCell align="right">Rank</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stats.games.map((game) => (
-                  <TableRow key={game.gameId}>
-                    <TableCell>{game.lobbyCode}</TableCell>
-                    <TableCell>{game.gameId}</TableCell>
-                    <TableCell>
-                      {new Date(game.startedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell align="right">{game.score}</TableCell>
-                    <TableCell align="right">{game.finalRank || '-'}</TableCell>
+          {stats.games && stats.games.length > 0 ? (
+            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+              <Table aria-label={t('bingoPlayerStats.gameHistoryTableAria', 'bingo game history table')}>
+                <TableHead sx={{ backgroundColor: theme.palette.secondary.main }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('bingoPlayerStats.table.lobbyCode', 'Lobby Code')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('bingoPlayerStats.table.gameId', 'Game ID')}</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>{t('bingoPlayerStats.table.date', 'Date')}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>{t('bingoPlayerStats.table.score', 'Score')}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>{t('bingoPlayerStats.table.rank', 'Rank')}</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {stats.games.map((game) => (
+                    <TableRow
+                      key={game.gameId}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 }, '&:hover': { backgroundColor: theme.palette.action.selected } }}
+                    >
+                      <TableCell component="th" scope="row">{game.lobbyCode}</TableCell>
+                      <TableCell>{game.gameId.slice(0, 8)}...</TableCell> 
+                      <TableCell>
+                        {new Date(game.startedAt).toLocaleDateString(i18n.language, {
+                          year: 'numeric', month: 'short', day: 'numeric'
+                        })}
+                      </TableCell>
+                      <TableCell align="right">{game.score.toLocaleString(i18n.language)}</TableCell>
+                      <TableCell align="right">{game.finalRank || t('bingoPlayerStats.notAvailableRank')}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography color="text.secondary" textAlign="center" p={3}>
+              {t('bingoPlayerStats.noGameHistory')}
+            </Typography>
+          )}
         </CardContent>
       </Card>
     </Box>

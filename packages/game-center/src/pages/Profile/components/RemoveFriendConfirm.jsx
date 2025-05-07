@@ -18,7 +18,8 @@ const RemoveFriendConfirm = ({
   onConfirm, 
   friendName, 
   friendAvatar,
-  theme 
+  theme,
+  t 
 }) => {
   return (
     <Dialog
@@ -43,7 +44,7 @@ const RemoveFriendConfirm = ({
         py: 2,
       }}>
         <Warning />
-        Arkadaşlıktan Çıkarma
+        {t('removeFriendConfirm.title', 'Remove Friend')}
       </DialogTitle>
       
       <DialogContent sx={{ mt: 2 }}>
@@ -67,7 +68,7 @@ const RemoveFriendConfirm = ({
         </Box>
         
         <DialogContentText>
-          Bu kullanıcıyı arkadaşlıktan çıkarmak istediğinizden emin misiniz? Bu işlem geri alınamaz ve tekrar arkadaş olmak için yeni bir istek göndermeniz gerekecektir.
+        {t('removeFriendConfirm.message', 'Are you sure you want to remove this user from your friends?', { friendName: friendName })}
         </DialogContentText>
       </DialogContent>
       
@@ -84,7 +85,7 @@ const RemoveFriendConfirm = ({
             }
           }}
         >
-          İptal
+          {t('Cancel')}
         </Button>
         <Button 
           onClick={onConfirm} 
@@ -97,7 +98,7 @@ const RemoveFriendConfirm = ({
             }
           }}
         >
-          Arkadaşlıktan Çıkar
+          {t('removeFriendConfirm.confirmButton', 'Remove Friend')}
         </Button>
       </DialogActions>
     </Dialog>
