@@ -138,6 +138,10 @@ export const buildTheme = (mode) => {
         fontFamily: "'VT323', monospace",
         fontSize: '1rem',
       },
+      tabSubtitle: {
+        fontFamily: "'VT323', monospace", 
+        fontSize: '1.5rem',
+      },
       button: {
         fontFamily: "'Press Start 2P', cursive",
         textTransform: 'none',

@@ -2,12 +2,14 @@ import React, { memo, useState } from 'react';
 import { Box, Avatar, Typography, Tooltip, IconButton, Menu, MenuItem, Badge, Fade } from '@mui/material';
 import MailIcon from '@mui/icons-material/Mail';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-
-const FriendAvatar = memo(({ friend, onMessage, onInvite, existingLobby }) => {
+import { useTranslation } from 'react-i18next';
+import {useNavigate } from "react-router-dom";
+const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
   const status = friend.isOnline ? 'online' : 'offline';
+  const{t}=useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  
+  const navigate = useNavigate();
   const handleClick = (event) => {
     if (friend.isOnline) {
       setAnchorEl(event.currentTarget);
@@ -19,7 +21,7 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite, existingLobby }) => {
   };
 
   const handleMessageClick = () => {
-    onMessage(friend);
+    navigate(`/conversation/all/friend/${friend.id}`)
     handleClose();
   };
 
@@ -121,7 +123,7 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite, existingLobby }) => {
         
         {/* Options icon with tooltip */}
         {friend.isOnline && (
-          <Tooltip title="Click for options" placement="right">
+          <Tooltip title={t("click")} placement="right">
             <IconButton 
               size="small" 
               onClick={handleIconClick}
@@ -181,13 +183,13 @@ const FriendAvatar = memo(({ friend, onMessage, onInvite, existingLobby }) => {
       >
         <MenuItem onClick={handleMessageClick}>
           <MailIcon fontSize="small" sx={{ mr: 1 }} />
-          <Typography variant="body2">Send Message</Typography>
+          <Typography variant="body2">{t("Send Message")}</Typography>
         </MenuItem>
         {
           existingLobby && (
             <MenuItem onClick={handleInviteClick}>
               <GroupAddIcon fontSize="small" sx={{ mr: 1 }} />
-              <Typography variant="body2">Invite to Lobby</Typography>
+              <Typography variant="body2">{t("inviteLobby")}</Typography>
             </MenuItem>
           )
         }

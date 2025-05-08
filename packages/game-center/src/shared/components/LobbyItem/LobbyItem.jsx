@@ -217,7 +217,6 @@ function LobbyItem({ lobby }) {
             <Typography
               variant={isMobile ? "h6" : "h5"}
               sx={{
-                fontWeight: 600,
                 fontSize: {
                   xs: "1rem",
                   sm: "1.1rem",

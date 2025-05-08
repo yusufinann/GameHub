@@ -11,6 +11,7 @@ import {
 import { handleCopy, handleShare } from "../../../utils/handleShare.js";
 import LobbyMembers from "./LobbyMembers.jsx";
 import { useLobbyContext } from "../../context/LobbyContext/context.js";
+import { useTranslation } from "react-i18next";
 
 export const SuccessScreen = ({ setSnackbar, onClose }) => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
     membersByLobby,
     existingLobby
   } = useLobbyContext();
-
+ const{t}=useTranslation();
   const members = membersByLobby[lobbyCode] || [];
 
   const handleLinkClick = () => {
@@ -43,7 +44,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
     return (
       <Box sx={{ textAlign: "center", py: 4 }}>
         <Typography variant="h6" color="error">
-          No active lobby found.
+          {t("noActiveLobby")}
         </Typography>
       </Box>
     );
@@ -77,7 +78,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Lobby Created Successfully
+          {t("createdMessage")}
         </Typography>
       </Box>
 
@@ -100,7 +101,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             fontWeight: 600,
           }}
         >
-          Lobby Code
+          {t("Lobby Code")}
         </Typography>
         <Box
           sx={{
@@ -118,7 +119,6 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             variant="h5"
             sx={{
               letterSpacing: 4,
-              fontWeight: 700,
               color: "rgba(34,193,195,1)",
             }}
           >
@@ -145,7 +145,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             fontWeight: 600,
           }}
         >
-          Lobby Link
+          {t("Lobby Link")}
         </Typography>
         <Box
           sx={{
@@ -170,7 +170,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             }}
             onClick={handleLinkClick}
           >
-            {lobbyLink || "Link not found"}
+            {lobbyLink || t("Link not found")}
           </Typography>
           <IconButton
             onClick={() => handleCopy(lobbyLink, setSnackbar)}
@@ -186,7 +186,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
         </Box>
       </Paper>
 
-      <LobbyMembers members={members} />
+      <LobbyMembers members={members} t={t}/>
 
       <Box
         sx={{
@@ -263,7 +263,7 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
             borderRadius: 2,
           }}
         >
-          Close
+          {t("Close")}
         </Button>
       </Box>
     </Box>

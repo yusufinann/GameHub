@@ -24,24 +24,22 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
 } from '@mui/icons-material';
-import { EventFields } from './EventFields';
+import { EventFields } from './EventFields'; // Assuming this component is also translated if needed
 import { useParams, useLocation } from 'react-router-dom';
-import { GAMES } from '../../../utils/constants';
+import { GAMES } from '../../../utils/constants'; // Assuming GAMES items (like game.title) are translatable or handled elsewhere
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose, isCreatingLobby }) {
   const { gameId } = useParams();
   const location = useLocation();
+  const { t } = useTranslation(); // Initialize t
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (gameId) {
-      // Check if the current route is a game-specific route
       const isGameDetailRoute = location.pathname.includes('game-detail');
-
       if (isGameDetailRoute) {
-        // Convert gameId to a number and find the corresponding game
         const selectedGame = GAMES.find(game => game.id === parseInt(gameId, 10));
-
         if (selectedGame) {
           setFormData((prev) => ({
             ...prev,
@@ -52,10 +50,8 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
     }
   }, [gameId, location.pathname, setFormData]);
 
-  // Determine if game selection should be disabled
   const isGameSelectionDisabled = location.pathname.includes('game-detail');
 
-  // Toggle password visibility
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -83,7 +79,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Create New Lobby
+            {t('lobbyForm.title', 'Create New Lobby')}
           </Typography>
         </Box>
       </Box>
@@ -91,12 +87,12 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
       <Box component="form" onSubmit={handleSubmit} sx={{ '& .MuiTextField-root': { mb: 3 } }}>
         <TextField
           fullWidth
-          label="Lobby Name"
+          label={t('lobbyForm.lobbyNameLabel', 'Lobby Name')}
           name="lobbyName"
           value={formData.lobbyName}
           onChange={handleChange}
           required
-          autoComplete="username"
+          autoComplete="off" // Changed from username to off as it's a lobby name
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,
@@ -117,14 +113,14 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           }}
         />
 
-        {/* Game Selection Area */}
         <FormControl fullWidth required sx={{ mb: 3 }}>
-          <InputLabel>Game Selection</InputLabel>
+          <InputLabel id="game-selection-label">{t('lobbyForm.gameSelectionLabel', 'Game Selection')}</InputLabel>
           <Select
+            labelId="game-selection-label"
             name="gameId"
             value={formData.gameId}
             onChange={handleChange}
-            label="Game Selection"
+            label={t('lobbyForm.gameSelectionLabel', 'Game Selection')} // Important for accessibility
             disabled={isGameSelectionDisabled}
             inputProps={{
               autoComplete: 'off',
@@ -154,7 +150,8 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
                   },
                 }}
               >
-                {game.title}
+                
+                {t(`games.${game.title}.title`)}
               </MenuItem>
             ))}
           </Select>
@@ -174,7 +171,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
           }}
         >
           <Typography variant="subtitle1" sx={{ mb: 1.5, color: 'rgba(34,193,195,1)', fontWeight: 600 }}>
-            Event Type
+            {t('lobbyForm.lobbyTypeLabel')}
           </Typography>
           <RadioGroup row name="eventType" value={formData.eventType} onChange={handleChange}>
             <FormControlLabel
@@ -189,7 +186,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
                   }}
                 />
               }
-              label="Normal"
+              label={t('lobbyForm.lobbyType.normal')}
               sx={{ mr: 4 }}
             />
             <FormControlLabel
@@ -204,16 +201,16 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
                   }}
                 />
               }
-              label="Event"
+              label={t('lobbyForm.lobbyType.event')}
             />
           </RadioGroup>
         </Paper>
 
-        {formData.eventType === 'event' && <EventFields formData={formData} handleChange={handleChange} />}
-        
+        {formData.eventType === 'event' && <EventFields formData={formData} handleChange={handleChange}/>}
+
         <TextField
           fullWidth
-          label="Max Members"
+          label={t('lobbyForm.maxMembersLabel', 'Max Members')}
           name="maxMembers"
           type="number"
           value={formData.maxMembers}
@@ -231,7 +228,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             },
           }}
           InputProps={{
-            inputProps: { min: 1, max: 10 },
+            inputProps: { min: 1, max: 10 }, 
             startAdornment: (
               <InputAdornment position="start">
                 <Typography variant="body2" color="rgba(34,193,195,0.8)">
@@ -241,13 +238,13 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             ),
           }}
         />
-        
+
         <TextField
           fullWidth
-          label="Lobby Password (Optional)"
+          label={t('lobbyForm.passwordLabel')}
           name="password"
           type={showPassword ? 'text' : 'password'}
-          autoComplete="current-password"
+          autoComplete="new-password" 
           value={formData.password}
           onChange={handleChange}
           sx={{
@@ -269,21 +266,21 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
             ),
             endAdornment: (
               <InputAdornment position="end">
-                <Tooltip title={showPassword ? "Hide password" : "Show password"}>
+                <Tooltip title={showPassword ? t('lobbyForm.hidePasswordTooltip', 'Hide password') : t('lobbyForm.showPasswordTooltip', 'Show password')}>
                   <IconButton
-                    aria-label="toggle password visibility"
+                    aria-label={t('lobbyForm.togglePasswordVisibilityAria', 'toggle password visibility')}
                     onClick={handleTogglePasswordVisibility}
                     edge="end"
                   >
-                    {showPassword ? 
-                      <VisibilityOffIcon sx={{ color: 'rgba(34,193,195,0.8)' }} /> : 
+                    {showPassword ?
+                      <VisibilityOffIcon sx={{ color: 'rgba(34,193,195,0.8)' }} /> :
                       <VisibilityIcon sx={{ color: 'rgba(34,193,195,0.8)' }} />
                     }
                   </IconButton>
                 </Tooltip>
               </InputAdornment>
             ),
-            placeholder: 'Enter a password (optional)',
+            placeholder: t('lobbyForm.passwordPlaceholder', 'Enter a password (optional)'),
           }}
         />
 
@@ -306,7 +303,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
               transition: 'all 0.3s ease',
             }}
           >
-            Cancel
+            {t('Cancel')}
           </Button>
           <Button
             variant="contained"
@@ -327,7 +324,7 @@ function LobbyForm({ formData, setFormData, handleChange, handleSubmit, onClose,
               transition: 'all 0.3s ease',
             }}
           >
-            {isCreatingLobby ? <CircularProgress size={24} color="inherit" /> : 'Create Lobby'}
+            {isCreatingLobby ? <CircularProgress size={24} color="inherit" /> : t('lobbyForm.createButton', 'Create Lobby')}
           </Button>
         </Box>
       </Box>

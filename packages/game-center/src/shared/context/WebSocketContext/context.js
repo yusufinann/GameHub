@@ -55,16 +55,6 @@ export const WebSocketProvider = ({ children }) => {
     ws.onerror = (error) => {
       console.error('WebSocket hatası:', error);
     };
- 
-    /* --During the development */
-    // ws.onmessage = (event) => {
-    //   try {
-    //     const data = JSON.parse(event.data);
-    //     console.log('WebSocket mesajı alındı:', data);
-    //   } catch (error) {
-    //     console.error('WebSocket mesajı işlenirken hata:', error);
-    //   }
-    // };
 
     socketRef.current = ws;
   }, [currentUser]);

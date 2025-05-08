@@ -20,7 +20,7 @@
      "Error":"Error",
      "Featured Games":"Featured Games",
      "Browse Games":"Browse Games",
-     "Welcome back":"Welcome back",
+     "Welcome":"Welcome",
      "mainScreen": {
           "slide1": {
             "title": "Play Together, Connect Everywhere",
@@ -535,7 +535,43 @@
     "wins": "Wins",
     "averageScore": "Average Score",
     "notAvailable": "N/A"
-  }
+  },
+  "lobbyForm": {
+    "title": "Create New Lobby",
+    "lobbyNameLabel": "Lobby Name",
+    "gameSelectionLabel": "Game Selection",
+    "lobbyTypeLabel": "Lobby Type",
+    "lobbyType": {
+      "normal": "Normal",
+      "event": "Event"
+    },
+    "maxMembersLabel": "Max Members",
+    "passwordLabel": "Lobby Password (Optional)",
+    "passwordPlaceholder": "Enter a password (optional)",
+    "hidePasswordTooltip": "Hide password",
+    "showPasswordTooltip": "Show password",
+    "togglePasswordVisibilityAria": "toggle password visibility",
+    "createButton": "Create Lobby"
+  },
+                     
+    "Start Time": "Start Time",
+    "End Time": "End Time",
+    "noActiveLobby":"No active lobby found.",
+    "createdMessage":"Lobby Created Successfully",
+    "Lobby Code":"Lobby Code",
+    "Lobby Link":"Lobby Link",
+    "Link not found":"Link not found",
+    "Lobby Members":"Lobby Members",
+    "Close":"Close",
+    "noMembers":"No other members yet",
+    "Lobby Name":"Lobby Name",
+    "Enable Password":"Enable Password",
+    "Password Protection":"Password Protection",
+    "helperText":"Leave blank to keep the current password",
+    "click":"Click for options",
+    "Send Message":"Send Message",
+    "inviteLobby":"Invite to lobby"
+    
 
   
 }

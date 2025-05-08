@@ -21,7 +21,7 @@
   "Featured Games": "Öne Çıkan Oyunlar",
   "Play Now": "Şimdi Oyna",
   "Browse Games": "Oyunlara Gözat",
-  "Welcome back": "Tekrar hoş geldiniz",
+  "Welcome": "Hoş geldiniz",
   "Performance Metrics": "Performans Ölçütleri",
   "Total Games": "Toplam Oyun",
   "Avg Score": "Ortalama Skor",
@@ -534,9 +534,40 @@
     "wins": "Kazanma Sayısı",
     "averageScore": "Ortalama Skor",
     "notAvailable": "Yok"
-  }
-  
-
-  
-  
+  },
+  "lobbyForm": {
+    "title": "Yeni Lobi Oluştur",
+    "lobbyNameLabel": "Lobi Adı",
+    "gameSelectionLabel": "Oyun Seçimi",
+    "lobbyTypeLabel": "Lobi Türü",
+    "lobbyType": {
+      "normal": "Normal",
+      "event": "Etkinlik"
+    },
+    "maxMembersLabel": "Maksimum Üye",
+    "passwordLabel": "Lobi Şifresi (İsteğe Bağlı)",
+    "passwordPlaceholder": "Bir şifre girin (isteğe bağlı)",
+    "hidePasswordTooltip": "Şifreyi gizle",
+    "showPasswordTooltip": "Şifreyi göster",
+    "togglePasswordVisibilityAria": "şifre görünürlüğünü değiştir",
+    "createButton": "Lobi Oluştur",
+    "cancelButton": "İptal"
+  },
+    "Start Time":  "Başlangıç Zamanı",
+    "End Time":  "Bitiş Zamanı",
+    "noActiveLobby":"Aktif Lobi Bulunmadı.",
+    "createdMessage":"Lobi Başarıyla Oluşturuldu",
+    "Lobby Code":"Lobi Kodu",
+    "Lobby Link":"Lobi Linki",
+    "Link not found":"Link bulunamadı",
+    "Lobby Members":"Lobi Üyeleri",
+    "Close":"Kapat" ,
+    "noMembers":"Henüz başka üye yok",
+    "Lobby Name":"Lobby Adı",
+    "Password Protection":"Şifre Koruması",
+    "Enable Password":"Şifre Etkinleştir",
+    "helperText":"Geçerli parolayı korumak için boş bırakın",
+    "click":"Seçenekler için tıkla",
+    "Send Message":"Mesaj gönder",
+    "inviteLobby":"Lobiye davet et"
 }

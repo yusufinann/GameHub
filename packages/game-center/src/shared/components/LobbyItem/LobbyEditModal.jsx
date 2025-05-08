@@ -34,6 +34,7 @@ import { GAMES } from "../../../utils/constants";
 import { EventFields } from "../CreateLobbyModal/EventFields";
 import formatDateForInputLocal from "../../../utils/formatDate";
 import { updateLobby as apiUpdateLobby } from "./api";
+import { useTranslation } from "react-i18next";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -54,7 +55,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
   const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [loading, setLoading] = useState(false);
-
+  const{t}=useTranslation();
   useEffect(() => {
     if (lobby) {
       setFormData({
@@ -194,24 +195,19 @@ function LobbyEditModal({ open, onClose, lobby }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <StarsIcon sx={{ 
               color: (theme) => 
-                theme.palette.mode === 'light' 
-                  ? 'primary.darker' 
-                  : 'secondary.main',
+                theme.palette.secondary.main,
               fontSize: 28
             }} />
-            <Typography
-              variant="h5"
+           <Typography
+              variant="h2"
               sx={{
-                fontWeight: 700,
                 background: (theme) => 
-                  theme.palette.mode === 'light'
-                    ? 'linear-gradient(45deg, rgba(50,135,97,1), rgba(66,183,129,0.9))'
-                    : 'linear-gradient(45deg, rgba(65,105,225,1), rgba(65,105,225,0.7))',
+                  theme.palette.secondary.main,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Edit Lobby
+              {t("Edit Lobby")}
             </Typography>
           </Box>
           <IconButton 
@@ -244,7 +240,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
         >
           <TextField
             fullWidth
-            label="Lobby Name"
+            label={t("lobbyForm.lobbyNameLabel")}
             name="lobbyName"
             value={formData.lobbyName}
             onChange={handleChange}
@@ -300,12 +296,12 @@ function LobbyEditModal({ open, onClose, lobby }) {
               }
             }}
           >
-            <InputLabel>Game Selection</InputLabel>
+            <InputLabel>{t("lobbyForm.gameSelectionLabel")}</InputLabel>
             <Select 
               name="gameId" 
               value={formData.gameId} 
               onChange={handleChange} 
-              label="Game Selection"
+              label={t("lobbyForm.gameSelectionLabel")}
               startAdornment={
                 <InputAdornment position="start" sx={{ ml: -0.5, mr: 1 }}>
                   <SportsEsports sx={{ 
@@ -352,7 +348,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
                     : 'secondary.main',
               }}
             >
-              Lobby Type
+              {t("lobbyForm.lobbyTypeLabel")}
             </Typography>
             <RadioGroup 
               row 
@@ -378,7 +374,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
                     }}
                   />
                 } 
-                label="Normal" 
+                label={t("Normal" )}
                 sx={{ mr: 4 }} 
               />
               <FormControlLabel 
@@ -399,7 +395,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
                     }}
                   />
                 } 
-                label="Event" 
+                label={t("Event")} 
               />
             </RadioGroup>
           </Paper>
@@ -408,7 +404,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
 
           <TextField
             fullWidth
-            label="Max Members"
+            label={t("lobbyForm.maxMembersLabel")}
             name="maxMembers"
             type="number"
             value={formData.maxMembers}
@@ -454,16 +450,15 @@ function LobbyEditModal({ open, onClose, lobby }) {
             mb: 2
           }}>
             <Typography 
-              variant="subtitle1" 
+              variant="h5" 
               sx={{ 
-                fontWeight: 600, 
                 color: (theme) => 
                   theme.palette.mode === 'light'
                     ? 'primary.medium'
                     : 'secondary.main'
               }}
             >
-              Password Protection
+              {t("Password Protection")}
             </Typography>
             <FormControlLabel
               control={
@@ -494,7 +489,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
                   }}
                 />
               }
-              label="Enable Password"
+              label={t("Enable Password")}
             />
           </Box>
 
@@ -531,7 +526,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
                     </InputAdornment>
                   ) 
                 }}
-                helperText="Leave blank to keep the current password"
+                helperText={t("Leave blank to keep the current password")}
                 sx={{
                   mb: 2.5,
                   '& .MuiOutlinedInput-root': {
@@ -617,15 +612,12 @@ function LobbyEditModal({ open, onClose, lobby }) {
               fullWidth 
               disabled={loading}   
               sx={{
+                color:"white",
                 background: (theme) => 
-                  theme.palette.mode === 'light'
-                    ? 'linear-gradient(45deg, rgba(50,135,97,1), rgba(66,183,129,0.9))'
-                    : 'linear-gradient(45deg, rgba(65,105,225,1), rgba(65,105,225,0.8))',
+                  theme.palette.secondary.main,
                 "&:hover": {
                   background: (theme) => 
-                    theme.palette.mode === 'light'
-                      ? 'linear-gradient(45deg, rgba(50,135,97,0.9), rgba(66,183,129,0.8))'
-                      : 'linear-gradient(45deg, rgba(65,105,225,0.9), rgba(65,105,225,0.7))',
+                    theme.palette.secondary.dark
                 },
                 textTransform: "none",
                 py: 1.5,

@@ -7,7 +7,7 @@ import CreateFriendGroupDialog from "./components/CreateFriendGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendGroupDialog } from "./components/useFriendGroupDialog";
 import { useConversationsPage } from "./useConversationPage";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import ChatBox from "../../shared/components/ChatBox/ChatBox";
@@ -24,7 +24,7 @@ function ConversationPage() {
     handleSnackbarClose,
     showSnackbar,
   } = useSnackbar();
-const{t}=useTranslation()
+  const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [friendGroups, setFriendGroups] = useState([]);
@@ -33,6 +33,8 @@ const{t}=useTranslation()
   const { friends, incomingRequests } = useFriendsContext();
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(2); // Default to friend groups tab
 
   const {
     createFriendGroupDialogOpen,
@@ -71,13 +73,24 @@ const{t}=useTranslation()
     openUpdateDialog,   
     closeUpdateDialog,
     handleUpdateFriendGroup,
-
   } = useConversationsPage(
     friendGroups,
     setFriendGroups,
     selectedConversation,
     setSelectedConversation
   );
+
+  // Set the appropriate tab based on URL path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/friend/')) {
+      setActiveTab(1); // Set to friends tab
+    } else if (path.includes('/friend-group/')) {
+      setActiveTab(2); // Set to friend groups tab
+    } else if (path.endsWith('/conversation/all')) {
+      setActiveTab(0); // Set to all tab
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!socket || !currentUser) return;
@@ -117,8 +130,6 @@ const{t}=useTranslation()
     return () => socket.removeEventListener("message", handleMessage);
   }, [socket, currentUser, setFriendGroups, showSnackbar]);
 
-  
-
   useEffect(() => {
     const fetchGroupDetails = async () => {
       try {
@@ -141,7 +152,7 @@ const{t}=useTranslation()
             type: "friendGroup",
           });
         } else {
-          console.warn("Grup bilgisi alınamadıı:", groupId);
+          console.warn("Grup bilgisi alınamadı:", groupId);
         }
       } catch (error) {
         console.error(
@@ -158,6 +169,7 @@ const{t}=useTranslation()
           ...friendConversation,
           type: "private",
         });
+        setSelectedFriend(friendConversation);
       } else {
         console.warn("Arkadaş bilgisi bulunamadı:", friendId);
       }
@@ -174,7 +186,7 @@ const{t}=useTranslation()
     } else {
       setSelectedConversation(null);
     }
-  }, [friendId, groupId, friendGroups, friends, setSelectedConversation]);
+  }, [friendId, groupId, friendGroups, friends, setSelectedConversation, setSelectedFriend]);
 
   useEffect(() => {
     if (selectedFriend) {
@@ -188,6 +200,7 @@ const{t}=useTranslation()
   const handleErrorModalClose = () => {
     setErrorModalOpen(false);
   };
+  
   return (
     <Box
       sx={{
@@ -274,6 +287,7 @@ const{t}=useTranslation()
           <ConversationList
             sx={{ flex: 1, height: "100%" }}
             selectedConversation={selectedConversation}
+            initialTabValue={activeTab}
             onFriendSelect={(item) => {
               if (item?.type === "friendGroup") {
                 handleFriendGroupSelection(item);

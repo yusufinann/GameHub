@@ -41,10 +41,11 @@ const ConversationList = ({
   friends,
   incomingRequests,
   friendGroupsLoading,
+  initialTabValue = 2,
   t,
 }) => {
   const theme = useTheme();
-  const [tabValue, setTabValue] = useState(2);
+  const [tabValue, setTabValue] = useState(initialTabValue);
   const [selectedFriend, setSelectedFriend] = useState(null);
 
   const navigate = useNavigate();
@@ -56,6 +57,21 @@ const ConversationList = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabValue]);
+
+  useEffect(() => {
+    // Ensure tabValue is set correctly on initial render based on initialTabValue prop
+    setTabValue(initialTabValue);
+  }, [initialTabValue]);
+
+  // Set selected friend based on selectedConversation
+  useEffect(() => {
+    if (selectedConversation && selectedConversation.type === "private") {
+      const friend = friends.find(f => f.id === selectedConversation.id);
+      if (friend) {
+        setSelectedFriend(friend);
+      }
+    }
+  }, [selectedConversation, friends]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -76,9 +92,13 @@ const ConversationList = ({
     const path = location.pathname;
     if (path.endsWith("/conversation/all")) {
       setTabValue(0);
-    } else if (path.endsWith("/conversation/friend")) {
+    } else if (path.includes("/conversation/all/friend/")) {
       setTabValue(1);
-    } else if (path.endsWith("/conversation/friend-group")) {
+    } else if (path.includes("/conversation/all/friend-group/")) {
+      setTabValue(2);
+    } else if (path.endsWith("/conversation/all/friend")) {
+      setTabValue(1);
+    } else if (path.endsWith("/conversation/all/friend-group")) {
       setTabValue(2);
     } else if (path.endsWith("/conversation")) {
       setTabValue(2); 
@@ -188,7 +208,7 @@ const ConversationList = ({
                 <ListItem
                   button
                   key={friend.id}
-                  selected={selectedFriend && selectedFriend.id === friend.id}
+                  selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
                   onClick={() => handleFriendSelect(friend)}
                   sx={{
                     mb: 1,
@@ -324,7 +344,7 @@ const ConversationList = ({
                 <ListItem
                   button
                   key={`all-friend-${friend.id}`}
-                  selected={selectedFriend && selectedFriend.id === friend.id}
+                  selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
                   onClick={() => handleFriendSelect(friend)}
                   sx={{
                     mb: 1,
@@ -403,7 +423,7 @@ const ConversationList = ({
               icon={<DashboardIcon sx={{ color: tabColors.all }} />}
               label={t("tabLabelAll")}
               sx={{
-                fontWeight: tabValue === 0 ? "bold" : "normal",
+                ...theme.typography.tabSubtitle,
                 transition: "all 0.3s",
               }}
             />
@@ -415,7 +435,7 @@ const ConversationList = ({
               }
               label={t("tabLabelFriends")}
               sx={{
-                fontWeight: tabValue === 1 ? "bold" : "normal",
+                ...theme.typography.tabSubtitle,
                 transition: "all 0.3s",
               }}
             />
@@ -423,7 +443,7 @@ const ConversationList = ({
               icon={<PeopleIcon sx={{ color: tabColors.friendGroups }} />}
               label={t("tabLabelFriendGroups")}
               sx={{
-                fontWeight: tabValue === 2 ? "bold" : "normal",
+                ...theme.typography.tabSubtitle,
                 transition: "all 0.3s",
               }}
             />

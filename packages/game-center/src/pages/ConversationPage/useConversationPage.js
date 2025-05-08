@@ -104,15 +104,23 @@ export const useConversationsPage = (
       } finally {
         setIsLoadingChat(false);
         if (page > 1) {
-          setIsLoadingMore(false); // Reset loading more state
+          setIsLoadingMore(false); 
         }
       }
     },
     [showSnackbar, token]
   );
-
+  useEffect(() => {
+    if (selectedConversation) {
+      if (selectedConversation.type === "private" && selectedConversation.id) {
+        fetchPrivateChatHistory(selectedConversation.id);
+      } else if (selectedConversation.type === "friendGroup" && selectedConversation._id) {
+        fetchFriendGroupChatHistory(selectedConversation._id);
+      }
+    }
+  }, [selectedConversation, fetchPrivateChatHistory,fetchFriendGroupChatHistory]);
   const loadMoreMessages = useCallback(() => {
-    if (isLoadingMore) return; // Prevent multiple simultaneous requests
+    if (isLoadingMore) return; 
     if (selectedConversation?.type === "friendGroup" && hasMoreFriend) {
       fetchFriendGroupChatHistory(selectedConversation._id, friendPage + 1);
     } else if (selectedConversation?.type === "private" && hasMorePrivate) {
@@ -137,14 +145,10 @@ export const useConversationsPage = (
       socket.readyState === WebSocket.OPEN &&
       selectedConversation?.type !== "friendGroup"
     ) {
-      // Reset pagination state when selecting a new conversation
       setPrivatePage(1);
-      //fetchPrivateChatHistory(selectedFriend.id);
     }
     if (selectedConversation?.type === "friendGroup") {
-      // Reset pagination state when selecting a new conversation
       setFriendPage(1);
-      //fetchFriendGroupChatHistory(selectedConversation._id);
     }
   }, [
     selectedFriend,

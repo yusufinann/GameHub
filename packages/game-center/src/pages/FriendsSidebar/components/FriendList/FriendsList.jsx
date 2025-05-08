@@ -19,7 +19,7 @@ const EmptyFriendsList = memo(() => (
   </Typography>
 ));
 
-const FriendsList = ({ friends, onMessage, onInvite, existingLobby }) => {
+const FriendsList = ({ friends,onInvite, existingLobby }) => {
   const hasFriends = friends?.length > 0;
 
   return (
@@ -29,7 +29,6 @@ const FriendsList = ({ friends, onMessage, onInvite, existingLobby }) => {
           <FriendAvatar
             key={friend.id}
             friend={friend}
-            onMessage={onMessage}
             onInvite={onInvite}
             existingLobby={existingLobby}
           />

@@ -106,7 +106,6 @@ const FriendsSidebar = () => {
         </Box>
         <FriendsList
           friends={friends}
-          onMessage={handleOpenMessageDialog}
           onInvite={handleOpenInviteDialog}
           existingLobby={existingLobby}
         />

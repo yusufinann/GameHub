@@ -1,6 +1,6 @@
 import { Box, Typography, Paper, Avatar } from '@mui/material';
 
-function LobbyMembers({ members }) {
+function LobbyMembers({ members,t }) {
   // Host üyeyi bul
   const hostMember = members.find(member => member.isHost);
   // Diğer üyeleri filtrele (host hariç)
@@ -27,10 +27,9 @@ function LobbyMembers({ members }) {
           fontWeight: 600,
         }}
       >
-        Lobby Members
+        {t("Lobby Members")}
       </Typography>
 
-      {/* Üyelerin Listesi */}
       <Box
         sx={{
           background: 'white',
@@ -38,7 +37,6 @@ function LobbyMembers({ members }) {
           borderRadius: 2,
         }}
       >
-        {/* Host Üye */}
         {hostMember && (
           <Box
             sx={{
@@ -47,7 +45,7 @@ function LobbyMembers({ members }) {
               alignItems: 'center',
               gap: 1,
               p: 1,
-              mb: 1, // Host üyeden sonra boşluk bırak
+              mb: 1, 
             }}
           >
             <Avatar
@@ -56,12 +54,11 @@ function LobbyMembers({ members }) {
               sx={{ width: 40, height: 40 }}
             />
             <Typography variant="body1" sx={{ color: 'rgba(34,193,195,1)' }}>
-              {hostMember.name} (Host)
+              {hostMember.name} ({t("Host")})
             </Typography>
           </Box>
         )}
 
-        {/* Diğer Üyeler */}
         <Box
           sx={{
             display: 'flex',
@@ -97,7 +94,7 @@ function LobbyMembers({ members }) {
               variant="body1"
               sx={{ color: 'rgba(34,193,195,1)', textAlign: 'center', width: '100%' }}
             >
-              No other members yet.
+              {t("noMembers")}
             </Typography>
           )}
         </Box>
