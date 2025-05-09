@@ -1,3 +1,6 @@
 [submodule "packages/bingo-game"]
 	path = packages/bingo-game
 	url = https://github.com/yusufinann/bingo-game
+[submodule "packages/hangman-game"]
+	path = packages/hangman-game
+	url = https://github.com/yusufinann/hangman-game.git

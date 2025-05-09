@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { BingoGame } from "@gamecenter/bingo-game";
+import { HangMan } from "@gamecenter/hangman-game";
 import ExpressionPanel from "../ChatArea/ExpressionPanel";
 import QuickExpressionButtons from "./QuickExpressionButtons";
 
@@ -86,7 +87,7 @@ const GameContentArea = ({
             border: `1px solid ${theme.palette.background.offwhite}`,
           }}
         >
-          <Typography 
+          {/* <Typography 
             variant="h5" 
             color="text.secondary" 
             sx={{ 
@@ -95,7 +96,8 @@ const GameContentArea = ({
             }}
           >
             Diğer Oyun İçeriği Burada
-          </Typography>
+          </Typography> */}
+          <HangMan/>
         </Box>
       )}
       {/* Quick Expression Buttons */}
