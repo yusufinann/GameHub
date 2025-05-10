@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import Lobby from '../models/lobby.model.js';
 import { bingoGames } from "./bingo.game.controller.js";
+import { hangmanGames } from './hangman.controller.js';
 const lobbyTimers = new Map();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -527,6 +528,7 @@ export const deleteLobby = async (req, res) => {
         lobby.isActive = false; 
         await lobby.save();
 
+        // Handle bingoGames cleanup
         if (bingoGames[lobbyCode]) {
             const game = bingoGames[lobbyCode];
 
@@ -549,18 +551,44 @@ export const deleteLobby = async (req, res) => {
             }, lobby.members.map(member => member.id));
 
             delete bingoGames[lobbyCode];
-
-            broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
-                lobbyCode: lobby.lobbyCode,
-                message: "Lobi silindi."
-            });
-        } else {
-            broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
-                lobbyCode: lobby.lobbyCode,
-                message: "Lobi silindi."
-            });
         }
 
+        // Handle hangmanGames cleanup - NEW CODE
+        if (hangmanGames[lobbyCode]) {
+            const game = hangmanGames[lobbyCode];
+            
+            // Clear any active turn timer
+            if (game.turnTimer) {
+                clearTimeout(game.turnTimer);
+                game.turnTimer = null;
+            }
+
+            // End any active game
+            if (game.gameStarted && !game.gameEnded) {
+                game.gameEnded = true;
+                
+                // Notify players that the game was terminated
+                Object.values(game.players).forEach(player => {
+                    if (player.ws && player.ws.readyState === player.ws.OPEN) {
+                        player.ws.send(JSON.stringify({
+                            type: "HANGMAN_GAME_TERMINATED",
+                            message: "Lobi silindi, oyun sonlandırıldı."
+                        }));
+                    }
+                });
+            }
+            
+            // Remove the game from hangmanGames
+            delete hangmanGames[lobbyCode];
+        }
+
+        // Broadcast lobby deletion to all members
+        broadcastLobbyEvent(lobby.lobbyCode, "LOBBY_DELETED", { 
+            lobbyCode: lobby.lobbyCode,
+            message: "Lobi silindi."
+        });
+
+        // Clean up any remaining timers
         if (lobbyTimers.has(`start_${lobby.id}`)) {
             clearTimeout(lobbyTimers.get(`start_${lobby.id}`));
             lobbyTimers.delete(`start_${lobby.id}`);
@@ -569,27 +597,25 @@ export const deleteLobby = async (req, res) => {
             clearTimeout(lobbyTimers.get(`end_${lobby.id}`));
             lobbyTimers.delete(`end_${lobby.id}`);
         }
-        // Host ayrılma zamanlayıcısını da temizle (eğer varsa)
-         if (lobbyTimers.has(`host_leave_${lobby.id}`)) {
+        if (lobbyTimers.has(`host_leave_${lobby.id}`)) {
             clearTimeout(lobbyTimers.get(`host_leave_${lobby.id}`));
             lobbyTimers.delete(`host_leave_${lobby.id}`);
             console.log(`Lobi silinirken host ayrılma zamanlayıcısı temizlendi: ${`host_leave_${lobby.id}`}`);
         }
 
+        // Permanently delete from database
         const deletionResult = await Lobby.deleteOne({ lobbyCode: lobbyCode });
-
 
         if (deletionResult.deletedCount === 0) {
             console.warn(`Lobi ${lobbyCode} silinemedi, belki zaten silinmişti.`);
             return res.status(404).json({ message: "Lobi silinemedi, muhtemelen zaten silinmiş." });
         }
 
-         console.log(`Lobi ${lobbyCode} başarıyla silindi.`);
+        console.log(`Lobi ${lobbyCode} başarıyla silindi.`);
         res.status(200).json({
             message: "Lobi başarıyla veritabanından kalıcı olarak silindi.",
             deletedLobbyCode: lobbyCode
         });
-
 
     } catch (error) {
         console.error("Lobi silme hatası:", error);

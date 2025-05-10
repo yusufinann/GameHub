@@ -1,0 +1,654 @@
+import Lobby from "../models/lobby.model.js";
+import { HangmanGame } from '../models/hangman.model.js';
+import User from '../models/user.model.js';
+import mongoose from 'mongoose';
+
+export const hangmanGames = {};
+
+const wordCategories = {
+  animals: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo', 'cheetah', 'crocodile', 'butterfly'],
+  countries: ['turkey', 'germany', 'japan', 'brazil', 'australia', 'canada', 'sweden', 'egypt'],
+  fruits: ['strawberry', 'pineapple', 'watermelon', 'blueberry', 'pomegranate', 'kiwi', 'apricot'],
+  sports: ['basketball', 'football', 'swimming', 'volleyball', 'gymnastics', 'skateboarding', 'tennis'],
+  movies: ['inception', 'avatar', 'titanic', 'interstellar', 'gladiator', 'frozen', 'jaws']
+};
+
+async function getUserInfo(userId) {
+  try {
+    const user = await User.findById(userId);
+    return user ? {
+      _id: user._id.toString(),
+      username: user.username,
+      name: user.name
+    } : null;
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    return null;
+  }
+}
+
+function getRandomWord(category) {
+  const safeCategory = wordCategories[category] ? category : 'animals';
+  const words = wordCategories[safeCategory];
+  return words[Math.floor(Math.random() * words.length)];
+}
+
+function broadcastToGame(game, dataToSend) { 
+  if (!game || !game.players) return;
+  Object.values(game.players).forEach((player) => {
+    if (player && player.ws && player.ws.readyState === player.ws.OPEN) {
+      const messageForPlayer = { ...dataToSend }; 
+
+      const relevantTypesForPlayerSpecificState = [
+        "HANGMAN_PLAYER_JOINED",
+        "HANGMAN_GAME_STARTED",
+        "HANGMAN_TURN_CHANGE",
+        "HANGMAN_GUESS_MADE",
+        "HANGMAN_WORD_GUESS_ATTEMPT",
+        "HANGMAN_PLAYER_ELIMINATED",
+        "HANGMAN_PLAYER_TIMEOUT",
+        "HANGMAN_GAME_OVER_WINNER",
+        "HANGMAN_WORD_REVEALED_GAME_OVER",
+        "HANGMAN_GAME_OVER_NO_WINNERS",
+        "HANGMAN_GAME_OVER_HOST_ENDED",
+      ];
+
+      if (relevantTypesForPlayerSpecificState.includes(messageForPlayer.type)) {
+        messageForPlayer.playerSpecificGameState = getPlayerSpecificGameState(game, player.userId);
+      }
+
+      const typesThatShouldHaveSharedState = [...relevantTypesForPlayerSpecificState]; // Similar set of types
+      
+      if (typesThatShouldHaveSharedState.includes(messageForPlayer.type)) {
+        if (messageForPlayer.sharedGameState) {
+            // If sharedGameState is already provided (e.g. by endGameProcedure's finalSharedState),
+            // merge it with the latest to ensure core elements are up-to-date, but prioritize provided one for specific values.
+            // Or, assume the provided one is complete and correct for that message.
+            // For simplicity and robustness, let's assume if it's provided, it's what's intended.
+            // If it's critical to always have the *absolute* latest, it would be:
+            // messageForPlayer.sharedGameState = { ...getSharedGameState(game), ...messageForPlayer.sharedGameState };
+            // However, current call sites mostly provide the latest shared state already.
+        } else {
+
+            messageForPlayer.sharedGameState = getSharedGameState(game);
+        }
+      }
+
+      const message = JSON.stringify(messageForPlayer);
+      player.ws.send(message, (err) => {
+        if (err) console.error(`Hangman mesaj (${messageForPlayer.type}) gönderme hatası ${player.userId}:`, err);
+      });
+    }
+  });
+}
+
+function getGameRankings(game) {
+  return Object.values(game.players)
+    .map(player => ({
+      playerId: player.userId,
+      userName: player.userName,
+      name: player.name,
+      remainingAttempts: player.remainingAttempts,
+      correctGuessesCount: player.correctGuesses.length,
+      incorrectGuessesCount: player.incorrectGuesses.length,
+      won: player.won || false,
+      eliminated: player.eliminated || false
+    }))
+    .sort((a, b) => {
+      if (a.won !== b.won) return a.won ? -1 : 1;
+      if (a.eliminated !== b.eliminated) return a.eliminated ? 1 : -1;
+      if (a.correctGuessesCount !== b.correctGuessesCount) return b.correctGuessesCount - a.correctGuessesCount;
+      if (a.incorrectGuessesCount !== b.incorrectGuessesCount) return a.incorrectGuessesCount - b.incorrectGuessesCount;
+      return b.remainingAttempts - a.remainingAttempts;
+    });
+}
+
+function generateMaskedWord(word, collectiveCorrectGuesses) {
+  const collectiveSet = new Set(collectiveCorrectGuesses.map(l => l.toLowerCase()));
+  return Array.from(word).map(letter =>
+    collectiveSet.has(letter.toLowerCase()) ? letter : '_'
+  ).join('');
+}
+
+function getPlayerSpecificGameState(game, playerId) {
+    const player = game.players[playerId];
+    if (!player) return null;
+
+    return {
+        correctGuesses: player.correctGuesses,
+        incorrectGuesses: player.incorrectGuesses,
+        remainingAttempts: player.remainingAttempts,
+        isMyTurn: game.currentPlayerId === playerId && !game.gameEnded && !player.eliminated && !player.won,
+        won: player.won || false,
+        eliminated: player.eliminated || false,
+    };
+}
+
+function getSharedGameState(game) {
+  let allPlayersCorrectGuesses = new Set();
+    Object.values(game.players).forEach(p => {
+        p.correctGuesses.forEach(g => allPlayersCorrectGuesses.add(g));
+    });
+  const currentMaskedWord = game.word ? generateMaskedWord(game.word, Array.from(allPlayersCorrectGuesses)) : '';
+
+  return {
+    lobbyCode: game.lobbyCode,
+    maskedWord: currentMaskedWord,
+    category: game.category,
+    gameStarted: game.gameStarted,
+    gameEnded: game.gameEnded,
+    currentPlayerId: game.currentPlayerId,
+    hostId: game.host,
+    turnEndsAt: (game.gameStarted && !game.gameEnded && game.turnStartTime) ? game.turnStartTime + 10000 : null,
+    playerStates: Object.fromEntries(
+      Object.values(game.players).map(p => [p.userId, {
+        userId: p.userId,
+        userName: p.userName,
+        name: p.name,
+        remainingAttempts: p.remainingAttempts,
+        won: p.won || false,
+        eliminated: p.eliminated || false,
+        isHost: game.host === p.userId,
+      }])
+    ),
+    rankings: game.gameEnded ? getGameRankings(game) : [],
+    wordLength: game.word ? game.word.length : 0,
+  };
+}
+
+async function saveGameStatsToDB(game) {
+  try {
+    const finalRankings = getGameRankings(game);
+    const winnerIds = finalRankings.filter(p => p.won).map(p => p.playerId);
+
+    const playersForDB = Object.values(game.players).map(player => ({
+      playerId: new mongoose.Types.ObjectId(player.userId),
+      userName: player.userName,
+      correctGuesses: player.correctGuesses,
+      incorrectGuesses: player.incorrectGuesses,
+      remainingAttempts: player.remainingAttempts,
+      won: player.won || false,
+      eliminated: player.eliminated || false,
+    }));
+
+    const newHangmanGame = new HangmanGame({
+      gameId: game.gameId,
+      lobbyCode: game.lobbyCode,
+      startedAt: game.startedAt,
+      endedAt: new Date(),
+      players: playersForDB,
+      word: game.word,
+      category: game.category,
+      winners: winnerIds.map(id => new mongoose.Types.ObjectId(id)),
+      createdBy: new mongoose.Types.ObjectId(game.host)
+    });
+
+    await newHangmanGame.save();
+  } catch (error) {
+    console.error("Hangman oyun istatistikleri kaydedilirken hata oluştu:", error);
+  }
+}
+
+function endGameProcedure(game, outcomeType, messageText) {
+  if (game.gameEnded) return;
+  game.gameEnded = true;
+  game.gameStarted = false; 
+  clearTimeout(game.turnTimer);
+  game.turnTimer = null;
+  game.currentPlayerId = null; 
+
+  if (outcomeType === "HANGMAN_WORD_REVEALED_GAME_OVER") {
+      Object.values(game.players).forEach(p => {
+          if (!p.eliminated) { 
+              p.won = true;
+          }
+      });
+  }
+
+  const finalSharedState = getSharedGameState(game); 
+
+  broadcastToGame(game, {
+    type: outcomeType, 
+    message: messageText,
+    word: game.word, 
+    sharedGameState: finalSharedState, 
+  });
+
+  saveGameStatsToDB(game);
+  
+}
+
+function startNextTurn(lobbyCode) {
+  const game = hangmanGames[lobbyCode];
+  if (!game || game.gameEnded || !game.gameStarted) return;
+
+  clearTimeout(game.turnTimer);
+  game.turnTimer = null;
+
+  const activePlayersInOrder = game.playerOrder.filter(playerId => {
+      const p = game.players[playerId];
+      return p && !p.eliminated && !p.won;
+  });
+
+  if (activePlayersInOrder.length === 0) {
+    const currentMaskedWord = getSharedGameState(game).maskedWord;
+    if (!currentMaskedWord.includes('_')) {
+        endGameProcedure(game, "HANGMAN_WORD_REVEALED_GAME_OVER", "Kelime açığa çıktı! Aktif oyuncular kazandı.");
+    } else {
+        endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Aktif oyuncu kalmadı, kimse kazanamadı.");
+    }
+    return;
+  }
+  
+  let nextPlayerIndex = 0;
+  if (game.currentPlayerId) {
+      const lastPlayerIndexInActive = activePlayersInOrder.indexOf(game.currentPlayerId);
+      if (lastPlayerIndexInActive !== -1) {
+          nextPlayerIndex = (lastPlayerIndexInActive + 1) % activePlayersInOrder.length;
+      }
+  }
+  
+  game.currentPlayerId = activePlayersInOrder[nextPlayerIndex];
+  game.turnStartTime = Date.now();
+  
+  broadcastToGame(game, {
+    type: "HANGMAN_TURN_CHANGE",
+    sharedGameState: getSharedGameState(game),
+  });
+
+  game.turnTimer = setTimeout(() => {
+    handleTurnTimeout(lobbyCode);
+  }, 10000);
+}
+
+function handleTurnTimeout(lobbyCode) {
+  const game = hangmanGames[lobbyCode];
+  if (!game || game.gameEnded || !game.currentPlayerId || !game.gameStarted) return;
+
+  const timedOutPlayerId = game.currentPlayerId;
+  const player = game.players[timedOutPlayerId];
+
+  if (player && !player.eliminated && !player.won) {
+    broadcastToGame(game, {
+      type: "HANGMAN_PLAYER_TIMEOUT",
+      playerId: timedOutPlayerId,
+      userName: player.userName,
+      sharedGameState: getSharedGameState(game), 
+    });
+  }
+  startNextTurn(lobbyCode); 
+}
+
+export const getCategories = (ws) => {
+  ws.send(JSON.stringify({
+    type: "HANGMAN_CATEGORIES",
+    categories: Object.keys(wordCategories)
+  }));
+};
+
+export const getWordsForCategory = (ws, data) => {
+  const { category } = data;
+  if (!wordCategories[category]) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçersiz kategori" }));
+  }
+  ws.send(JSON.stringify({
+    type: "HANGMAN_CATEGORY_WORDS",
+    category,
+    words: wordCategories[category]
+  }));
+};
+
+export const joinGame = async (ws, data) => {
+  const { lobbyCode } = data;
+  if (!lobbyCode) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Lobby kodu belirtilmedi." }));
+  }
+
+  const userInfo = await getUserInfo(ws.userId);
+  if (!userInfo) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Kullanıcı bilgileri alınamadı." }));
+  }
+
+  const lobby = await Lobby.findOne({ lobbyCode: lobbyCode });
+  if (!lobby) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Lobby bulunamadı." }));
+  }
+
+  for (const otherLobbyCodeInMap in hangmanGames) {
+    if (hangmanGames.hasOwnProperty(otherLobbyCodeInMap)) {
+      const otherGame = hangmanGames[otherLobbyCodeInMap];
+      if (otherGame.players[ws.userId] && otherLobbyCodeInMap !== lobbyCode) {
+        console.log(`[Hangman Server] Kullanıcı ${ws.userId}, ${otherLobbyCodeInMap} lobisindeki oyundan ayrılıyor çünkü ${lobbyCode} lobisine katılıyor.`);
+        
+        delete otherGame.players[ws.userId];
+      }
+    }
+  }
+
+  if (!hangmanGames[lobbyCode]) {
+    hangmanGames[lobbyCode] = {
+      lobbyCode,
+      players: {},
+      gameStarted: false,
+      gameEnded: false,
+      host: lobby.createdBy.toString(),
+      word: '',
+      category: '',
+      startedAt: null,
+      gameId: null,
+      currentPlayerId: null,
+      playerOrder: [],
+      turnTimer: null,
+      turnStartTime: null,
+    };
+  }
+  const game = hangmanGames[lobbyCode];
+
+  if (game.players[ws.userId]) {
+    game.players[ws.userId].ws = ws;
+    game.players[ws.userId].userName = userInfo.username;
+    game.players[ws.userId].name = userInfo.name;
+
+    const playerState = getPlayerSpecificGameState(game, ws.userId);
+    const sharedState = getSharedGameState(game);
+
+    ws.send(JSON.stringify({
+      type: "HANGMAN_RECONNECTED",
+      message: "Oyuna yeniden bağlandın",
+      isHost: game.host === ws.userId,
+      sharedGameState: sharedState,
+      playerSpecificGameState: playerState
+    }));
+    return;
+  }
+
+  if (game.gameStarted && !game.gameEnded) {
+      return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyun zaten başladı, katılamazsınız." }));
+  }
+
+  game.players[ws.userId] = {
+    ws,
+    userId: ws.userId,
+    userName: userInfo.username,
+    name: userInfo.name,
+    correctGuesses: [],
+    incorrectGuesses: [],
+    remainingAttempts: 6,
+    won: false,
+    eliminated: false,
+  };
+  if (!game.playerOrder.includes(ws.userId)) { 
+      game.playerOrder.push(ws.userId);
+  }
+
+  broadcastToGame(game, { 
+    type: "HANGMAN_PLAYER_JOINED",
+    player: { id: ws.userId, userName: userInfo.username, name: userInfo.name },
+    sharedGameState: getSharedGameState(game),
+  });
+
+
+    ws.send(JSON.stringify({
+        type: "HANGMAN_JOINED_SUCCESS",
+        message: "Oyuna katıldın",
+        isHost: game.host === ws.userId,
+        sharedGameState: getSharedGameState(game),
+        playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId)
+    }));
+};
+
+export const startGame = (ws, data) => {
+  const { lobbyCode, category } = data;
+  const game = hangmanGames[lobbyCode];
+
+  if (!game) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Hangman oyunu bulunamadı." }));
+  }
+  if (game.host !== ws.userId) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Sadece host oyunu başlatabilir." }));
+  }
+  if (game.gameStarted && !game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyun zaten başladı." }));
+  }
+  if (Object.keys(game.players).length === 0) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyunu başlatmak için en az bir oyuncu olmalı." }));
+  }
+  if (!category || !wordCategories[category]) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçerli bir kategori seçmelisiniz." }));
+  }
+
+  game.gameEnded = false; 
+  game.category = category;
+  game.word = getRandomWord(category).toLowerCase();
+  game.gameId = new mongoose.Types.ObjectId();
+  game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5); 
+  
+  Object.values(game.players).forEach(player => {
+    player.correctGuesses = [];
+    player.incorrectGuesses = [];
+    player.remainingAttempts = 6;
+    player.won = false;
+    player.eliminated = false;
+  });
+
+  let countdown = 5;
+  const countdownInterval = setInterval(() => {
+    broadcastToGame(game, { type: "HANGMAN_COUNTDOWN", countdown, lobbyCode: game.lobbyCode });
+    countdown--;
+    if (countdown < 0) {
+      clearInterval(countdownInterval);
+      game.startedAt = new Date();
+      game.gameStarted = true; 
+      broadcastToGame(game, {
+        type: "HANGMAN_GAME_STARTED",
+        message: "Oyun başladı!",
+        sharedGameState: getSharedGameState(game),
+      });
+      startNextTurn(lobbyCode);
+    }
+  }, 1000);
+};
+
+export const guessLetter = (ws, data) => {
+  const { lobbyCode, letter } = data;
+  const game = hangmanGames[lobbyCode];
+
+  if (!game || !game.gameStarted || game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyun aktif değil." }));
+  }
+  if (game.currentPlayerId !== ws.userId) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Sıra sende değil." }));
+  }
+  
+  const player = game.players[ws.userId];
+  if (!player || player.eliminated || player.won) { 
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Tahmin yapamazsınız." }));
+  }
+
+  const normalizedLetter = letter.toLowerCase();
+  if (!/^[a-zçğıöşü]$/.test(normalizedLetter)) { 
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçerli bir harf girmelisiniz." }));
+  }
+  
+  const alreadyGuessed = player.correctGuesses.includes(normalizedLetter) || player.incorrectGuesses.includes(normalizedLetter);
+  if (alreadyGuessed) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Bu harfi zaten tahmin ettiniz." }));
+  }
+
+  let correctGuess = false;
+  if (game.word.includes(normalizedLetter)) {
+    player.correctGuesses.push(normalizedLetter);
+    correctGuess = true;
+  } else {
+    player.incorrectGuesses.push(normalizedLetter);
+    player.remainingAttempts--;
+  }
+
+  const currentSharedState = getSharedGameState(game); 
+
+  broadcastToGame(game, {
+    type: "HANGMAN_GUESS_MADE",
+    playerId: ws.userId,
+    userName: player.userName,
+    letter: normalizedLetter,
+    correct: correctGuess,
+    sharedGameState: currentSharedState,
+  });
+  
+  ws.send(JSON.stringify({ 
+      type: "HANGMAN_MY_GUESS_RESULT",
+      correct: correctGuess,
+      letter: normalizedLetter,
+      playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId),
+      sharedMaskedWord: currentSharedState.maskedWord 
+  }));
+
+  if (!correctGuess && player.remainingAttempts <= 0) {
+    player.eliminated = true;
+    broadcastToGame(game, {
+      type: "HANGMAN_PLAYER_ELIMINATED",
+      playerId: ws.userId,
+      userName: player.userName,
+      reason: "no attempts left",
+      sharedGameState: getSharedGameState(game), 
+    });
+  }
+
+  if (!currentSharedState.maskedWord.includes('_')) {
+    endGameProcedure(game, "HANGMAN_WORD_REVEALED_GAME_OVER", "Kelime tamamen açığa çıktı! Aktif kalanlar kazandı.");
+    return;
+  }
+
+  const activePlayersLeft = game.playerOrder.filter(pid => {
+      const p = game.players[pid];
+      return p && !p.eliminated && !p.won;
+  });
+
+  if (activePlayersLeft.length === 0 && !game.gameEnded) { 
+    endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Tüm oyuncular elendi, kimse kazanamadı.");
+    return;
+  }
+  
+  if (!game.gameEnded) {
+      startNextTurn(lobbyCode);
+  }
+};
+
+export const guessWord = (ws, data) => {
+  const { lobbyCode, word } = data;
+  const game = hangmanGames[lobbyCode];
+
+  if (!game || !game.gameStarted || game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyun aktif değil." }));
+  }
+  if (game.currentPlayerId !== ws.userId) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Sıra sende değil." }));
+  }
+  
+  const player = game.players[ws.userId];
+  if (!player || player.eliminated || player.won) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Tahmin yapamazsınız." }));
+  }
+
+  const normalizedGuess = word.toLowerCase();
+  const normalizedAnswer = game.word.toLowerCase();
+
+  if (normalizedGuess === normalizedAnswer) {
+    player.won = true;
+    normalizedAnswer.split('').forEach(char => {
+        if (!player.correctGuesses.includes(char)) player.correctGuesses.push(char);
+    });
+    
+    endGameProcedure(game, "HANGMAN_GAME_OVER_WINNER", `${player.userName} kelimeyi doğru tahmin etti ve kazandı!`);
+    return; 
+
+  } else { 
+    player.remainingAttempts--; 
+    
+    ws.send(JSON.stringify({ 
+      type: "HANGMAN_WORD_GUESS_INCORRECT",
+      message: "Kelime tahmini yanlış.",
+      playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId),
+      sharedMaskedWord: getSharedGameState(game).maskedWord
+    }));
+
+    broadcastToGame(game, { 
+      type: "HANGMAN_WORD_GUESS_ATTEMPT",
+      playerId: ws.userId,
+      userName: player.userName,
+      guessedWord: normalizedGuess, 
+      correct: false,
+      sharedGameState: getSharedGameState(game), 
+    });
+
+    if (player.remainingAttempts <= 0) {
+      player.eliminated = true;
+      broadcastToGame(game, {
+        type: "HANGMAN_PLAYER_ELIMINATED",
+        playerId: ws.userId,
+        userName: player.userName,
+        reason: "incorrect word guess and no attempts left",
+        sharedGameState: getSharedGameState(game), 
+      });
+
+      const activePlayersLeft = game.playerOrder.filter(pid => {
+          const p = game.players[pid];
+          return p && !p.eliminated && !p.won;
+      });
+      if (activePlayersLeft.length === 0 && !game.gameEnded) {
+        endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Tüm oyuncular elendi, kimse kazanamadı.");
+        return;
+      }
+    }
+  }
+  
+  if (!game.gameEnded) { 
+      startNextTurn(lobbyCode);
+  }
+};
+
+export const endGame = (ws, data) => {
+  const { lobbyCode } = data;
+  const game = hangmanGames[lobbyCode];
+
+  if (!game) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Hangman oyunu bulunamadı." }));
+  }
+  if (game.host !== ws.userId) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Sadece host oyunu sonlandırabilir." }));
+  }
+  if (game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_INFO", message: "Oyun zaten bitmiş." }));
+  }
+
+  endGameProcedure(game, "HANGMAN_GAME_OVER_HOST_ENDED", "Oyun host tarafından sonlandırıldı.");
+};
+
+export const addCustomCategory = (ws, data) => {
+  const { category, words } = data;
+  if (!category || !Array.isArray(words) || words.length === 0) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçersiz kategori veya kelime listesi." }));
+  }
+  wordCategories[category.toLowerCase()] = words.map(word => word.toLowerCase().trim()).filter(word => word.length > 0);
+  ws.send(JSON.stringify({
+    type: "HANGMAN_CATEGORY_ADDED",
+    message: `"${category}" kategorisi eklendi/güncellendi.`,
+    category: category.toLowerCase(),
+    newCategories: Object.keys(wordCategories) 
+  }));
+};
+
+export const getGameState = (ws, data) => {
+  const { lobbyCode } = data;
+  const game = hangmanGames[lobbyCode];
+
+  if (!game) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Hangman oyunu bulunamadı." }));
+  }
+  
+  ws.send(JSON.stringify({
+    type: "HANGMAN_CURRENT_GAME_STATE",
+    sharedGameState: getSharedGameState(game),
+    playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId)
+  }));
+};

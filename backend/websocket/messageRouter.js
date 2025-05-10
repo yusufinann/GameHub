@@ -14,6 +14,7 @@ import * as communityChatController from "../controllers/communityChat.controlle
 import * as privateChatController from "../controllers/privateChat.controller.js";
 import * as groupChatController from "../controllers/groupChat.controller.js";
 import * as friendGroupChatController from "../controllers/friendGroupChat.controller.js";
+import * as hangmanGameController from "../controllers/hangman.controller.js"
 // Note: Auth controller is likely only needed for initialization, not routing here
 
 // This function handles the core message routing logic
@@ -265,7 +266,35 @@ export const routeMessage = async (ws, message, broadcasters) => {
                 // }
                 break;
 
-            // Default case for unknown types
+            case "HANGMAN_JOIN":
+          hangmanGameController.joinGame(ws, data);
+          break;
+        case "HANGMAN_START":
+          hangmanGameController.startGame(ws, data);
+          break;
+        case "HANGMAN_GUESS_LETTER":
+          hangmanGameController.guessLetter(ws, data);
+          break;
+        case "HANGMAN_GUESS_WORD":
+          hangmanGameController.guessWord(ws, data);
+          break;
+        case "HANGMAN_END_GAME":
+          hangmanGameController.endGame(ws, data);
+          break;
+        case "HANGMAN_ADD_CATEGORY":
+          hangmanGameController.addCustomCategory(ws, data);
+          break;
+        case "HANGMAN_GET_GAME_STATE":
+          hangmanGameController.getGameState(ws, data);
+          break;
+        case "HANGMAN_GET_CATEGORIES":
+          hangmanGameController.getCategories(ws);
+          break;
+        case "HANGMAN_GET_WORDS_FOR_CATEGORY":
+          hangmanGameController.getWordsForCategory(ws, data);
+          break;
+            
+                // Default case for unknown types
             default:
                 console.log("Bilinmeyen mesaj tipi:", data.type);
         }
