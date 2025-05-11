@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
-import { login, validateToken } from "./api"; 
+import { login, validateToken } from "./api";
 import { useNavigate } from "react-router-dom";
 import crypto from 'crypto-js';
 import { useAuthContext } from "../../../../shared/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const useLoginForm = () => {
   const navigate = useNavigate();
@@ -14,8 +15,8 @@ const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [savedUser, setSavedUser] = useState(null);
-  const [isNavigating, setIsNavigating] = useState(false); 
-
+  const [isNavigating, setIsNavigating] = useState(false);
+  const {t}=useTranslation();
   const validateTokenFromAPI = useCallback(async (token) => {
     try {
       const response = await validateToken(token);
@@ -28,6 +29,12 @@ const useLoginForm = () => {
     }
   }, [navigate, logout]);
 
+  const clearSavedUser = useCallback(() => {
+    localStorage.removeItem("savedUser");
+    setSavedUser(null);
+    setEmail("");
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -36,13 +43,35 @@ const useLoginForm = () => {
     if (!isNavigating) {
       const encryptedUser = localStorage.getItem("savedUser");
       if (encryptedUser) {
-        const decryptedBytes = crypto.AES.decrypt(encryptedUser, 'secret_key');
-        const userInfo = JSON.parse(decryptedBytes.toString(crypto.enc.Utf8));
-        setSavedUser(userInfo);
-        setEmail(userInfo.email);
+        try {
+          const decryptedBytes = crypto.AES.decrypt(encryptedUser, 'secret_key');
+          const decryptedString = decryptedBytes.toString(crypto.enc.Utf8);
+
+          if (decryptedString) {
+            const userInfo = JSON.parse(decryptedString);
+            if (userInfo && userInfo.email) {
+              if (!userInfo.avatar && (!userInfo.name || userInfo.name.trim() === "")) {
+                console.warn("Saved user data is incomplete (missing avatar and valid name). Clearing for standard login.");
+                clearSavedUser();
+              } else {
+                setSavedUser(userInfo);
+                setEmail(userInfo.email);
+              }
+            } else {
+              console.warn("Decrypted savedUser data is missing essential fields (e.g., email). Clearing.");
+              clearSavedUser();
+            }
+          } else {
+            console.warn("Decrypted savedUser data is empty. Clearing.");
+            clearSavedUser();
+          }
+        } catch (error) {
+          console.error("Failed to decrypt or parse savedUser from localStorage:", error);
+          clearSavedUser();
+        }
       }
     }
-  }, [validateTokenFromAPI, isNavigating]);
+  }, [validateTokenFromAPI, isNavigating, clearSavedUser]); 
 
   const handleSubmit = async (event) => {
     if (event && event.preventDefault) {
@@ -64,30 +93,42 @@ const useLoginForm = () => {
       localStorage.setItem("token", token);
       authLogin({ id: user.id, email: user.email, name: user.name, username: user.username, avatar: user.avatar, token });
       setIsNavigating(true);
-      
+
       if (rememberMe) {
-        const userInfo = { email: user.email, id: user.id, name: user.name, avatar: user.avatar };
+        const userInfoToSave = {
+          email: user.email,
+          id: user.id,
+          name: user.name || '',
+          avatar: user.avatar || null 
+        };
         const encrypted = crypto.AES.encrypt(
-          JSON.stringify(userInfo),
+          JSON.stringify(userInfoToSave),
           'secret_key'
         ).toString();
         localStorage.setItem("savedUser", encrypted);
+      } else {
+        localStorage.removeItem("savedUser");
       }
 
       navigate("/");
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed");
-      setIsNavigating(false); // Reset flag if login fails
+      setIsNavigating(false);
       setLoading(false);
     }
   };
 
   const quickLogin = async (event) => {
-    if (savedUser) {
-      setEmail(savedUser.email);
+    if (savedUser && savedUser.email) { 
+
       if (password) {
         handleSubmit(event);
+      } else {
+        setError(t("Enter your password")); 
       }
+    } else {
+        console.warn("Quick login attempted with invalid savedUser. Clearing.")
+        clearSavedUser();
     }
   };
 
@@ -97,6 +138,7 @@ const useLoginForm = () => {
     setEmail("");
     setPassword("");
     setRememberMe(false);
+    setError(null); 
   }, []);
 
   return {
@@ -106,9 +148,12 @@ const useLoginForm = () => {
     rememberMe,
     loading,
     error,
-    savedUser,
+    savedUser, 
     handleEmailChange: useCallback((e) => setEmail(e.target.value), []),
-    handlePasswordChange: useCallback((e) => setPassword(e.target.value), []),
+    handlePasswordChange: useCallback((e) => {
+        setPassword(e.target.value);
+        if(error) setError(null); 
+    }, [error]),
     handleRememberMeChange: useCallback((e) => setRememberMe(e.target.checked), []),
     handleClickShowPassword: useCallback(() => setShowPassword(p => !p), []),
     handleSubmit,

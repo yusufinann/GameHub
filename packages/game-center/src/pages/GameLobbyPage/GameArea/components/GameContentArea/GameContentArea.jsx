@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { BingoGame } from "@gamecenter/bingo-game";
-import { HangMan } from "@gamecenter/hangman-game";
+import { Hangman } from "@gamecenter/hangman-game";
 import ExpressionPanel from "../ChatArea/ExpressionPanel";
 import QuickExpressionButtons from "./QuickExpressionButtons";
 
@@ -78,7 +78,7 @@ const GameContentArea = ({
               border: `1px solid ${theme.palette.background.offwhite}`,
             }}
           >
-            <HangMan />
+            <Hangman lobbyCode={lobbyInfo.lobbyCode} lobbyInfo={lobbyInfo} members={members} socket={socket} user={currentUser}/>
           </Box>
         );
       default:

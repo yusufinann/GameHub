@@ -141,7 +141,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     <Paper
       elevation={12}
       sx={{
-        height: "100vh",
+        height: "100%",
         width: "100%",
         display: "flex",
         flexDirection: "column",

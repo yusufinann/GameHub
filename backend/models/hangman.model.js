@@ -11,8 +11,12 @@ const HangmanPlayerSchema = new mongoose.Schema({
     required: true
   },
   incorrectGuesses: {
-    type: Number,
+    type: [String],
     default: 0
+  },
+  remainingAttempts: {
+    type: Number,     
+    default: 6    
   },
   correctGuesses: {
     type: Array,
@@ -30,10 +34,10 @@ const HangmanPlayerSchema = new mongoose.Schema({
     type: Number,
     default: null
   },
-  isEliminated: {
-    type: Boolean,
+   eliminated: {        // Şemanızda isEliminated var, saveGameStatsToDB'de eliminated.
+    type: Boolean,     // İsimlendirmeyi tutarlı hale getirin.
     default: false
-  }
+  },
 });
 
 const HangmanGameSchema = new mongoose.Schema({

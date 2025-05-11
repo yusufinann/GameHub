@@ -5,7 +5,7 @@ import Header from './Header';
 import MemberItem from './MemberItem';
 
 function MembersList({ members,t }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const theme = useTheme();
 
   const handleToggle = () => setIsCollapsed(!isCollapsed);
@@ -21,7 +21,7 @@ function MembersList({ members,t }) {
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
         transition: 'all 0.3s ease',
-        overflow: 'hidden',
+        gap: 1,
       }}
     >
       <Header

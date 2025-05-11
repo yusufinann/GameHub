@@ -30,7 +30,12 @@ const QuickLoginSection = ({
     event.preventDefault();
     quickLogin();
   };
-
+const displayName = savedUser.name && savedUser.name.trim() !== '' ? savedUser.name : savedUser.email;
+  const avatarInitial = savedUser.name && savedUser.name.trim() !== ''
+    ? savedUser.name[0].toUpperCase()
+    : savedUser.email // Email varsa ve name yoksa email'in baş harfi
+    ? savedUser.email[0].toUpperCase()
+    : '?'; // Hiçbiri yoksa (bu durum olmamalı)
   return (
     <Box
       sx={{
@@ -55,7 +60,7 @@ const QuickLoginSection = ({
           boxShadow: `0 4px 12px ${theme.palette.background.elevation[1]}`
         }}
       >
-        {!savedUser.avatar ? savedUser.name[0].toUpperCase() : null}
+        {!savedUser.avatar ? avatarInitial : null}
       </Avatar>
 
       <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
