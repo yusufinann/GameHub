@@ -57,7 +57,7 @@ function broadcastToGame(game, dataToSend) {
         messageForPlayer.playerSpecificGameState = getPlayerSpecificGameState(game, player.userId);
       }
 
-      const typesThatShouldHaveSharedState = [...relevantTypesForPlayerSpecificState]; // Similar set of types
+      const typesThatShouldHaveSharedState = [...relevantTypesForPlayerSpecificState]; 
       
       if (typesThatShouldHaveSharedState.includes(messageForPlayer.type)) {
         if (messageForPlayer.sharedGameState) {
@@ -158,32 +158,45 @@ function getSharedGameState(game) {
 
 async function saveGameStatsToDB(game) {
   try {
-    const finalRankings = getGameRankings(game);
+    const finalRankings = getGameRankings(game); 
     const winnerIds = finalRankings.filter(p => p.won).map(p => p.playerId);
 
-    const playersForDB = Object.values(game.players).map(player => ({
-      playerId: new mongoose.Types.ObjectId(player.userId),
-      userName: player.userName,
-      correctGuesses: player.correctGuesses,
-      incorrectGuesses: player.incorrectGuesses,
-      remainingAttempts: player.remainingAttempts,
-      won: player.won || false,
-      eliminated: player.eliminated || false,
-    }));
+    const playersForDB = Object.values(game.players).map(player => {
+      const rankInfo = finalRankings.find(r => r.playerId === player.userId);
+      let playerCompletedAt = null;
+      if (player.won || player.eliminated) {
+        playerCompletedAt = new Date(); 
+      }
+
+      return {
+        playerId: new mongoose.Types.ObjectId(player.userId),
+        userName: player.userName,
+        correctGuesses: player.correctGuesses,
+        incorrectGuesses: player.incorrectGuesses,
+        remainingAttempts: player.remainingAttempts,
+        won: player.won || false,  
+        eliminated: player.eliminated || false, 
+        completedAt: playerCompletedAt,
+        finalRank: rankInfo ? finalRankings.indexOf(rankInfo) + 1 : null 
+      };
+    });
 
     const newHangmanGame = new HangmanGame({
-      gameId: game.gameId,
+      gameId: game.gameId, 
       lobbyCode: game.lobbyCode,
       startedAt: game.startedAt,
-      endedAt: new Date(),
+      endedAt: new Date(), 
       players: playersForDB,
       word: game.word,
       category: game.category,
       winners: winnerIds.map(id => new mongoose.Types.ObjectId(id)),
-      createdBy: new mongoose.Types.ObjectId(game.host)
+      createdBy: new mongoose.Types.ObjectId(game.host),
+      isActive: false, 
+      maxIncorrectGuesses: 6, 
     });
 
     await newHangmanGame.save();
+    console.log(`[Hangman Server] Game ${game.lobbyCode} stats saved to DB.`);
   } catch (error) {
     console.error("Hangman oyun istatistikleri kaydedilirken hata oluştu:", error);
   }
@@ -651,4 +664,141 @@ export const getGameState = (ws, data) => {
     sharedGameState: getSharedGameState(game),
     playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId)
   }));
+};
+
+export const getUsersHangmanStats = async (req, res) => {
+  try {
+    const stats = await HangmanGame.aggregate([
+    
+      { $unwind: "$players" },
+      
+      {
+        $group: {
+          _id: "$players.playerId", 
+          userName: { $first: "$players.userName" }, 
+          totalGamesPlayed: { $sum: 1 }, 
+          totalWins: {
+            $sum: { $cond: ["$players.won", 1, 0] } 
+          },
+          totalCorrectGuesses: { $sum: { $size: "$players.correctGuesses" } },
+          totalIncorrectGuesses: { $sum: { $size: "$players.incorrectGuesses" } },
+        }
+      },
+     
+      {
+        $addFields: {
+          totalGuesses: { $add: ["$totalCorrectGuesses", "$totalIncorrectGuesses"] }
+        }
+      },
+      {
+        $addFields: {
+          accuracy: {
+            $cond: [
+              { $eq: ["$totalGuesses", 0] }, 
+              0, 
+              { $divide: ["$totalCorrectGuesses", "$totalGuesses"] } 
+            ]
+          }
+        }
+      },
+   
+      {
+        $sort: {
+          totalWins: -1,
+          accuracy: -1,
+          userName: 1 
+        }
+      },
+      {
+        $project: {
+          _id: 0, 
+          playerId: "$_id",
+          userName: 1,
+          totalGamesPlayed: 1,
+          totalWins: 1,
+          accuracy: 1,
+          totalCorrectGuesses: 1,
+          totalIncorrectGuesses: 1,
+        }
+      }
+    ]);
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("Error fetching Hangman user stats:", error);
+    res.status(500).json({ message: "Sunucuda bir hata oluştu.", error: error.message });
+  }
+};
+
+export const getPlayerStats = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Geçersiz kullanıcı IDsi." });
+    }
+
+    const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+    const playerGames = await HangmanGame.find({ "players.playerId": objectIdUserId })
+      .sort({ endedAt: -1 })
+      .select("-word"); 
+
+    if (!playerGames || playerGames.length === 0) {
+      return res.status(404).json({ message: "Bu kullanıcı için oyun istatistiği bulunamadı." });
+    }
+
+    let totalWins = 0;
+    let totalGamesPlayed = playerGames.length;
+    let totalCorrectGuesses = 0;
+    let totalIncorrectGuesses = 0;
+    let userName = "";
+
+    const gameHistory = playerGames.map(game => {
+      const playerInfoInGame = game.players.find(p => p.playerId.equals(objectIdUserId));
+      if (playerInfoInGame) {
+        if (!userName) userName = playerInfoInGame.userName;
+        if (playerInfoInGame.won) totalWins++;
+        
+        if (playerInfoInGame.correctGuesses && Array.isArray(playerInfoInGame.correctGuesses)) {
+            totalCorrectGuesses += playerInfoInGame.correctGuesses.length;
+        }
+        if (playerInfoInGame.incorrectGuesses && Array.isArray(playerInfoInGame.incorrectGuesses)) {
+            totalIncorrectGuesses += playerInfoInGame.incorrectGuesses.length;
+        }
+        
+        return {
+            gameId: game.gameId, 
+            lobbyCode: game.lobbyCode,
+            category: game.category,
+            won: playerInfoInGame.won,
+            eliminated: playerInfoInGame.eliminated,
+            correctGuessesCount: (playerInfoInGame.correctGuesses && Array.isArray(playerInfoInGame.correctGuesses)) ? playerInfoInGame.correctGuesses.length : 0,
+            incorrectGuessesCount: (playerInfoInGame.incorrectGuesses && Array.isArray(playerInfoInGame.incorrectGuesses)) ? playerInfoInGame.incorrectGuesses.length : 0,
+            correctGuesses: playerInfoInGame.correctGuesses, 
+            incorrectGuesses: playerInfoInGame.incorrectGuesses, 
+            finalRank: playerInfoInGame.finalRank,
+            endedAt: game.endedAt,
+        };
+      }
+      return null;
+    }).filter(g => g !== null);
+
+    const totalGuesses = totalCorrectGuesses + totalIncorrectGuesses;
+    const accuracy = totalGuesses > 0 ? (totalCorrectGuesses / totalGuesses) : 0;
+
+    res.status(200).json({
+      playerId: userId,
+      userName: userName,
+      totalGamesPlayed,
+      totalWins,
+      accuracy,
+      totalCorrectGuesses,
+      totalIncorrectGuesses,
+      gameHistory
+    });
+
+  } catch (error) {
+    console.error(`Error fetching stats for player ${req.params.userId}:`, error);
+    res.status(500).json({ message: "Oyuncu istatistikleri alınırken bir hata oluştu.", error: error.message });
+  }
 };

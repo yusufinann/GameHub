@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import lobbyRoutes from './routes/lobby.routes.js'
 import bingoRoutes from './routes/bingo.routes.js'
+import hangmanRoutes from './routes/hangman.routes.js'
 import friendGroupRoutes from './routes/friendGroup.routes.js'
 import friendRoutes from './routes/friend.routes.js'
 import chatRoutes from './routes/chat.routes.js'
@@ -57,6 +58,7 @@ app.use("/api/bingo",bingoRoutes)
 app.use('/api/chat', chatRoutes);
 app.use('/api/friendlist', friendRoutes); 
 app.use('/api/games', gamesRouter);
+app.use("/api/hangman",hangmanRoutes)
 
 
 const PORT = process.env.PORT || 3001;

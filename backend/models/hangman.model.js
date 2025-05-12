@@ -10,44 +10,48 @@ const HangmanPlayerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  incorrectGuesses: {
-    type: [String],
-    default: 0
-  },
-  remainingAttempts: {
-    type: Number,     
-    default: 6    
-  },
-  correctGuesses: {
-    type: Array,
+  correctGuesses: { // Önce correctGuesses'ı koymak daha yaygın bir sıralama
+    type: [String], // [String] Array için daha kısa ve yaygın bir gösterim
     default: []
   },
-  hasGuessedWord: {
+  incorrectGuesses: {
+    type: [String],
+    default: [] // Düzeltildi: 0 yerine []
+  },
+  remainingAttempts: {
+    type: Number,
+    default: 6
+  },
+  won: { // Eklendi
     type: Boolean,
     default: false
   },
-  completedAt: {
+  eliminated: {
+    type: Boolean,
+    default: false
+  },
+  completedAt: { // Oyuncunun oyunu ne zaman tamamladığı (kazanarak/elenerek)
     type: Date,
     default: null
   },
   finalRank: {
     type: Number,
     default: null
-  },
-   eliminated: {        // Şemanızda isEliminated var, saveGameStatsToDB'de eliminated.
-    type: Boolean,     // İsimlendirmeyi tutarlı hale getirin.
-    default: false
-  },
+  }
+  // _id: false // Eğer alt dökümanlar için ayrı _id istemiyorsanız (genelde istenir)
 });
 
 const HangmanGameSchema = new mongoose.Schema({
-  gameId: {
+  gameId: { // Eğer bu Mongoose'un _id'si değilse ve siz üretiyorsanız tamam.
+            // Genelde Mongoose _id'sini kullanmak yeterli olur.
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
+    unique: true // gameId'nin benzersiz olmasını sağlamak iyi bir pratik
   },
   lobbyCode: {
     type: String,
-    required: true
+    required: true,
+    index: true // Sık sorgulanacaksa index eklemek performansı artırır
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -71,27 +75,27 @@ const HangmanGameSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  guessedLetters: {
-    type: [String],
-    default: []
-  },
-  winner: {
-    playerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    userName: String,
-    completedAt: Date
-  },
-  isActive: {
+  // guessedLetters (oyun genelinde tüm tahmin edilen harfler)
+  // Eğer her oyuncunun kendi tahminleri yeterliyse bu alana gerek olmayabilir.
+  // Ancak genel bir bakış için tutulabilir.
+  // guessedLetters: {
+  //   type: [String],
+  //   default: []
+  // },
+  winners: [{ // Düzeltildi: "winner" yerine "winners" ve ObjectId dizisi
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  isActive: { // Oyun bittiğinde false olacak
     type: Boolean,
-    default: true
+    default: true // Başlangıçta true, oyun bittiğinde false'a güncellenir
   },
   maxIncorrectGuesses: {
     type: Number,
     default: 6
   }
-}, { timestamps: true });
+}, { timestamps: true }); // createdAt ve updatedAt alanlarını otomatik ekler
 
+// Model ismi tekil olmalı (HangmanGame)
 export const HangmanGame = mongoose.model('HangmanGame', HangmanGameSchema);
 export default HangmanGame;
