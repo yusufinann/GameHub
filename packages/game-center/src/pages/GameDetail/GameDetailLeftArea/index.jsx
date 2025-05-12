@@ -2,11 +2,23 @@ import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
 import GameInfo from './components/GameInfo/GameInfo';
 import BingoGameDetails from './components/BingoGameDetail';
+import HangmanGameDetails from './components/HangmanGameDetail';
 
 function GameDetailLeftArea({ game, filteredLobbies }) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const getGameDetail = (id) => {
+    switch (id) {
+      case 1:
+        return <BingoGameDetails />;
+      case 2:
+        return <HangmanGameDetails />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Box
@@ -17,7 +29,7 @@ function GameDetailLeftArea({ game, filteredLobbies }) {
       }}
     >
       <GameInfo game={game} filteredLobbies={filteredLobbies} />
-      <BingoGameDetails />
+      {getGameDetail(game.id)}
     </Box>
   );
 }

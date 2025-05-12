@@ -25,7 +25,7 @@ function ActiveGamesArea() {
   };
 
   const isGameFullyImplemented = (gameId) => {
-    return gameId === 1;
+    return gameId === 1 || gameId === 2;
   };
 
   const handleGameClick = (gameId) => {

@@ -62,7 +62,7 @@ const GameContentArea = ({
             />
           </Box>
         );
-      case "4":
+      case "2":
         return (
           <Box
             sx={{

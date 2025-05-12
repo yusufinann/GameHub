@@ -19,8 +19,26 @@ export const GAMES = [
       "games.Bingo.howToPlay.3",
     ],
   },
-  {
+   {
     id: 2,
+    title: "HangMan",
+    translationKey: "games.HangMan",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ63bZ9-d9KLHmXM7kXcxhBTIG--ZPlT64tcQ&s",
+    genre: "Racing",
+    rating: 4.6,
+    playTime: "10min",
+    description: "games.HangMan.description",
+    howToPlay: [
+      "games.HangMan.howToPlay.0",
+      "games.HangMan.howToPlay.1",
+      "games.HangMan.howToPlay.2",
+      "games.HangMan.howToPlay.3",
+      "games.HangMan.howToPlay.4",
+    ],
+  },
+  {
+    id: 3,
     title: "Uno",
     translationKey: "games.Uno",
     image:
@@ -38,7 +56,7 @@ export const GAMES = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     title: "Chess",
     translationKey: "games.Chess",
     image:
@@ -55,24 +73,7 @@ export const GAMES = [
       "games.Chess.howToPlay.4",
     ],
   },
-  {
-    id: 4,
-    title: "HangMan",
-    translationKey: "games.HangMan",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ63bZ9-d9KLHmXM7kXcxhBTIG--ZPlT64tcQ&s",
-    genre: "Racing",
-    rating: 4.6,
-    playTime: "10min",
-    description: "games.HangMan.description",
-    howToPlay: [
-      "games.HangMan.howToPlay.0",
-      "games.HangMan.howToPlay.1",
-      "games.HangMan.howToPlay.2",
-      "games.HangMan.howToPlay.3",
-      "games.HangMan.howToPlay.4",
-    ],
-  },
+ 
 ];
 
 export const gameData = [
