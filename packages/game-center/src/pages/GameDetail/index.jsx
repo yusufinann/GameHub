@@ -10,7 +10,7 @@ const GameDetail = () => {
   const { gameId } = useParams();
   const { lobbies, existingLobby } = useLobbyContext();
   const [filteredLobbies, setFilteredLobbies] = useState([]);
-
+console.log("gameId : ",gameId)
   const fadeIn = keyframes`
     from {
       opacity: 0;
@@ -62,6 +62,7 @@ const GameDetail = () => {
         lobbies={lobbies}
         existingLobby={existingLobby}
         filteredLobbies={filteredLobbies}
+        gameId={gameId}
       />
     </Box>
   );

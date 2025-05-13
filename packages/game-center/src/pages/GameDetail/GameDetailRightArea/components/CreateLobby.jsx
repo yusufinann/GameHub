@@ -7,7 +7,7 @@ import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
 import FingerPushingButton from "./FingerPushingButton";
 import { useTranslation } from "react-i18next";
-
+import dummyHangman from "../../../../assets/hangman-rmBg.png";
 function CreateLobby({ existingLobby }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -22,7 +22,12 @@ function CreateLobby({ existingLobby }) {
   const isGameDetailRoute = location.pathname.includes("game-detail");
   const hasLobbyForCurrentGame =
     isGameDetailRoute && existingLobby?.game === parseInt(gameId, 10);
-
+ const dummyImage =
+    gameId === '1'
+      ? DummyImage        // DOĞRUDAN dosya yolu
+      : gameId === '2'
+      ? dummyHangman
+      : '';
   const handleOpenModal = () => {
     if (
       (!isGameDetailRoute && existingLobby) ||
@@ -81,9 +86,9 @@ function CreateLobby({ existingLobby }) {
           },
         }}
       >
-        <Box
+       <Box
           component="img"
-          src={DummyImage}
+          src={dummyImage}
           alt="Game Background Art"
           sx={{
             position: "absolute",

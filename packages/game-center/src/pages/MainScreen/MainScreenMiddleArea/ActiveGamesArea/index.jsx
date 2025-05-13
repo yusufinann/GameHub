@@ -1,6 +1,6 @@
-import { Box, Button, Typography, IconButton, useTheme} from '@mui/material';
+import { Box, Button, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import React, { useState, useRef } from 'react';
-import { Gamepad, Star, Timer, ChevronLeft, ChevronRight, Construction, EmojiEvents } from '@mui/icons-material';
+import { Gamepad, ChevronLeft, ChevronRight, Construction, EmojiEvents } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { GAMES } from '../../../../utils/constants';
 import Header from '../../MainScreenBottomArea/Header';
@@ -12,6 +12,8 @@ function ActiveGamesArea() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const scrollContainerRef = useRef(null);
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   const handleScroll = (direction) => {
     const container = scrollContainerRef.current;
@@ -34,6 +36,13 @@ function ActiveGamesArea() {
     } else {
       navigate(`/game-detail/${gameId}?preview=true`);
     }
+  };
+
+  // Kart boyutunu ekran boyutuna göre hesapla
+  const getCardWidth = () => {
+    if (isSmallScreen) return '240px';
+    if (isMediumScreen) return '280px';
+    return '320px';
   };
 
   return (
@@ -128,9 +137,10 @@ function ActiveGamesArea() {
           ref={scrollContainerRef}
           sx={{
             display: 'flex',
-            gap: 3,
+            gap: { xs: 2, md: 3 },
             overflowX: 'auto',
             scrollBehavior: 'smooth',
+            scrollSnapType: 'x mandatory',
             '&::-webkit-scrollbar': { display: 'none' },
             height: '100%',
             padding: '0 40px',
@@ -145,14 +155,17 @@ function ActiveGamesArea() {
                 key={game.id}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
+                onClick={() => handleGameClick(game.id)}
                 sx={{
-                  flex: '0 0 280px',
+                  flex: '0 0 auto',
+                  width: getCardWidth(),
                   aspectRatio: '16/9',
                   position: 'relative',
                   borderRadius: '25px',
                   overflow: 'hidden',
-                  height: '80%',
+                  height: { xs: '75%', md: '80%' },
                   cursor: 'pointer',
+                  scrollSnapAlign: 'center',
                   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   boxShadow: hoveredIndex === index
                     ? fullyImplemented ? '0 12px 32px rgba(78, 205, 196, 0.5)' : '0 12px 32px rgba(255, 180, 0, 0.5)'
@@ -185,7 +198,7 @@ function ActiveGamesArea() {
                   </Box>
                 )}
 
-                {/* Image Container */}
+                {/* Image Container - enhanced transition and effects */}
                 <Box
                   component="img"
                   src={game.image}
@@ -202,8 +215,8 @@ function ActiveGamesArea() {
                       : hoveredIndex === index
                         ? 'brightness(1.1)'
                         : 'brightness(0.9)',
-                    transition: 'transform 0.4s ease-out, filter 0.3s ease',
-                    transform: hoveredIndex === index ? 'scale(1.05)' : 'scale(1)'
+                    transition: 'transform 0.6s ease-out, filter 0.4s ease', // Daha yumuşak geçiş
+                    transform: hoveredIndex === index ? 'scale(1.08)' : 'scale(1)' // Daha belirgin büyütme
                   }}
                 />
 
@@ -228,7 +241,7 @@ function ActiveGamesArea() {
                   </Box>
                 )}
 
-                {/* Content Overlay */}
+                {/* Content Overlay - enhanced blur effect */}
                 <Box
                   sx={{
                     position: 'absolute',
@@ -236,9 +249,10 @@ function ActiveGamesArea() {
                     left: 0,
                     right: 0,
                     padding: '20px',
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 70%, transparent 100%)',
-                    backdropFilter: 'blur(2px)',
-                    transition: 'all 0.3s ease-in-out'
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 80%, transparent 100%)', // Geliştirilmiş gradient
+                    backdropFilter: 'blur(3px)', // Daha belirgin blur efekti
+                    transition: 'all 0.3s ease-in-out',
+                    height: hoveredIndex === index ? 'auto' : 'auto', // Hover durumunda otomatik yükseklik
                   }}
                 >
                   <Typography variant="h6" sx={{
@@ -266,29 +280,16 @@ function ActiveGamesArea() {
                     }
                   }}>
                     <Box>
-                      <Gamepad sx={{ color: '#4ECDC4', fontSize: 20 }} />
-                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                        {t(`${game.translationKey}.genre`)}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Star sx={{ color: '#FFD700', fontSize: 20 }} />
-                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                        {game.rating}
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Timer sx={{ color: '#FF6B6B', fontSize: 20 }} />
-                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                        {game.playTime}
-                      </Typography>
                     </Box>
                   </Box>
 
                   {/* Play Button - Now all are active */}
                   <Button
                     variant="contained"
-                    onClick={() => handleGameClick(game.id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Çift tıklama sorununu önle
+                      handleGameClick(game.id);
+                    }}
                     fullWidth
                     sx={{
                       bgcolor: fullyImplemented ? theme.palette.secondary.light : theme.palette.warning.light,

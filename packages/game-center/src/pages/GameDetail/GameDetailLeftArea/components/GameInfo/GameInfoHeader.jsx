@@ -9,7 +9,8 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PeopleIcon from "@mui/icons-material/People";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CelebrationIcon from "@mui/icons-material/Celebration";
-import hallowenBingo from "../../../../../assets/hallowenBingo.png";
+import halloweenBingo from "../../../../../assets/halloweenBingo.png";
+import hangmanHeader from "../../../../../assets/hangmanHeader.png";
 import { LobbyInfo } from "../../../../../shared/components/LobbyItem/LobbyInfo";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +21,12 @@ function GameInfoHeader({ game, filteredLobbies }) {
   const upcomingEvents = filteredLobbies.filter(
     (lobby) => lobby.lobbyType === "event"
   );
+const headerImage =
+    game.id === 1
+      ? `url(${halloweenBingo})`
+      : game.id === 2
+      ? `url(${hangmanHeader})`
+      : 'none';
 
   return (
     <Box
@@ -409,7 +416,7 @@ function GameInfoHeader({ game, filteredLobbies }) {
         sx={{
           height: { xs: "25vh", sm: "30vh", md: "40vh" },
           width: { xs: "35vw", sm: "30vw", md: "35vw" },
-          backgroundImage: `url(${hallowenBingo})`,
+          backgroundImage: headerImage,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right",

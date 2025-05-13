@@ -5,10 +5,11 @@ import { GameSettingsContext } from '../context';
 import DummyArea from './DummyArea';
 import { useTranslation } from 'react-i18next';
 
-function GameSettings({ settings, onSettingsChange }) {
+function GameSettings({ settings, onSettingsChange,gameId }) {
   const { soundEnabled, toggleSound } = useContext(GameSettingsContext);
   const theme = useTheme();
   const{t}=useTranslation();
+  console.log("SgameId : ",gameId)
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
       <Box>
@@ -72,7 +73,7 @@ function GameSettings({ settings, onSettingsChange }) {
       </Box>
     
       <Box>
-        <DummyArea />
+        <DummyArea gameId={gameId}/>
       </Box>
     </Box>
   );

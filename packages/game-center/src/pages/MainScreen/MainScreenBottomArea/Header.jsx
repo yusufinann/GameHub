@@ -9,7 +9,6 @@ const Header = ({ title, icon, variant = 'default', theme }) => {
         borderRadius: 2,
         py: 1.5,
         px: 2.5,
-        mt:2,
         boxShadow: 3,
         background: theme.palette.background.gradient,
         position: 'relative',

@@ -4,7 +4,7 @@ import CreateLobby from './components/CreateLobby';
 import ActiveLobbies from './components/ActiveLobbies';
 import GameSettings from './components/GameSettings';
 
-function GameDetailRightArea({ filteredLobbies, lobbies, existingLobby }) {
+function GameDetailRightArea({ filteredLobbies, lobbies, existingLobby,gameId}) {
   const [settings, setSettings] = useState({
     sound: true,
     notifications: false,
@@ -24,7 +24,7 @@ function GameDetailRightArea({ filteredLobbies, lobbies, existingLobby }) {
     >
       <CreateLobby existingLobby={existingLobby} lobbies={lobbies} />
       <ActiveLobbies filteredLobbies={filteredLobbies} />
-      <GameSettings settings={settings} onSettingsChange={setSettings} />
+      <GameSettings settings={settings} onSettingsChange={setSettings} gameId={gameId}/>
     </Box>
   );
 }
