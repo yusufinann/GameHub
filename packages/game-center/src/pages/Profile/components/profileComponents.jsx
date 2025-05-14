@@ -1,15 +1,23 @@
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
-  Grow, 
+import {
+  Card,
+  CardContent,
+  Typography,
+  Grow,
   Grid,
   Paper,
   Box,
+  CircularProgress,
+  Tabs, 
+  Tab   
 } from '@mui/material';
+import {
+  TrendingUp,
+  EmojiEvents,
+  Assessment, 
+} from '@mui/icons-material';
 
-export const StatCard = ({ icon: Icon, title, value, delay, theme }) => {
+export const StatCard = ({ icon: Icon, title, value, delay, theme, sx: sxProp }) => {
   return (
     <Grow in={true} timeout={1000} style={{ transitionDelay: `${delay || 0}ms` }}>
       <Card sx={{
@@ -23,17 +31,18 @@ export const StatCard = ({ icon: Icon, title, value, delay, theme }) => {
           boxShadow: theme.shadows[6],
           background: theme.palette.background.gradient,
           '& .title': {
-            color: theme.palette.text.contrast
+            color: theme.palette.text.contrast || theme.palette.primary.contrastText
           },
           '& .value': {
-            color: theme.palette.text.contrast,
+            color: theme.palette.text.contrast || theme.palette.primary.contrastText,
             transform: 'scale(1.1)'
           },
           '& .icon': {
-            color: theme.palette.text.contrast,
+            color: theme.palette.text.contrast || theme.palette.primary.contrastText,
             transform: 'rotate(360deg)'
           }
-        }
+        },
+        ...sxProp
       }}>
         <CardContent sx={{
           display: 'flex',
@@ -52,14 +61,14 @@ export const StatCard = ({ icon: Icon, title, value, delay, theme }) => {
           <Typography className="value" variant="h4" sx={{
             mb: 1,
             transition: 'all 0.3s ease',
-            fontWeight: 800, 
-            color: theme.palette.mode === 'light' 
-              ? theme.palette.primary.darker 
-              : theme.palette.secondary.light, 
-            textShadow: `0 2px 4px ${theme.palette.background.dot}`, 
-            fontSize: '2.5rem', 
+            fontWeight: 800,
+            color: theme.palette.mode === 'light'
+              ? (theme.palette.primary.darker || theme.palette.primary.dark)
+              : (theme.palette.secondary.light),
+            textShadow: `0 2px 4px ${theme.palette.background.dot}`,
+            fontSize: '2.5rem',
             '&:hover': {
-              color: theme.palette.text.contrast,
+              color: theme.palette.text.contrast || theme.palette.primary.contrastText,
               textShadow: 'none'
             }
           }}>
@@ -81,44 +90,175 @@ export const StatCard = ({ icon: Icon, title, value, delay, theme }) => {
 };
 
 export const ProfileSection = {
-  Achievements: ({ achievements, theme }) => (
-    <Grid container spacing={2}>
-      {achievements?.map((achievement) => (
-        <Grid item xs={12} sm={6} md={4} key={achievement.id}>
-          <Paper sx={{ 
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            bgcolor: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.background.dot}`,
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: theme.shadows[4]
-            }
-          }}>
-            <Typography variant="h4" sx={{ 
-              color: theme.palette.primary.main,
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {achievement.icon}
-            </Typography>
-            <Box>
-              <Typography variant="subtitle1" sx={{ color: theme.palette.text.primary }}>
-                {achievement.name}
-              </Typography>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                {new Date(achievement.date).toLocaleDateString()}
-              </Typography>
-            </Box>
-          </Paper>
+  Achievements: ({
+    bingoLongestStreak,
+    bingoWinRate,
+    bingoLoading, 
+    bingoTotalGames,
+    hangmanWinRate,     
+    hangmanAccuracy,    
+    hangmanLoading,     
+    hangmanTotalGames,  
+    theme,
+    t,
+  }) => {
+    const [activeAchievementTab, setActiveAchievementTab] = React.useState(0); // 0 for Bingo, 1 for Hangman
+
+    const handleTabChange = (event, newValue) => {
+      setActiveAchievementTab(newValue);
+    };
+
+    const bingoAchievementsData = [
+      {
+        id: 'bingo-longest-streak',
+        iconComponent: TrendingUp,
+        nameKey: 'profile.achievements.bingoLongestStreak',
+        fallbackName: 'Bingo Longest Streak',
+        value: bingoLoading ? '...' : bingoLongestStreak,
+        color: theme.palette.primary.main,
+      },
+      {
+        id: 'bingo-win-rate',
+        iconComponent: EmojiEvents,
+        nameKey: 'profile.achievements.bingoWinRate',
+        fallbackName: 'Bingo Win Rate',
+        value: bingoLoading ? '...' : `${bingoWinRate}%`,
+        color: theme.palette.secondary.main,
+      },
+    ];
+
+    const hangmanAchievementsData = [
+      {
+        id: 'hangman-win-rate',
+        iconComponent: EmojiEvents,
+        nameKey: 'profile.achievements.hangmanWinRate',
+        fallbackName: 'Hangman Win Rate',
+        value: hangmanLoading ? '...' : `${hangmanWinRate}%`,
+        color: theme.palette.primary.main,
+      },
+      {
+        id: 'hangman-accuracy',
+        iconComponent: Assessment,
+        nameKey: 'profile.achievements.hangmanAccuracy',
+        fallbackName: 'Hangman Guess Accuracy',
+        value: hangmanLoading ? '...' : `${hangmanAccuracy}%`, 
+        color: theme.palette.secondary.main,
+      },
+    ];
+
+    const renderAchievements = (data, gameLoading, gameTotalGames, noActivityKey, noActivityFallback) => {
+      if (gameLoading) {
+        return (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 3, minHeight: 150 }}>
+            <CircularProgress />
+          </Box>
+        );
+      }
+
+      if (gameTotalGames === undefined || gameTotalGames === 0) {
+        return (
+            <Grid container spacing={2} sx={{p:2, pt: 3}}> 
+                <Grid item xs={12}>
+                   <Typography sx={{ textAlign:'center', color: 'text.secondary'}}>
+                       {t(noActivityKey, noActivityFallback)}
+                   </Typography>
+                </Grid>
+            </Grid>
+       );
+   }
+
+      return (
+        <Grid container spacing={2} sx={{ pt: 2 }}> 
+          {data.map((achievement) => {
+            const IconCmp = achievement.iconComponent;
+            return (
+              <Grid item xs={12} sm={6} key={achievement.id}> 
+                <Paper sx={{
+                  p: 2.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2.5,
+                  bgcolor: theme.palette.background.paper,
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  height: '100%',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[4]
+                  }
+                }}>
+                  <Box sx={{ color: achievement.color, display: 'flex', alignItems: 'center' }}>
+                    <IconCmp sx={{ fontSize: { xs: '2.2rem', sm: '2.8rem' } }} />
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="h2" 
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        textTransform: 'uppercase',
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        letterSpacing: '0.5px',
+                        mb: 0.5
+                      }}
+                    >
+                      {t(achievement.nameKey, achievement.fallbackName)}
+                    </Typography>
+                    <Typography variant="h2" sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
+                      {achievement.value}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
         </Grid>
-      ))}
-    </Grid>
-  ),
+      );
+    };
+
+    return (
+      <>
+        <Tabs
+          value={activeAchievementTab}
+          onChange={handleTabChange}
+          indicatorColor="secondary"
+          textColor="inherit"
+          variant="fullWidth"
+          aria-label={t("profile.achievements.tabsAriaLabel", "Game Achievements Tabs")}
+          sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} // Reduced mb slightly
+        >
+          <Tab
+            label={t("profile.achievements.bingoTab", "Bingo")}
+            id="achievements-bingo-tab"
+            aria-controls="achievements-bingo-panel"
+          />
+          <Tab
+            label={t("profile.achievements.hangmanTab", "Hangman")}
+            id="achievements-hangman-tab"
+            aria-controls="achievements-hangman-panel"
+          />
+        </Tabs>
+
+        <Box role="tabpanel" hidden={activeAchievementTab !== 0} id="achievements-bingo-panel" aria-labelledby="achievements-bingo-tab">
+          {activeAchievementTab === 0 && renderAchievements(
+            bingoAchievementsData,
+            bingoLoading,
+            bingoTotalGames,
+            'profile.achievements.noBingoActivity',
+            'No Bingo game activity yet to show achievements.'
+          )}
+        </Box>
+        <Box role="tabpanel" hidden={activeAchievementTab !== 1} id="achievements-hangman-panel" aria-labelledby="achievements-hangman-tab">
+          {activeAchievementTab === 1 && renderAchievements(
+            hangmanAchievementsData,
+            hangmanLoading,
+            hangmanTotalGames,
+            'profile.achievements.noHangmanActivity',
+            'No Hangman game activity yet to show achievements.'
+          )}
+        </Box>
+      </>
+    );
+  },
 };

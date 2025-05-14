@@ -9,6 +9,7 @@ const config = {
     user: '/api/users/profile',
     userProfile: '/api/users', 
     bingoStats: '/api/bingo/stats',
+    hangmanStats: '/api/hangman/stats',
     
     // Friends Endpoints
     friendRequest: '/api/friends/request',

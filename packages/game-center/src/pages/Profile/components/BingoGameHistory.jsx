@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-// Keep the original imports from your project
 import {
   Card,
   CardContent,
@@ -49,9 +48,7 @@ const getScoreEmoji = (score) => {
   return "";
 };
 
-// Helper function to format duration in milliseconds to minutes and seconds
 const formatDuration = (durationMs, t) => {
-  // Pass t here
   if (durationMs === null || durationMs === undefined)
     return t("bingoHistory.durationNA", "N/A");
   const totalSeconds = Math.floor(durationMs / 1000);
