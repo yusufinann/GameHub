@@ -853,29 +853,71 @@ export const getUserBingoStats = async (req, res) => {
   }
 };
 
+const formatMillisecondsToHHMMSS = (ms) => {
+  if (ms === null || ms === undefined || ms <= 0) return "00:00:00";
+  let seconds = Math.floor(ms / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+  hours = hours % 24; // Günleri göstermiyoruz, sadece saat kısmı
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 export const getPlayerStats = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Get all games where this user was a player
-    const games = await BingoGame.find({ "players.playerId": userId });
+    // ObjectId geçerliliğini kontrol etmek iyi bir pratik
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Geçersiz kullanıcı IDsi." });
+    }
 
-    let totalGames = games.length;
-    let wins = 0;
+    // startedAt ve endedAt alanlarını da seçtiğimizden emin olalım
+    const games = await BingoGame.find({ "players.playerId": userId })
+        .select("lobbyCode gameId players startedAt endedAt") // Gerekli alanları seç
+        .sort({ endedAt: -1 }) // En son oynanan oyunlar üste gelsin
+        .lean(); // Performans için
+
+    if (!games || games.length === 0) {
+      // Opsiyonel: Kullanıcı adını User modelinden çekip döndürebilirsiniz
+      return res.status(404).json({ message: "Bu kullanıcı için Bingo oyun istatistiği bulunamadı." });
+    }
+
+    let totalGamesPlayed = games.length;
+    let totalWins = 0;
     let totalScore = 0;
+    let totalPlayTimeMilliseconds = 0;
+    let userName = ""; // Kullanıcı adını oyunlardan veya User modelinden alabiliriz
 
     const gamesDetails = games.map(game => {
-      const playerInfo = game.players.find(p => p.playerId === userId);
-      let isWin = false;
-      if (playerInfo && playerInfo.finalRank === 1) {
-        wins++;
-        isWin = true;
-      }
-      totalScore += playerInfo ? playerInfo.score : 0;
+      const playerInfo = game.players.find(p => p.playerId === userId); // Bingo modelinizde playerId String ise
+      // const playerInfo = game.players.find(p => p.playerId.equals(new mongoose.Types.ObjectId(userId))); // playerId ObjectId ise
 
-      let duration = null;
+      let isWin = false;
+      let playerScore = 0;
+      let playerFinalRank = null;
+
+      if (playerInfo) {
+        if (!userName && playerInfo.userName) userName = playerInfo.userName; // İlk bulduğumuz userName'i alalım
+        if (playerInfo.finalRank === 1) {
+          totalWins++;
+          isWin = true;
+        }
+        playerScore = playerInfo.score || 0;
+        playerFinalRank = playerInfo.finalRank;
+      }
+      totalScore += playerScore;
+
+      let durationMilliseconds = null;
+      let durationFormatted = "00:00:00"; // veya "N/A"
+
       if (game.startedAt && game.endedAt) {
-        duration = game.endedAt.getTime() - game.startedAt.getTime(); // Duration in milliseconds
+        durationMilliseconds = game.endedAt.getTime() - game.startedAt.getTime();
+        totalPlayTimeMilliseconds += durationMilliseconds;
+        durationFormatted = formatMillisecondsToHHMMSS(durationMilliseconds);
       }
 
       return {
@@ -883,24 +925,43 @@ export const getPlayerStats = async (req, res) => {
         lobbyCode: game.lobbyCode,
         startedAt: game.startedAt,
         endedAt: game.endedAt,
-        duration: duration, // Oyun süresini ekle
-        score: playerInfo ? playerInfo.score : 0,
-        finalRank: playerInfo ? playerInfo.finalRank : null,
+        durationMilliseconds: durationMilliseconds,
+        durationFormatted: durationFormatted,
+        score: playerScore,
+        finalRank: playerFinalRank,
         isWin: isWin
       };
     });
 
-    const averageScore = totalGames > 0 ? totalScore / totalGames : 0;
+    const averageScore = totalGamesPlayed > 0 ? parseFloat((totalScore / totalGamesPlayed).toFixed(2)) : 0;
 
-    res.json({
-      totalGames,
-      wins,
+    // Eğer oyunlardan userName alınamadıysa User modelinden çekmeyi deneyebiliriz
+    if (!userName && totalGamesPlayed > 0) {
+        try {
+            const User = mongoose.model('User'); // User modelinizin adını ve importunu kontrol edin
+            const user = await User.findById(userId).select('username').lean(); // 'username' alanını kendi modelinize göre ayarlayın
+            if (user && user.username) {
+                userName = user.username;
+            }
+        } catch (e) {
+            console.warn("Bingo stats: Kullanıcı adı User modelinden alınırken hata:", e.message);
+        }
+    }
+
+
+    res.status(200).json({
+      userId: userId,
+      userName: userName || "Bilinmiyor",
+      totalGames: totalGamesPlayed,
+      wins: totalWins,
       averageScore,
+      totalPlayTimeMilliseconds,
+      totalPlayTimeFormatted: formatMillisecondsToHHMMSS(totalPlayTimeMilliseconds),
       games: gamesDetails
     });
   } catch (error) {
-    console.error('Error fetching player stats:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Error fetching Bingo player stats:', error);
+    res.status(500).json({ message: 'Bingo istatistikleri alınırken sunucuda bir hata oluştu.', error: error.message });
   }
 };
 

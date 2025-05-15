@@ -449,17 +449,36 @@
     "addFriendButton": "Arkadaş Ekle",
     "joinedSince": "Katılma tarihi: {{date}}",
     "levelProgress": "Seviye İlerlemesi",
-    "stats": {
-      "totalGames": "Toplam Oyun",
-      "winRate": "Kazanma Oranı",
-      "longestStreak": "En Uzun Kazanma Serisi",
+   "stats": {
+      "overall": {
+        "totalGames": "Toplam Oynanan Oyun",
+        "winRate": "Genel Kazanma Oranı",
+        "totalPlayTime": "Toplam Oyun Süresi"
+      },
       "friends": "Arkadaşlar"
     },
+  
+   
     "tabs": {
       "statistics": "İstatistikler",
       "history": "Geçmiş",
       "achievements": "Başarılar"
     }
+  },
+    "Win Rate":"Kazanma Oranı",
+    "Longest Streak":"En uzun galibiyet serisi",
+    "Guess Accuracy":"Tahmin Doğruluğu",
+   "Bingo":"Tombala",
+  "Hangman":"Adam Asmaca",
+  "hangmanOverallStats": {
+    "loading": "Adam Asmaca İstatistikleri Yükleniyor...",
+    "error": "Adam Asmaca istatistikleri yüklenirken hata oluştu: {{error}}",
+    "noStats": "Henüz Adam Asmaca istatistiği bulunmuyor.",
+    "title": "Adam Asmaca - Genel İstatistikler",
+    "totalGamesPlayed": "Toplam Oyun",
+    "wins": "Kazanma Sayısı",
+    "notAvailable": "Mevcut Değil",
+    "averageCorrectGuesses": "Ort. Doğru Tahmin"
   },
   "removeFriendConfirm": {
     "title": "Arkadaşlıktan Çıkar",
@@ -491,8 +510,8 @@
     "pagination": {
       "rowsPerPage": "Sayfa başına satır:",
       "rowsPerPageAria": "sayfa başına satır seçici",
-      "displayingGames_one": "{{totalGames}} oyundan {{startIndex}}-{{endIndex}} arası",
-      "displayingGames_other": "{{totalGames}} oyundan {{startIndex}}-{{endIndex}} arası",
+     "displayingGames_one": "{{count}} oyundan {{from}}-{{to}} arası",
+      "displayingGames_other": "{{count}} oyundan {{from}}-{{to}} arası",
       "pageInfo": "{{currentPage}} / {{totalPages}}",
       "firstPage": "İlk Sayfa",
       "firstPageAria": "ilk sayfa",

@@ -730,6 +730,18 @@ export const getUsersHangmanStats = async (req, res) => {
   }
 };
 
+const formatMillisecondsToHHMMSS = (ms) => {
+  if (ms === null || ms === undefined || ms <= 0) return "00:00:00";
+  let seconds = Math.floor(ms / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 export const getPlayerStats = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -741,10 +753,33 @@ export const getPlayerStats = async (req, res) => {
 
     const playerGames = await HangmanGame.find({ "players.playerId": objectIdUserId })
       .sort({ endedAt: -1 })
-      .select("-word"); 
+      .select("-word")
+      .lean();
 
+    let userNameFromDB = ""; // Initialize userNameFromDB
     if (!playerGames || playerGames.length === 0) {
-      return res.status(404).json({ message: "Bu kullanıcı için oyun istatistiği bulunamadı." });
+      try {
+        const User = mongoose.model('User');
+        const user = await User.findById(objectIdUserId).select('username').lean();
+        if (user) {
+            userNameFromDB = user.username;
+        }
+      } catch(e) {
+        console.warn("Kullanıcı adı alınırken hata (oyun bulunamadı durumu):", e.message);
+      }
+      return res.status(200).json({ // Return 200 with empty stats instead of 404 to allow profile page to load
+        message: "Bu kullanıcı için oyun istatistiği bulunamadı.",
+        userName: userNameFromDB || "Bilinmiyor",
+        totalGamesPlayed: 0,
+        totalWins: 0,
+        accuracy: 0,
+        totalCorrectGuesses: 0,
+        totalIncorrectGuesses: 0,
+        totalPlayTimeMilliseconds: 0,
+        totalPlayTimeFormatted: "00:00:00",
+        bestRankOverall: null,
+        gameHistory: []
+      });
     }
 
     let totalWins = 0;
@@ -752,39 +787,76 @@ export const getPlayerStats = async (req, res) => {
     let totalCorrectGuesses = 0;
     let totalIncorrectGuesses = 0;
     let userName = "";
+    let totalPlayTimeMilliseconds = 0;
+    let bestRankOverall = null; // En iyi genel sıralamayı tutmak için
 
     const gameHistory = playerGames.map(game => {
       const playerInfoInGame = game.players.find(p => p.playerId.equals(objectIdUserId));
       if (playerInfoInGame) {
-        if (!userName) userName = playerInfoInGame.userName;
+        if (!userName && playerInfoInGame.userName) userName = playerInfoInGame.userName;
         if (playerInfoInGame.won) totalWins++;
-        
+
         if (playerInfoInGame.correctGuesses && Array.isArray(playerInfoInGame.correctGuesses)) {
             totalCorrectGuesses += playerInfoInGame.correctGuesses.length;
         }
         if (playerInfoInGame.incorrectGuesses && Array.isArray(playerInfoInGame.incorrectGuesses)) {
             totalIncorrectGuesses += playerInfoInGame.incorrectGuesses.length;
         }
-        
+
+        // En iyi genel sıralamayı güncelle
+        if (playerInfoInGame.finalRank && typeof playerInfoInGame.finalRank === 'number' && playerInfoInGame.finalRank > 0) {
+            if (bestRankOverall === null || playerInfoInGame.finalRank < bestRankOverall) {
+                bestRankOverall = playerInfoInGame.finalRank;
+            }
+        }
+
+        let durationMilliseconds = null;
+        let durationFormatted = "N/A";
+
+        if (game.startedAt && game.endedAt) {
+            durationMilliseconds = game.endedAt.getTime() - game.startedAt.getTime();
+            totalPlayTimeMilliseconds += durationMilliseconds;
+            durationFormatted = formatMillisecondsToHHMMSS(durationMilliseconds);
+        }
+
         return {
-            gameId: game.gameId, 
+            gameId: game.gameId,
             lobbyCode: game.lobbyCode,
             category: game.category,
             won: playerInfoInGame.won,
             eliminated: playerInfoInGame.eliminated,
             correctGuessesCount: (playerInfoInGame.correctGuesses && Array.isArray(playerInfoInGame.correctGuesses)) ? playerInfoInGame.correctGuesses.length : 0,
             incorrectGuessesCount: (playerInfoInGame.incorrectGuesses && Array.isArray(playerInfoInGame.incorrectGuesses)) ? playerInfoInGame.incorrectGuesses.length : 0,
-            correctGuesses: playerInfoInGame.correctGuesses, 
-            incorrectGuesses: playerInfoInGame.incorrectGuesses, 
+            correctGuesses: playerInfoInGame.correctGuesses,
+            incorrectGuesses: playerInfoInGame.incorrectGuesses,
             finalRank: playerInfoInGame.finalRank,
+            startedAt: game.startedAt,
             endedAt: game.endedAt,
+            durationMilliseconds: durationMilliseconds,
+            durationFormatted: durationFormatted,
         };
       }
       return null;
     }).filter(g => g !== null);
 
     const totalGuesses = totalCorrectGuesses + totalIncorrectGuesses;
-    const accuracy = totalGuesses > 0 ? (totalCorrectGuesses / totalGuesses) : 0;
+    const accuracy = totalGuesses > 0 ? parseFloat((totalCorrectGuesses / totalGuesses).toFixed(4)) : 0;
+
+    if (!userName && playerGames.length > 0) {
+        try {
+            const User = mongoose.model('User');
+            const user = await User.findById(objectIdUserId).select('username').lean();
+            if (user && user.username) {
+                userName = user.username;
+            } else {
+                userName = "Bilinmiyor";
+            }
+        } catch(e) {
+            console.warn("Kullanıcı adı alınırken hata (oyun bulundu durumu):", e.message);
+            userName = "Bilinmiyor";
+        }
+    }
+
 
     res.status(200).json({
       playerId: userId,
@@ -792,8 +864,11 @@ export const getPlayerStats = async (req, res) => {
       totalGamesPlayed,
       totalWins,
       accuracy,
-      totalCorrectGuesses,
+      totalCorrectGuesses, // Bu genel toplam doğru tahmin sayısı
       totalIncorrectGuesses,
+      totalPlayTimeMilliseconds,
+      totalPlayTimeFormatted: formatMillisecondsToHHMMSS(totalPlayTimeMilliseconds), // Bu genel toplam oyun süresi
+      bestRankOverall, // Bu yeni eklenen genel en iyi sıralama
       gameHistory
     });
 

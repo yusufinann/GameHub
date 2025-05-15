@@ -120,7 +120,7 @@ const HangmanOverallStats = ({ stats, loading, error, theme }) => {
                 {stats.totalWins?.toLocaleString(i18n.language) || '0'}
               </Typography>
               <Typography variant="subtitle1">
-                {t('hangmanOverallStats.wins', 'Wins')}
+                {t('Wins')}
               </Typography>
             </Paper>
           </Grid>

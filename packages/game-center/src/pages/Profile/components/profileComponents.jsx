@@ -58,7 +58,7 @@ export const StatCard = ({ icon: Icon, title, value, delay, theme, sx: sxProp })
             mb: 2,
             transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
           }} />
-          <Typography className="value" variant="h4" sx={{
+          <Typography className="value" variant="h2" sx={{
             mb: 1,
             transition: 'all 0.3s ease',
             fontWeight: 800,
@@ -112,16 +112,16 @@ export const ProfileSection = {
       {
         id: 'bingo-longest-streak',
         iconComponent: TrendingUp,
-        nameKey: 'profile.achievements.bingoLongestStreak',
-        fallbackName: 'Bingo Longest Streak',
+        nameKey: 'Longest Streak',
+        fallbackName: 'Longest Streak',
         value: bingoLoading ? '...' : bingoLongestStreak,
         color: theme.palette.primary.main,
       },
       {
         id: 'bingo-win-rate',
         iconComponent: EmojiEvents,
-        nameKey: 'profile.achievements.bingoWinRate',
-        fallbackName: 'Bingo Win Rate',
+        nameKey: 'Win Rate',
+        fallbackName: 'Win Rate',
         value: bingoLoading ? '...' : `${bingoWinRate}%`,
         color: theme.palette.secondary.main,
       },
@@ -131,16 +131,16 @@ export const ProfileSection = {
       {
         id: 'hangman-win-rate',
         iconComponent: EmojiEvents,
-        nameKey: 'profile.achievements.hangmanWinRate',
-        fallbackName: 'Hangman Win Rate',
+        nameKey: 'Win Rate',
+        fallbackName: 'Win Rate',
         value: hangmanLoading ? '...' : `${hangmanWinRate}%`,
         color: theme.palette.primary.main,
       },
       {
         id: 'hangman-accuracy',
         iconComponent: Assessment,
-        nameKey: 'profile.achievements.hangmanAccuracy',
-        fallbackName: 'Hangman Guess Accuracy',
+        nameKey: 'Guess Accuracy',
+        fallbackName: 'Guess Accuracy',
         value: hangmanLoading ? '...' : `${hangmanAccuracy}%`, 
         color: theme.palette.secondary.main,
       },
@@ -226,15 +226,15 @@ export const ProfileSection = {
           textColor="inherit"
           variant="fullWidth"
           aria-label={t("profile.achievements.tabsAriaLabel", "Game Achievements Tabs")}
-          sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} // Reduced mb slightly
+          sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} 
         >
           <Tab
-            label={t("profile.achievements.bingoTab", "Bingo")}
+            label={t("Bingo")}
             id="achievements-bingo-tab"
             aria-controls="achievements-bingo-panel"
           />
           <Tab
-            label={t("profile.achievements.hangmanTab", "Hangman")}
+            label={t("Hangman")}
             id="achievements-hangman-tab"
             aria-controls="achievements-hangman-panel"
           />

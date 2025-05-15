@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
   Paper,
   Box,
   CircularProgress,
@@ -19,19 +18,20 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  TablePagination, // TablePagination'ı tekrar ekliyorum
 } from "@mui/material";
 import {
   EmojiEvents as TrophyIcon,
   AccessTime as TimeIcon,
+  TimerOutlined as DurationIcon,
   Numbers as NumbersIcon,
   Share as ShareIcon,
-  Info as InfoIcon,
   FirstPage as FirstPageIcon,
   LastPage as LastPageIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from "@mui/icons-material";
-import { useTranslation } from "react-i18next"; // Import useTranslation
+import { useTranslation } from "react-i18next";
 
 const getRankColor = (rank) => {
   if (!rank) return "default";
@@ -48,22 +48,45 @@ const getScoreEmoji = (score) => {
   return "";
 };
 
-const formatDuration = (durationMs, t) => {
-  if (durationMs === null || durationMs === undefined)
+const formatGameDuration = (durationMs, t) => {
+  if (durationMs === null || durationMs === undefined || durationMs <= 0) {
     return t("bingoHistory.durationNA", "N/A");
-  const totalSeconds = Math.floor(durationMs / 1000);
+  }
+
+  let totalSeconds = Math.floor(durationMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  totalSeconds %= 3600;
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  // Use t function for "minutes" and "seconds"
-  return t("bingoHistory.durationFormat", "{{minutes}} min {{seconds}} sec", {
-    minutes,
-    seconds,
-  });
+
+  const parts = [];
+  if (hours > 0) {
+    parts.push(
+      t("bingoHistory.duration.hours", "{{count}} sa", { count: hours })
+    );
+  }
+  if (minutes > 0) {
+    parts.push(
+      t("bingoHistory.duration.minutes", "{{count}} dk", { count: minutes })
+    );
+  }
+  if (seconds > 0 || (hours === 0 && minutes === 0 && durationMs > 0)) {
+    parts.push(
+      t("bingoHistory.duration.seconds", "{{count}} sn", { count: seconds })
+    );
+  }
+
+  if (parts.length === 0 && durationMs > 0) {
+    return t("bingoHistory.duration.lessThanASecond", "< 1 sn");
+  }
+  return parts.length > 0
+    ? parts.join(" ")
+    : t("bingoHistory.durationNA", "N/A");
 };
 
 const BingoGameHistory = ({ stats, loading, error }) => {
-  const { t, i18n } = useTranslation(); 
-  const [page, setPage] = useState(1);
+  const { t, i18n } = useTranslation();
+  const [page, setPage] = useState(0); // Material-UI TablePagination 0-indexed page kullanır
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const statsSummary = useMemo(() => {
@@ -75,19 +98,48 @@ const BingoGameHistory = ({ stats, loading, error }) => {
       };
     }
 
-    const totalScore = stats.games.reduce((sum, game) => sum + game.score, 0);
+    const totalScore = stats.games.reduce(
+      (sum, game) => sum + (game.score || 0),
+      0
+    );
     const validRanks = stats.games
       .filter((game) => game.finalRank)
       .map((game) => game.finalRank);
     const bestRank = validRanks.length > 0 ? Math.min(...validRanks) : "-";
-    const totalDurationMs = stats.games.reduce(
-      (sum, game) => sum + (game.duration || 0),
-      0
-    );
-    const formattedTotalDuration = formatDuration(totalDurationMs, t); 
 
-    return { totalScore, bestRank, formattedTotalDuration };
-  }, [stats, t]); 
+    let formattedTotalDuration;
+    if (stats.totalPlayTimeFormatted) {
+      if (
+        stats.totalPlayTimeFormatted === "00:00:00" &&
+        (!stats.totalPlayTimeMilliseconds ||
+          stats.totalPlayTimeMilliseconds === 0)
+      ) {
+        formattedTotalDuration = t("bingoHistory.durationNA", "N/A");
+      } else {
+        formattedTotalDuration = stats.totalPlayTimeFormatted;
+      }
+    } else {
+      formattedTotalDuration = formatGameDuration(
+        stats.totalPlayTimeMilliseconds,
+        t
+      );
+    }
+
+    return {
+      totalScore,
+      bestRank,
+      formattedTotalDuration,
+    };
+  }, [stats, t]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   if (loading) {
     return (
@@ -100,7 +152,7 @@ const BingoGameHistory = ({ stats, loading, error }) => {
       >
         <CircularProgress color="secondary" />
         <Typography variant="body2" ml={2} color="text.secondary">
-          {t("bingoHistory.loadingHistory", "Loading game history...")}
+          {t("bingoHistory.loadingHistory", "Oyun geçmişi yükleniyor...")}
         </Typography>
       </Box>
     );
@@ -112,7 +164,7 @@ const BingoGameHistory = ({ stats, loading, error }) => {
         <Alert severity="error" variant="filled">
           {t(
             "bingoHistory.errorLoadingStats",
-            "Error loading game statistics: {{error}}",
+            "Oyun istatistikleri yüklenirken hata oluştu: {{error}}",
             { error: error }
           )}
         </Alert>
@@ -126,7 +178,7 @@ const BingoGameHistory = ({ stats, loading, error }) => {
         <CardContent>
           <Box textAlign="center" p={4}>
             <Typography variant="h5" gutterBottom color="primary.main">
-              {t("bingoHistory.title", "Bingo Game History")}
+              {t("bingoHistory.title", "Bingo Oyun Geçmişi")}
             </Typography>
             <Box mb={2}>
               <NumbersIcon sx={{ fontSize: 64, color: "text.disabled" }} />
@@ -134,7 +186,7 @@ const BingoGameHistory = ({ stats, loading, error }) => {
             <Typography color="text.secondary">
               {t(
                 "bingoHistory.noHistory",
-                "No game history found yet. Play your first Bingo game!"
+                "Henüz oyun geçmişi bulunmuyor. İlk Bingo oyununuzu oynayın!"
               )}
             </Typography>
           </Box>
@@ -143,11 +195,10 @@ const BingoGameHistory = ({ stats, loading, error }) => {
     );
   }
 
-  const totalGames = stats.games.length;
-  const totalPages = Math.ceil(totalGames / rowsPerPage);
-  const startIndex = (page - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, totalGames);
-  const currentGames = stats.games.slice(startIndex, endIndex);
+  const currentGames = stats.games.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Card elevation={3} sx={{ borderRadius: 2, overflow: "visible" }}>
@@ -158,10 +209,12 @@ const BingoGameHistory = ({ stats, loading, error }) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="h5"  color="secondary.main">
-            {t("bingoHistory.title")}
+          <Typography variant="h5" color="secondary.main">
+            {t("bingoHistory.title", "Bingo Oyun Geçmişi")}
           </Typography>
-          <Tooltip title={t("bingoHistory.shareTooltip", "Share game history")}>
+          <Tooltip
+            title={t("bingoHistory.shareTooltip", "Oyun geçmişini paylaş")}
+          >
             <IconButton size="small" color="primary">
               <ShareIcon />
             </IconButton>
@@ -181,10 +234,10 @@ const BingoGameHistory = ({ stats, loading, error }) => {
             flex={1}
             width={{ xs: "100%", sm: "auto" }}
           >
-            <Typography variant="body2" color="text.secondary">
-              {t("bingoHistory.summary.totalDuration", "Total Time Spent")}
+            <Typography variant="subtitle1" color="text.secondary">
+              {t("bingoHistory.summary.totalDuration", "Toplam Oyun Süresi")}
             </Typography>
-            <Typography variant="h6" fontWeight="bold">
+            <Typography variant="h3" fontWeight="bold">
               {statsSummary.formattedTotalDuration}
             </Typography>
           </Box>
@@ -196,10 +249,10 @@ const BingoGameHistory = ({ stats, loading, error }) => {
             flex={1}
             width={{ xs: "100%", sm: "auto" }}
           >
-            <Typography variant="body2" color="text.secondary">
-              {t("bingoHistory.summary.totalScore", "Total Score")}
+            <Typography variant="subtitle1" color="text.secondary">
+              {t("bingoHistory.summary.totalScore", "Toplam Skor")}
             </Typography>
-            <Typography variant="h6" fontWeight="bold">
+            <Typography variant="h3" fontWeight="bold">
               {statsSummary.totalScore.toLocaleString(i18n.language)}
             </Typography>
           </Box>
@@ -211,10 +264,10 @@ const BingoGameHistory = ({ stats, loading, error }) => {
             flex={1}
             width={{ xs: "100%", sm: "auto" }}
           >
-            <Typography variant="body2" color="text.secondary">
-              {t("bingoHistory.summary.bestRank", "Best Rank")}
+            <Typography variant="subtitle1" color="text.secondary">
+              {t("bingoHistory.summary.bestRank", "En İyi Sıra")}
             </Typography>
-            <Typography variant="h6" fontWeight="bold">
+            <Typography variant="h3" >
               {statsSummary.bestRank}
               {statsSummary.bestRank === 1 && " 🏆"}
             </Typography>
@@ -234,29 +287,29 @@ const BingoGameHistory = ({ stats, loading, error }) => {
                 <TableCell
                   sx={{ fontWeight: "bold", color: "primary.contrastText" }}
                 >
-                  {t("bingoHistory.table.lobbyCode")}
+                  {t("bingoHistory.table.lobbyCode", "Lobi Kodu")}
                 </TableCell>
                 <TableCell
                   sx={{ fontWeight: "bold", color: "primary.contrastText" }}
                 >
-                  {t("bingoHistory.table.gameId", "Game ID")}
+                  {t("bingoHistory.table.date", "Tarih")}
                 </TableCell>
                 <TableCell
                   sx={{ fontWeight: "bold", color: "primary.contrastText" }}
                 >
-                  {t("bingoHistory.table.date", "Date")}
-                </TableCell>
-                <TableCell
-                  align="right"
-                  sx={{ fontWeight: "bold", color: "primary.contrastText" }}
-                >
-                  {t("bingoHistory.table.score", "Score")}
+                  {t("bingoHistory.table.duration", "Süre")}
                 </TableCell>
                 <TableCell
                   align="right"
                   sx={{ fontWeight: "bold", color: "primary.contrastText" }}
                 >
-                  {t("bingoHistory.table.rank", "Rank")}
+                  {t("bingoHistory.table.score", "Skor")}
+                </TableCell>
+                <TableCell
+                  align="right"
+                  sx={{ fontWeight: "bold", color: "primary.contrastText" }}
+                >
+                  {t("bingoHistory.table.rank", "Sıra")}
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -280,21 +333,6 @@ const BingoGameHistory = ({ stats, loading, error }) => {
                   </TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center">
-                      <Tooltip
-                        title={t(
-                          "bingoHistory.gameDetailsTooltip",
-                          "Game Details"
-                        )}
-                      >
-                        <IconButton size="small" sx={{ mr: 1 }}>
-                          <InfoIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      {game.gameId.slice(0, 8)}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
                       <TimeIcon
                         fontSize="small"
                         sx={{ mr: 1, color: "text.secondary" }}
@@ -311,10 +349,19 @@ const BingoGameHistory = ({ stats, loading, error }) => {
                       )}
                     </Box>
                   </TableCell>
+                  <TableCell>
+                    <Box display="flex" alignItems="center">
+                      <DurationIcon
+                        fontSize="small"
+                        sx={{ mr: 1, color: "text.secondary" }}
+                      />
+                      {formatGameDuration(game.durationMilliseconds, t)}
+                    </Box>
+                  </TableCell>
                   <TableCell align="right">
                     <Typography fontWeight="medium">
-                      {game.score.toLocaleString(i18n.language)}{" "}
-                      {getScoreEmoji(game.score)}
+                      {(game.score || 0).toLocaleString(i18n.language)}{" "}
+                      {getScoreEmoji(game.score || 0)}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
@@ -344,155 +391,132 @@ const BingoGameHistory = ({ stats, loading, error }) => {
           </Table>
         </TableContainer>
 
-        {/* Pagination Controls - Simplified version */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={2}
-        >
-          <Box>
-            <Typography component="span" variant="body2" mr={1}>
-              {t("bingoHistory.pagination.rowsPerPage")}
-            </Typography>
-            <Box
-              component={TablePagination}
-              count={totalGames}
-              page={page - 1}
-              rowsPerPage={rowsPerPage}
-              onPageChange={(event, newPage) => setPage(newPage + 1)}
-              onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10));
-                setPage(1);
-              }}
-              rowsPerPageOptions={[5, 10, 25]}
-              sx={{ display: "inline", border: "none" }}
-              labelDisplayedRows={() => ""} 
-              labelRowsPerPage="" 
-              backIconButtonProps={{ style: { display: "none" } }}
-              nextIconButtonProps={{ style: { display: "none" } }}
-              SelectProps={{
-                variant: "outlined",
-                size: "small",
-                "aria-label": t(
-                  "bingoHistory.pagination.rowsPerPageAria",
-                  "rows per page selector"
-                ),
-              }}
-            />
-          </Box>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={stats.games.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage={t(
+            "bingoHistory.pagination.rowsPerPage",
+            "Sayfa başına satır:"
+          )}
+          labelDisplayedRows={({ from, to, count }) =>
+            t(
+              "bingoHistory.pagination.displayingGames",
+              "{{from}}-{{to}} / {{count}}",
+              {
+                from,
+                to,
+                count:
+                  count !== -1
+                    ? count
+                    : t(
+                        "bingoHistory.pagination.moreThan",
+                        "{{to}}'dan fazla",
+                        { to }
+                      ),
+              }
+            )
+          }
+          getItemAriaLabel={(type) => {
+            if (type === "first")
+              return t(
+                "bingoHistory.pagination.firstPageAria",
+                "İlk sayfaya git"
+              );
+            if (type === "last")
+              return t(
+                "bingoHistory.pagination.lastPageAria",
+                "Son sayfaya git"
+              );
+            if (type === "next")
+              return t(
+                "bingoHistory.pagination.nextPageAria",
+                "Sonraki sayfaya git"
+              );
+            if (type === "previous")
+              return t(
+                "bingoHistory.pagination.previousPageAria",
+                "Önceki sayfaya git"
+              );
+            return "";
+          }}
+          ActionsComponent={(props) => {
+            const {
+              count,
+              page: currentPage,
+              rowsPerPage: currentRowsPerPage,
+              onPageChange,
+            } = props;
+            const handleFirstPageButtonClick = (event) => {
+              onPageChange(event, 0);
+            };
+            const handleBackButtonClick = (event) => {
+              onPageChange(event, currentPage - 1);
+            };
+            const handleNextButtonClick = (event) => {
+              onPageChange(event, currentPage + 1);
+            };
+            const handleLastPageButtonClick = (event) => {
+              onPageChange(
+                event,
+                Math.max(0, Math.ceil(count / currentRowsPerPage) - 1)
+              );
+            };
 
-          <Box display="flex" alignItems="center">
-            <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
-              {t(
-                "bingoHistory.pagination.displayingGames",
-                "{{startIndex}}-{{endIndex}} of {{totalGames}} games",
-                {
-                  startIndex: startIndex + 1,
-                  endIndex: endIndex,
-                  totalGames: totalGames,
-                }
-              )}
-            </Typography>
-
-            {/* Simple Pagination */}
-            <Box display="flex" gap="8px">
-              <Tooltip
-                title={t("bingoHistory.pagination.firstPage", "First Page")}
-              >
+            return (
+              <Box sx={{ flexShrink: 0, ml: 2.5 }}>
                 <IconButton
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  size="small"
-                  sx={{
-                    border: "1px solid #ccc",
-                    opacity: page === 1 ? 0.5 : 1,
-                  }}
+                  onClick={handleFirstPageButtonClick}
+                  disabled={currentPage === 0}
                   aria-label={t(
                     "bingoHistory.pagination.firstPageAria",
-                    "first page"
+                    "İlk sayfa"
                   )}
                 >
-                  <FirstPageIcon fontSize="small" />
+                  <FirstPageIcon />
                 </IconButton>
-              </Tooltip>
-              <Tooltip
-                title={t(
-                  "bingoHistory.pagination.previousPage"
-                )}
-              >
                 <IconButton
-                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={page === 1}
-                  size="small"
-                  sx={{
-                    border: "1px solid #ccc",
-                    opacity: page === 1 ? 0.5 : 1,
-                  }}
+                  onClick={handleBackButtonClick}
+                  disabled={currentPage === 0}
                   aria-label={t(
-                    "bingoHistory.pagination.previousPageAria"
+                    "bingoHistory.pagination.previousPageAria",
+                    "Önceki sayfa"
                   )}
                 >
-                  <ChevronLeftIcon fontSize="small" />
+                  <ChevronLeftIcon />
                 </IconButton>
-              </Tooltip>
-
-              <Typography
-                variant="body2"
-                mx={1}
-                display="flex"
-                alignItems="center"
-              >
-                {t(
-                  "bingoHistory.pagination.pageInfo",
-                  "{{currentPage}} / {{totalPages}}",
-                  { currentPage: page, totalPages: totalPages }
-                )}
-              </Typography>
-
-              <Tooltip
-                title={t("bingoHistory.pagination.nextPage", "Next Page")}
-              >
                 <IconButton
-                  onClick={() =>
-                    setPage((prev) => Math.min(prev + 1, totalPages))
+                  onClick={handleNextButtonClick}
+                  disabled={
+                    currentPage >= Math.ceil(count / currentRowsPerPage) - 1
                   }
-                  disabled={page === totalPages}
-                  size="small"
-                  sx={{
-                    border: "1px solid #ccc",
-                    opacity: page === totalPages ? 0.5 : 1,
-                  }}
                   aria-label={t(
                     "bingoHistory.pagination.nextPageAria",
-                    "next page"
+                    "Sonraki sayfa"
                   )}
                 >
-                  <ChevronRightIcon fontSize="small" />
+                  <ChevronRightIcon />
                 </IconButton>
-              </Tooltip>
-              <Tooltip
-                title={t("bingoHistory.pagination.lastPage", "Last Page")}
-              >
                 <IconButton
-                  onClick={() => setPage(totalPages)}
-                  disabled={page === totalPages}
-                  size="small"
-                  sx={{
-                    border: "1px solid #ccc",
-                    opacity: page === totalPages ? 0.5 : 1,
-                  }}
+                  onClick={handleLastPageButtonClick}
+                  disabled={
+                    currentPage >= Math.ceil(count / currentRowsPerPage) - 1
+                  }
                   aria-label={t(
                     "bingoHistory.pagination.lastPageAria",
-                    "last page"
+                    "Son sayfa"
                   )}
                 >
-                  <LastPageIcon fontSize="small" />
+                  <LastPageIcon />
                 </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-        </Box>
+              </Box>
+            );
+          }}
+        />
       </CardContent>
     </Card>
   );

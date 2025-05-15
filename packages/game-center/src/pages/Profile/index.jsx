@@ -16,10 +16,8 @@ import {
   Schedule,
   Person,
   LocationOn,
-  CalendarMonth,
-  SportsEsports,
-  Timeline,
-  Psychology,
+  SportsEsports, 
+  Timeline,   
   Group,
   PersonAdd,
   PersonRemove,
@@ -39,7 +37,7 @@ import HangmanOverallStats from "./components/HangmanOverallStats";
 import HangmanGameHistory from "./components/HangmanGameHistory";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendsContext } from "../../shared/context/FriendsContext/context";
-import apiClient from "./api";
+import apiClient from "./api"; // Assuming apiClient is correctly set up
 
 const Profile = () => {
   const { userId } = useParams();
@@ -50,13 +48,18 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [activeStatsSubTab, setActiveStatsSubTab] = useState(0);
   const [activeHistorySubTab, setActiveHistorySubTab] = useState(0);
-  const [activeSummaryGameTab, setActiveSummaryGameTab] = useState(0);
+  // REMOVED: const [activeSummaryGameTab, setActiveSummaryGameTab] = useState(0);
 
   const { user, loading: userLoading, error: userError } = useProfile(userId);
   const { sendFriendRequest, removeFriend, isRequestSent, isFriend, friends } = useFriendsContext();
   const { currentUser } = useAuthContext();
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+  // Overall Game Stats
+  const [overallGameStats, setOverallGameStats] = useState(null);
+  const [overallGameStatsLoading, setOverallGameStatsLoading] = useState(true);
+  const [overallGameStatsError, setOverallGameStatsError] = useState(null);
 
   // Bingo Stats
   const [bingoStats, setBingoStats] = useState(null);
@@ -73,12 +76,30 @@ const Profile = () => {
   const [hangmanAccuracyPercent, setHangmanAccuracyPercent] = useState(0);
 
   // Hangman Game History
-  const [hangmanGameHistory, setHangmanGameHistory] = useState(null);
+  const [hangmanGameHistoryData, setHangmanGameHistoryData] = useState({ // Değişiklik: Artık bir obje
+  games: [],
+  totalPlayTimeFormatted: '00:00:00',
+  totalCorrectGuesses: 0,
+  bestRankOverall: null,
+});
   const [hangmanGameHistoryLoading, setHangmanGameHistoryLoading] = useState(true);
   const [hangmanGameHistoryError, setHangmanGameHistoryError] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
+
+    const fetchOverallGameStats = async () => {
+      setOverallGameStatsLoading(true);
+      setOverallGameStatsError(null);
+      try {
+        const data = await apiClient.gameService.getGeneralGameStats(userId);
+        setOverallGameStats(data);
+      } catch (err) {
+        setOverallGameStatsError(err.message || "Failed to load overall game stats");
+      } finally {
+        setOverallGameStatsLoading(false);
+      }
+    };
 
     const fetchBingoStats = async () => {
       setBingoStatsLoading(true);
@@ -111,18 +132,32 @@ const Profile = () => {
           accuracy: data.accuracy,
           totalCorrectGuesses: data.totalCorrectGuesses,
           totalIncorrectGuesses: data.totalIncorrectGuesses,
+          totalPlayTimeFormatted: data.totalPlayTimeFormatted,
+             bestRankOverall: data.bestRankOverall,
         });
-        setHangmanGameHistory({ games: data.gameHistory || [] });
+         setHangmanGameHistoryData({
+            games: data.gameHistory || [],
+            totalPlayTimeFormatted: data.totalPlayTimeFormatted,
+            totalCorrectGuesses: data.totalCorrectGuesses,
+            bestRankOverall: data.bestRankOverall,
+        });
       } catch (err) {
         const errorMessage = err.message || "Failed to load Hangman stats";
         setHangmanOverallStatsError(errorMessage);
         setHangmanGameHistoryError(errorMessage);
+          setHangmanGameHistoryData({
+            games: [],
+            totalPlayTimeFormatted: 'N/A',
+            totalCorrectGuesses: 0,
+            bestRankOverall: null,
+        });
       } finally {
         setHangmanOverallStatsLoading(false);
         setHangmanGameHistoryLoading(false);
       }
     };
 
+    fetchOverallGameStats();
     fetchBingoStats();
     fetchHangmanStats();
   }, [userId]);
@@ -249,7 +284,7 @@ const Profile = () => {
               {[
                 { icon: <Person fontSize="small"/>, label: user.name, key: "name" },
                 { icon: <LocationOn fontSize="small"/>, label: user.location, key: "location" },
-                { icon: <CalendarMonth fontSize="small"/>, label: t("profile.joinedSince", "Joined: {{date}}", { date: new Date(user.memberSince).toLocaleDateString(i18n.language) }), key: "joined" },
+             
               ].map((item) => item.label ? (<Chip key={item.key} icon={item.icon} label={item.label} size="small" sx={{ bgcolor: "action.hover", color: "text.secondary" }} />) : null)}
             </Box>
             {getFriendButton()}
@@ -263,98 +298,52 @@ const Profile = () => {
         </Box>
       </Paper>
 
-      <Tabs
-        value={activeSummaryGameTab}
-        onChange={(e, newValue) => setActiveSummaryGameTab(newValue)}
-        indicatorColor="secondary"
-        textColor="inherit"
-        variant="standard"
-        sx={{
-          mb: 3,
-          mt: { xs: 2, sm: 0 },
-          minHeight: 'auto',
-          '& .MuiTab-root': {
-            minWidth: { xs: 120, sm: 140 },
-            minHeight: 'auto',
-            py: 1,
-            fontSize: { xs: '0.8rem', sm: '0.9rem'},
-            color: theme.palette.text.secondary,
-            '& .MuiSvgIcon-root': {
-              mr: 1,
-              fontSize: '1.25rem',
-            },
-            "&.Mui-selected": {
-              color: theme.palette.secondary.main,
-              fontWeight: 600,
-            },
-          },
-        }}
-        aria-label={t("profile.summaryGameTabs.ariaLabel", "Özet istatistikler için oyun seçin")}
-      >
-        <Tab
-          icon={<ViewList />}
-          iconPosition="start"
-          label={t("profile.summaryGameTabs.bingo", "Bingo")}
-          id="summary-game-tab-0"
-          aria-controls="summary-game-panel-0"
-        />
-        <Tab
-          icon={<SportsKabaddi />}
-          iconPosition="start"
-          label={t("profile.summaryGameTabs.hangman", "Hangman")}
-          id="summary-game-tab-1"
-          aria-controls="summary-game-panel-1"
-        />
-      </Tabs>
-
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }, gap: 2, mb: 4 }}>
-        {(() => {
-          const friendStatCard = {
+        {[
+          {
+            icon: SportsEsports,
+            titleKey: "profile.stats.overall.totalGames",
+            fallbackTitle: "Total Games Played",
+            value: overallGameStatsLoading ? "..." : (overallGameStats?.totalGamesPlayed?.toLocaleString(i18n.language) || "0")
+          },
+          {
+            icon: Timeline,
+            titleKey: "profile.stats.overall.winRate",
+            fallbackTitle: "Overall Win Rate",
+            value: overallGameStatsLoading ? "..." : (
+                overallGameStats?.overallWinRate !== undefined
+                ? `${(overallGameStats.overallWinRate * 100).toFixed(1)}%`
+                : "0.0%"
+            )
+          },
+          {
+            icon: Schedule,
+            titleKey: "profile.stats.overall.totalPlayTime",
+            fallbackTitle: "Total Play Time",
+            value: overallGameStatsLoading ? "..." : (overallGameStats?.totalPlayTimeFormatted || "00:00:00")
+          },
+          {
             icon: Group,
             titleKey: "profile.stats.friends",
             fallbackTitle: "Friends",
             value: friends.length.toLocaleString(i18n.language)
-          };
-
-          let gameSpecificStats;
-          if (activeSummaryGameTab === 0) { // Bingo
-            gameSpecificStats = [
-              { icon: SportsEsports, titleKey: "profile.stats.bingo.totalGames", fallbackTitle: "Bingo Toplam Oyun", value: bingoStatsLoading ? "..." : (bingoStats?.totalGames?.toLocaleString(i18n.language) || "0") },
-              { icon: Timeline, titleKey: "profile.stats.bingo.winRate", fallbackTitle: "Bingo Kazanma Oranı", value: bingoStatsLoading ? "..." : `${bingoWinRate}%` },
-              { icon: Psychology, titleKey: "profile.stats.bingo.longestStreak", fallbackTitle: "Bingo En Uzun Seri", value: bingoStatsLoading ? "..." : bingoLongestStreak.toLocaleString(i18n.language) },
-            ];
-          } else { // Hangman
-            gameSpecificStats = [
-              { icon: SportsKabaddi, titleKey: "profile.stats.hangman.totalGames", fallbackTitle: "Toplam Oyun", value: hangmanOverallStatsLoading ? "..." : (hangmanOverallStats?.totalGamesPlayed?.toLocaleString(i18n.language) || "0") },
-              { icon: Timeline, titleKey: "profile.stats.hangman.winRate", fallbackTitle: "Kazanma Oranı", value: hangmanOverallStatsLoading ? "..." : `${hangmanWinRate}%` },
-              {
-                icon: Assessment,
-                titleKey: "profile.stats.hangman.accuracy",
-                fallbackTitle: "Tahmin Başarı Oranı",
-                value: hangmanOverallStatsLoading
-                  ? "..."
-                  : (hangmanOverallStats?.accuracy !== undefined
-                      ? `${(hangmanOverallStats.accuracy * 100).toFixed(1)}%`
-                      : "0.0%"
-                    )
-              },
-            ];
           }
-
-          const allStats = [...gameSpecificStats, friendStatCard];
-
-          return allStats.map((stat, index) => (
-            <StatCard
-              key={stat.titleKey}
-              icon={stat.icon}
-              title={t(stat.titleKey, stat.fallbackTitle)}
-              value={stat.value}
-              sx={{ "& .MuiSvgIcon-root": { color: index % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main } }}
-              theme={theme}
-            />
-          ));
-        })()}
+        ].map((stat, index) => (
+          <StatCard
+            key={stat.titleKey}
+            icon={stat.icon}
+            title={t(stat.titleKey, stat.fallbackTitle)}
+            value={stat.value}
+            sx={{ "& .MuiSvgIcon-root": { color: index % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main } }}
+            theme={theme}
+          />
+        ))}
+         {overallGameStatsError && (
+            <Paper sx={{ gridColumn: "1 / -1", p: 2, textAlign: "center", color: "error.main" }}>
+                {t("profile.errorLoadingOverallStats", "Could not load overall stats: {{message}}", { message: overallGameStatsError })}
+            </Paper>
+        )}
       </Box>
 
 
@@ -411,8 +400,8 @@ const Profile = () => {
               sx={{ mb: 2, borderBottom: 1, borderColor: 'divider', "& .MuiTab-root": { fontSize: '0.875rem', minHeight: 48, "&.Mui-selected": { fontWeight: '600' }, "& .MuiSvgIcon-root": {mr:0.5, fontSize:'1.25rem'} } }}
               aria-label={t("profile.subTabs.statsAriaLabel", "Game Statistics Tabs")}
             >
-              <Tab icon={<ViewList />} label={t("profile.subTabs.bingo", "Bingo")} id="stats-subtab-0" aria-controls="stats-subtabpanel-0" />
-              <Tab icon={<SportsKabaddi />} label={t("profile.subTabs.hangman", "Hangman")} id="stats-subtab-1" aria-controls="stats-subtabpanel-1"/>
+              <Tab icon={<ViewList />} label={t("Bingo")} id="stats-subtab-0" aria-controls="stats-subtabpanel-0" />
+              <Tab icon={<SportsKabaddi />} label={t("Hangman")} id="stats-subtab-1" aria-controls="stats-subtabpanel-1"/>
             </Tabs>
             <Box role="tabpanel" hidden={activeStatsSubTab !== 0} id="stats-subtabpanel-0" aria-labelledby="stats-subtab-0">
               {activeStatsSubTab === 0 && (<BingoOverallStats stats={bingoStats} loading={bingoStatsLoading} error={bingoStatsError} theme={theme} />)}
@@ -453,14 +442,14 @@ const Profile = () => {
                sx={{ mb: 2, borderBottom: 1, borderColor: 'divider', "& .MuiTab-root": { fontSize: '0.875rem', minHeight: 48, "&.Mui-selected": { fontWeight: '600' }, "& .MuiSvgIcon-root": {mr:0.5, fontSize:'1.25rem'} } }}
               aria-label={t("profile.subTabs.historyAriaLabel", "Game History Tabs")}
             >
-              <Tab icon={<ViewList />} label={t("profile.subTabs.bingo", "Bingo")} id="history-subtab-0" aria-controls="history-subtabpanel-0"/>
-              <Tab icon={<SportsKabaddi />} label={t("profile.subTabs.hangman", "Hangman")} id="history-subtab-1" aria-controls="history-subtabpanel-1"/>
+              <Tab icon={<ViewList />} label={t("Bingo")} id="history-subtab-0" aria-controls="history-subtabpanel-0"/>
+              <Tab icon={<SportsKabaddi />} label={t("Hangman")} id="history-subtab-1" aria-controls="history-subtabpanel-1"/>
             </Tabs>
             <Box role="tabpanel" hidden={activeHistorySubTab !== 0} id="history-subtabpanel-0" aria-labelledby="history-subtab-0">
               {activeHistorySubTab === 0 && (<BingoGameHistory stats={bingoStats} loading={bingoStatsLoading} error={bingoStatsError} />)}
             </Box>
             <Box role="tabpanel" hidden={activeHistorySubTab !== 1} id="history-subtabpanel-1" aria-labelledby="history-subtab-1">
-             {activeHistorySubTab === 1 && (<HangmanGameHistory stats={hangmanGameHistory} loading={hangmanGameHistoryLoading} error={hangmanGameHistoryError} />)}
+             {activeHistorySubTab === 1 && (<HangmanGameHistory  stats={hangmanGameHistoryData} loading={hangmanGameHistoryLoading} error={hangmanGameHistoryError} />)}
             </Box>
           </Box>
         )}

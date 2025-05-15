@@ -10,6 +10,7 @@ const config = {
     userProfile: '/api/users', 
     bingoStats: '/api/bingo/stats',
     hangmanStats: '/api/hangman/stats',
+    generalGameStats:'/api/users/stats/overall',
     
     // Friends Endpoints
     friendRequest: '/api/friends/request',

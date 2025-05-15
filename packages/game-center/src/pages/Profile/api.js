@@ -88,12 +88,20 @@ export const gameService = {
       handleApiError(error, 'Son oyunlar alınamadı');
     }
   },
-    getHangmanStats: async (userId) => {
+   getHangmanStats: async (userId) => {
     try {
       const response = await api.get(buildUrl(config.apiEndpoints.hangmanStats, userId));
       return response.data;
     } catch (error) {
-      handleApiError(error, 'Bingo istatistikleri alınamadı');
+      handleApiError(error, 'Hangman istatistikleri alınamadı');
+    }
+  },
+   getGeneralGameStats: async (userId) => {
+    try {
+      const response = await api.get(buildUrl(config.apiEndpoints.generalGameStats, userId));
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Genel istatistikler alınamadı');
     }
   },
 };

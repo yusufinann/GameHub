@@ -451,16 +451,32 @@
     "joinedSince": "Joined: {{date}}",
     "levelProgress": "Level Progress",
     "stats": {
-      "totalGames": "Total Games",
-      "winRate": "Win Rate",
-      "longestStreak": "Longest Streak",
+      "overall": {
+        "totalGames": "Total Games Played",
+        "winRate": "Overall Win Rate",
+        "totalPlayTime": "Total Play Time"
+      },
       "friends": "Friends"
-    },
+    }, 
+
     "tabs": {
       "statistics": "Statistics",
       "history": "History",
       "achievements": "Achievements"
     }
+  },
+    "Win Rate":"Win Rate",
+    "Longest Streak":"Longest Streak",
+    "Guess Accuracy":"Guess Accuracy",
+    "hangmanOverallStats": {
+    "loading": "Loading Hangman Stats...",
+    "error": "Error loading Hangman statistics: {{error}}",
+    "noStats": "No Hangman statistics available yet.",
+    "title": "Hangman - Overall Statistics",
+    "totalGamesPlayed": "Total Games",
+    "wins": "Wins",
+    "notAvailable": "N/A",
+    "averageCorrectGuesses": "Avg. Correct Guesses"
   },
   "removeFriendConfirm": {
     "title": "Remove Friend",
@@ -492,8 +508,8 @@
     "pagination": {
       "rowsPerPage": "Rows per page:",
       "rowsPerPageAria": "rows per page selector",
-      "displayingGames_one": "{{startIndex}}-{{endIndex}} of {{totalGames}} game",
-      "displayingGames_other": "{{startIndex}}-{{endIndex}} of {{totalGames}} games",
+     "displayingGames_one": "{{from}}-{{to}} of {{count}} game",
+      "displayingGames_other": "{{from}}-{{to}} of {{count}} games",
       "pageInfo": "{{currentPage}} / {{totalPages}}",
       "firstPage": "First Page",
       "firstPageAria": "first page",
@@ -505,6 +521,8 @@
       "lastPageAria": "last page"
     }
   },
+  "Bingo":"Bingo",
+  "Hangman":"Hangman",
   "bingoPlayerStats": {
     "loading": "Loading statistics...",
     "error": "Error loading statistics: {{error}}",
