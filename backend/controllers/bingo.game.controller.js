@@ -184,7 +184,7 @@ function autoDrawNumber(game) {
       if (allPlayersCompleted && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
-          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+          game.gameStarted = false; 
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All players completed - Final Rankings",
@@ -195,7 +195,7 @@ function autoDrawNumber(game) {
       } else if (game.numberPool.length === 0 && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
-          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+          game.gameStarted = false; 
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All numbers drawn - Final Rankings",
@@ -227,7 +227,7 @@ export const drawNumber = (ws, data) => {
   if (game.numberPool.length === 0) {
       const rankings = getGameRankings(game);
       game.gameEnded = true;
-      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+      game.gameStarted = false; 
       broadcastToGame(game, {
           type: "BINGO_GAME_OVER",
           message: "Tüm numaralar çekildi.",
@@ -278,7 +278,7 @@ export const drawNumber = (ws, data) => {
           broadcastToGame(game, {
               type: "BINGO_NUMBER_DISPLAY_END",
               number: number,
-              activeNumbers: game.activeNumbers // Still keep in active numbers
+              activeNumbers: game.activeNumbers 
           });
       }
   }, numberDisplayDuration);
@@ -310,7 +310,7 @@ export const drawNumber = (ws, data) => {
       if (allPlayersCompleted && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
-          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+          game.gameStarted = false; 
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All players completed - Final Rankings",
@@ -321,7 +321,7 @@ export const drawNumber = (ws, data) => {
       } else if (game.numberPool.length === 0 && !game.gameEnded) {
           const rankings = getGameRankings(game);
           game.gameEnded = true;
-          game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+          game.gameStarted = false; 
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: "All numbers drawn - Final Rankings",
@@ -444,7 +444,7 @@ export const joinGame = async (ws, data) => {
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
-        message: "Lobby kodu belirtilmedi.",
+        message: "Lobi kodu belirtilmedi.",
       })
     );
   }
@@ -466,7 +466,7 @@ export const joinGame = async (ws, data) => {
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
-        message: "Lobby bulunamadı.",
+        message: "Lobi bulunamadı.",
       })
     );
   }
@@ -479,8 +479,8 @@ export const joinGame = async (ws, data) => {
       drawnNumbers: [],
       activeNumbers: [],
       numberPool: generateShuffledNumbers(1, 90),
-      gameStarted: false,
-      gameEnded: false,
+      gameStarted: false, 
+      gameEnded: false,   
       host: lobby.createdBy.toString(),
       drawMode: 'auto',
       drawer: null
@@ -489,41 +489,47 @@ export const joinGame = async (ws, data) => {
 
   const game = bingoGames[lobbyCode];
 
-  // Handle reconnection with updated user info
+  if (game.gameStarted && !game.gameEnded && !game.players[ws.userId]) {
+    return ws.send(JSON.stringify({
+      type: "BINGO_ERROR",
+      message: "Bu lobide aktif bir oyun devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın."
+    }));
+  }
+
   if (game.players[ws.userId]) {
     const player = game.players[ws.userId];
-    player.ws = ws;
+    player.ws = ws; 
     player.userName = userInfo.username;
     player.name = userInfo.name;
+
     const hasCompleted = player.completedBingo || false;
+
     return ws.send(JSON.stringify({
-      type: "BINGO_JOIN",
-      message: "Already in game",
+      type: "BINGO_JOIN", 
+      message: "Oyuna başarıyla yeniden bağlandınız.",
       ticket: player.ticket,
       markedNumbers: player.markedNumbers || [],
       isHost: game.host === ws.userId,
-      // players: Object.keys(game.players), // Sadece ID yerine daha fazla bilgi göndermek daha iyi olabilir
-       players: Object.values(game.players).map(p => ({ // Oyuncu detaylarını göndermek için örnek
-           id: p.userId, // veya ws.userId hangisi kullanılıyorsa
+      players: Object.values(game.players).map(p => ({
+           id: p.userId,
            userName: p.userName,
            name: p.name,
-           completed: p.completedBingo || false 
+           completed: p.completedBingo || false
        })),
       gameStarted: game.gameStarted,
       drawnNumbers: game.drawnNumbers,
       activeNumbers: game.activeNumbers,
       drawMode: game.drawMode,
       drawer: game.drawer,
-      completedBingo: hasCompleted, 
+      completedBingo: hasCompleted,
       completedPlayers: getCompletedPlayersList(game),
       bingoMode: game.bingoMode,
       competitionMode: game.competitionMode,
       gameId: game.gameId,
-      rankings: game.rankings || getGameRankings(game), // Mevcut sıralamayı da gönder
+      rankings: game.rankings || (game.gameStarted ? getGameRankings(game) : []), 
     }));
   }
 
-  // Add new player with proper user info
   const ticket = generateTicket();
   game.players[ws.userId] = {
     ticket,
@@ -546,30 +552,35 @@ export const joinGame = async (ws, data) => {
 
   ws.send(JSON.stringify({
     type: "BINGO_JOIN",
-    message: "Joined the game",
+    message: "Oyuna başarıyla katıldınız.",
     ticket,
     markedNumbers: [],
     isHost: game.host === ws.userId,
-    players: Object.keys(game.players),
-    gameStarted: game.gameStarted,
-    drawnNumbers: game.drawnNumbers,
-    activeNumbers: game.activeNumbers,
+    players: Object.values(game.players).map(p => ({
+        id: p.userId,
+        userName: p.userName,
+        name: p.name,
+        completed: p.completedBingo || false
+    })),
+    gameStarted: game.gameStarted, 
+    drawnNumbers: game.drawnNumbers, 
+    activeNumbers: game.activeNumbers, 
     drawMode: game.drawMode,
     drawer: game.drawer,
-    userInfo: {
+    userInfo: { 
       name: userInfo.name,
       userName: userInfo.username
     },
-    completedBingo: false, // Oyuncu henüz bingo yapmadı
-    completedPlayers: getCompletedPlayersList(game),
-    bingoMode: game.bingoMode,
-    competitionMode: game.competitionMode,
-    gameId: game.gameId,
-    rankings: game.rankings || [],
+    completedBingo: false,
+    completedPlayers: getCompletedPlayersList(game), 
+    bingoMode: game.bingoMode, 
+    competitionMode: game.competitionMode, 
+    gameId: game.gameId, 
+    rankings: game.rankings || [], 
   }));
 };
 
-// Yeni fonksiyon: Numaraları işaretleme
+
 export const markNumber = (ws, data) => {
   const { lobbyCode, number } = data;
   const game = bingoGames[lobbyCode];
@@ -583,11 +594,9 @@ export const markNumber = (ws, data) => {
 
   const player = game.players[ws.userId];
 
-  // Numarayı oyuncunun işaretlediği numaralar listesine ekle
   if (!player.markedNumbers.includes(number)) {
     player.markedNumbers.push(number);
 
-    // Broadcast the marked number to all players
     broadcastToGame(game, {
       type: "BINGO_NUMBER_MARKED",
       playerId: ws.userId,
@@ -596,11 +605,7 @@ export const markNumber = (ws, data) => {
     });
   }
 };
-/**
- * Bingo kontrolü: Oyuncu "BINGO" dediğinde, ticket’ındaki tüm numaraların
- * çekilmiş numaralar arasında olup olmadığını kontrol eder.
- * Beklenen data örneği: { lobbyCode: "ABC123" }
- **/
+
 // Yardımcı fonksiyon: Oyun istatistiklerini MongoDB'ye kaydeder
 async function saveGameStatsToDB(game) {
   console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date());

@@ -17,7 +17,7 @@ export const useLobbyItem = (lobby, currentUser) => {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-
+ const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
  
 
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
@@ -30,6 +30,7 @@ export const useLobbyItem = (lobby, currentUser) => {
 
   const handleJoin = async (password = "") => {
     setError("");
+    setIsErrorModalOpen(false);// Modal'ı kapat
     setIsJoining(true);
 
     try {
@@ -73,8 +74,10 @@ export const useLobbyItem = (lobby, currentUser) => {
         message: joinResponse.message || "Successfully joined the lobby.",
         severity: "success",
       });
-    } catch (error) {
-      setError(error.message || "Failed to join the lobby.");
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to join the lobby.";
+      setError(errorMessage); // Hata mesajını ErrorModal için ayarla
+      setIsErrorModalOpen(true);
       showSnackbar({
         message: error.message || "Failed to join the lobby.",
         severity: "error",
@@ -90,6 +93,8 @@ export const useLobbyItem = (lobby, currentUser) => {
       event.stopPropagation();
     }
     setIsDeleting(true);
+    setError(""); // Temizle
+    setIsErrorModalOpen(false); // Temizle
     try {
       await deleteLobby(lobbyCode);
 
@@ -98,8 +103,11 @@ export const useLobbyItem = (lobby, currentUser) => {
         severity: "success",
       });
       
-    } catch (error) {
-      console.error("Error deleting lobby:", error);
+    } catch (err) {
+      console.error("Error deleting lobby:", err);
+      const errorMessage = err.response?.data?.message || "An error occurred while deleting the lobby.";
+      setError(errorMessage); // Silme hatasını da modal ile göstermek isterseniz
+      setIsErrorModalOpen(true); // Veya sadece snackbar ile
 
       showSnackbar({
         message: error.response?.data?.message || "An error occurred while deleting the lobby.",
@@ -109,7 +117,10 @@ export const useLobbyItem = (lobby, currentUser) => {
       setIsDeleting(false);
     }
   };
-
+ const closeErrorModal = () => {
+    setIsErrorModalOpen(false);
+    setError("");
+  };
   return {
     isJoining,
     isMember,
@@ -117,6 +128,8 @@ export const useLobbyItem = (lobby, currentUser) => {
     handleJoin,
     handleDelete,
     setError,
-    isDeleting
+    isDeleting,
+      isErrorModalOpen, // Modal'ın durumunu dışarı ver
+    closeErrorModal,  // Modal'ı kapatma fonksiyonunu dışarı ver
   };
 };

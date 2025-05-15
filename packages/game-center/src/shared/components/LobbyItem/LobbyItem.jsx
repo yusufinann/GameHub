@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useEffect } from "react";
 import {
   Box,
   Chip,
@@ -9,7 +9,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { LobbyInfo } from "./LobbyInfo"; // Already internationalized
+import { LobbyInfo } from "./LobbyInfo";
 import { LobbyActions } from "./LobbyActions";
 import { useAuthContext } from "../../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
@@ -18,15 +18,14 @@ import { Event, Group, People } from "@mui/icons-material";
 import ErrorModal from "../ErrorModal";
 import LobbyEditModal from "./LobbyEditModal";
 import { useLobbyContext } from "../../context/LobbyContext/context";
-import { useTranslation } from "react-i18next"; // Import useTranslation
+import { useTranslation } from "react-i18next";
 
-// Memoize alt bileşenler gereksiz render'ları önlemek için
 const LobbyTypeChip = memo(function LobbyTypeChip({ lobbyType, isMobile, t }) {
   return (
     <Chip
       size={isMobile ? "small" : "medium"}
       icon={lobbyType === "event" ? <Event /> : <Group />}
-      label={t(lobbyType === "event" ? "lobbyTypeEvent" : "lobbyTypeNormal")} 
+      label={t(lobbyType === "event" ? "lobbyTypeEvent" : "lobbyTypeNormal")}
       color={lobbyType === "event" ? "secondary" : "primary"}
       sx={{
         flexShrink: 0,
@@ -40,11 +39,11 @@ const LobbyTypeChip = memo(function LobbyTypeChip({ lobbyType, isMobile, t }) {
   );
 });
 
-const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobile, t }) { 
+const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobile, t }) {
   return (
     <Chip
       size={isMobile ? "small" : "medium"}
-      label={t('membersLabel', { 
+      label={t('membersLabel', {
         count: count || 0,
         maxPart: maxMembers ? `/ ${maxMembers}` : ''
       })}
@@ -61,21 +60,32 @@ const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobi
 });
 
 function LobbyItem({ lobby }) {
-  const { t } = useTranslation(); 
-  const { membersByLobby, existingLobby } = useLobbyContext();
+  const { t } = useTranslation();
+  const { membersByLobby, existingLobby, setIsJoined: setContextIsJoined } = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
   const {
     isJoining,
-    isMember,
+    error: joinError,
     handleJoin,
     handleDelete,
     isDeleting,
+    isErrorModalOpen: isJoinErrorModalOpen,
+    closeErrorModal: closeJoinErrorModal,
   } = useLobbyItem(lobby, currentUser);
-  const [isLobbyFull, setIsLobbyFull] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+
+  const [isLobbyFullError, setIsLobbyFullError] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const isMember = membersByLobby[lobby.lobbyCode]?.some(
+    (member) => member.id === currentUser?.id
+  );
+
+  useEffect(() => {
+    setContextIsJoined(isMember);
+  }, [isMember, setContextIsJoined]);
 
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
@@ -86,27 +96,31 @@ function LobbyItem({ lobby }) {
   const handleJoinClick = useCallback(async () => {
     try {
       const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
-      if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers) {
-        setIsLobbyFull(true);
-        setIsErrorModalOpen(true);
+      if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers && !isMember) {
+        setIsLobbyFullError(true);
         return;
       }
 
-      if (lobby.password) {
+      if (lobby.password && !isMember) {
         setIsPasswordModalOpen(true);
       } else {
         await handleJoin();
       }
     } catch (error) {
-      console.error("Error joining lobby:", error); 
-      setIsErrorModalOpen(true);
+      // console.error("Unexpected error in handleJoinClick:", error);
     }
-  }, [lobby, membersByLobby, handleJoin]);
+  }, [lobby, membersByLobby, handleJoin, isMember]);
+
 
   const handleErrorModalClose = useCallback(() => {
-    setIsErrorModalOpen(false);
-    setIsLobbyFull(false);
-  }, []);
+    if (isLobbyFullError) {
+      setIsLobbyFullError(false);
+    }
+    if (isJoinErrorModalOpen) {
+      closeJoinErrorModal();
+    }
+  }, [isLobbyFullError, isJoinErrorModalOpen, closeJoinErrorModal]);
+
 
   const handleEditClick = useCallback(() => {
     setIsEditModalOpen(true);
@@ -136,6 +150,13 @@ function LobbyItem({ lobby }) {
 
   const membersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
 
+  let currentErrorMessage = "";
+  if (isLobbyFullError) {
+    currentErrorMessage = t('lobbyFullError');
+  } else if (isJoinErrorModalOpen && joinError) {
+    currentErrorMessage = joinError;
+  }
+
   const renderModals = () => {
     return (
       <>
@@ -143,7 +164,12 @@ function LobbyItem({ lobby }) {
           <LobbyPasswordModal
             open={isPasswordModalOpen}
             onClose={closePasswordModal}
-            onSubmit={handleJoin}
+            onSubmit={async (password) => {
+              await handleJoin(password);
+              if (!joinError && !isJoinErrorModalOpen) {
+                 setIsPasswordModalOpen(false);
+              }
+            }}
             lobbyDetails={{
               isPasswordProtected: Boolean(lobby.password),
               lobbyCode: lobby.lobbyCode,
@@ -153,13 +179,11 @@ function LobbyItem({ lobby }) {
           />
         )}
 
-        {isErrorModalOpen && (
+        {(isLobbyFullError || isJoinErrorModalOpen) && (
           <ErrorModal
-            open={isErrorModalOpen}
+            open={true}
             onClose={handleErrorModalClose}
-            errorMessage={ 
-              isLobbyFull ? t('lobbyFullError') : t('joinLobbyError')
-            }
+            errorMessage={currentErrorMessage}
           />
         )}
 
@@ -226,9 +250,9 @@ function LobbyItem({ lobby }) {
                 flexGrow: 1,
               }}
             >
-              {lobby.lobbyName || t('unnamedLobby')} 
+              {lobby.lobbyName || t('unnamedLobby')}
             </Typography>
-            <LobbyTypeChip lobbyType={lobby.lobbyType} isMobile={isMobile} t={t} /> 
+            <LobbyTypeChip lobbyType={lobby.lobbyType} isMobile={isMobile} t={t} />
           </Box>
 
           <Box
@@ -250,10 +274,10 @@ function LobbyItem({ lobby }) {
                 maxMembers={lobby.maxMembers}
                 theme={theme}
                 isMobile={isMobile}
-                t={t} 
+                t={t}
               />
               {lobby.lobbyType === "event" && (
-                <LobbyInfo 
+                <LobbyInfo
                   startDate={startDate}
                   startTime={startTime}
                   endDate={endDate}
@@ -291,7 +315,7 @@ function LobbyItem({ lobby }) {
         </Stack>
       </Paper>
 
-      {(isPasswordModalOpen || isErrorModalOpen || isEditModalOpen) && renderModals()}
+      {renderModals()}
     </>
   );
 }
