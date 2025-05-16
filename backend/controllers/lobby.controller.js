@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import Lobby from '../models/lobby.model.js';
-import { bingoGames } from "./bingo.game.controller.js";
-import { hangmanGames } from './hangman.controller.js';
+import { bingoGames, broadcastToGame as broadcastToBingoGame } from './bingo.game.controller.js';
+import { hangmanGames, broadcastToGame as broadcastToHangmanGame, getSharedGameState as getHangmanSharedGameState } from './hangman.controller.js'; 
 const lobbyTimers = new Map();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -470,7 +470,48 @@ export const leaveLobby = async (req, res) => {
 
         const removedUser = lobby.members.splice(userIndex, 1)[0];
         const wasHost = removedUser.id.toString() === lobby.createdBy.toString(); 
+// OYUNDAN ÇIKARMA LOGIĞI BAŞLANGICI
+        if (lobby.game === '1') { // Eğer oyun türü Bingo ise
+            const bingoGame = bingoGames[lobbyCode];
+            if (bingoGame && !bingoGame.gameStarted && bingoGame.players[removedUser.id]) {
+                console.log(`[Lobby Controller] User ${removedUser.id} left lobby ${lobbyCode} which is a Bingo game not yet started. Removing from Bingo game players.`);
+                const playerInfo = bingoGame.players[removedUser.id]; // Oyuncu bilgilerini al
+                delete bingoGame.players[removedUser.id];
 
+                // Diğer Bingo oyuncularına bilgi gönder
+                // Bu, client tarafında Bingo oyuncu listesinin güncellenmesini sağlar
+                if (Object.keys(bingoGame.players).length > 0) { // Sadece kalan oyuncu varsa broadcast et
+                    broadcastToBingoGame(bingoGame, { // bingo.controller.js'den import edilen broadcastToGame'i kullan
+                        type: "BINGO_PLAYER_LEFT_PREGAME", // Veya "BINGO_PLAYER_LEFT" gibi genel bir event
+                        playerId: removedUser.id,
+                        playerName: playerInfo?.name, // Silinmeden önceki oyuncu adı
+                        userName: playerInfo?.userName, // Silinmeden önceki kullanıcı adı
+                        // İsteğe bağlı: güncel oyuncu listesi
+                        players: Object.values(bingoGame.players).map(p => ({
+                            id: p.userId,
+                            userName: p.userName,
+                            name: p.name,
+                            completed: p.completedBingo || false
+                        }))
+                    });
+                }
+            }
+        } else if (lobby.game === '2') { // Eğer oyun türü Adam Asmaca ise
+            const hangmanGame = hangmanGames[lobbyCode];
+            if (hangmanGame && !hangmanGame.gameStarted && hangmanGame.players[removedUser.id]) {
+                console.log(`[Lobby Controller] User ${removedUser.id} left lobby ${lobbyCode} which is a Hangman game not yet started. Removing from Hangman game players.`);
+                delete hangmanGame.players[removedUser.id];
+                hangmanGame.playerOrder = hangmanGame.playerOrder.filter(pid => pid.toString() !== removedUser.id.toString());
+
+                broadcastToHangmanGame(hangmanGame, {
+                    type: "HANGMAN_PLAYER_LEFT_PREGAME",
+                    playerId: removedUser.id,
+                    playerName: removedUser.name,
+                    sharedGameState: getHangmanSharedGameState(hangmanGame)
+                });
+            }
+        }
+        // OYUNDAN ÇIKARMA LOGIĞI SONU
          const remainingMemberIds = lobby.members.map(m => m.id.toString());
          if (remainingMemberIds.length > 0) {
              broadcastLobbyEvent(lobbyCode, "USER_LEFT", {

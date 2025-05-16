@@ -74,7 +74,7 @@ function getGameRankings(game) {
 /**
  * Yardımcı: Belirtilen oyundaki tüm oyunculara mesaj gönderir.
  */
-function broadcastToGame(game, data) {
+export function broadcastToGame(game, data) {
   const message = JSON.stringify(data);
   Object.values(game.players).forEach((player) => {
     if (player.ws.readyState === player.ws.OPEN) {

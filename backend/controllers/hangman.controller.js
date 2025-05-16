@@ -32,8 +32,24 @@ function getRandomWord(category) {
   const words = wordCategories[safeCategory];
   return words[Math.floor(Math.random() * words.length)];
 }
+export const removePlayerFromHangmanPregame = (lobbyCode, userId) => {
+  const game = hangmanGames[lobbyCode];
+  if (game && !game.gameStarted && game.players[userId]) {
+    console.log(`[Hangman Controller] User ${userId} is being removed from pre-game state of ${lobbyCode}.`);
+    delete game.players[userId];
+    game.playerOrder = game.playerOrder.filter(pid => pid !== userId);
 
-function broadcastToGame(game, dataToSend) { 
+   
+    broadcastToGame(game, {
+      type: "HANGMAN_PLAYER_LEFT_PREGAME",
+      playerId: userId,
+      sharedGameState: getSharedGameState(game)
+    });
+    return true;
+  }
+  return false;
+};
+export  function broadcastToGame(game, dataToSend) { 
   if (!game || !game.players) return;
   Object.values(game.players).forEach((player) => {
     if (player && player.ws && player.ws.readyState === player.ws.OPEN) {
@@ -124,7 +140,7 @@ function getPlayerSpecificGameState(game, playerId) {
     };
 }
 
-function getSharedGameState(game) {
+export function getSharedGameState(game) {
   let allPlayersCorrectGuesses = new Set();
     Object.values(game.players).forEach(p => {
         p.correctGuesses.forEach(g => allPlayersCorrectGuesses.add(g));
