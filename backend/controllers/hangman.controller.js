@@ -35,20 +35,63 @@ function getRandomWord(category) {
 export const removePlayerFromHangmanPregame = (lobbyCode, userId) => {
   const game = hangmanGames[lobbyCode];
   if (game && !game.gameStarted && game.players[userId]) {
-    console.log(`[Hangman Controller] User ${userId} is being removed from pre-game state of ${lobbyCode}.`);
+    console.log(`[Hangman Controller] Kullanıcı ${userId}, ${lobbyCode} lobisindeki oyun başlamadan önce ayrılıyor.`);
+    const playerInfo = game.players[userId]; // Oyuncu bilgilerini al (isim vs. için)
     delete game.players[userId];
-    game.playerOrder = game.playerOrder.filter(pid => pid !== userId);
+    game.playerOrder = game.playerOrder.filter(pid => pid.toString() !== userId.toString());
 
-   
     broadcastToGame(game, {
       type: "HANGMAN_PLAYER_LEFT_PREGAME",
       playerId: userId,
-      sharedGameState: getSharedGameState(game)
+      playerName: playerInfo?.name, // Oyuncunun adını gönder
+      // sharedGameState, broadcastToGame tarafından otomatik olarak eklenecek
+      // veya getSharedGameState(game) ile manuel olarak eklenebilir.
     });
     return true;
   }
   return false;
 };
+
+// YENİ FONKSİYON: Oyun sırasında ayrılan oyuncuyu yönetmek için
+export const handleHangmanPlayerLeaveMidGame = (lobbyCode, userId) => {
+  const game = hangmanGames[lobbyCode];
+  if (!game || !game.gameStarted || game.gameEnded || !game.players[userId]) {
+    return;
+  }
+
+  const player = game.players[userId];
+
+  if (player.eliminated || !player.ws) {
+      return;
+  }
+
+  player.eliminated = true;
+
+  broadcastToGame(game, {
+    type: "HANGMAN_PLAYER_LEFT_MIDGAME",
+    playerId: userId,
+    playerName: player.name,
+  });
+
+  if (game.players[userId]) {
+      game.players[userId].ws = null;
+  }
+
+  if (game.currentPlayerId === userId) {
+    startNextTurn(lobbyCode);
+  } else {
+    const activePlayersWithWs = Object.values(game.players).filter(p => p.ws && !p.eliminated && !p.won);
+    if (activePlayersWithWs.length === 0 && !game.gameEnded) {
+        const currentMaskedWord = getSharedGameState(game).maskedWord;
+        if (!currentMaskedWord.includes('_')) {
+            endGameProcedure(game, "HANGMAN_WORD_REVEALED_GAME_OVER", "Kelime bulundu ve son aktif oyuncu da ayrıldı.");
+        } else {
+            endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Aktif oyuncu kalmadı. Oyun berabere bitti.");
+        }
+    }
+  }
+};
+
 export  function broadcastToGame(game, dataToSend) { 
   if (!game || !game.players) return;
   Object.values(game.players).forEach((player) => {
@@ -73,19 +116,14 @@ export  function broadcastToGame(game, dataToSend) {
         messageForPlayer.playerSpecificGameState = getPlayerSpecificGameState(game, player.userId);
       }
 
-      const typesThatShouldHaveSharedState = [...relevantTypesForPlayerSpecificState]; 
+       const typesThatShouldHaveSharedState = [
+          ...relevantTypesForPlayerSpecificState,
+          "HANGMAN_PLAYER_LEFT_PREGAME", // Oyuncu listesi güncellenir
+          "HANGMAN_PLAYER_LEFT_MIDGAME"  // Oyuncu durumu (eliminated) güncellenir
+        ];
       
       if (typesThatShouldHaveSharedState.includes(messageForPlayer.type)) {
-        if (messageForPlayer.sharedGameState) {
-            // If sharedGameState is already provided (e.g. by endGameProcedure's finalSharedState),
-            // merge it with the latest to ensure core elements are up-to-date, but prioritize provided one for specific values.
-            // Or, assume the provided one is complete and correct for that message.
-            // For simplicity and robustness, let's assume if it's provided, it's what's intended.
-            // If it's critical to always have the *absolute* latest, it would be:
-            // messageForPlayer.sharedGameState = { ...getSharedGameState(game), ...messageForPlayer.sharedGameState };
-            // However, current call sites mostly provide the latest shared state already.
-        } else {
-
+        if (!messageForPlayer.sharedGameState) { // Eğer mesajda zaten yoksa ekle
             messageForPlayer.sharedGameState = getSharedGameState(game);
         }
       }
@@ -97,7 +135,6 @@ export  function broadcastToGame(game, dataToSend) {
     }
   });
 }
-
 function getGameRankings(game) {
   return Object.values(game.players)
     .map(player => ({
@@ -448,19 +485,34 @@ export const startGame = (ws, data) => {
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçerli bir kategori seçmelisiniz." }));
   }
 
+  const activePlayersForNewGame = {};
+  Object.keys(game.players).forEach(playerId => {
+    const player = game.players[playerId];
+    if (player && player.ws) { // Sadece ws bağlantısı olanları yeni oyuna dahil et
+      activePlayersForNewGame[playerId] = player;
+    }
+  });
+  game.players = activePlayersForNewGame; // game.players nesnesini sadece aktif olanlarla güncelle
+
+  if (Object.keys(game.players).length === 0) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyunu başlatmak için en az bir aktif oyuncu olmalı." }));
+  }
   game.gameEnded = false; 
-  game.rankingsSnapshot = [];// <<< YENİ: Sıralama fotoğrafını temizle
+  game.rankingsSnapshot = [];
   game.category = category;
   game.word = getRandomWord(category).toLowerCase();
   game.gameId = new mongoose.Types.ObjectId();
-  game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5); 
-  
+  //game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5); 
+
+   game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5);
+
   Object.values(game.players).forEach(player => {
+    // Bu döngü artık sadece ws bağlantısı olan ve yeni oyuna dahil edilen oyuncular için çalışacak
     player.correctGuesses = [];
     player.incorrectGuesses = [];
     player.remainingAttempts = 6;
     player.won = false;
-    player.eliminated = false;
+    player.eliminated = false; // Bu sıfırlama artık sadece aktif oyuncular için geçerli
   });
 
   let countdown = 5;
@@ -474,7 +526,7 @@ export const startGame = (ws, data) => {
       broadcastToGame(game, {
         type: "HANGMAN_GAME_STARTED",
         message: "Oyun başladı!",
-        sharedGameState: getSharedGameState(game),
+       // sharedGameState: getSharedGameState(game),  broadcastToGame tarafından eklenecek
       });
       startNextTurn(lobbyCode);
     }
