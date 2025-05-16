@@ -9,7 +9,7 @@
   <p align="center">
     Web-Based Live Game and Social Interaction Platform 🚀
     <br />
-    Discover Fun with Bingo and More! 🎲
+    Discover Fun with Bingo, Hangman, and More! 🎲🔠
     <br />
     <a href="#project-summary"><strong>Project Summary</strong></a>
     ·
@@ -27,22 +27,23 @@
 
 <h2 id="project-summary">✨ Project Summary</h2>
 
-Game Center Game Platform is a **web-based dynamic game center** that offers players the opportunity to experience various games and socialize with friends from the comfort of their homes. Starting with Bingo, our platform's foundation, we aim to incorporate **various new and exciting games** in the future. Our goal is to provide our users not only with a platform to play games but also a place where they can **socialize in a live, interactive, and enjoyable digital environment**. With our user-friendly interface, real-time gaming experience, and rich social features, we promise players a **unique entertainment and community experience**.
+Game Center Game Platform is a **web-based dynamic game center** that offers players the opportunity to experience various games and socialize with friends from the comfort of their homes. Our platform now offers both **Bingo** and the classic word-guessing game, **Hangman**, as foundational experiences, with plans to incorporate **various new and exciting games** in the future. Our goal is to provide our users not only with a platform to play games but also a place where they can **socialize in a live, interactive, and enjoyable digital environment**. With our user-friendly interface, real-time gaming experience, rich social features, multi-language support, and customizable themes, we promise players a **unique entertainment and community experience**.
 
 ---
 
 <h2 id="key-features">🚀 Key Features</h2>
 
-* **🕹️ Various Games on a Single Platform:** Easy access to a game collection catering to different tastes.
+* **🕹️ Various Games on a Single Platform:** Easy access to a game collection catering to different tastes, now featuring Bingo and Hangman.
 * **👥 Social Interaction Focused:** Setting up lobbies with friends, chatting, and enjoying games together.
-* **⚡ Real-Time Live Gaming Experience:** Instant updates and real-time competition with WebSocket.
+* **⚡ Real-Time Live Gaming Experience:** Instant updates, synchronized gameplay, and real-time competition with WebSocket.
 * **🎨 User-Friendly and Stylish Interface:** Modern and intuitive design with React and Material UI.
 * **📱 Fully Responsive Design:** Seamless experience on desktop, tablet, and mobile devices.
-* **🌙 Light & Dark Theme Options:** Personalize your experience with theme choices, including an eye-friendly dark mode.
-* **🌐 Multi-Language Support (Coming Soon):** Reaching a wide audience with English and Turkish language options.
+* **🌈 Customizable Theme Options:** Personalize your experience with theme choices including Light, Dark, and an attractive modern **Neon-Ocean** theme.
+* **🌐 Multi-Language Support:** Reaching a wide audience with English and Turkish language options.
 * **🔔 Smart Notification System:** Instant notifications for events, invitations, and updates.
 * **📊 Detailed Player Profile:** Personal development tracking with statistics, game history, friends, and achievements.
 * **💬 Community and Chat Areas:** Building a player community with global and private group chats.
+* **🔠 Interactive Hangman Multiplayer:** Guess words together or competitively, see opponents' progress in real-time, and chat within the game lobby.
 
 ---
 
@@ -55,7 +56,7 @@ Our application is built on modern and powerful web technologies:
 * **⚛️ React:** Component-based, modular, and reusable interface development.
 * **🗺️ react-router-dom:** Smooth and dynamic page routing and navigation.
 * **📡 Axios:** HTTP client for reliable and fast Backend API communication.
-* **🎨 Material UI:** Aesthetics and functionality with a rich, modern, and customizable UI components library (supports theming like Light/Dark modes).
+* **🎨 Material UI:** Aesthetics and functionality with a rich, modern, and customizable UI components library (supports theming like Light/Dark/Neon-Ocean modes).
 * **📦 React Context:** Efficient and easy state management throughout the application.
 
 ### Backend
@@ -93,7 +94,7 @@ Our application is built on modern and powerful web technologies:
 
 ### 🏠 Main Screen
 
-* **🚪 Lobby Listing:** Dynamically listing active game lobbies (type, status, encryption).
+* **🚪 Lobby Listing:** Dynamically listing active game lobbies (game type like Bingo or Hangman, status, encryption).
 * **🎨 Animations and Visual Richness:** Interactive elements that make the interface lively and user-friendly.
 * **<img src="https://cdn-icons-png.flaticon.com/512/929/929679.png" alt="Menu" width="20" style="vertical-align: middle;"> Left Fixed Menu (Sidebar):** Easy access for main navigation (Main Screen, Games, Community, Chat, Profile).
 * **<img src="https://cdn-icons-png.flaticon.com/512/447/447315.png" alt="Friends" width="20" style="vertical-align: middle;"> Right Fixed Friend List (Sidebar):** Online friends and quick social interaction.
@@ -113,7 +114,7 @@ Our application is built on modern and powerful web technologies:
 
 * **<img src="https://cdn-icons-png.flaticon.com/512/93/93634.png" alt="Modal" width="20" style="vertical-align: middle;"> Create Lobby Modal:** Configuring all lobby settings from a single place.
 * **📝 Lobby Name (Required):** Unique name that defines the lobby.
-* **🎲 Game Selection (Dropdown):** Easily selecting the game type to be played (Bingo).
+* **🎲 Game Selection (Dropdown):** Easily selecting the game type to be played (e.g., Bingo, Hangman).
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446813.png" alt="Type" width="20" style="vertical-align: middle;"> Lobby Type Selection (Radio Buttons):** Determining "Normal" or "Event" lobby type.
     * **<img src="https://cdn-icons-png.flaticon.com/512/446/446824.png" alt="Normal" width="20" style="vertical-align: middle;"> Normal Lobby:** Always open and always playable.
     * **<img src="https://cdn-icons-png.flaticon.com/512/446/446859.png" alt="Event" width="20" style="vertical-align: middle;"> Event Lobby:** Planned events with a specific time range.
@@ -136,7 +137,7 @@ Our Game Platform offers users powerful and intuitive lobby management tools. Th
 
 * **🎨 Lobby Creation Modal:** Easily configure lobby settings with a user-friendly modal interface.
 * **📝 Lobby Name:** Specify a custom name that defines your lobby (required).
-* **🎲 Game Selection:** Select the type of game you want to play (currently Bingo).
+* **🎲 Game Selection:** Select the type of game you want to play (e.g., Bingo, Hangman).
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446813.png" alt="Type" width="20" style="vertical-align: middle;"> Lobby Types:** Choose the lobby type that suits your needs:
     * **<img src="https://cdn-icons-png.flaticon.com/512/446/446824.png" alt="Normal" width="20" style="vertical-align: middle;"> Normal Lobbies:**
         * Lobbies that remain open continuously, where you can play games whenever you want.
@@ -175,7 +176,7 @@ Lobby creators can keep their lobbies under full control:
 * **🗑️ Lobby Deletion:** Delete your created lobby completely at any time.
     * Permanently remove the lobby with the delete icon in the lobby list.
 * **⏳ Automatic Lobby Deletion (Normal Lobbies):** In normal lobbies, if the host leaves the lobby and does not return within 8 hours, the lobby is automatically deleted. This efficiently utilizes system resources and prevents unnecessary lobby clutter.
-* **🎮 Game Control:** As the host, you have the authority to start the game, choose the game mode, and competition style. Guide your players for the best gaming experience.
+* **🎮 Game Control:** As the host, you have the authority to start the game, choose the game mode (if applicable to the game, e.g. for Hangman: word category, difficulty), and competition style. Guide your players for the best gaming experience.
 
 #### 🚪 Player Lobby Management
 
@@ -197,11 +198,11 @@ Our platform supports your lobby management operations with instant notification
 
 ### ℹ️ Game Detail Page
 
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446827.png" alt="Mode" width="20" style="vertical-align: middle;"> Game Modes and Rules:** Different game modes (Classic, Extended, Super Fast) and detailed descriptions.
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446827.png" alt="Mode" width="20" style="vertical-align: middle;"> Game Modes and Rules:** Detailed descriptions for each game (e.g., Bingo: Classic, Extended, Super Fast; Hangman: Single Player, Multiplayer, Word Categories).
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446861.png" alt="Competition" width="20" style="vertical-align: middle;"> Competition Styles:** Information about competitive and relaxed game styles.
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446837.png" alt="How to Play" width="20" style="vertical-align: middle;"> "How to Play?" Section:** Step-by-step simple game guide for new players.
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446857.png" alt="History" width="20" style="vertical-align: middle;"> Game History Section:** User's game history and performance statistics (with pagination).
-* **🚪 Active Lobby List (Game Page):** List of active lobbies specific to the selected game type.
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446837.png" alt="How to Play" width="20" style="vertical-align: middle;"> "How to Play?" Section:** Step-by-step simple game guide for new players for each game.
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446857.png" alt="History" width="20" style="vertical-align: middle;"> Game History Section:** User's game history and performance statistics for each game (with pagination).
+* **🚪 Active Lobby List (Game Page):** List of active lobbies specific to the selected game type (e.g., Bingo, Hangman).
 * **➕ "Create Lobby" Button (Game Page):** Quick lobby creation shortcut for this game type.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446822.png" alt="Animation" width="20" style="vertical-align: middle;"> Animated Page Transition:** Smooth and visually rich user experience.
 
@@ -229,7 +230,7 @@ Our platform supports your lobby management operations with instant notification
 * **💾 Game History Recording (Database):** Permanently storing game results.
 * **⏳ If Host Leaves Lobby:** Lobby automatically closes if they do not return within 8 hours.
 
-**Event Lobby:**
+**Bingo in Event Lobby:**
 
 * **⏱️ Event Timer:** Dynamically showing the time remaining until the event starts.
 * **👑 Host Control (Event Lobby):** Event owner host's authority to start the game.
@@ -246,13 +247,42 @@ Our platform supports your lobby management operations with instant notification
     * **🗑️ Lobby Deleted by Host:** "Lobby No Longer Available" modal and countdown.
     * **⌛ Event Lobby Time Expired:** "Lobby No Longer Available" modal and countdown.
 
+### 🔠 Game Screen (Hangman Game)
+
+Engage in a classic word-guessing challenge with a modern, interactive twist!
+
+**Hangman in Normal/Event Lobbies:**
+
+* **👑 Host Control:** Lobby creator (host) can set game parameters (e.g., word category, difficulty if applicable) and initiate the game.
+* **👤 Single Player or Multiplayer Mode:** Enjoy Hangman solo or compete/collaborate with friends in the same lobby.
+* **🚪 Easy User Participation:** Join Hangman lobbies via lobby link, main screen, or game detail page.
+* **🏁 Game Start & Countdown:** Game begins after host initiation, often with a short countdown for anticipation.
+* **⚡ Real-Time Synchronized Experience:** All players see the game state (word progression, guessed letters) update simultaneously.
+* **👀 Real-Time Opponent Progress (Multiplayer):** See the status of other players' Hangman figures or their progress in guessing, fostering a competitive or collaborative atmosphere.
+* **💬 In-Game Messaging (Chat):** Strategize, tease, or cheer with the integrated chat, complete with emoji support.
+* **⌨️ Interactive Game Area:**
+    * **Word Display:** See the hidden word represented by blanks.
+    * **Hangman Figure:** Watch the Hangman figure build with each incorrect guess.
+    * **Letter Selection:** An on-screen keyboard or input method to guess letters.
+    * **Guessed Letters:** Track correct and incorrect letters already chosen.
+* **🔊 In-Game Sound Control:** Option to turn sound effects for guesses and game events on/off.
+* **🏆 Win/Loss Conditions:** Clear indication of winning (guessing the word) or losing (completing the Hangman figure).
+* **📊 Game Over and Results:** Display of the correct word, individual/team scores (if applicable), and options to "Play Again."
+* **💾 Game History Recording (Database):** Game outcomes and relevant stats are saved to player profiles.
+* **⏳ Host Departure (Normal Lobbies):** If the host leaves a normal lobby, it may automatically close after a certain period (e.g., 8 hours) if they don't return.
+* **🔔 In-Game Notifications:**
+    * **User Joined/Left Lobby:** Audible and/or visual cues.
+    * **Correct/Incorrect Guess:** Visual feedback and optional sound.
+    * **Game Won/Lost:** Clear notifications for game end-states.
+    * **Event Lobby Specifics:** Timers and start/end notifications similar to Bingo event lobbies.
+
 ### 👤 Profile Screen
 
 * **👤 User Profile Information:** Basic information such as name, level, location, membership date, level progress.
-* **📊 Bingo General Statistics:** Total games, wins, average score, win rate, longest streak (summary and graphs).
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446857.png" alt="History" width="20" style="vertical-align: middle;"> Bingo Game History:** Detailed list of games (regular display with pagination).
+* **📊 Game General Statistics:** Total games, wins, average score, win rate, longest streak (summary and graphs) for each game played (e.g., Bingo, Hangman).
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446857.png" alt="History" width="20" style="vertical-align: middle;"> Game History (e.g., Bingo, Hangman):** Detailed list of games played for each game type (regular display with pagination).
 * **<img src="https://cdn-icons-png.flaticon.com/512/447/447315.png" alt="Friends" width="20" style="vertical-align: middle;"> Friends List:** Viewing current friends.
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446826.png" alt="Achievements" width="20" style="vertical-align: middle;"> Achievements:** Visual display of earned achievements.
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446826.png" alt="Achievements" width="20" style="vertical-align: middle;"> Achievements:** Visual display of earned achievements (potentially game-specific achievements too).
 * **➕ Send/Add Friend Request:** "ADD FRIEND" button and status indicator.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446845.png" alt="Requests" width="20" style="vertical-align: middle;"> Manage Friend Requests:** Accept/reject with "Friend Requests" modal.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446843.png" alt="Remove" width="20" style="vertical-align: middle;"> Remove Friend:** "REMOVE FRIEND" button and confirmation modal.
@@ -298,8 +328,8 @@ Our platform supports your lobby management operations with instant notification
 
 ### ⚙️ Settings Screen
 
-*   **<img src="https://cdn-icons-png.flaticon.com/512/606/606788.png" alt="Theme" width="20" style="vertical-align: middle;"> In-App Theme Selection (Light/Dark):** Easily switch between light and dark modes to suit your preference.
-*   **<img src="https://cdn-icons-png.flaticon.com/512/2037/2037790.png" alt="Language" width="20" style="vertical-align: middle;"> In-App Language Selection (Coming Soon):** Choose your preferred language for the application interface.
+*   **<img src="https://cdn-icons-png.flaticon.com/512/606/606788.png" alt="Theme" width="20" style="vertical-align: middle;"> In-App Theme Selection (Light/Dark/Neon-Ocean):** Easily switch between Light, Dark, and a stylish Neon-Ocean theme to suit your preference.
+*   **<img src="https://cdn-icons-png.flaticon.com/512/2037/2037790.png" alt="Language" width="20" style="vertical-align: middle;"> In-App Language Selection:** Choose your preferred language (English/Turkish) for the application interface.
 *   **<img src="https://cdn-icons-png.flaticon.com/512/878/878439.png" alt="Sound" width="20" style="vertical-align: middle;"> Game Sound Management:** Control and adjust game sound effects volume or mute them entirely.
 *   **<img src="https://cdn-icons-png.flaticon.com/512/929/929679.png" alt="Sidebar" width="20" style="vertical-align: middle;"> Sidebar Theme Control:** The theme can also be conveniently controlled directly from the sidebar.
   
@@ -307,8 +337,7 @@ Our platform supports your lobby management operations with instant notification
 
 <h2 id="coming-soon">⏳ Coming Soon</h2>
 
-* **🌐 Multi-Language Support:** Turkish and English language options.
-* **🎲 New Games:** Different game types in addition to Bingo (e.g., poker, okey, etc.).
+* **🎲 More New Games:** Expanding our library with different game types (e.g., poker, okey, etc.) beyond Bingo and Hangman.
 * **🚀 Mobile Applications:** Mobile applications for iOS and Android platforms.
 
 ---
