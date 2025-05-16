@@ -151,7 +151,8 @@ function getSharedGameState(game) {
         isHost: game.host === p.userId,
       }])
     ),
-    rankings: game.gameEnded ? getGameRankings(game) : [],
+   // rankings: game.gameEnded ? getGameRankings(game) : [],
+   rankings: game.gameEnded ? (game.rankingsSnapshot || []) : [], // <<< YENİ: Oyun bittiyse fotoğrafı kullan
     wordLength: game.word ? game.word.length : 0,
   };
 }
@@ -217,7 +218,7 @@ function endGameProcedure(game, outcomeType, messageText) {
           }
       });
   }
-
+game.rankingsSnapshot = getGameRankings(game);
   const finalSharedState = getSharedGameState(game); 
 
   broadcastToGame(game, {
@@ -351,6 +352,7 @@ export const joinGame = async (ws, data) => {
       gameId: null,
       currentPlayerId: null,
       playerOrder: [],
+      rankingsSnapshot: [],
       turnTimer: null,
       turnStartTime: null,
     };
@@ -431,6 +433,7 @@ export const startGame = (ws, data) => {
   }
 
   game.gameEnded = false; 
+  game.rankingsSnapshot = [];// <<< YENİ: Sıralama fotoğrafını temizle
   game.category = category;
   game.word = getRandomWord(category).toLowerCase();
   game.gameId = new mongoose.Types.ObjectId();
