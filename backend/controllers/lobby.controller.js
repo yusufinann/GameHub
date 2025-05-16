@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import Lobby from '../models/lobby.model.js';
-import { bingoGames, broadcastToGame as broadcastToBingoGame } from './bingo.game.controller.js';
+import { bingoGames, broadcastToGame as broadcastToBingoGame, handleBingoPlayerLeaveMidGame, handleBingoPlayerLeavePreGame } from './bingo.game.controller.js';
 import { hangmanGames, broadcastToGame as broadcastToHangmanGame, getSharedGameState as getHangmanSharedGameState, handleHangmanPlayerLeaveMidGame } from './hangman.controller.js'; 
 const lobbyTimers = new Map();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
@@ -469,44 +469,24 @@ export const leaveLobby = async (req, res) => {
 
         const removedUser = lobby.members.splice(userIndex, 1)[0];
         const wasHost = removedUser.id.toString() === lobby.createdBy.toString();
+        const playerIdToRemove = removedUser.id.toString();
 
-        if (lobby.game === '1') {
+        if (lobby.game === '1') { // Bingo
             const bingoGame = bingoGames[lobbyCode];
-            if (bingoGame && !bingoGame.gameStarted && bingoGame.players[removedUser.id.toString()]) {
-                console.log(`[Lobby Controller] Kullanıcı ${removedUser.id} henüz başlamamış Bingo oyunundan (${lobbyCode}) ayrılıyor.`);
-                const playerInfo = bingoGame.players[removedUser.id.toString()];
-                delete bingoGame.players[removedUser.id.toString()];
-
-                if (Object.keys(bingoGame.players).length > 0) {
-                    broadcastToBingoGame(bingoGame, {
-                        type: "BINGO_PLAYER_LEFT_PREGAME",
-                        playerId: removedUser.id.toString(),
-                        playerName: playerInfo?.name,
-                        userName: playerInfo?.userName,
-                        players: Object.values(bingoGame.players).map(p => ({
-                            id: p.userId,
-                            userName: p.userName,
-                            name: p.name,
-                            completed: p.completedBingo || false
-                        }))
-                    });
+            if (bingoGame && bingoGame.players[playerIdToRemove]) {
+                if (bingoGame.gameStarted && !bingoGame.gameEnded) {
+                    handleBingoPlayerLeaveMidGame(lobbyCode, playerIdToRemove);
+                } else if (!bingoGame.gameStarted) {
+                    handleBingoPlayerLeavePreGame(lobbyCode, playerIdToRemove);
                 }
-            } else if (bingoGame && bingoGame.gameStarted && !bingoGame.gameEnded && bingoGame.players[removedUser.id.toString()]) {
-                console.log(`[Lobby Controller] Kullanıcı ${removedUser.id} aktif Bingo oyunundan (${lobbyCode}) ayrılıyor.`);
-                // Burada bingo.controller.js içinde `handleBingoPlayerLeaveMidGame` gibi bir fonksiyon çağrılmalı
-                // Bu fonksiyon oyuncuyu oyundan çıkarır, diğerlerine haber verir ve gerekirse oyun durumunu günceller.
-                // Şimdilik sadece konsol logu ekliyorum, bu özellik Bingo için ayrıca implemente edilmeli.
-                // Örneğin: handleBingoPlayerLeaveMidGame(lobbyCode, removedUser.id.toString());
             }
-        } else if (lobby.game === '2') {
+        } else if (lobby.game === '2') { // Hangman
             const hangmanGame = hangmanGames[lobbyCode];
-            if (hangmanGame) {
-                if (hangmanGame.gameStarted && !hangmanGame.gameEnded && hangmanGame.players[removedUser.id.toString()]) {
-                    console.log(`[Lobby Controller] Kullanıcı ${removedUser.id} aktif Hangman oyunundan (${lobbyCode}) ayrılıyor.`);
-                    handleHangmanPlayerLeaveMidGame(lobbyCode, removedUser.id.toString());
-                } else if (!hangmanGame.gameStarted && hangmanGame.players[removedUser.id.toString()]) {
-                    console.log(`[Lobby Controller] Kullanıcı ${removedUser.id} henüz başlamamış Hangman oyunundan (${lobbyCode}) ayrılıyor.`);
-                    removePlayerFromHangmanPregame(lobbyCode, removedUser.id.toString());
+            if (hangmanGame && hangmanGame.players[playerIdToRemove]) {
+                if (hangmanGame.gameStarted && !hangmanGame.gameEnded) {
+                    handleHangmanPlayerLeaveMidGame(lobbyCode, playerIdToRemove);
+                } else if (!hangmanGame.gameStarted) {
+                    removePlayerFromHangmanPregame(lobbyCode, playerIdToRemove);
                 }
             }
         }
@@ -539,23 +519,19 @@ export const leaveLobby = async (req, res) => {
 
         if (wasHost && lobby.lobbyType === "normal") {
             if (lobby.members.length === 0) {
-                console.log(`Host ${lobbyCode} lobisinden ayrıldı ve lobi boş kaldı. Direkt siliniyor.`);
                 if (lobbyTimers.has(`start_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`start_${lobby.id}`)); lobbyTimers.delete(`start_${lobby.id}`); }
                 if (lobbyTimers.has(`end_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`end_${lobby.id}`)); lobbyTimers.delete(`end_${lobby.id}`); }
                 if (lobbyTimers.has(`host_leave_${lobby.id}`)) { clearTimeout(lobbyTimers.get(`host_leave_${lobby.id}`)); lobbyTimers.delete(`host_leave_${lobby.id}`); }
                 await Lobby.deleteOne({ lobbyCode: lobbyCode });
             } else {
                 const timerKey = `host_leave_${lobby.id}`;
-                console.log(`Host ayrıldı, 8 saatlik silme zamanlayıcısı başlatılıyor. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
                 let existingTimer = lobbyTimers.get(timerKey);
                 if (existingTimer) {
                     clearTimeout(existingTimer);
                     lobbyTimers.delete(timerKey);
-                    console.log(`Önceki zamanlayıcı temizlendi. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
                 }
 
                 const deletionTimer = setTimeout(async () => {
-                    console.log(`8 saatlik süre doldu, ${lobbyCode} lobisi siliniyor (Host geri dönmedi).`);
                     try {
                         const currentLobby = await Lobby.findOne({ lobbyCode: lobbyCode }).lean();
                         if (currentLobby) {
@@ -564,18 +540,14 @@ export const leaveLobby = async (req, res) => {
                                 reason: "Host geri dönmediği için lobi kapatıldı.",
                             });
                             await Lobby.deleteOne({ lobbyCode: lobbyCode });
-                            console.log(`Lobi ${lobbyCode} (Host geri dönmediği için) başarıyla silindi.`);
-                        } else {
-                            console.log(`Zamanlayıcı çalıştı ama lobi ${lobbyCode} zaten silinmiş veya bulunamadı.`);
                         }
                     } catch (error) {
                         console.error("Host ayrılma zamanlayıcısı (silme) hatası:", error);
                     } finally {
                         lobbyTimers.delete(timerKey);
                     }
-                }, 8 * 60 * 60 * 1000);
+                }, 8 * 60 * 60 * 1000); // 8 saat
                 lobbyTimers.set(timerKey, deletionTimer);
-                console.log(`Yeni silme zamanlayıcısı ayarlandı. Lobi ID: ${lobby.id}, Anahtar: ${timerKey}`);
             }
         }
 

@@ -579,8 +579,118 @@ export const joinGame = async (ws, data) => {
     rankings: game.rankings || [], 
   }));
 };
+export const handleBingoPlayerLeavePreGame = (lobbyCode, playerId) => {
+    const game = bingoGames[lobbyCode];
+    if (!game || !game.players[playerId]) {
+        return;
+    }
 
+    if (game.gameStarted) {
+       
+        return;
+    }
 
+    const playerInfo = game.players[playerId];
+    delete game.players[playerId];
+
+    if (Object.keys(game.players).length > 0) {
+        broadcastToGame(game, {
+            type: "BINGO_PLAYER_LEFT_PREGAME",
+            playerId: playerId,
+            playerName: playerInfo?.name,
+            userName: playerInfo?.userName,
+            players: Object.values(game.players).map(p => ({
+                id: p.userId,
+                userName: p.userName,
+                name: p.name,
+                completed: p.completedBingo || false
+            }))
+        });
+    } else {
+        
+        delete bingoGames[lobbyCode];
+    }
+};
+export const handleBingoPlayerLeaveMidGame = (lobbyCode, playerId) => {
+    const game = bingoGames[lobbyCode];
+
+    if (!game) {
+        return;
+    }
+
+    if (!game.gameStarted || game.gameEnded) {
+        return;
+    }
+
+    const playerLeaving = game.players[playerId];
+    if (!playerLeaving) {
+        return;
+    }
+
+    if (playerLeaving.ws && playerLeaving.ws.readyState === playerLeaving.ws.OPEN) {
+        playerLeaving.ws.close(1000, "Oyuncu lobiden ayrıldı.");
+    }
+
+    delete game.players[playerId];
+
+    const remainingPlayerCount = Object.keys(game.players).length;
+
+    if (remainingPlayerCount > 0) {
+        const currentRankings = getGameRankings(game); // Ayrılan oyuncu olmadan sıralama alınır
+        broadcastToGame(game, {
+            type: "BINGO_PLAYER_LEFT_MID_GAME",
+            playerId: playerId,
+            playerName: playerLeaving.name,
+            userName: playerLeaving.userName,
+            players: Object.values(game.players).map(p => ({
+                id: p.userId,
+                userName: p.userName,
+                name: p.name,
+                completed: p.completedBingo || false
+            })),
+            rankings: currentRankings
+        });
+
+        if (game.drawMode === 'manual' && String(game.drawer) === String(playerId)) {
+            game.drawer = null;
+            broadcastToGame(game, {
+                type: "BINGO_MANUAL_DRAWER_LEFT",
+                message: `Sayıyı çeken oyuncu (${playerLeaving.userName}) oyundan ayrıldı. Host yeni bir çekici atamalı veya oyun modunu değiştirmeli.`,
+                drawerPlayerId: playerId
+            });
+             if (game.autoDrawInterval) { 
+                 clearInterval(game.autoDrawInterval);
+                 game.autoDrawInterval = null;
+             }
+        }
+
+        const completedPlayersCount = currentRankings.filter(r => r.completedAt).length;
+        const allRemainingPlayersCompleted = completedPlayersCount === remainingPlayerCount;
+
+        if (allRemainingPlayersCompleted && !game.gameEnded) {
+            game.gameEnded = true;
+            game.gameStarted = false;
+            broadcastToGame(game, {
+                type: "BINGO_GAME_OVER",
+                message: "Kalan tüm oyuncular tamamladı (bir oyuncu ayrıldıktan sonra) - Final Sıralaması",
+                finalRankings: currentRankings
+            });
+            saveGameStatsToDB(game);
+            if (game.autoDrawInterval) {
+                clearInterval(game.autoDrawInterval);
+                game.autoDrawInterval = null;
+            }
+        }
+    } else {
+        game.gameEnded = true;
+        game.gameStarted = false;
+        if (game.autoDrawInterval) {
+            clearInterval(game.autoDrawInterval);
+            game.autoDrawInterval = null;
+        }
+        delete bingoGames[lobbyCode];
+    }
+};
 export const markNumber = (ws, data) => {
   const { lobbyCode, number } = data;
   const game = bingoGames[lobbyCode];
