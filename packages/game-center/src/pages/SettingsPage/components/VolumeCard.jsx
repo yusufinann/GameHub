@@ -4,27 +4,22 @@ import {
   Typography,
   Paper,
   Switch,
-  Slider,
   useTheme,
   alpha,
   Grow,
 } from "@mui/material";
-import {
-  VolumeUp as VolumeUpIcon,
-  VolumeOff as VolumeOffIcon,
-} from "@mui/icons-material";
+import { VolumeUp as VolumeUpIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
 const VolumeCard = ({
-  soundEnabled,
-  soundVolume,
-  handleSoundChange,
-  handleVolumeChange,
-  handleVolumeChangeCommitted,
+  bingoSoundEnabled,
+  toggleBingoSound,
+  hangmanSoundEnabled,
+  toggleHangmanSound,
   animateCards,
 }) => {
   const theme = useTheme();
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
 
   const primary = theme.palette.primary;
   const bg = theme.palette.background;
@@ -38,6 +33,14 @@ const VolumeCard = ({
           theme.palette.secondary.main,
           0.1
         )}`;
+
+  const handleBingoToggle = () => {
+    toggleBingoSound();
+  };
+
+  const handleHangmanToggle = () => {
+    toggleHangmanSound();
+  };
 
   return (
     <Box sx={{ width: "100%", p: 2 }}>
@@ -65,7 +68,7 @@ const VolumeCard = ({
             sx={{
               background: `linear-gradient(135deg, ${
                 theme.palette.warning.main
-              } 0%, ${primary.medium || primary.main} 100%)`, 
+              } 0%, ${primary.medium || primary.main} 100%)`,
               p: 3,
               display: "flex",
               alignItems: "center",
@@ -83,210 +86,349 @@ const VolumeCard = ({
                 backgroundColor: "rgba(255, 255, 255, 0.2)",
               }}
             >
-              {soundEnabled ? (
-                <VolumeUpIcon fontSize="large" />
-              ) : (
-                <VolumeOffIcon fontSize="large" />
-              )}
+              <VolumeUpIcon fontSize="large" sx={{ color: "white" }} />
             </Box>
             <Typography variant="h5" fontWeight="bold" color="white">
-              {t("volumeCard.title")}
+              {t("volumeCard.title", "Sound Settings")}
             </Typography>
           </Box>
-          <Box sx={{ p: 3 }}>
-            <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1.5 }}>
-              <Box sx={{ width: { xs: "100%", md: "50%" }, p: 1.5 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 2,
-                    backgroundColor: alpha(bg.default, 0.5),
-                    borderRadius: 3,
-                  }}
+          <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                backgroundColor: alpha(bg.default, 0.5),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Bingo SVG İkon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 64 64"
+                  width="36"
+                  height="36"
                 >
-                  <Typography variant="body1" fontWeight="medium">
-                    {soundEnabled
-                      ? t("volumeCard.soundOnLabel")
-                      : t("volumeCard.soundOffLabel")}
-                  </Typography>
-                  <Switch
-                    checked={soundEnabled}
-                    onChange={handleSoundChange}
-                    color="warning"
-                    aria-label={
-                      soundEnabled
-                        ? t("volumeCard.soundOnSwitchAriaLabel")
-                        : t("volumeCard.soundOffSwitchAriaLabel")
-                    }
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: theme.palette.warning.main,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                        {
-                          backgroundColor: alpha(
-                            theme.palette.warning.main,
-                            0.5
-                          ),
-                        },
-                    }}
+                  <rect
+                    x="4"
+                    y="4"
+                    width="56"
+                    height="56"
+                    rx="8"
+                    fill={theme.palette.mode === "dark" ? "#2a3b4e" : "#f0f4ff"}
+                    stroke={theme.palette.info.main}
+                    strokeWidth="2"
                   />
-                </Box>
-              </Box>
-              <Box sx={{ width: { xs: "100%", md: "50%" }, p: 1.5 }}>
-                <Box
-                  sx={{
-                    p: 2,
-                    backgroundColor: alpha(bg.default, 0.5),
-                    borderRadius: 3,
-                    opacity: soundEnabled ? 1 : 0.5,
-                    pointerEvents: soundEnabled ? "auto" : "none",
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <VolumeOffIcon fontSize="small" />
-                    <Slider
-                      value={soundVolume}
-                      onChange={handleVolumeChange}
-                      onChangeCommitted={handleVolumeChangeCommitted}
-                      aria-label={t("volumeCard.volumeSliderAriaLabel")}
-                      min={0}
-                      max={100}
-                      sx={{
-                        color: theme.palette.warning.main,
-                        "& .MuiSlider-thumb": {
-                          width: 20,
-                          height: 20,
-                          "&:hover, &.Mui-active": {
-                            boxShadow: `0px 0px 0px 8px ${alpha(
-                              theme.palette.warning.main,
-                              0.16
-                            )}`,
-                          },
-                        },
-                      }}
-                    />
-                    <VolumeUpIcon fontSize="small" />
-                    <Typography variant="body2" sx={{ minWidth: 36 }}>
-                      {soundVolume}%
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
+                  <text
+                    x="32"
+                    y="36"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="16"
+                    fill={theme.palette.info.main}
+                    fontFamily="Arial, sans-serif"
+                    fontWeight="bold"
+                  >
+                    BINGO
+                  </text>
 
-            <Box sx={{ display: "flex", flexWrap: "wrap", mx: -1, mt: 2 }}>
-              <Box sx={{ width: { xs: "100%", md: "33.33%" }, p: 1 }}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: alpha(bg.default, 0.3),
-                    opacity: soundEnabled ? 1 : 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight="bold">
-                      {t("volumeCard.musicLabel")}
-                    </Typography>
-                    <Switch
-                      size="small"
-                      defaultChecked={true}
-                      disabled={!soundEnabled}
-                      aria-label={t("volumeCard.musicSwitchAriaLabel")}
-                    />
-                  </Box>
-                  <Slider
-                    size="small"
-                    defaultValue={80}
-                    disabled={!soundEnabled}
-                    aria-label={t("volumeCard.musicSliderAriaLabel")}
-                    sx={{ color: theme.palette.warning.light }}
+                  {/* Bingo kartı noktalar */}
+                  <circle
+                    cx="16"
+                    cy="16"
+                    r="3"
+                    fill={theme.palette.info.main}
                   />
-                </Paper>
-              </Box>
-              <Box sx={{ width: { xs: "100%", md: "33.33%" }, p: 1 }}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: alpha(bg.default, 0.3),
-                    opacity: soundEnabled ? 1 : 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight="bold">
-                      {t("volumeCard.soundEffectsLabel")}
-                    </Typography>
-                    <Switch
-                      size="small"
-                      defaultChecked={true}
-                      disabled={!soundEnabled}
-                      aria-label={t("volumeCard.soundEffectsSwitchAriaLabel")}
-                    />
-                  </Box>
-                  <Slider
-                    size="small"
-                    defaultValue={90}
-                    disabled={!soundEnabled}
-                    aria-label={t("volumeCard.soundEffectsSliderAriaLabel")}
-                    sx={{ color: theme.palette.warning.light }}
+                  <circle
+                    cx="32"
+                    cy="16"
+                    r="3"
+                    fill={theme.palette.info.main}
                   />
-                </Paper>
-              </Box>
-              <Box sx={{ width: { xs: "100%", md: "33.33%" }, p: 1 }}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: alpha(bg.default, 0.3),
-                    opacity: soundEnabled ? 1 : 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="body2" fontWeight="bold">
-                      {t("volumeCard.uiSoundsLabel")}
-                    </Typography>
-                    <Switch
-                      size="small"
-                      defaultChecked={true}
-                      disabled={!soundEnabled}
-                      aria-label={t("volumeCard.uiSoundsSwitchAriaLabel")}
-                    />
-                  </Box>
-                  <Slider
-                    size="small"
-                    defaultValue={70}
-                    disabled={!soundEnabled}
-                    aria-label={t("volumeCard.uiSoundsSliderAriaLabel")}
-                    sx={{ color: theme.palette.warning.light }}
+                  <circle
+                    cx="48"
+                    cy="16"
+                    r="3"
+                    fill={theme.palette.info.main}
                   />
-                </Paper>
+                  <circle
+                    cx="16"
+                    cy="32"
+                    r="3"
+                    fill={theme.palette.info.main}
+                  />
+                  <circle
+                    cx="48"
+                    cy="32"
+                    r="3"
+                    fill={theme.palette.info.main}
+                  />
+                  <circle
+                    cx="16"
+                    cy="48"
+                    r="3"
+                    fill={theme.palette.info.main}
+                  />
+                  <circle
+                    cx="32"
+                    cy="48"
+                    r="3"
+                    fill={theme.palette.info.main}
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="3"
+                    fill={theme.palette.info.main}
+                  />
+
+                  {/* Merkezdeki yıldız efekti */}
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="6"
+                    fill={theme.palette.error.main}
+                  />
+                  <path
+                    d="M32,26 L33.5,30.5 L38,32 L33.5,33.5 L32,38 L30.5,33.5 L26,32 L30.5,30.5 Z"
+                    fill="#fff"
+                  />
+                </svg>
+                <Typography variant="body1" fontWeight="medium">
+                  {t("volumeCard.bingoSoundLabel", "Bingo Game Sounds")}
+                </Typography>
               </Box>
-            </Box>
+              <Switch
+                checked={bingoSoundEnabled}
+                onChange={handleBingoToggle}
+                color="info"
+                aria-label={t(
+                  "volumeCard.bingoSoundAriaLabel",
+                  "Toggle Bingo game sounds"
+                )}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: theme.palette.info.main,
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: alpha(theme.palette.info.main, 0.5),
+                  },
+                }}
+              />
+            </Paper>
+
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                backgroundColor: alpha(bg.default, 0.5),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Adam Asmaca SVG İkon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 64 64"
+                  width="36"
+                  height="36"
+                >
+                  <rect
+                    width="64"
+                    height="64"
+                    rx="8"
+                    fill={theme.palette.mode === "dark" ? "#263238" : "#f5f5f5"}
+                    fillOpacity="0.5"
+                  />
+
+                  {/* Darağacı */}
+                  <line
+                    x1="14"
+                    y1="14"
+                    x2="42"
+                    y2="14"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="14"
+                    y1="14"
+                    x2="14"
+                    y2="50"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="14"
+                    y1="50"
+                    x2="22"
+                    y2="50"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="14"
+                    x2="28"
+                    y2="20"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+
+                  {/* Adam */}
+                  <circle
+                    cx="28"
+                    cy="26"
+                    r="6"
+                    fill="none"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="32"
+                    x2="28"
+                    y2="42"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="36"
+                    x2="22"
+                    y2="32"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="36"
+                    x2="34"
+                    y2="32"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="42"
+                    x2="23"
+                    y2="48"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="28"
+                    y1="42"
+                    x2="33"
+                    y2="48"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="2"
+                  />
+
+                  {/* Harfler */}
+                  <text
+                    x="44"
+                    y="24"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    A
+                  </text>
+                  <text
+                    x="50"
+                    y="24"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    B
+                  </text>
+                  <text
+                    x="44"
+                    y="32"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    C
+                  </text>
+                  <text
+                    x="50"
+                    y="32"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    D
+                  </text>
+                  <text
+                    x="44"
+                    y="40"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    ?
+                  </text>
+                  <text
+                    x="50"
+                    y="40"
+                    fontSize="6"
+                    fill={theme.palette.success.main}
+                  >
+                    !
+                  </text>
+
+                  {/* Kelime alanı */}
+                  <line
+                    x1="40"
+                    y1="50"
+                    x2="45"
+                    y2="50"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="47"
+                    y1="50"
+                    x2="52"
+                    y2="50"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="54"
+                    y1="50"
+                    x2="59"
+                    y2="50"
+                    stroke={theme.palette.success.main}
+                    strokeWidth="1"
+                  />
+                </svg>
+                <Typography variant="body1" fontWeight="medium">
+                  {t("volumeCard.hangmanSoundLabel", "Hangman Game Sounds")}
+                </Typography>
+              </Box>
+              <Switch
+                checked={hangmanSoundEnabled}
+                onChange={handleHangmanToggle}
+                color="success"
+                aria-label={t(
+                  "volumeCard.hangmanSoundAriaLabel",
+                  "Toggle Hangman game sounds"
+                )}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: theme.palette.success.main,
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: alpha(theme.palette.success.main, 0.5),
+                  },
+                }}
+              />
+            </Paper>
           </Box>
         </Paper>
       </Grow>

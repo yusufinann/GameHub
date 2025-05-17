@@ -1,27 +1,25 @@
 import { useState, useEffect, useContext } from "react";
 import { useTheme, alpha } from "@mui/material";
-import { ThemeContext } from "../../theme/context";
-import { useTranslation } from 'react-i18next'; 
+import { ThemeContext } from "../../theme/context"; // Assuming this path is correct
+import { useTranslation } from 'react-i18next';
+import { GameSettingsContext } from "../GameDetail/GameDetailRightArea/context";
 
 const useSettingsPage = () => {
   const theme = useTheme();
   const { mode, setSpecificTheme } = useContext(ThemeContext);
-  const { i18n } = useTranslation(); 
+  const {
+    bingoSoundEnabled,
+    toggleBingoSound,
+    hangmanSoundEnabled,
+    toggleHangmanSound,
+  } = useContext(GameSettingsContext);
+  const { i18n } = useTranslation();
 
   const isDarkMode = mode === "dark";
   const isNeonOceanMode = mode === "neonOcean";
 
-
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("language") || "tr";
-  });
-
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem("soundEnabled") !== "false";
-  });
-
-  const [soundVolume, setSoundVolume] = useState(() => {
-    return parseInt(localStorage.getItem("soundVolume") || "75");
   });
 
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
@@ -49,25 +47,9 @@ const useSettingsPage = () => {
   };
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang); 
-    localStorage.setItem("language", lang); 
-    i18n.changeLanguage(lang); 
-    triggerSaveIndicator();
-  };
-
-  const handleSoundChange = () => {
-    const newValue = !soundEnabled;
-    setSoundEnabled(newValue);
-    localStorage.setItem("soundEnabled", String(newValue));
-    triggerSaveIndicator();
-  };
-
-  const handleVolumeChange = (event, newValue) => {
-    setSoundVolume(newValue);
-  };
-
-  const handleVolumeChangeCommitted = () => {
-    localStorage.setItem("soundVolume", String(soundVolume));
+    setLanguage(lang);
+    localStorage.setItem("language", lang);
+    i18n.changeLanguage(lang);
     triggerSaveIndicator();
   };
 
@@ -96,14 +78,14 @@ const useSettingsPage = () => {
     isDarkMode,
     isNeonOceanMode,
     handleThemeChange,
-    language, 
+    language,
     handleLanguageChange,
-    soundEnabled,
-    soundVolume,
-    handleSoundChange,
-    handleVolumeChange,
-    handleVolumeChangeCommitted,
+    bingoSoundEnabled,
+    toggleBingoSound,
+    hangmanSoundEnabled,
+    toggleHangmanSound,
     showSaveIndicator,
+    triggerSaveIndicator, 
     animateCards,
     decorationGradient
   };

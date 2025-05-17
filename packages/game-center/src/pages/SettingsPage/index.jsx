@@ -14,14 +14,13 @@ const SettingsPage = () => {
     handleThemeChange,
     language,
     handleLanguageChange,
-    soundEnabled,
-    soundVolume,
-    handleSoundChange,
-    handleVolumeChange,
-    handleVolumeChangeCommitted,
-    showSaveIndicator,
+    bingoSoundEnabled,
+    toggleBingoSound,
+    hangmanSoundEnabled,
+    toggleHangmanSound,
     animateCards,
-    decorationGradient
+    showSaveIndicator,
+    decorationGradient,
   } = useSettingsPage();
 
   return (
@@ -83,12 +82,10 @@ const SettingsPage = () => {
             animateCards={animateCards}
           />
           <VolumeCard
-            language={language}
-            soundEnabled={soundEnabled}
-            soundVolume={soundVolume}
-            handleSoundChange={handleSoundChange}
-            handleVolumeChange={handleVolumeChange}
-            handleVolumeChangeCommitted={handleVolumeChangeCommitted}
+            bingoSoundEnabled={bingoSoundEnabled}
+            toggleBingoSound={toggleBingoSound}
+            hangmanSoundEnabled={hangmanSoundEnabled}
+            toggleHangmanSound={toggleHangmanSound}
             animateCards={animateCards}
           />
         </Box>
