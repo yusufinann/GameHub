@@ -2,7 +2,7 @@ import Lobby from "../models/lobby.model.js";
 import { HangmanGame } from '../models/hangman.model.js';
 import User from '../models/user.model.js';
 import mongoose from 'mongoose';
-
+import { bingoGames } from './bingo.game.controller.js';
 export const hangmanGames = {};
 
 const wordCategories = {
@@ -381,16 +381,41 @@ export const joinGame = async (ws, data) => {
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Lobby bulunamadı." }));
   }
 
+   //  AKTİF OYUN KONTROLÜ 
+  // 1. Diğer Hangman oyunlarında aktif mi?
   for (const otherLobbyCodeInMap in hangmanGames) {
     if (hangmanGames.hasOwnProperty(otherLobbyCodeInMap)) {
       const otherGame = hangmanGames[otherLobbyCodeInMap];
-      if (otherGame.players[ws.userId] && otherLobbyCodeInMap !== lobbyCode) {
-        console.log(`[Hangman Server] Kullanıcı ${ws.userId}, ${otherLobbyCodeInMap} lobisindeki oyundan ayrılıyor çünkü ${lobbyCode} lobisine katılıyor.`);
-        
-        delete otherGame.players[ws.userId];
+      if (otherGame.players[ws.userId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
+        const errorMessage = `Zaten başka bir Adam Asmaca oyununda (${otherLobbyCodeInMap}) aktifsiniz. Yeni bir oyuna katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
+        console.warn(`[Hangman Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${otherLobbyCodeInMap} (Hangman) lobisindeki oyunda. ${lobbyCode} (Hangman) lobisine katılım engellendi.`);
+        ws.send(JSON.stringify({
+            type: "HANGMAN_ERROR",
+            message: errorMessage,
+            activeGameInfo: { gameType: 'Adam Asmaca', lobbyCode: otherLobbyCodeInMap }
+        }));
+        return;
       }
     }
   }
+
+  // 2. Aktif Bingo oyunlarında aktif mi?
+  for (const bingoLobbyCode in bingoGames) {
+    if (bingoGames.hasOwnProperty(bingoLobbyCode)) {
+      const bingoGame = bingoGames[bingoLobbyCode];
+      if (bingoGame.players[ws.userId] && bingoGame.gameStarted && !bingoGame.gameEnded) {
+        const errorMessage = `Zaten bir Tombala oyununda (${bingoLobbyCode}) aktifsiniz. Adam Asmaca oyununa katılmak için lütfen önce Tombala oyununuzdan ayrılın veya oyunu tamamlayın.`;
+        console.warn(`[Hangman Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${bingoLobbyCode} (Bingo) lobisindeki oyunda. ${lobbyCode} (Hangman) lobisine katılım engellendi.`);
+        ws.send(JSON.stringify({
+            type: "HANGMAN_ERROR",
+            message: errorMessage,
+            activeGameInfo: { gameType: 'Tombala', lobbyCode: bingoLobbyCode }
+        }));
+        return;
+      }
+    }
+  }
+ 
 
   if (!hangmanGames[lobbyCode]) {
     hangmanGames[lobbyCode] = {
@@ -469,64 +494,121 @@ export const startGame = (ws, data) => {
   const { lobbyCode, category } = data;
   const game = hangmanGames[lobbyCode];
 
+  // --- ÖN KONTROLLER ---
   if (!game) {
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Hangman oyunu bulunamadı." }));
   }
   if (game.host !== ws.userId) {
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Sadece host oyunu başlatabilir." }));
   }
-  if (game.gameStarted && !game.gameEnded) {
-    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyun zaten başladı." }));
+  if (game.gameStarted && !game.gameEnded) { // Bu lobideki oyun zaten başlamış ve bitmemişse
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Bu lobideki oyun zaten başladı." }));
   }
-  if (Object.keys(game.players).length === 0) {
+  if (Object.keys(game.players).length === 0) { // Aktif oyuncu yoksa (bu kontrolü de başa alabiliriz)
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyunu başlatmak için en az bir oyuncu olmalı." }));
   }
   if (!category || !wordCategories[category]) {
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Geçerli bir kategori seçmelisiniz." }));
   }
 
-  const activePlayersForNewGame = {};
+// --- AKTİF OYUNCULARI BELİRLE (SADECE WS BAĞLANTISI OLANLAR) ---
+  // Bu, oyuna gerçekten katılacak oyuncu listesidir.
+  const playersToStartGameWith = {};
+  const playerInfoForCheck = []; // Kontrol için oyuncu ID'lerini ve isimlerini topla
   Object.keys(game.players).forEach(playerId => {
     const player = game.players[playerId];
-    if (player && player.ws) { // Sadece ws bağlantısı olanları yeni oyuna dahil et
-      activePlayersForNewGame[playerId] = player;
+    if (player && player.ws) {
+      playersToStartGameWith[playerId] = player;
+      playerInfoForCheck.push({ id: playerId, name: player.name || player.userName });
     }
   });
-  game.players = activePlayersForNewGame; // game.players nesnesini sadece aktif olanlarla güncelle
 
-  if (Object.keys(game.players).length === 0) {
-    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyunu başlatmak için en az bir aktif oyuncu olmalı." }));
+  if (Object.keys(playersToStartGameWith).length === 0) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
   }
-  game.gameEnded = false; 
+
+  // AKTİF OYUN KONTROLÜ (HOST VE TÜM ÜYELER İÇİN) ---
+  const problematicPlayers = []; // Başka oyunda aktif olan oyuncuları tutacak
+
+  for (const playerToCheck of playerInfoForCheck) {
+    const playerId = playerToCheck.id;
+    const playerName = playerToCheck.name;
+
+    // 1. Diğer Hangman oyunlarında aktif mi?
+    for (const otherLobbyCodeInMap in hangmanGames) {
+      if (hangmanGames.hasOwnProperty(otherLobbyCodeInMap)) {
+        const otherGame = hangmanGames[otherLobbyCodeInMap];
+        if (otherGame.players[playerId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
+          if (!problematicPlayers.find(p => p.id === playerId)) { 
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Adam Asmaca', activeLobby: otherLobbyCodeInMap });
+          }
+          break; 
+        }
+      }
+    }
+    if (problematicPlayers.find(p => p.id === playerId)) continue; // Bu oyuncu zaten sorunlu, Bingo'ya bakmaya gerek yok
+
+    // 2. Aktif Bingo oyunlarında aktif mi?
+    for (const bingoLobbyCode in bingoGames) {
+      if (bingoGames.hasOwnProperty(bingoLobbyCode)) {
+        const bingoGame = bingoGames[bingoLobbyCode];
+        if (bingoGame.players[playerId] && bingoGame.gameStarted && !bingoGame.gameEnded) {
+           if (!problematicPlayers.find(p => p.id === playerId)) {
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Tombola', activeLobby: bingoLobbyCode });
+          }
+          break; 
+        }
+      }
+    }
+  }
+
+  if (problematicPlayers.length > 0) {
+    const playerNames = problematicPlayers.map(p => `${p.name} (${p.gameType} - Lobi: ${p.activeLobby})`).join(', ');
+    const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular başka aktif oyunlarda: ${playerNames}. Lütfen bu oyuncuların mevcut oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
+    console.warn(`[Hangman Server] Oyun başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
+    ws.send(JSON.stringify({
+        type: "HANGMAN_ERROR",
+        message: errorMessage,
+        details: {
+            reason: "ACTIVE_PLAYERS_IN_OTHER_GAMES",
+            players: problematicPlayers
+        }
+    }));
+    return; 
+  }
+  
+
+
+  // Oyun state'ini sıfırlama
+  game.gameEnded = false;
   game.rankingsSnapshot = [];
   game.category = category;
   game.word = getRandomWord(category).toLowerCase();
   game.gameId = new mongoose.Types.ObjectId();
-  //game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5); 
-
-   game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5);
+  game.playerOrder = Object.keys(game.players).sort(() => Math.random() - 0.5);
 
   Object.values(game.players).forEach(player => {
-    // Bu döngü artık sadece ws bağlantısı olan ve yeni oyuna dahil edilen oyuncular için çalışacak
     player.correctGuesses = [];
     player.incorrectGuesses = [];
     player.remainingAttempts = 6;
     player.won = false;
-    player.eliminated = false; // Bu sıfırlama artık sadece aktif oyuncular için geçerli
+    player.eliminated = false;
   });
 
+  // --- GERİ SAYIM VE OYUN BAŞLATMA ---
   let countdown = 5;
+  // Geri sayım interval'ını bir değişkende tutmaya gerek yok gibi duruyor,
+  // çünkü oyun başladıktan sonra temizleniyor ve oyunun kendisi game.turnTimer'ı yönetiyor.
   const countdownInterval = setInterval(() => {
     broadcastToGame(game, { type: "HANGMAN_COUNTDOWN", countdown, lobbyCode: game.lobbyCode });
     countdown--;
     if (countdown < 0) {
-      clearInterval(countdownInterval);
+      clearInterval(countdownInterval); // Geri sayımı temizle
       game.startedAt = new Date();
-      game.gameStarted = true; 
+      game.gameStarted = true;
       broadcastToGame(game, {
-        type: "HANGMAN_GAME_STARTED",
+        type: "HANGMAN_GAME_STARTED", // <<<--- İSTENMEYEN YAYIN BU OLABİLİR
         message: "Oyun başladı!",
-       // sharedGameState: getSharedGameState(game),  broadcastToGame tarafından eklenecek
       });
       startNextTurn(lobbyCode);
     }

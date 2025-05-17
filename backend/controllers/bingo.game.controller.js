@@ -1,5 +1,6 @@
 import Lobby from "../models/lobby.model.js";
 import { BingoGame } from '../models/bingo.game.model.js';
+import { hangmanGames } from './hangman.controller.js';
 import User from '../models/user.model.js';
 import mongoose from 'mongoose';
 // Helper function to get user info from MongoDB
@@ -333,42 +334,96 @@ export const drawNumber = (ws, data) => {
   }, activeNumberTotalDuration);
 };
 
-// Adjust startGame to set correct interval for auto draw mode
+
 export const startGame = (ws, data) => {
-  const { lobbyCode, drawMode, drawer, bingoMode,competitionMode  } = data;
+  const { lobbyCode, drawMode, drawer, bingoMode, competitionMode } = data;
   const game = bingoGames[lobbyCode];
+
+  
   if (!game) {
-      return ws.send(
-          JSON.stringify({
-              type: "BINGO_ERROR",
-              message: "Bingo oyunu bulunamadı.",
-          })
-      );
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bingo oyunu bulunamadı." }));
   }
-
   if (game.host !== ws.userId) {
-      return ws.send(JSON.stringify({
-          type: "BINGO_ERROR",
-          message: "Sadece host oyunu başlatabilir."
-      }));
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Sadece host oyunu başlatabilir." }));
   }
-  if (game.gameStarted) {
-      return ws.send(
-          JSON.stringify({
-              type: "BINGO_ERROR",
-              message: "Oyun zaten başladı.",
-          })
-      );
+  if (game.gameStarted && !game.gameEnded) { 
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
+  }
+   //AKTİF OYUNCULARI BELİRLE (SADECE WS BAĞLANTISI OLANLAR) 
+  const playersToStartGameWith = {};
+  const playerInfoForCheck = [];
+  Object.keys(game.players).forEach(playerId => {
+    const player = game.players[playerId];
+    if (player && player.ws) {
+      playersToStartGameWith[playerId] = player;
+      playerInfoForCheck.push({ id: playerId, name: player.name || player.userName });
+    }
+  });
+
+  if (Object.keys(playersToStartGameWith).length === 0) {
+    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
   }
 
-  // Reset game data
+  // AKTİF OYUN KONTROLÜ (HOST VE TÜM ÜYELER İÇİN) 
+  const problematicPlayers = [];
+
+  for (const playerToCheck of playerInfoForCheck) {
+    const playerId = playerToCheck.id;
+    const playerName = playerToCheck.name;
+
+    // 1. Diğer Bingo oyunlarında aktif mi?
+    for (const otherLobbyCodeInMap in bingoGames) {
+      if (bingoGames.hasOwnProperty(otherLobbyCodeInMap)) {
+        const otherGame = bingoGames[otherLobbyCodeInMap];
+        if (otherGame.players[playerId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
+          if (!problematicPlayers.find(p => p.id === playerId)) {
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Tombola', activeLobby: otherLobbyCodeInMap });
+          }
+          break;
+        }
+      }
+    }
+    if (problematicPlayers.find(p => p.id === playerId)) continue;
+
+    // 2. Aktif Hangman oyunlarında aktif mi?
+    for (const hangmanLobbyCode in hangmanGames) {
+      if (hangmanGames.hasOwnProperty(hangmanLobbyCode)) {
+        const hangmanGame = hangmanGames[hangmanLobbyCode];
+        if (hangmanGame.players[playerId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
+          if (!problematicPlayers.find(p => p.id === playerId)) {
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Adam Asmaca', activeLobby: hangmanLobbyCode });
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  if (problematicPlayers.length > 0) {
+    const playerNames = problematicPlayers.map(p => `${p.name} (${p.gameType} - Lobi: ${p.activeLobby})`).join(', ');
+    const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular başka aktif oyunlarda: ${playerNames}. Lütfen bu oyuncuların mevcut oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
+    console.warn(`[Bingo Server] Oyun başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
+    ws.send(JSON.stringify({
+        type: "BINGO_ERROR",
+        message: errorMessage,
+        details: {
+            reason: "ACTIVE_PLAYERS_IN_OTHER_GAMES",
+            players: problematicPlayers
+        }
+    }));
+    return; 
+  }
+  
+
+  game.players = playersToStartGameWith; 
+  // Oyun state'ini sıfırlama
   game.drawnNumbers = [];
   game.activeNumbers = [];
-  game.numberPool = generateShuffledNumbers(1, 90);
+  game.numberPool = generateShuffledNumbers(1, 90); 
   game.gameEnded = false;
-  game.gameStarted = false;
+  // game.gameStarted = false; // Geri sayımdan sonra true olacak
   game.gameId = new mongoose.Types.ObjectId();
-  game.competitionMode = competitionMode || 'competitive'; 
+  game.competitionMode = competitionMode || 'competitive';
 
   if (game.autoDrawInterval) {
       clearInterval(game.autoDrawInterval);
@@ -376,20 +431,22 @@ export const startGame = (ws, data) => {
   }
 
   for (const playerId in game.players) {
-      game.players[playerId].markedNumbers = [];
-      game.players[playerId].ticket = generateTicket();
-      delete game.players[playerId].completedAt;
-      delete game.players[playerId].completedBingo;
+      if (game.players.hasOwnProperty(playerId)) { // Ekstra güvenlik
+          game.players[playerId].markedNumbers = [];
+          game.players[playerId].ticket = generateTicket(); // Bu fonksiyonun tanımlı olduğundan emin olun
+          delete game.players[playerId].completedAt;
+          delete game.players[playerId].completedBingo;
+      }
   }
 
   game.drawMode = drawMode;
   game.drawer = drawMode === "manual" ? drawer : null;
   game.bingoMode = bingoMode;
 
-  // 5 second countdown
+  // --- GERİ SAYIM VE OYUN BAŞLATMA ---
   let countdown = 5;
   const countdownInterval = setInterval(() => {
-      broadcastToGame(game, {
+      broadcastToGame(game, { // Bu fonksiyonun tanımlı olduğundan emin olun
           type: "BINGO_COUNTDOWN",
           countdown,
       });
@@ -398,9 +455,9 @@ export const startGame = (ws, data) => {
           clearInterval(countdownInterval);
           game.startedAt = new Date();
           game.gameStarted = true;
-          console.log('Oyun başladı - Başlangıç Zamanı:', game.startedAt);
+          console.log('[Bingo Server] Oyun başladı - Başlangıç Zamanı:', game.startedAt);
           broadcastToGame(game, {
-              type: "BINGO_STARTED",
+              type: "BINGO_STARTED", // <<<--- İSTENMEYEN YAYIN BU OLABİLİR
               message: "Oyun başladı!",
               drawMode,
               drawer: drawMode === "manual" ? drawer : undefined,
@@ -411,7 +468,7 @@ export const startGame = (ws, data) => {
                   ticket: game.players[playerId].ticket
               })),
               competitionMode: game.competitionMode,
-              completedPlayers: []
+              completedPlayers: [] // Başlangıçta boş
           });
 
           if (drawMode === "auto") {
@@ -421,13 +478,13 @@ export const startGame = (ws, data) => {
               }
 
               const autoDrawInterval = setInterval(() => {
-                  if (game.gameEnded) {
+                  if (game.gameEnded || !game.gameStarted) { // gameStarted kontrolü de eklendi
                       clearInterval(autoDrawInterval);
+                      game.autoDrawInterval = null; // interval'ı temizledikten sonra referansı da null yapın
                       return;
                   }
-                  autoDrawNumber(game);
+                  autoDrawNumber(game); // Bu fonksiyonun tanımlı olduğundan emin olun
               }, drawInterval);
-
               game.autoDrawInterval = autoDrawInterval;
           }
       }
@@ -470,6 +527,42 @@ export const joinGame = async (ws, data) => {
       })
     );
   }
+
+   // --- KAPSAMLI AKTİF OYUN KONTROLÜ ---
+  // 1. Diğer Bingo oyunlarında aktif mi?
+  for (const otherLobbyCodeInMap in bingoGames) {
+    if (bingoGames.hasOwnProperty(otherLobbyCodeInMap)) {
+      const otherGame = bingoGames[otherLobbyCodeInMap];
+      if (otherGame.players[ws.userId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
+        const errorMessage = `Zaten başka bir Tombala oyununda (${otherLobbyCodeInMap}) aktifsiniz. Yeni bir oyuna katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
+        console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${otherLobbyCodeInMap} (Bingo) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
+        ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            message: errorMessage,
+            activeGameInfo: { gameType: 'Tombala', lobbyCode: otherLobbyCodeInMap }
+        }));
+        return;
+      }
+    }
+  }
+
+  // 2. Aktif Hangman oyunlarında aktif mi?
+  for (const hangmanLobbyCode in hangmanGames) {
+    if (hangmanGames.hasOwnProperty(hangmanLobbyCode)) {
+      const hangmanGame = hangmanGames[hangmanLobbyCode];
+      if (hangmanGame.players[ws.userId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
+        const errorMessage = `Zaten bir Adam Asmaca oyununda (${hangmanLobbyCode}) aktifsiniz. Tombala oyununa katılmak için lütfen önce Adam Asmaca oyununuzdan ayrılın veya oyunu tamamlayın.`;
+        console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${hangmanLobbyCode} (Hangman) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
+        ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            message: errorMessage,
+            activeGameInfo: { gameType: 'Adam Asmaca', lobbyCode: hangmanLobbyCode }
+        }));
+        return;
+      }
+    }
+  }
+  // --- KONTROL SONU ---
 
   // Create game if it doesn't exist
   if (!bingoGames[lobbyCode]) {
