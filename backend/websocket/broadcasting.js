@@ -1,4 +1,5 @@
 import GroupChat from "../models/groupChat.model.js";
+import Lobby from "../models/lobby.model.js";
 import FriendGroupChat from "../models/friendGroupChat.model.js";
 import { formatFriendGroupResponse } from "../controllers/friendGroupChat.controller.js";
 
@@ -133,6 +134,25 @@ export const createBroadcasters = (connectedClients) => {
         }
     };
 
+  
+    const broadcastToLobbyMembers = async (lobbyCode, eventType, payload) => {
+        try {
+            const lobby = await Lobby.findOne({ lobbyCode: lobbyCode }).select("members.id").lean();
+            if (lobby && lobby.members && lobby.members.length > 0) {
+                const memberIds = lobby.members.map(member => member.id.toString());
+                const message = {
+                    type: eventType,
+                    data: { ...payload, lobbyCode: lobbyCode }
+                };
+                broadcastToSpecificUsers(memberIds, message);
+            } else {
+                console.warn(`broadcastToLobbyMembers: Lobby '${lobbyCode}' not found or has no members.`);
+            }
+        } catch (error) {
+            console.error(`Error in broadcastToLobbyMembers for lobbyCode ${lobbyCode}, event ${eventType}:`, error);
+        }
+    };
+
     const broadcastFriendEvent = (targetUserId, payload) => {
         console.log("Broadcasting Friend Event:", { targetUserId, payload });
         sendToSpecificUser(targetUserId, payload);
@@ -161,6 +181,7 @@ export const createBroadcasters = (connectedClients) => {
         broadcastFriendGroupEvent,
         broadcastFriendGroupMessage,
         broadcastLobbyEvent,
+        broadcastToLobbyMembers,
         broadcastFriendEvent,
         sendAcknowledgement,
     };
