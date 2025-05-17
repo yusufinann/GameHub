@@ -1,23 +1,28 @@
 import React from 'react';
-import { ListItem, Avatar, ListItemText, Typography, Box, useTheme } from '@mui/material';
-
-function MemberItem({ member, index,t }) {
+import { ListItem, Avatar, ListItemText, Typography, Box, useTheme, IconButton } from '@mui/material';
+import { RemoveCircleOutline as KickIcon } from '@mui/icons-material';
+function MemberItem({ member, index,t ,onKickPlayer,isCurrentUserHost,currentUserId}) {
   const theme = useTheme();
-
+const handleKick = () => {
+    if (onKickPlayer) {
+      onKickPlayer(member.id); 
+    }
+  };
   return (
     <ListItem
       sx={{
         mb: 0.5,
         bgcolor: member.isHost 
-          ? `${theme.palette.secondary.gold}26` // 15% opacity (26 in hex)
+          ? `${theme.palette.secondary.gold}26` 
           : 'transparent',
         borderRadius: '10px',
         '&:hover': {
           bgcolor: member.isHost 
-            ? `${theme.palette.secondary.gold}4D` // 30% opacity (4D in hex)
-            : `${theme.palette.secondary.main}33`, // 20% opacity (33 in hex)
+            ? `${theme.palette.secondary.gold}4D`
+            : `${theme.palette.secondary.main}33`, 
         },
         position: 'relative',
+         pr: isCurrentUserHost && !member.isHost ? '50px' : '16px',
       }}
     >
       <Avatar
@@ -70,6 +75,25 @@ function MemberItem({ member, index,t }) {
           </Box>
         }
       />
+      {isCurrentUserHost && !member.isHost && member.id !== currentUserId && (
+        <IconButton
+          onClick={handleKick}
+          size="small"
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: theme.palette.error.main,
+            '&:hover': {
+              backgroundColor: `${theme.palette.error.main}20`,
+            },
+          }}
+          title={t("Kick Player")}
+        >
+          <KickIcon />
+        </IconButton>
+      )}
     </ListItem>
   );
 }

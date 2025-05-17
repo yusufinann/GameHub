@@ -52,16 +52,16 @@ const GameLobbyPage = () => {
     isPasswordModalOpen,
     handleJoin,
     handlePasswordModalClose,
-    isMember // Assuming this is provided by your hook or needs to be added
+    isMember 
   } = useGameLobbyPage();
 
-  // Check if the current user is a member of the lobby
+
   const checkIsMember = () => {
     if (!members || !userId) return false;
     return members.some(member => member.id === userId);
   };
 
-  // Use the value from the hook if available, otherwise calculate it
+
   const userIsMember = isMember !== undefined ? isMember : checkIsMember();
 
   const handleDeletedModalClose = () => {
@@ -79,13 +79,8 @@ const GameLobbyPage = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // If the user is not a member and the lobby exists, redirect them or show access denied
   useEffect(() => {
     if (!loading && lobbyDetails && !userIsMember && !isPasswordModalOpen) {
-      // Option 1: Redirect to homepage
-      // navigate("/");
-      
-      // Option 2: Show access denied screen (we'll use this)
       setError("Access denied. You are not a member of this lobby.");
     }
   }, [loading, lobbyDetails, userIsMember, isPasswordModalOpen]);
@@ -206,7 +201,8 @@ const GameLobbyPage = () => {
             {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Tooltip>
-        <MembersList members={members} t={t} />
+        <MembersList members={members} t={t}    lobbyCode={lobbyDetails.lobbyCode} 
+          currentLobbyCreatorId={lobbyDetails.createdBy} />
         <GameArea
           lobbyInfo={lobbyDetails}
           link={link}

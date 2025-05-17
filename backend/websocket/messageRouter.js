@@ -8,7 +8,7 @@ import {
 } from "../controllers/friend.controller.js";
 import * as bingoGameController from "../controllers/bingo.game.controller.js";
 // Keep lobby controller import separate if initialized elsewhere
-// import * as lobbyController from "../controllers/lobby.controller.js";
+import * as lobbyController from "../controllers/lobby.controller.js";
 import * as lobbyChatController from "../controllers/lobbyChat.controller.js";
 import * as communityChatController from "../controllers/communityChat.controller.js";
 import * as privateChatController from "../controllers/privateChat.controller.js";
@@ -85,13 +85,18 @@ export const routeMessage = async (ws, message, broadcasters) => {
             case "HOST_RETURNED":
                 // Assumes data.data contains userIds if specific broadcast is needed
                 broadcastLobbyEvent(data.lobbyCode, "HOST_RETURNED", data.data);
-                break;
-            case "USER_KICKED":
-                broadcastToOthers(ws, {
-                    type: "USER_KICKED",
-                    lobbyCode: data.lobbyCode,
-                    data: data.data,
-                });
+                break;               
+                case "KICK_PLAYER": // YENİ CASE
+                if (ws.userId) { // Sadece giriş yapmış kullanıcılar (hostlar) kick atabilir
+                    await lobbyController.kickPlayerFromLobby(ws, data);
+                    sendToSpecificUser(data.playerIdToKick, {
+                        type: "USER_KICKED", // İstemcinin ele alacağı özel tip
+                        lobbyCode: data.lobbyCode,
+                        reason: "Lobi sahibi tarafından lobiden çıkarıldınız."
+                    });
+                } else {
+                    ws.send(JSON.stringify({ type: "ERROR", message: "Oyuncu atmak için giriş yapmış olmalısınız." }));
+                }
                 break;
             case "EVENT_START_NOTIFICATION":
                  broadcastToSpecificUsers(data.data.userIds, { // Assuming data.data contains userIds array

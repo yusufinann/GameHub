@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import Lobby from '../models/lobby.model.js';
 import { bingoGames, broadcastToGame as broadcastToBingoGame, handleBingoPlayerLeaveMidGame, handleBingoPlayerLeavePreGame } from './bingo.game.controller.js';
-import { hangmanGames, broadcastToGame as broadcastToHangmanGame, getSharedGameState as getHangmanSharedGameState, handleHangmanPlayerLeaveMidGame } from './hangman.controller.js'; 
+import { hangmanGames, broadcastToGame as broadcastToHangmanGame, getSharedGameState as getHangmanSharedGameState, handleHangmanPlayerLeaveMidGame, removePlayerFromHangmanPregame } from './hangman.controller.js'; 
 const lobbyTimers = new Map();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -565,6 +565,111 @@ export const leaveLobby = async (req, res) => {
     }
 };
 
+//KICK_PLAYER
+export const kickPlayerFromLobby = async (ws, data) => {
+    const { lobbyCode, playerIdToKick } = data;
+    const hostUserId = ws.userId;
+
+    try {
+        if (!lobbyCode || !playerIdToKick) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Lobi kodu ve atılacak oyuncu ID'si gereklidir." }));
+            return;
+        }
+
+        if (!hostUserId) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Bu işlem için yetkili kullanıcı bulunamadı." }));
+            return;
+        }
+
+        const lobby = await Lobby.findOne({ lobbyCode: lobbyCode, isActive: true });
+
+        if (!lobby || !lobby.isActive) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Aktif lobi bulunamadı." }));
+            return;
+        }
+
+        if (lobby.createdBy.toString() !== hostUserId) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Sadece lobi sahibi oyuncu atabilir." }));
+            return;
+        }
+
+        if (playerIdToKick === hostUserId) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Kendinizi lobiden atamazsınız. Ayrılmak için 'Lobiden Ayrıl' seçeneğini kullanın." }));
+            return;
+        }
+
+        const userIndex = lobby.members.findIndex((member) => member.id.toString() === playerIdToKick);
+        if (userIndex === -1) {
+            ws.send(JSON.stringify({ type: "ERROR", message: "Atılmak istenen oyuncu bu lobide değil." }));
+            return;
+        }
+
+        const kickedUserMemberInfo = lobby.members.splice(userIndex, 1)[0];
+
+        if (lobby.game === '1') { // Bingo
+            const bingoGame = bingoGames[lobbyCode];
+            if (bingoGame && bingoGame.players[playerIdToKick]) {
+                if (bingoGame.gameStarted && !bingoGame.gameEnded) {
+                    handleBingoPlayerLeaveMidGame(lobbyCode, playerIdToKick);
+                } else if (!bingoGame.gameStarted) {
+                    handleBingoPlayerLeavePreGame(lobbyCode, playerIdToKick);
+                }
+            }
+        } else if (lobby.game === '2') { // Hangman
+            const hangmanGame = hangmanGames[lobbyCode];
+            if (hangmanGame && hangmanGame.players[playerIdToKick]) {
+                if (hangmanGame.gameStarted && !hangmanGame.gameEnded) {
+                    handleHangmanPlayerLeaveMidGame(lobbyCode, playerIdToKick);
+                } else if (!hangmanGame.gameStarted) {
+                    removePlayerFromHangmanPregame(lobbyCode, playerIdToKick);
+                }
+            }
+        }
+
+        await lobby.save();
+
+        const remainingMemberIds = lobby.members.map(m => m.id.toString());
+        if (remainingMemberIds.length > 0) {
+            if (typeof broadcastLobbyEvent === 'function') {
+                broadcastLobbyEvent(lobbyCode, "PLAYER_KICKED_BY_HOST", {
+                    kickedUserId: kickedUserMemberInfo.id,
+                    kickedUserName: kickedUserMemberInfo.name,
+                    lobbyCode: lobby.lobbyCode,
+                }, remainingMemberIds);
+            } else {
+                console.error("broadcastLobbyEvent is not initialized or not a function.");
+            }
+        }
+
+        if (typeof broadcastLobbyEvent === 'function') {
+            broadcastLobbyEvent(
+                null,
+                "LOBBY_MEMBER_COUNT_UPDATED",
+                {
+                    lobbyCode: lobby.lobbyCode,
+                    memberCount: lobby.members.length,
+                    maxMembers: lobby.maxMembers,
+                    members: lobby.members.map(m => ({
+                        id: m.id,
+                        name: m.name,
+                        avatar: m.avatar,
+                        isHost: m.id.toString() === lobby.createdBy.toString(),
+                    }))
+                },
+                null
+            );
+        } else {
+            console.error("broadcastLobbyEvent is not initialized or not a function for LOBBY_MEMBER_COUNT_UPDATED.");
+        }
+
+        // Atılan kullanıcıya özel mesaj `messageRouter` tarafından gönderilecek.
+        // Host'a başarı ACK mesajı `messageRouter` tarafından gönderilecek.
+
+    } catch (error) {
+        console.error("Oyuncu atma hatası (kickPlayerFromLobby):", error);
+        ws.send(JSON.stringify({ type: "ERROR", message: "Oyuncu atılırken bir sunucu hatası oluştu." }));
+    }
+};
 
 export const deleteLobby = async (req, res) => {
     const { lobbyCode } = req.params;

@@ -3,13 +3,28 @@ import { Paper, List, Avatar, Tooltip, Stack, useTheme } from '@mui/material';
 import { Person as PersonIcon } from '@mui/icons-material';
 import Header from './Header';
 import MemberItem from './MemberItem';
-
-function MembersList({ members,t }) {
+import { useAuthContext } from '../../../shared/context/AuthContext';
+import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
+function MembersList({  members, t, lobbyCode, currentLobbyCreatorId}) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const{socket}=useWebSocket();
   const theme = useTheme();
-
+ const {currentUser}=useAuthContext();
   const handleToggle = () => setIsCollapsed(!isCollapsed);
-
+const handleKickPlayer = (playerIdToKick) => {
+    if (socket && lobbyCode && currentUser && currentLobbyCreatorId === currentUser.id) {
+      console.log(`Kicking player ${playerIdToKick} from lobby ${lobbyCode}`);
+      socket.send(JSON.stringify({
+        type: 'KICK_PLAYER',
+        lobbyCode: lobbyCode,
+        playerIdToKick: playerIdToKick,
+      }));
+    } else {
+      console.error("Cannot kick player: missing socket, lobbyCode, or not host.");
+    }
+  };
+  const isCurrentUserTheHost = currentUser && currentLobbyCreatorId === currentUser.id;
+  console.log("isCurrentUserTheHost",isCurrentUserTheHost)
   return (
     <Paper
       elevation={8}
@@ -61,7 +76,7 @@ function MembersList({ members,t }) {
       ) : (
         <List sx={{ p: 0 }}>
           {members.map((member, index) => (
-            <MemberItem key={member.id} member={member} index={index} t={t} />
+            <MemberItem key={member.id} member={member} index={index} t={t} currentUserId={currentUser.id} isCurrentUserHost={isCurrentUserTheHost} onKickPlayer={handleKickPlayer}/>
           ))}
         </List>
       )}
