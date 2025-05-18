@@ -591,7 +591,11 @@
     "inviteLobby":"Invite to lobby",
     "Hangman Game":"Hangman Game",
     "Uno Game":"Uno Game",
-    "Chess Game":"Chess Game"
+    "Chess Game":"Chess Game",
+    "Kick Player": "Kick Player",
+  "Confirm Kick": "Confirm Kick",
+  "Are you sure you want to kick": "Are you sure you want to kick",
+  "Kick": "Kick"
     
 
   

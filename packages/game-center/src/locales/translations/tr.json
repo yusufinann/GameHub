@@ -591,5 +591,9 @@
     "inviteLobby":"Lobiye davet et",
     "Hangman Game":"Adam Asmaca Oyunu",
     "Uno Game":"Uno Oyunu",
-    "Chess Game":"Satranç Oyunu"
+    "Chess Game":"Satranç Oyunu",
+  "Kick Player": "Oyuncuyu At",
+  "Confirm Kick": "Atmayı Onayla",
+  "Are you sure you want to kick": "Bu oyuncuyu atmak istediğinizden emin misiniz",
+  "Kick": "At"
 }
