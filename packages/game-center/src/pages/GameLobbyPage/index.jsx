@@ -279,7 +279,7 @@ const ErrorScreen = ({ error, navigate,t }) => (
 );
 
 const AccessDeniedScreen = ({ navigate,t }) => (
-  <Box
+ <Box
     sx={{
       display: "flex",
       justifyContent: "center",
@@ -287,13 +287,17 @@ const AccessDeniedScreen = ({ navigate,t }) => (
       height: "100vh",
       flexDirection: "column",
       gap: 2,
+      textAlign: "center",
+      p: 2,
     }}
   >
-    <Typography variant="h5" color="error">
+ <Typography variant="h5" color="error">
       {t("Access Denied")}
     </Typography>
     <Typography variant="body1">
-      {t("You're not a member of this lobby. Please join the lobby first")}.
+      {t(
+        "You are not a member of this lobby or do not have permission to access it."
+      )}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
       {t("Go to Main Screen")}

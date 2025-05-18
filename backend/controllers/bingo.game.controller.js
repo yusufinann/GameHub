@@ -711,79 +711,105 @@ export const handleBingoPlayerLeaveMidGame = (lobbyCode, playerId) => {
     const game = bingoGames[lobbyCode];
 
     if (!game) {
+        console.warn(`[Bingo Leave MidGame] Game not found for lobby: ${lobbyCode}`);
         return;
     }
 
     if (!game.gameStarted || game.gameEnded) {
+        console.warn(`[Bingo Leave MidGame] Game not started or already ended for lobby: ${lobbyCode}`);
         return;
     }
 
     const playerLeaving = game.players[playerId];
     if (!playerLeaving) {
+        console.warn(`[Bingo Leave MidGame] Player ${playerId} not found in game for lobby: ${lobbyCode}`);
         return;
     }
 
-    if (playerLeaving.ws && playerLeaving.ws.readyState === playerLeaving.ws.OPEN) {
-        playerLeaving.ws.close(1000, "Oyuncu lobiden ayrıldı.");
-    }
+    const playerName = playerLeaving.name || playerLeaving.userName || `Oyuncu ${playerId}`;
+    console.log(`[Bingo Leave MidGame] Player ${playerName} (${playerId}) is leaving mid-game from lobby: ${lobbyCode}`);
 
     delete game.players[playerId];
 
     const remainingPlayerCount = Object.keys(game.players).length;
 
     if (remainingPlayerCount > 0) {
-        const currentRankings = getGameRankings(game); // Ayrılan oyuncu olmadan sıralama alınır
         broadcastToGame(game, {
             type: "BINGO_PLAYER_LEFT_MID_GAME",
             playerId: playerId,
-            playerName: playerLeaving.name,
-            userName: playerLeaving.userName,
-            players: Object.values(game.players).map(p => ({
-                id: p.userId,
-                userName: p.userName,
-                name: p.name,
-                completed: p.completedBingo || false
-            })),
-            rankings: currentRankings
+            playerName: playerName,
         });
 
         if (game.drawMode === 'manual' && String(game.drawer) === String(playerId)) {
-            game.drawer = null;
-            broadcastToGame(game, {
-                type: "BINGO_MANUAL_DRAWER_LEFT",
-                message: `Sayıyı çeken oyuncu (${playerLeaving.userName}) oyundan ayrıldı. Host yeni bir çekici atamalı veya oyun modunu değiştirmeli.`,
-                drawerPlayerId: playerId
-            });
-             if (game.autoDrawInterval) { 
-                 clearInterval(game.autoDrawInterval);
-                 game.autoDrawInterval = null;
-             }
-        }
-
-        const completedPlayersCount = currentRankings.filter(r => r.completedAt).length;
-        const allRemainingPlayersCompleted = completedPlayersCount === remainingPlayerCount;
-
-        if (allRemainingPlayersCompleted && !game.gameEnded) {
-            game.gameEnded = true;
-            game.gameStarted = false;
-            broadcastToGame(game, {
-                type: "BINGO_GAME_OVER",
-                message: "Kalan tüm oyuncular tamamladı (bir oyuncu ayrıldıktan sonra) - Final Sıralaması",
-                finalRankings: currentRankings
-            });
-            saveGameStatsToDB(game);
+            console.log(`[Bingo Leave MidGame] Manual drawer ${playerName} left. Switching to AUTO draw mode for lobby: ${lobbyCode}`);
+            
             if (game.autoDrawInterval) {
                 clearInterval(game.autoDrawInterval);
                 game.autoDrawInterval = null;
             }
+
+            game.drawMode = 'auto';
+            game.drawer = null;
+
+            broadcastToGame(game, {
+                type: "BINGO_DRAW_MODE_CHANGED",
+                newDrawMode: 'auto',
+                message: `Sayıyı çeken oyuncu (${playerName}) oyundan ayrıldığı için oyun otomatik sayı çekme moduna geçirildi.`,
+            });
+
+            let drawInterval = 5000; 
+            if (game.bingoMode === "superfast") {
+                drawInterval = 3000;
+            } else if (game.bingoMode === "fast") {
+                drawInterval = 4000;
+            }
+
+            if (typeof autoDrawNumber === 'function') {
+                game.autoDrawInterval = setInterval(() => {
+                    if (game.gameEnded || !game.gameStarted) {
+                        clearInterval(game.autoDrawInterval);
+                        game.autoDrawInterval = null;
+                        return;
+                    }
+                    autoDrawNumber(game);
+                }, drawInterval);
+            } else {
+                console.error(`[Bingo Leave MidGame] autoDrawNumber function is not defined for lobby: ${lobbyCode}. Cannot start auto draw.`);
+            }
         }
+
+        const currentRankings = getGameRankings(game);
+        const completedPlayersCount = currentRankings.filter(r => r.completedAt).length;
+        const allRemainingPlayersCompleted = completedPlayersCount === remainingPlayerCount;
+
+        if (allRemainingPlayersCompleted && !game.gameEnded) {
+            console.log(`[Bingo Leave MidGame] All remaining players completed. Ending game for lobby: ${lobbyCode}`);
+            game.gameEnded = true;
+            game.gameStarted = false;
+            
+            if (game.autoDrawInterval) {
+                clearInterval(game.autoDrawInterval);
+                game.autoDrawInterval = null;
+            }
+            
+            broadcastToGame(game, {
+                type: "BINGO_GAME_OVER",
+                message: "Kalan tüm oyuncular tamamladı (bir oyuncu ayrıldıktan sonra). Final Sıralaması:",
+                finalRankings: currentRankings
+            });
+            saveGameStatsToDB(game);
+        }
+
     } else {
+        console.log(`[Bingo Leave MidGame] No players left. Ending and deleting game for lobby: ${lobbyCode}`);
         game.gameEnded = true;
         game.gameStarted = false;
+        
         if (game.autoDrawInterval) {
             clearInterval(game.autoDrawInterval);
             game.autoDrawInterval = null;
         }
+        
         delete bingoGames[lobbyCode];
     }
 };

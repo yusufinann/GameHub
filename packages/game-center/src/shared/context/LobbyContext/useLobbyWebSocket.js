@@ -41,6 +41,12 @@ const useLobbyWebSocket = (
           case "USER_LEFT":
             handleUserLeft(data);
             break;
+            case "PLAYER_KICKED_BY_HOST": // Sunucudan gelen mesaj bu şekildeyse
+            handlePlayerKickedByHost(data.data); // data.data içinde kickedUserId, kickedUserName, lobbyCode olmalı
+            break;
+          case "USER_KICKED": // Eğer atılan kullanıcıya özel bu mesaj geliyorsa
+            handleUserKicked(data); // data içinde lobbyCode ve reason olmalı
+            break;
           case "LOBBY_DELETED":
             handleLobbyDeleted(data.lobbyCode, data.data);
             break;
@@ -316,6 +322,53 @@ const useLobbyWebSocket = (
         )
       );
     };
+
+    const handlePlayerKickedByHost = (kickData) => {
+      const { lobbyCode, kickedUserId, kickedUserName } = kickData;
+
+      setLobbies((prev) =>
+        prev.map((lobby) =>
+          lobby.lobbyCode === lobbyCode
+            ? {
+                ...lobby,
+                members: lobby.members.filter((m) => m.id !== kickedUserId),
+              }
+            : lobby
+        )
+      );
+      setMembersByLobby((prev) => ({
+        ...prev,
+        [lobbyCode]: (prev[lobbyCode] || []).filter((m) => m.id !== kickedUserId),
+      }));
+
+      // Snackbar için bilgi ayarla (kendi atılma durumumuz "USER_KICKED" ile ele alınacak)
+      if (currentUser?.id !== kickedUserId) {
+        setUserLeftInfo({ lobbyCode, name: kickedUserName, reason: "kicked" });
+      }
+    };
+
+    const handleUserKicked = (kickData) => {
+      const { lobbyCode, reason } = kickData;
+
+      setDeletedLobbyInfo({
+        lobbyCode,
+        reason: reason || "You have been kicked from the lobby by the host.",
+        isKicked: true,
+      });
+
+      // Eğer atıldığı lobi, KENDİSİNİN HOST OLDUĞU AKTİF LOBİ ise (existingLobby),
+      // o zaman local state'i ve localStorage'ı temizle.
+      // Bu durum aslında pek olası değil, çünkü host kendini atamaz, ama güvenlik için kalabilir.
+      // Daha önemlisi, eğer host başka birini atıyorsa ve sunucu LOBBY_DELETED gönderiyorsa (host ayrılınca),
+      // o zaman burası zaten tetiklenmez, LOBBY_DELETED tetiklenir.
+      // Bu case daha çok, kullanıcının ÜYE OLDUĞU bir lobiden atılması için.
+      if (existingLobby?.lobbyCode === lobbyCode && existingLobby?.createdBy === currentUser?.id) {
+        console.warn("Host kendi host olduğu lobiden atıldı olarak işaretlendi, bu durum incelenmeli.", lobbyCode);
+        setExistingLobby(null);
+        localStorage.removeItem("userLobby");
+      }
+    };
+
 
     socket.addEventListener("message", handleWebSocketMessage);
     return () => socket.removeEventListener("message", handleWebSocketMessage);

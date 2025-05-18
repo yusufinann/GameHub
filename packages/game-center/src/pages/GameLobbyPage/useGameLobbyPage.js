@@ -150,9 +150,8 @@ export const useGameLobbyPage = () => {
   }, [lobbyDetails, userId, navigate]);
 
   const members = useMemo(() => {
-    console.log(`useGameLobbyPage: Calculating members for lobby ${link}`); // Ne zaman çalıştığını görmek için log
     return membersByLobby[link] || [];
-  }, [membersByLobby, link]); // Sadece membersByLobby veya link değiştiğinde y
+  }, [membersByLobby, link]); 
   return {
     lobbyDetails,
     loading,
