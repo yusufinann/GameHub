@@ -421,7 +421,9 @@ export const startGame = (ws, data) => {
   game.activeNumbers = [];
   game.numberPool = generateShuffledNumbers(1, 90); 
   game.gameEnded = false;
-  // game.gameStarted = false; // Geri sayımdan sonra true olacak
+  game.drawMode = drawMode || 'auto'; 
+  game.drawer = game.drawMode === "manual" ? drawer : null;
+  game.bingoMode = bingoMode || 'classic';  
   game.gameId = new mongoose.Types.ObjectId();
   game.competitionMode = competitionMode || 'competitive';
 
@@ -431,9 +433,9 @@ export const startGame = (ws, data) => {
   }
 
   for (const playerId in game.players) {
-      if (game.players.hasOwnProperty(playerId)) { // Ekstra güvenlik
+      if (game.players.hasOwnProperty(playerId)) { 
           game.players[playerId].markedNumbers = [];
-          game.players[playerId].ticket = generateTicket(); // Bu fonksiyonun tanımlı olduğundan emin olun
+          game.players[playerId].ticket = generateTicket(); 
           delete game.players[playerId].completedAt;
           delete game.players[playerId].completedBingo;
       }
@@ -443,10 +445,10 @@ export const startGame = (ws, data) => {
   game.drawer = drawMode === "manual" ? drawer : null;
   game.bingoMode = bingoMode;
 
-  // --- GERİ SAYIM VE OYUN BAŞLATMA ---
+
   let countdown = 5;
   const countdownInterval = setInterval(() => {
-      broadcastToGame(game, { // Bu fonksiyonun tanımlı olduğundan emin olun
+      broadcastToGame(game, { 
           type: "BINGO_COUNTDOWN",
           countdown,
       });
@@ -455,9 +457,8 @@ export const startGame = (ws, data) => {
           clearInterval(countdownInterval);
           game.startedAt = new Date();
           game.gameStarted = true;
-          console.log('[Bingo Server] Oyun başladı - Başlangıç Zamanı:', game.startedAt);
           broadcastToGame(game, {
-              type: "BINGO_STARTED", // <<<--- İSTENMEYEN YAYIN BU OLABİLİR
+              type: "BINGO_STARTED",
               message: "Oyun başladı!",
               drawMode,
               drawer: drawMode === "manual" ? drawer : undefined,
@@ -468,22 +469,22 @@ export const startGame = (ws, data) => {
                   ticket: game.players[playerId].ticket
               })),
               competitionMode: game.competitionMode,
-              completedPlayers: [] // Başlangıçta boş
+              completedPlayers: [] 
           });
 
           if (drawMode === "auto") {
-              let drawInterval = 5000; // Default for all modes
+              let drawInterval = 5000; 
               if (game.bingoMode === "superfast") {
                   drawInterval = 3000;
               }
 
               const autoDrawInterval = setInterval(() => {
-                  if (game.gameEnded || !game.gameStarted) { // gameStarted kontrolü de eklendi
+                  if (game.gameEnded || !game.gameStarted) { 
                       clearInterval(autoDrawInterval);
-                      game.autoDrawInterval = null; // interval'ı temizledikten sonra referansı da null yapın
+                      game.autoDrawInterval = null; 
                       return;
                   }
-                  autoDrawNumber(game); // Bu fonksiyonun tanımlı olduğundan emin olun
+                  autoDrawNumber(game); 
               }, drawInterval);
               game.autoDrawInterval = autoDrawInterval;
           }
@@ -528,7 +529,7 @@ export const joinGame = async (ws, data) => {
     );
   }
 
-   // --- KAPSAMLI AKTİF OYUN KONTROLÜ ---
+   //AKTİF OYUN KONTROLÜ ---
   // 1. Diğer Bingo oyunlarında aktif mi?
   for (const otherLobbyCodeInMap in bingoGames) {
     if (bingoGames.hasOwnProperty(otherLobbyCodeInMap)) {
@@ -562,7 +563,6 @@ export const joinGame = async (ws, data) => {
       }
     }
   }
-  // --- KONTROL SONU ---
 
   // Create game if it doesn't exist
   if (!bingoGames[lobbyCode]) {
@@ -576,7 +576,10 @@ export const joinGame = async (ws, data) => {
       gameEnded: false,   
       host: lobby.createdBy.toString(),
       drawMode: 'auto',
-      drawer: null
+      drawer: null,
+        bingoMode: 'classic', 
+    competitionMode: 'competitive',
+    rankings: []
     };
   }
 

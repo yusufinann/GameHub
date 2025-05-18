@@ -23,6 +23,20 @@ const GameAreaHeader = ({
   t
 }) => {
   const theme = useTheme();
+ const getGameName = (gameId) => {
+    switch (gameId) {
+      case "1":
+        return t("Bingo Game");
+      case "2":
+        return t("Hangman Game");
+      case "3":
+        return t("Uno Game");
+      case "4":
+        return t("Chess Game");
+      default:
+        return t("Other Game"); 
+    }
+  };
   return (
     <Box
       sx={{
@@ -68,7 +82,7 @@ const GameAreaHeader = ({
               }}
             >
               <StarsIcon fontSize="large" />
-              {lobbyInfo.game === "1" ? t("Bingo Game") : t("Other Game")}
+              {getGameName(lobbyInfo.game)}
             </Typography>
           </Typography>
           

@@ -588,5 +588,8 @@
     "helperText":"Geçerli parolayı korumak için boş bırakın",
     "click":"Seçenekler için tıkla",
     "Send Message":"Mesaj gönder",
-    "inviteLobby":"Lobiye davet et"
+    "inviteLobby":"Lobiye davet et",
+    "Hangman Game":"Adam Asmaca Oyunu",
+    "Uno Game":"Uno Oyunu",
+    "Chess Game":"Satranç Oyunu"
 }

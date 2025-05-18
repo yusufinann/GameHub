@@ -588,7 +588,10 @@
     "helperText":"Leave blank to keep the current password",
     "click":"Click for options",
     "Send Message":"Send Message",
-    "inviteLobby":"Invite to lobby"
+    "inviteLobby":"Invite to lobby",
+    "Hangman Game":"Hangman Game",
+    "Uno Game":"Uno Game",
+    "Chess Game":"Chess Game"
     
 
   
