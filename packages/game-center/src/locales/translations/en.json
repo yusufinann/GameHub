@@ -687,11 +687,12 @@
     "guessWordFieldLabel": "Guess the Word",
     "submitButton": "Submit",
     "winMessage": "Congratulations, you won!",
-    "eliminationMessage": "You were eliminated!",
-    "volume": {
+    "eliminationMessage": "You were eliminated!"
+   
+  },
+   "volume": {
     "mute": "Mute sound",
     "unmute": "Unmute sound"
-  }
   },
   
      "playerList": {

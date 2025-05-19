@@ -680,12 +680,13 @@
     "guessWordFieldLabel": "Kelimeyi Tahmin Et",
     "submitButton": "Gönder",
     "winMessage": "Tebrikler, kazandınız!",
-    "eliminationMessage": "Elendiniz!",
-    "volume": {
+    "eliminationMessage": "Elendiniz!"
+    
+  },
+  "volume": {
       "mute": "Sesi Kapat",
       "unmute": "Sesi Aç"
-    }
-  },
+    },
   "playerList": {
     "title": "Oyuncular",
     "status": {
