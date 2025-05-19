@@ -70,10 +70,6 @@ const GameContentArea = ({
               width: "100%",
               height: "100%",
               borderRadius: "24px",
-              background: `${theme.palette.background.paper}B3`,
-              backdropFilter: 'blur(8px)',
-              boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
-              border: `1px solid ${theme.palette.background.offwhite}`,
             }}
           >
             <Hangman

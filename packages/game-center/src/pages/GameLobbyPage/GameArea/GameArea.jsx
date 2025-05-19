@@ -135,7 +135,25 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
       }
       return newValue;
     });
-  }, 200); 
+  }, 200);
+
+  const getBackgroundImageUrl = (gameId) => {
+    const numericGameId = Number(gameId);
+    switch (numericGameId) {
+      case 1:
+        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg";
+      case 2:
+        return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ63bZ9-d9KLHmXM7kXcxhBTIG--ZPlT64tcQ&s";
+      case 3:
+        return "https://cdn2.unrealengine.com/Diesel%2Fproductv2%2Funo%2Fhome%2FGameName_Store_Landscape_2560x1440-2560x1440-5195e8a3e06d672f97a1ee49ecea59027c14cae4.jpg";
+      case 4:
+        return "https://www.shutterstock.com/shutterstock/photos/1258437028/display_1500/stock-photo-logic-chess-game-logo-simple-illustration-of-logic-chess-game-logo-for-web-design-isolated-on-1258437028.jpg";
+      default:
+        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombola/2-550x400.jpg"; 
+    }
+  };
+
+  const backgroundImageUrl = lobbyInfo ? getBackgroundImageUrl(lobbyInfo.game) : getBackgroundImageUrl(undefined);
 
   return (
     <Paper
@@ -158,7 +176,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
           right: 0,
           bottom: 0,
           left: 0,
-          backgroundImage: 'url("https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg")',
+         backgroundImage: `url("${backgroundImageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
