@@ -595,5 +595,133 @@
   "Kick Player": "Oyuncuyu At",
   "Confirm Kick": "Atmayı Onayla",
   "Are you sure you want to kick": "Bu oyuncuyu atmak istediğinizden emin misiniz",
-  "Kick": "At"
+  "Kick": "At",
+  "Waiting for connection...": "Bağlantı bekleniyor...",
+  "Your Ticket": "Biletiniz",
+  "Drawn Numbers": "Çekilen Numaralar",
+  "Bingo Completed!": "Tombala Tamamlandı!",
+  "Call Bingo!": "Tombala Çağır!",
+  "Draw Number": "Numara Çek",
+  "Active Numbers": "Aktif Numaralar",
+  "drawnNumbers": {
+    "pageIndicator": "Sayfa {{currentPage}} / {{totalPages}}",
+    "noPages": "Sayfa 1 / 1",
+    "previousPage": "Önceki Sayfa",
+    "nextPage": "Sonraki Sayfa"
+  },
+  "Bingo Completed": "Tombala Tamamlandı",
+  "Players Who Completed Bingo": "Tombalayı Tamamlayan Oyuncular",
+  "No players have completed Bingo yet": "Henüz tombalayı tamamlayan oyuncu yok",
+  "Current Rankings": "Güncel Sıralama",
+  "View All": "Tümünü Gör",
+  "Complete Rankings": "Tam Sıralama",
+  "startGameDialog": {
+    "title": "Oyun Modu ve Çekiliş Seçenekleri",
+    "drawingMode": {
+      "auto": "Otomatik Çekiliş",
+      "manual": "Manuel Çekiliş"
+    },
+    "drawingPlayerLabel": "Çekilişi Yapan Oyuncu",
+    "bingoMode": {
+      "classicLabel": "Klasik Tombala (Standart Mod) 🔹",
+      "extendedLabel": "Uzatılmış Süre Modu (Kolay Mod) 🕒",
+      "superfastLabel": "Süper Hızlı Tombala (Zor Mod) ⚡"
+    },
+    "competitionMode": {
+      "competitiveLabel": "Rekabetçi Mod (Sıralamalı) 🏆",
+      "nonCompetitiveLabel": "Rekabetçi Olmayan Mod (İlk Tombala Kazanır!) 🎉"
+    },
+    "description": {
+      "classicText": "<strong>Klasik:</strong> Her 5 saniyede bir numara, 5 saniye görüntülenir; sadece son numara işaretlenebilir, geçmiş gösterilmez.",
+      "extendedText": "<strong>Uzatılmış:</strong> Her 5 saniyede bir numara, 10 saniye görüntülenir; en fazla 2 numara görünür, geçmiş (önceki numara) listelenir ve işaretlenebilir.",
+      "superfastText": "<strong>Süper Hızlı:</strong> Her 3 saniyede bir numara, 3 saniye görüntülenir; hızlı kararlar gerekir, yanlış \"Tombala!\" çağrıları cezalandırılır.",
+      "competitiveText": "<strong>Rekabetçi Mod:</strong> Oyuncular puana ve tamamlama süresine göre sıralanır. Tüm numaralar çekilene veya tüm oyuncular Tombala'yı tamamlayana kadar oyun devam eder.",
+      "nonCompetitiveText": "<strong>Rekabetçi Olmayan Mod:</strong> İlk \"Tombala!\" diyen oyuncu hemen kazanır ve oyun sona erer."
+    },
+    "cancelButtonText": "İptal",
+    "startButtonText": "Oyunu Başlat"
+  },
+   "bingoGameWaiting": {
+    "lobbyTitle": "Tombala Oyun Lobisi",
+    "hostMessage": "Siz ev sahibisiniz! Herkes hazır olduğunda oyunu başlatın.",
+    "guestMessage": "Lütfen ev sahibinin oyunu başlatmasını bekleyin.",
+    "gameStatusTitle": "Oyun Durumu",
+    "status": {
+      "waitingForMinPlayers": "Oyuncular bekleniyor (Min. 2 gerekli)",
+      "waitingForPlayers": "Oyuncular bekleniyor ({{currentPlayers}}/{{maxPlayers}})"
+    },
+    "startGameButton": "Oyunu Başlat ({{currentPlayers}}/{{maxPlayers}})",
+    "waitingForHost": "Ev sahibinin başlatması bekleniyor..."
+  },
+  "Game Loading...": "Oyun Yükleniyor...",
+  "hangmanLoadingErrorMessage": "Oyunu yüklerken bir sorun oluştu. Lütfen sayfayı yenileyin veya tıklayıp tekrar deneyin.",
+  "hangmanNoPlayers": "Henüz hiçbir oyuncu katılmadı.",
+  "hangmanStartWarning": "Oyunu başlatmak için en az 1 başka oyuncu gereklidir.",
+  "Game Over - Waiting Screen": "Oyun Bitti - Bekleme Ekranı",
+  "Welcome to Lobby!": "Lobiye Hoş Geldiniz!",
+  "Joined Players": "Katılan Oyuncular",
+  "waitingForHost": "Sunucunun ({{hostName}}) {{action}} yapması bekleniyor... Lütfen sabırla bekleyin.",
+  "startGame": "oyunu başlatmasını",
+  "startNewGame": "yeni bir oyun başlatmasını",
+  "NoJoinedPlayer": "Henüz başka oyuncu katılmadı.",
+  "GameOverWaitHost": "Oyun bitti. Yeni oyun için sunucuyu bekleyin.",
+  "ChooseLetter": "Bir harf seçin",
+  "Category": "Kategori",
+  "Queue": "Sıra",
+  "gameplay": {
+    "categoryLabel": "Kategori",
+    "categoryUndefined": "TANIMSIZ",
+    "turnLabel": "Sıra",
+    "yourTurn": "SIRA SENDE! ({{seconds}}s)",
+    "loadingWord": "Kelime Yükleniyor...",
+    "attemptsLeftLabel": "Kalan Hak",
+    "correctGuessesLabel": "Doğru Tahminler",
+    "incorrectGuessesLabel": "Yanlış Tahminler",
+    "guessWordFieldLabel": "Kelimeyi Tahmin Et",
+    "submitButton": "Gönder",
+    "winMessage": "Tebrikler, kazandınız!",
+    "eliminationMessage": "Elendiniz!",
+    "volume": {
+      "mute": "Sesi Kapat",
+      "unmute": "Sesi Aç"
+    }
+  },
+  "playerList": {
+    "title": "Oyuncular",
+    "status": {
+      "won": "Kazandı!",
+      "eliminated": "Elendi"
+    },
+    "role": {
+      "host": "Sunucu"
+    },
+    "currentUserIndicator": {
+      "full": "Siz",
+      "short": "S"
+    },
+    "attemptsLeft": "Kalan Hak: {{count}}",
+    "currentTurnIndicator": "Sırada",
+    "undefinedPlayer": "Oyuncu"
+  },
+  "Game on": "Oyun Başladı!",
+  "willStart": "Oyun birazdan başlayacak!",
+  "hostCanStart": "Sunucu yeni bir oyun başlatabilir.",
+  "backLobby": "Lobiye Dön",
+  "Game Over!": "Oyun Bitti!",
+  "Correct Word": "Doğru Kelime",
+  "End Game (Host)": "Oyunu Bitir (Sunucu)",
+  "hostSetupModal": {
+    "title": "Yeni Oyun Ayarları",
+    "description": "Oyuncuların tahmin edeceği kelime için bir kategori seçin. Kelime rastgele seçilecektir.",
+    "categoryLabel": "Kategori",
+    "loadingCategories": "Kategoriler yükleniyor...",
+    "cancelButton": "İptal",
+    "startButton": "Oyunu Başlat"
+  },
+    "titleGameOver": "Oyun Bitti - Lobi (Host)",
+      "titleWaiting": "Oyun Lobisi (Host)",
+      "descriptionCanStartNew": "Yeni bir oyun başlatabilirsin.",
+      "descriptionWaitingForPlayers": "Oyuncuların katılmasını bekliyorsun. Hazır olduğunda oyunu başlatabilirsin!",
+       "defaultNamePrefix": "Oyuncu",
+       "Set New Game":"Yeni Oyun Ayarla"
 }

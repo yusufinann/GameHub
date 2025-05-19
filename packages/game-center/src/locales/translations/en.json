@@ -595,8 +595,147 @@
     "Kick Player": "Kick Player",
   "Confirm Kick": "Confirm Kick",
   "Are you sure you want to kick": "Are you sure you want to kick",
-  "Kick": "Kick"
+  "Kick": "Kick",
+  "Waiting for connection...":"Waiting for connection...",
+  "Your Ticket":"Your Ticket",
+  "Drawn Numbers":"Drawn Numbers",
+  "Bingo Completed!":"Bingo Completed!",
+  "Call Bingo!":"Call Bingo!",
+    "Draw Number":"Draw Number",
+    "Active Numbers":"Active Numbers",
     
+  "drawnNumbers": {
+    "pageIndicator": "Page {{currentPage}} of {{totalPages}}",
+    "noPages": "Page 1 of 1",
+    "previousPage": "Previous Page",
+    "nextPage": "Next Page"
+  },
+  "Bingo Completed":"Bingo Completed",
+  "Players Who Completed Bingo":"Players Who Completed Bingo",
+  "No players have completed Bingo yet":"No players have completed Bingo yet",
+  "Current Rankings":"Current Rankings",
+  "View All":"View All",
+  "Complete Rankings":"Complete Rankings",
+ 
+  "startGameDialog": {
+    "title": "Game Mode and Drawing Options",
+    "drawingMode": {
+      "auto": "Automatic Drawing",
+      "manual": "Manual Drawing"
+    },
+    "drawingPlayerLabel": "Drawing Player",
+    "bingoMode": {
+      "classicLabel": "Classic Bingo (Standard Mode) 🔹",
+      "extendedLabel": "Extended Time Mode (Easy Mode) 🕒",
+      "superfastLabel": "Super Fast Bingo (Hard Mode) ⚡"
+    },
+    "competitionMode": {
+      "competitiveLabel": "Competitive Mode (Ranked) 🏆",
+      "nonCompetitiveLabel": "Non-Competitive Mode (First Bingo Wins!) 🎉"
+    },
+    "description": {
+      "classicText": "<strong>Classic:</strong> One number every 5 seconds, displayed for 5 seconds; only the latest number can be marked, no history displayed.",
+      "extendedText": "<strong>Extended:</strong> One number every 5 seconds, displayed for 10 seconds; up to 2 numbers visible, history (previous number) is listed and markable.",
+      "superfastText": "<strong>Super Fast:</strong> One number every 3 seconds, displayed for 3 seconds; quick decisions required, wrong \"Bingo!\" calls are penalized.",
+      "competitiveText": "<strong>Competitive Mode:</strong> Players are ranked by score and completion time. The game continues until all numbers are drawn or all players have completed Bingo.",
+      "nonCompetitiveText": "<strong>Non-Competitive Mode:</strong> The first player to call \"Bingo!\" wins immediately, and the game ends."
+    },
+    "cancelButtonText": "Cancel",
+    "startButtonText": "Start Game"
+},
+"bingoGameWaiting": {
+    "lobbyTitle": "Bingo Game Lobby",
+    "hostMessage": "You're the host! Start the game when everyone is ready.",
+    "guestMessage": "Please wait for the host to start the game.",
+    "gameStatusTitle": "Game Status",
+    "status": {
+      "waitingForMinPlayers": "Waiting for players (Min. 2 needed)",
+      "waitingForPlayers": "Waiting for players ({{currentPlayers}}/{{maxPlayers}})"
+    },
+    "startGameButton": "Start Game ({{currentPlayers}}/{{maxPlayers}})",
+    "waitingForHost": "Waiting for host to start..."
+  },
+
+
+  "Game Loading...":"Game Loading...",
+  "hangmanLoadingErrorMessage":"There was a problem loading the game. Please refresh the page or click then try again.",
+  "hangmanNoPlayers":"No players have joined yet.",
+
+  "hangmanStartWarning":"At least 1 other player is required to start the game.",
+  "Game Over - Waiting Screen":"Game Over - Waiting Screen",
+  "Welcome to Lobby!":"Welcome to Lobby!",
+  "Joined Players":"Joined Players",
+    
+    "waitingForHost": "Waiting for the host ({{hostName}}) to {{action}}... Please wait patiently.",
+    
+      "startGame": "start the game",
+      "startNewGame": "start a new game",
+      "NoJoinedPlayer":"No other players have joined yet.",
+      "GameOverWaitHost":" The game is over. Wait for the host for the new game.",
+      "ChooseLetter":"Choose a letter",
+      "Category":"Category",
+      "Queue":"Queue",
+       "gameplay": {
+    "categoryLabel": "Category",
+    "categoryUndefined": "UNDEFINED",
+    "turnLabel": "Turn",
+    "yourTurn": "YOU! ({{seconds}}s)",
+    "loadingWord": "Loading...",
+    "attemptsLeftLabel": "Attempts Left",
+    "correctGuessesLabel": "Correct",
+    "incorrectGuessesLabel": "Incorrect",
+    "guessWordFieldLabel": "Guess the Word",
+    "submitButton": "Submit",
+    "winMessage": "Congratulations, you won!",
+    "eliminationMessage": "You were eliminated!",
+    "volume": {
+    "mute": "Mute sound",
+    "unmute": "Unmute sound"
+  }
+  },
+  
+     "playerList": {
+    "title": "Players",
+    "status": {
+      "won": "Won!",
+      "eliminated": "Eliminated"
+    },
+    "role": {
+      "host": "Host"
+    },
+    "currentUserIndicator": {
+      "full": "You",
+      "short": "Y"
+    },
+    "attemptsLeft": "Attempts: {{count}}",
+    "currentTurnIndicator": "Turn",
+    "undefinedPlayer": "Player"
+  },
+  "Game on":"Game on",
+  "willStart":"The game will start soon!",
+  "hostCanStart":"Host can start a new game.",
+  "backLobby":"Back to Lobby",
+  "Game Over!":"Game Over!",
+  "Correct Word":"Correct Word",
+  "End Game (Host)":"End Game (Host)",
+  "hostSetupModal": {
+    "title": "New Game Settings",
+    "description": "Select a category for the word that players will guess. The word will be chosen randomly.",
+    "categoryLabel": "Category",
+    "loadingCategories": "Categories loading...",
+    "cancelButton": "Cancel",
+    "startButton": "Start Game"
+  },
+   "titleGameOver": "Game Over - Lobby (Host)",
+      "titleWaiting": "Game Lobby (Host)",
+      "descriptionCanStartNew": "You can start a new game.",
+      "descriptionWaitingForPlayers": "Waiting for players to join. You can start the game when ready!",
+      "defaultNamePrefix": "Player",
+      "Set New Game":"Set New Game"
+   
+ 
+  
+
 
   
 }

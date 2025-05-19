@@ -13,7 +13,8 @@ const GameContentArea = ({
   members,
   centerExpressions,
   onSendExpression,
-  isChatOpen
+  isChatOpen,
+  t
 }) => {
   const theme = useTheme();
   const {
@@ -55,6 +56,7 @@ const GameContentArea = ({
               soundEnabled={bingoSoundEnabled} 
               toggleSound={toggleBingoSound}   
               soundEnabledRef={bingoSoundEnabledRef} 
+              t={t}
             />
           </Box>
         );
@@ -82,6 +84,7 @@ const GameContentArea = ({
               user={currentUser}
               toggleSound={toggleHangmanSound}
               hangmanSoundEnabled={hangmanSoundEnabled} 
+              t={t}
             />
           </Box>
         );

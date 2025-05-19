@@ -215,6 +215,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
             centerExpressions={showExpressions ? centerExpressions : []}
             onSendExpression={handleSendExpression}
             isChatOpen={isChatOpen}
+            t={t}
           />
 
           {/* Control Buttons */}
