@@ -277,7 +277,7 @@ export const joinLobby = async (req, res) => {
             (member) => member.id === user.id
         );
 
-        if (lobby.lobbyType === "normal" && !isUserAlreadyInLobbyForGameCheck) {
+        if (!isUserAlreadyInLobbyForGameCheck) {
             let gameInProgress = false;
             let gameTypeMessage = "";
 
@@ -286,13 +286,13 @@ export const joinLobby = async (req, res) => {
          
                 if (bingoGame && bingoGame.gameStarted && !bingoGame.gameEnded) {
                     gameInProgress = true;
-                    gameTypeMessage = "Tombala oyunu";
+                    gameTypeMessage = "Bingo";
                 }
             } else if (lobby.game === '2') {
                 const hangmanGame = hangmanGames[lobbyCode];
                 if (hangmanGame && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
                     gameInProgress = true;
-                    gameTypeMessage = "Adam Asmaca oyunu";
+                    gameTypeMessage = "Hangman";
                 }
             }
 

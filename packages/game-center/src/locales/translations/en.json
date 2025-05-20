@@ -732,9 +732,118 @@
       "descriptionCanStartNew": "You can start a new game.",
       "descriptionWaitingForPlayers": "Waiting for players to join. You can start the game when ready!",
       "defaultNamePrefix": "Player",
-      "Set New Game":"Set New Game"
-   
- 
+      "Set New Game":"Set New Game",
+      "notifications": {
+    "playerJoined": "{{playerName}} joined the game!",
+    "rejoinedSuccess": "Successfully reconnected to the game.",
+    "joinedSuccess": "Successfully joined the Bingo game!",
+    "gameStarted": "Game has started!",
+    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
+    "gameOverAllNumbers": "All numbers drawn - Final Rankings",
+    "gameOverAllCompleted": "All players completed - Final Rankings"
+  },
+  "errors": {
+    "hostOnlyStart": "Only the host can start the game.",
+    "gameNotFound": "Bingo game not found.",
+    "alreadyStarted": "The game has already started.",
+    "noActivePlayers": "At least one active (connected) player is required to start the game.",
+    "activePlayersInOtherGames": "Game cannot start because some players are in other active games: {{playerNames}}. Please have these players finish or leave their current games.",
+    "lobbyCodeMissing": "Lobby code not specified.",
+    "userInfoError": "User information could not be retrieved.",
+    "lobbyNotFound": "Lobby not found.",
+    "alreadyInOtherBingo": "You are already active in another Bingo game ({{lobbyCode}}). Please leave or complete your current game to join a new one.",
+    "alreadyInOtherHangman": "You are already active in a Hangman game ({{lobbyCode}}). Please leave or complete your Hangman game to join a Bingo game.",
+    "ongoingGameJoin": "An active game is in progress in this lobby. Please wait for the game to end or join another lobby.",
+    "manualDrawOnlyDrawer": "Only the selected player can draw numbers in manual mode.",
+    "allNumbersDrawnManual": "All numbers have been drawn (manual draw).",
+    "invalidBingoCall": "Invalid Bingo call. Your ticket is not complete or numbers are incorrect.",
+    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})"
+  },
+  "joinedMessage":"Successfully joined the Bingo game",
+  "Game has started!":"Game has started!",
+  "leftlobby":"left from lobby",
+   "common": {
+    "error": "An error occurred. Please try again.",
+    "success": "Operation successful.",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "lobby": {
+    "error": {
+      "codeRequired": "Lobby code is required.",
+      "notFoundOrInactive": "Lobby not found or is not active.",
+      "gameInProgress": "An active {{gameType}} is in progress in this lobby. Please wait for the game to end or join another lobby.",
+      "invalidPassword": "Invalid password.",
+      "lobbyFull": "Lobby is full. Cannot join.",
+      "alreadyInLobby": "You are already in this lobby.",
+      "joinFailed": "Failed to join the lobby. Please try again.",
+      "createFailed": "Failed to create the lobby. Please try again.",
+      "leaveFailed": "Failed to leave the lobby.",
+      "updateSettingsFailed": "Failed to update lobby settings.",
+      "hostOnlyAction": "Only the host can perform this action.",
+      "notInLobby": "You are not currently in this lobby."
+    },
+    "success": {
+      "hostReturned": "You have returned to the lobby as the host.",
+      "joined": "Successfully joined the lobby: {{lobbyName}}.",
+      "created": "Lobby created successfully!",
+       "updated": "Lobby updated successfully!",
+      "left": "You have left the lobby.",
+      "settingsUpdated": "Lobby settings updated successfully.",
+      "kicked": "You have been kicked from the lobby by the host."
+    },
+    "status": {
+      "waiting": "Waiting for players...",
+      "gameStarting": "Game starting soon...",
+      "inGame": "Game in progress"
+    },
+    "action": {
+      "join": "Join Lobby",
+      "create": "Create Lobby",
+      "leave": "Leave Lobby",
+      "startGame": "Start Game",
+      "kickPlayer": "Kick Player",
+      "promoteToHost": "Make Host"
+    },
+    "label": {
+      "lobbyCode": "Lobby Code",
+      "lobbyName": "Lobby Name",
+      "password": "Password (optional)",
+      "maxMembers": "Max Members",
+      "gameType": "Game Type",
+      "players": "Players",
+      "host": "Host"
+    }
+  },
+  "notification": {
+    "userJoinedLobby": "{{userName}} joined the lobby.",
+    "userLeftLobby": "{{userName}} left the lobby.",
+    "hostChanged": "{{newHostName}} is now the host.",
+    "gameStartingSoon": "{{gameName}} will start in {{count}} seconds!",
+    "gameStarted": "{{gameName}} has started!",
+    "gameEnded": "{{gameName}} has ended. Winner: {{winnerName}}",
+    "playerKicked": "{{playerName}} was kicked from the lobby by the host."
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "validation": {
+    "required": "{{fieldName}} is required.",
+    "minLength": "{{fieldName}} must be at least {{count}} characters long.",
+    "maxLength": "{{fieldName}} cannot be more than {{count}} characters long."
+  },
+  "game_bingo":"bingo game",
+  "game_hangman":"hangman game",
+ "joined":"joined",
+ "gameEndedByHost":"Game ended by the host.",
+ "needMorePlayers": "You need at least 2 players to start the game. Waiting for more players to join...",
+  "readyToStart": "Your lobby is ready! You can start the game whenever you're ready."
   
 
 

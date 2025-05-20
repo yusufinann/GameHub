@@ -344,7 +344,12 @@ export const startGame = (ws, data) => {
       return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bingo oyunu bulunamadı." }));
   }
   if (game.host !== ws.userId) {
-      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Sadece host oyunu başlatabilir." }));
+      return ws.send(JSON.stringify({
+  type: "BINGO_ERROR",
+  error: { 
+    key: "errors.hostOnlyStart",
+  }
+}));
   }
   if (game.gameStarted && !game.gameEnded) { 
       return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
@@ -391,7 +396,7 @@ export const startGame = (ws, data) => {
         const hangmanGame = hangmanGames[hangmanLobbyCode];
         if (hangmanGame.players[playerId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
           if (!problematicPlayers.find(p => p.id === playerId)) {
-            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Adam Asmaca', activeLobby: hangmanLobbyCode });
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Hangman', activeLobby: hangmanLobbyCode });
           }
           break;
         }
@@ -540,7 +545,7 @@ export const joinGame = async (ws, data) => {
         ws.send(JSON.stringify({
             type: "BINGO_ERROR",
             message: errorMessage,
-            activeGameInfo: { gameType: 'Tombala', lobbyCode: otherLobbyCodeInMap }
+            activeGameInfo: { gameType: 'Bingo', lobbyCode: otherLobbyCodeInMap }
         }));
         return;
       }
@@ -557,7 +562,7 @@ export const joinGame = async (ws, data) => {
         ws.send(JSON.stringify({
             type: "BINGO_ERROR",
             message: errorMessage,
-            activeGameInfo: { gameType: 'Adam Asmaca', lobbyCode: hangmanLobbyCode }
+            activeGameInfo: { gameType: 'Hangman', lobbyCode: hangmanLobbyCode }
         }));
         return;
       }
@@ -643,7 +648,11 @@ export const joinGame = async (ws, data) => {
       id: ws.userId,
       name: userInfo.name,
       userName: userInfo.username
-    }
+    },
+    notification: { 
+    key: "notifications.playerJoined", 
+    params: { playerName: userInfo.name || userInfo.username } 
+  }
   });
 
   ws.send(JSON.stringify({
@@ -1204,67 +1213,61 @@ export const getPlayerStats = async (req, res) => {
 
 export const getAllPlayerBingoStats = async (req, res) => {
   try {
-    // Tüm oyunları çekiyoruz.
-    const games = await BingoGame.find({});
-
-
-    // Oyunları oynanma tarihine göre artan sıralıyoruz.
-    games.sort((a, b) => new Date(a.startedAt) - new Date(b.startedAt)); // Directly sort games
-
-    // Her oyuncunun kümülatif istatistiklerini tutacak nesne.
-    const cumulativeStats = {};
-    // Her oyuna ait oyuncu istatistiklerinin tutulacağı dizi.
-    const detailedStats = [];
-
-    games.forEach(game => { // Directly forEach over games
-      const gameTime = game.startedAt;
-      // Her oyunda yer alan oyuncular için:
-      game.players.forEach(player => {
-        const id = player.playerId;
-        const userName = player.userName;
-
-        // İlk defa karşılaşıyorsak oyuncu için kümülatif bilgileri initialize ediyoruz.
-        if (!cumulativeStats[id]) {
-          cumulativeStats[id] = {
-            totalGames: 0,
-            totalScore: 0,
-            wins: 0,
-            userName: userName
-          };
+    const playerStats = await BingoGame.aggregate([
+    
+      {
+        $unwind: "$players"
+      },
+    
+      {
+        $group: {
+          _id: "$players.playerId", 
+          userName: { $first: "$players.userName" }, 
+          totalGames: { $sum: 1 }, 
+          totalScore: { $sum: "$players.score" }, 
+          wins: {
+            $sum: {
+              $cond: [{ $eq: ["$players.finalRank", 1] }, 1, 0] 
+            }
+          }
         }
-
-        // Oyun bazında kümülatif istatistikleri güncelliyoruz.
-        cumulativeStats[id].totalGames += 1;
-        cumulativeStats[id].totalScore += player.score;
-        if (player.finalRank === 1) {
-          cumulativeStats[id].wins += 1;
+      },
+  
+      {
+        $addFields: {
+          averageScore: {
+            $cond: [
+              { $eq: ["$totalGames", 0] },
+              0, 
+              { $divide: ["$totalScore", "$totalGames"] } 
+            ]
+          }
         }
+      },
+   
+      {
+        $sort: {
+          averageScore: -1, 
+          userName: 1     
+        }
+      },
+      
+      {
+        $project: {
+          _id: 0, 
+          playerId: "$_id", 
+          userName: 1,
+          totalGames: 1,
+          totalScore: 1,
+          wins: 1,
+          averageScore: 1
+        }
+      }
+    ]);
 
-        // O ana kadar alınan ortalama puanı hesaplıyoruz.
-        const averageScore =
-          cumulativeStats[id].totalScore / cumulativeStats[id].totalGames;
-
-        const rank = player.finalRank === 1 ? 1 : player.finalRank;
-        const isWinForGame = rank === 1;
-
-        // Her oyun için detaylı istatistik kaydını oluşturuyoruz.
-        detailedStats.push({
-          gameId: game.gameId,
-          playerId: id,
-          userName: userName || cumulativeStats[id].userName || 'Unknown Player',
-          score: player.score,
-          averageScore: averageScore,
-          wins: cumulativeStats[id].wins,
-          rank: rank,
-          gameTime: gameTime,
-          isWin: isWinForGame,
-        });
-      });
-    });
-
-    res.json({ playerGameStats: detailedStats });
+    res.status(200).json({ playerOverallStats: playerStats });
   } catch (error) {
-    console.error("Error aggregating detailed player stats:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error aggregating player bingo stats:", error);
+    res.status(500).json({ message: "Sunucuda bir hata oluştu.", error: error.message });
   }
 };

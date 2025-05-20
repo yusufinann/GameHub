@@ -130,7 +130,7 @@ function LobbyEditModal({ open, onClose, lobby }) {
       }
 
       await apiUpdateLobby(lobby.lobbyCode, payload);
-      setSnackbar({ open: true, message: "Lobby başarıyla güncellendi!", severity: "success" });
+      setSnackbar({ open: true, message: t("lobby.success.updated"), severity: "success" });
       setTimeout(() => onClose(true), 1500);
     } catch (error) {
       console.error("Lobby update error:", error);

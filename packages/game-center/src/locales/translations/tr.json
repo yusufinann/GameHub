@@ -724,5 +724,114 @@
       "descriptionCanStartNew": "Yeni bir oyun başlatabilirsin.",
       "descriptionWaitingForPlayers": "Oyuncuların katılmasını bekliyorsun. Hazır olduğunda oyunu başlatabilirsin!",
        "defaultNamePrefix": "Oyuncu",
-       "Set New Game":"Yeni Oyun Ayarla"
+       "Set New Game":"Yeni Oyun Ayarla",
+        "notifications": {
+    "playerJoined": "{{playerName}} oyuna katıldı!",
+    "rejoinedSuccess": "Oyuna başarıyla yeniden bağlandınız.",
+    "joinedSuccess": "Tombala oyununa başarıyla katıldınız!",
+    "gameStarted": "Oyun başladı!",
+    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})",
+    "gameOverAllNumbers": "Tüm numaralar çekildi - Final Sıralaması",
+    "gameOverAllCompleted": "Tüm oyuncular tamamladı - Final Sıralaması"
+  },
+  "errors": {
+    "hostOnlyStart": "Sadece lobi sahibi oyunu başlatabilir.",
+    "gameNotFound": "Tombala oyunu bulunamadı.",
+    "alreadyStarted": "Oyun zaten başladı.",
+    "noActivePlayers": "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı.",
+    "activePlayersInOtherGames": "Oyun başlatılamadı çünkü bazı oyuncular başka aktif oyunlarda: {{playerNames}}. Lütfen bu oyuncuların mevcut oyunlarını bitirmelerini veya ayrılmalarını sağlayın.",
+    "lobbyCodeMissing": "Lobi kodu belirtilmedi.",
+    "userInfoError": "Kullanıcı bilgileri alınamadı.",
+    "lobbyNotFound": "Lobi bulunamadı.",
+    "alreadyInOtherBingo": "Zaten başka bir Tombala oyununda ({{lobbyCode}}) aktifsiniz. Yeni bir oyuna katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.",
+    "alreadyInOtherHangman": "Zaten bir Adam Asmaca oyununda ({{lobbyCode}}) aktifsiniz. Tombala oyununa katılmak için lütfen önce Adam Asmaca oyununuzdan ayrılın veya oyunu tamamlayın.",
+    "ongoingGameJoin": "Bu lobide aktif bir oyun devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
+    "manualDrawOnlyDrawer": "Manuel modda sadece seçilen oyuncu sayı çekebilir.",
+    "allNumbersDrawnManual": "Tüm numaralar çekildi (manuel çekiliş).",
+    "invalidBingoCall": "Geçersiz Tombala çağrısı. Kartınız tamamlanmamış veya sayılar yanlış.",
+    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
+  },
+  "joinedMessage":"Tombala oyununa başarıyla katıldınız",
+  "Game has started!":"Oyun başladı!",
+  "leftlobby":"lobiden ayrıldı",
+   "common": {
+    "error": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "success": "İşlem başarılı.",
+    "loading": "Yükleniyor...",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "lobby": {
+    "error": {
+      "codeRequired": "Lobi kodu gereklidir.",
+      "notFoundOrInactive": "Lobi bulunamadı veya aktif değil.",
+      "gameInProgress": "Bu lobide aktif bir {{gameType}} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
+      "invalidPassword": "Geçersiz şifre.",
+      "lobbyFull": "Lobi dolu. Katılamazsınız.",
+      "alreadyInLobby": "Zaten bu lobidesiniz.",
+      "joinFailed": "Lobiye katılırken bir hata oluştu. Lütfen tekrar deneyin.",
+      "createFailed": "Lobi oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
+      "leaveFailed": "Lobiden ayrılırken hata oluştu.",
+      "updateSettingsFailed": "Lobi ayarları güncellenemedi.",
+      "hostOnlyAction": "Bu işlemi sadece lobi sahibi yapabilir.",
+      "notInLobby": "Şu anda bu lobide değilsiniz."
+    },
+    "success": {
+      "hostReturned": "Lobiye host olarak geri döndünüz.",
+      "joined": "'{{lobbyName}}' lobisine başarıyla katıldınız.",
+      "created": "Lobi başarıyla oluşturuldu!",
+       "updated": "Lobi başarıyla güncellendi!",
+      "left": "Lobiden ayrıldınız.",
+      "settingsUpdated": "Lobi ayarları başarıyla güncellendi.",
+      "kicked": "Lobi sahibi tarafından lobiden atıldınız."
+    },
+    "status": {
+      "waiting": "Oyuncular bekleniyor...",
+      "gameStarting": "Oyun birazdan başlayacak...",
+      "inGame": "Oyun devam ediyor"
+    },
+    "action": {
+      "join": "Lobiye Katıl",
+      "create": "Lobi Oluştur",
+      "leave": "Lobiden Ayrıl",
+      "startGame": "Oyunu Başlat",
+      "kickPlayer": "Oyuncuyu At",
+      "promoteToHost": "Host Yap"
+    },
+    "label": {
+      "lobbyCode": "Lobi Kodu",
+      "lobbyName": "Lobi Adı",
+      "password": "Şifre (isteğe bağlı)",
+      "maxMembers": "Maksimum Üye",
+      "gameType": "Oyun Türü",
+      "players": "Oyuncular",
+      "host": "Host"
+    }
+  },
+  "notification": {
+    "userJoinedLobby": "{{userName}} lobiye katıldı.",
+    "userLeftLobby": "{{userName}} lobiden ayrıldı.",
+    "hostChanged": "{{newHostName}} artık lobi sahibi.",
+    "gameStartingSoon": "{{gameName}} {{count}} saniye içinde başlayacak!",
+    "gameStarted": "{{gameName}} başladı!",
+    "gameEnded": "{{gameName}} sona erdi. Kazanan: {{winnerName}}",
+    "playerKicked": "{{playerName}}, lobi sahibi tarafından lobiden atıldı."
+  },
+  "user": {
+    "profile": "Profil",
+    "settings": "Ayarlar",
+    "logout": "Çıkış Yap"
+  },
+  "validation": {
+    "required": "{{fieldName}} alanı zorunludur.",
+    "minLength": "{{fieldName}} en az {{count}} karakter uzunluğunda olmalıdır.",
+    "maxLength": "{{fieldName}} en fazla {{count}} karakter uzunluğunda olabilir."
+  }, "game_bingo":"tombala oyunu",
+  "game_hangman":"adam asmaca oyunu",
+  "joined":"katıldı","gameEndedByHost":"Oyun host tarafından sonlandırıldı.",
+    "needMorePlayers": "Oyunu başlatmak için en az 2 oyuncuya ihtiyacınız var. Daha fazla oyuncunun katılması bekleniyor...",
+    "readyToStart": "Lobiniz hazır! Oyunu istediğiniz zaman başlatabilirsiniz."
 }

@@ -392,7 +392,7 @@ export const joinGame = async (ws, data) => {
         ws.send(JSON.stringify({
             type: "HANGMAN_ERROR",
             message: errorMessage,
-            activeGameInfo: { gameType: 'Adam Asmaca', lobbyCode: otherLobbyCodeInMap }
+            activeGameInfo: { gameType: 'Hangman', lobbyCode: otherLobbyCodeInMap }
         }));
         return;
       }
@@ -540,7 +540,7 @@ export const startGame = (ws, data) => {
         const otherGame = hangmanGames[otherLobbyCodeInMap];
         if (otherGame.players[playerId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
           if (!problematicPlayers.find(p => p.id === playerId)) { 
-            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Adam Asmaca', activeLobby: otherLobbyCodeInMap });
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Hangman', activeLobby: otherLobbyCodeInMap });
           }
           break; 
         }
@@ -554,7 +554,7 @@ export const startGame = (ws, data) => {
         const bingoGame = bingoGames[bingoLobbyCode];
         if (bingoGame.players[playerId] && bingoGame.gameStarted && !bingoGame.gameEnded) {
            if (!problematicPlayers.find(p => p.id === playerId)) {
-            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Tombola', activeLobby: bingoLobbyCode });
+            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Bingo', activeLobby: bingoLobbyCode });
           }
           break; 
         }

@@ -238,7 +238,7 @@ const GameLobbyPage = () => {
             justifyContent: 'center'
           }}
         >
-          {userLeftInfo?.name} {t("lobiden ayrıldı")}!
+          {userLeftInfo?.name} {t("leftlobby")}!
         </Alert>
       </Snackbar>
     </>

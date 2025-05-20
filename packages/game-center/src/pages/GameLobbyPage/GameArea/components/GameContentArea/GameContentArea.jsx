@@ -1,4 +1,4 @@
-import React, { useContext } from "react"; // Make sure useContext is imported
+import React, { useContext } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { BingoGame } from "@gamecenter/bingo-game";
 import { Hangman } from "@gamecenter/hangman-game";
@@ -29,25 +29,15 @@ const GameContentArea = ({
     switch (lobbyInfo.game) {
       case "1": // Bingo
         return (
-          <Box sx={{ height: '70vh' }}>
+          <Box sx={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            pb: { xs: 3, sm: 3 }
+          }}>
             <BingoGame
-              sx={{
-                width: "100%",
-                height: "100%",
-                "& .MuiContainer-root": { height: "100%", maxWidth: "none", p: 0 },
-                "& .MuiCard-root": {
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: "24px",
-                  overflow: "hidden",
-                  boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
-                  border: `1px solid ${theme.palette.background.offwhite}`,
-                  background: `${theme.palette.background.paper}B3`,
-                  backdropFilter: 'blur(8px)',
-                },
-                "& .MuiCardContent-root": { flex: 1, overflow: "auto", p: 3 },
-              }}
               lobbyCode={lobbyInfo.lobbyCode}
               socket={socket}
               currentUser={currentUser}
@@ -70,6 +60,7 @@ const GameContentArea = ({
               width: "100%",
               height: "100%",
               borderRadius: "24px",
+              
             }}
           >
             <Hangman
@@ -98,6 +89,7 @@ const GameContentArea = ({
               backdropFilter: 'blur(8px)',
               boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
               border: `1px solid ${theme.palette.background.offwhite}`,
+              pb: { xs: 3, sm: 3 }
             }}
           >
             <Typography
@@ -123,7 +115,8 @@ const GameContentArea = ({
         flexDirection: 'column',
         transition: 'width 0.3s ease-in-out',
         overflow: 'hidden',
-        pr: isChatOpen ? 1 : 0
+        pr: isChatOpen ? 1 : 0,
+        position: 'relative', 
       }}
     >
       <ExpressionPanel centerExpressions={centerExpressions} />

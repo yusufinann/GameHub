@@ -53,7 +53,6 @@ const Profile = () => {
   const { user, loading: userLoading, error: userError } = useProfile(userId);
   const { sendFriendRequest, removeFriend, isRequestSent, isFriend, friends } = useFriendsContext();
   const { currentUser } = useAuthContext();
-
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   // Overall Game Stats
@@ -327,7 +326,7 @@ const Profile = () => {
             icon: Group,
             titleKey: "profile.stats.friends",
             fallbackTitle: "Friends",
-            value: friends.length.toLocaleString(i18n.language)
+            value: user.friends.length.toLocaleString(i18n.language)
           }
         ].map((stat, index) => (
           <StatCard
