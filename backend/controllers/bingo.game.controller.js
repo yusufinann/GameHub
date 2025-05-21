@@ -9,7 +9,8 @@ async function getUserInfo(userId) {
     const user = await User.findById(userId);
     return user ? {
       username: user.username,
-      name: user.name
+      name: user.name,
+      avatar:user.avatar
     } : null;
   } catch (error) {
     console.error('Error fetching user info:', error);
@@ -59,6 +60,7 @@ function getGameRankings(game) {
     .map(([playerId, player]) => ({
       playerId,
       userName: player.userName,
+       avatar: player.avatar,
       score: calculatePlayerScore(player, game.drawnNumbers),
       completedAt: player.completedAt || null
     }))
@@ -76,7 +78,8 @@ function getGameRankings(game) {
  * Yardımcı: Belirtilen oyundaki tüm oyunculara mesaj gönderir.
  */
 export function broadcastToGame(game, data) {
-  const message = JSON.stringify(data);
+  const messageData = { ...data, lobbyCode: game.lobbyCode };
+  const message = JSON.stringify(messageData);
   Object.values(game.players).forEach((player) => {
     if (player.ws.readyState === player.ws.OPEN) {
       player.ws.send(message, (err) => {
@@ -99,7 +102,7 @@ function autoDrawNumber(game) {
   if (game.numberPool.length === 0) {
       const rankings = getGameRankings(game);
       game.gameEnded = true;
-      game.gameStarted = false; // <----- EKLEDİ: Oyun bittiğinde gameStarted'ı false yap
+      game.gameStarted = false; 
       broadcastToGame(game, {
           type: "BINGO_GAME_OVER",
           message: "All numbers drawn - Final Rankings",
@@ -114,11 +117,11 @@ function autoDrawNumber(game) {
   const number = game.numberPool.shift();
   game.drawnNumbers.push(number);
 
-  // Configuration based on game mode
-  let numberDisplayDuration = 5000;    // Display time for current number
-  let activeNumberTotalDuration = 5000; // Total time number stays active (including display time)
+  
+  let numberDisplayDuration = 5000;    
+  let activeNumberTotalDuration = 5000; 
 
-  // Extended mode: numbers remain active for 10 seconds total (5s display + 5s active only)
+  
   if (game.bingoMode === "extended") {
       activeNumberTotalDuration = 10000; // 10 seconds total active time
   } else if (game.bingoMode === "superfast") {
@@ -126,17 +129,15 @@ function autoDrawNumber(game) {
       activeNumberTotalDuration = 3000;
   }
 
-  // Add the new number to active numbers
   game.activeNumbers.push(number);
 
-  // For extended mode, keep the current and one previous number
-  // For other modes, keep only the current number
+
   const numbersToKeepActive = game.bingoMode === "extended" ? 2 : 1;
   if (game.activeNumbers.length > numbersToKeepActive) {
       game.activeNumbers = game.activeNumbers.slice(-numbersToKeepActive);
   }
 
-  // Broadcast the drawn number to all players
+ 
   broadcastToGame(game, {
       type: "BINGO_NUMBER_DRAWN",
       number,
@@ -144,11 +145,10 @@ function autoDrawNumber(game) {
       activeNumbers: game.activeNumbers
   });
 
-  // First timeout: After display duration, clear number from display but keep in active numbers
+ 
   setTimeout(() => {
       if (game.bingoMode === "extended") {
-          // For extended mode, we don't remove from activeNumbers yet,
-          // but we notify clients that the number is no longer being displayed
+      
           broadcastToGame(game, {
               type: "BINGO_NUMBER_DISPLAY_END",
               number: number,
@@ -157,10 +157,10 @@ function autoDrawNumber(game) {
       }
   }, numberDisplayDuration);
 
-  // Second timeout: After total active duration, clear number from active numbers
+ 
   setTimeout(() => {
       if (game.bingoMode === "extended") {
-          // Remove oldest number from active numbers if there's more than one
+         
           if (game.activeNumbers.length > 1) {
               game.activeNumbers = game.activeNumbers.slice(1);
           } else {
@@ -178,7 +178,7 @@ function autoDrawNumber(game) {
 
       broadcastGameStatus(game);
 
-      // Game end checks
+    
       const completedPlayersCount = getGameRankings(game).filter(r => r.completedAt).length;
       const allPlayersCompleted = completedPlayersCount === Object.keys(game.players).length;
 
@@ -241,29 +241,24 @@ export const drawNumber = (ws, data) => {
   const number = game.numberPool.shift();
   game.drawnNumbers.push(number);
 
-  // Configuration based on game mode
-  let numberDisplayDuration = 5000; // Display time for current number
-  let activeNumberTotalDuration = 5000; // Total time number stays active (including display time)
+  
+  let numberDisplayDuration = 5000; 
+  let activeNumberTotalDuration = 5000; 
 
-  // Extended mode: numbers remain active for 10 seconds total (5s display + 5s active only)
   if (game.bingoMode === "extended") {
-      activeNumberTotalDuration = 10000; // 10 seconds total active time
+      activeNumberTotalDuration = 10000;
   } else if (game.bingoMode === "superfast") {
       numberDisplayDuration = 3000;
       activeNumberTotalDuration = 3000;
   }
 
-  // Add the new number to active numbers
   game.activeNumbers.push(number);
 
-  // For extended mode, keep the current and one previous number
-  // For other modes, keep only the current number
   const numbersToKeepActive = game.bingoMode === "extended" ? 2 : 1;
   if (game.activeNumbers.length > numbersToKeepActive) {
       game.activeNumbers = game.activeNumbers.slice(-numbersToKeepActive);
   }
 
-  // Broadcast the drawn number to all players
   broadcastToGame(game, {
       type: "BINGO_NUMBER_DRAWN",
       number,
@@ -271,11 +266,10 @@ export const drawNumber = (ws, data) => {
       activeNumbers: game.activeNumbers
   });
 
-  // First timeout: After display duration, clear number from display but keep in active numbers
+
   setTimeout(() => {
       if (game.bingoMode === "extended") {
-          // For extended mode, we don't remove from activeNumbers yet,
-          // but we notify clients that the number is no longer being displayed
+         
           broadcastToGame(game, {
               type: "BINGO_NUMBER_DISPLAY_END",
               number: number,
@@ -286,25 +280,25 @@ export const drawNumber = (ws, data) => {
 
   setTimeout(() => {
       if (game.bingoMode === "extended") {
-          // Remove oldest number from active numbers if there's more than one
+        
           if (game.activeNumbers.length > 1) {
               game.activeNumbers = game.activeNumbers.slice(1);
           } else {
               game.activeNumbers = [];
           }
       } else {
-          // For other modes, clear all active numbers
+      
           game.activeNumbers = [];
       }
 
-      // Broadcast the updated active numbers
+      
       broadcastToGame(game, {
           type: "BINGO_NUMBER_CLEAR",
           clearedNumber: number,
           activeNumbers: game.activeNumbers
       });
 
-      // Game end checks
+    
       const completedPlayersCount = getGameRankings(game).filter(r => r.completedAt).length;
       const allPlayersCompleted = completedPlayersCount === Object.keys(game.players).length;
 
@@ -339,29 +333,35 @@ export const startGame = (ws, data) => {
   const { lobbyCode, drawMode, drawer, bingoMode, competitionMode } = data;
   const game = bingoGames[lobbyCode];
 
-  
   if (!game) {
-      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bingo oyunu bulunamadı." }));
+     console.warn(`[Bingo Server] Oyun başlatma hatası (${lobbyCode}): İn-memory oyun state'i bulunamadı.`);
+    return ws.send(JSON.stringify({
+        type: "BINGO_ERROR",
+        message: "Oyun başlatılamadı: Lobi bilgisi sunucuda mevcut değil veya hazır değil.",
+    }));
   }
+
   if (game.host !== ws.userId) {
-      return ws.send(JSON.stringify({
-  type: "BINGO_ERROR",
-  error: { 
-    key: "errors.hostOnlyStart",
+    return ws.send(JSON.stringify({
+      type: "BINGO_ERROR",
+      error: {
+        key: "errors.hostOnlyStart",
+        message: "Sadece host oyunu başlatabilir.",
+      }
+    }));
   }
-}));
+  if (game.gameStarted && !game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
   }
-  if (game.gameStarted && !game.gameEnded) { 
-      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
+  if (Object.keys(game.players).length === 0) {
+     return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için lobide en az bir oyuncu olmalı." }));
   }
-   //AKTİF OYUNCULARI BELİRLE (SADECE WS BAĞLANTISI OLANLAR) 
+
   const playersToStartGameWith = {};
-  const playerInfoForCheck = [];
   Object.keys(game.players).forEach(playerId => {
     const player = game.players[playerId];
     if (player && player.ws) {
       playersToStartGameWith[playerId] = player;
-      playerInfoForCheck.push({ id: playerId, name: player.name || player.userName });
     }
   });
 
@@ -369,36 +369,44 @@ export const startGame = (ws, data) => {
     return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
   }
 
-  // AKTİF OYUN KONTROLÜ (HOST VE TÜM ÜYELER İÇİN) 
   const problematicPlayers = [];
 
-  for (const playerToCheck of playerInfoForCheck) {
-    const playerId = playerToCheck.id;
-    const playerName = playerToCheck.name;
+  for (const playerId in game.players) {
+    if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
+      const player = game.players[playerId];
+      const playerName = player.name || player.userName || `Oyuncu #${playerId}`;
 
-    // 1. Diğer Bingo oyunlarında aktif mi?
-    for (const otherLobbyCodeInMap in bingoGames) {
-      if (bingoGames.hasOwnProperty(otherLobbyCodeInMap)) {
-        const otherGame = bingoGames[otherLobbyCodeInMap];
-        if (otherGame.players[playerId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
-          if (!problematicPlayers.find(p => p.id === playerId)) {
-            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Tombola', activeLobby: otherLobbyCodeInMap });
+      for (const otherLobbyCodeInMap in bingoGames) {
+        if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
+          const otherGame = bingoGames[otherLobbyCodeInMap];
+          if (
+            otherGame.players && otherGame.players[playerId] &&
+            otherGame.gameStarted &&
+            !otherGame.gameEnded &&
+            otherLobbyCodeInMap !== lobbyCode
+          ) {
+            if (!problematicPlayers.find(p => p.id === playerId)) {
+              problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Bingo', activeLobby: otherLobbyCodeInMap });
+            }
+            break;
           }
-          break;
         }
       }
-    }
-    if (problematicPlayers.find(p => p.id === playerId)) continue;
+      if (problematicPlayers.find(p => p.id === playerId)) continue;
 
-    // 2. Aktif Hangman oyunlarında aktif mi?
-    for (const hangmanLobbyCode in hangmanGames) {
-      if (hangmanGames.hasOwnProperty(hangmanLobbyCode)) {
-        const hangmanGame = hangmanGames[hangmanLobbyCode];
-        if (hangmanGame.players[playerId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
-          if (!problematicPlayers.find(p => p.id === playerId)) {
-            problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Hangman', activeLobby: hangmanLobbyCode });
+      for (const hangmanLobbyCode in hangmanGames) {
+        if (Object.prototype.hasOwnProperty.call(hangmanGames, hangmanLobbyCode)) {
+          const hangmanGame = hangmanGames[hangmanLobbyCode];
+          if (
+             hangmanGame.players && hangmanGame.players[playerId] &&
+             hangmanGame.gameStarted &&
+            !hangmanGame.gameEnded
+          ) {
+            if (!problematicPlayers.find(p => p.id === playerId)) {
+              problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Hangman', activeLobby: hangmanLobbyCode });
+            }
+            break;
           }
-          break;
         }
       }
     }
@@ -408,6 +416,7 @@ export const startGame = (ws, data) => {
     const playerNames = problematicPlayers.map(p => `${p.name} (${p.gameType} - Lobi: ${p.activeLobby})`).join(', ');
     const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular başka aktif oyunlarda: ${playerNames}. Lütfen bu oyuncuların mevcut oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
     console.warn(`[Bingo Server] Oyun başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
+
     ws.send(JSON.stringify({
         type: "BINGO_ERROR",
         message: errorMessage,
@@ -416,19 +425,20 @@ export const startGame = (ws, data) => {
             players: problematicPlayers
         }
     }));
-    return; 
+    return;
   }
-  
 
-  game.players = playersToStartGameWith; 
-  // Oyun state'ini sıfırlama
+  ws.send(JSON.stringify({ type: 'ACKNOWLEDGEMENT', messageType: 'BINGO_START', timestamp: new Date().toISOString() }));
+
+  game.players = playersToStartGameWith;
+
   game.drawnNumbers = [];
   game.activeNumbers = [];
-  game.numberPool = generateShuffledNumbers(1, 90); 
+  game.numberPool = generateShuffledNumbers(1, 90);
   game.gameEnded = false;
-  game.drawMode = drawMode || 'auto'; 
-  game.drawer = game.drawMode === "manual" ? drawer : null;
-  game.bingoMode = bingoMode || 'classic';  
+  game.drawMode = drawMode || 'auto';
+  game.drawer = (game.drawMode === "manual" && game.players[drawer]) ? drawer : null;
+  game.bingoMode = bingoMode || 'classic';
   game.gameId = new mongoose.Types.ObjectId();
   game.competitionMode = competitionMode || 'competitive';
 
@@ -438,60 +448,67 @@ export const startGame = (ws, data) => {
   }
 
   for (const playerId in game.players) {
-      if (game.players.hasOwnProperty(playerId)) { 
-          game.players[playerId].markedNumbers = [];
-          game.players[playerId].ticket = generateTicket(); 
-          delete game.players[playerId].completedAt;
-          delete game.players[playerId].completedBingo;
+      if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
+          const player = game.players[playerId];
+          player.markedNumbers = [];
+          player.ticket = generateTicket();
+          delete player.completedAt;
+          delete player.completedBingo;
       }
   }
 
-  game.drawMode = drawMode;
-  game.drawer = drawMode === "manual" ? drawer : null;
-  game.bingoMode = bingoMode;
-
-
   let countdown = 5;
   const countdownInterval = setInterval(() => {
-      broadcastToGame(game, { 
+      broadcastToGame(game, {
           type: "BINGO_COUNTDOWN",
           countdown,
       });
       countdown--;
+
       if (countdown < 0) {
           clearInterval(countdownInterval);
           game.startedAt = new Date();
           game.gameStarted = true;
+          game.gameEnded = false;
           broadcastToGame(game, {
               type: "BINGO_STARTED",
               message: "Oyun başladı!",
-              drawMode,
-              drawer: drawMode === "manual" ? drawer : undefined,
+              drawMode: game.drawMode,
+              drawer: game.drawMode === "manual" ? game.drawer : undefined,
               bingoMode: game.bingoMode,
               gameId: game.gameId,
-              players: Object.keys(game.players).map(playerId => ({
-                  playerId: playerId,
-                  ticket: game.players[playerId].ticket
-              })),
+            players: Object.keys(game.players).map(playerId => { 
+                  const currentPlayer = game.players[playerId]; 
+                  return {
+                      playerId: playerId,
+                      name: currentPlayer.name || currentPlayer.userName,
+                      avatar: currentPlayer.avatar, 
+                      ticket: currentPlayer.ticket,
+                      markedNumbers: currentPlayer.markedNumbers,
+                  };
+              }),
               competitionMode: game.competitionMode,
-              completedPlayers: [] 
+              completedPlayers: []
           });
 
-          if (drawMode === "auto") {
-              let drawInterval = 5000; 
+          if (game.drawMode === "auto") {
+              let drawInterval = 5000;
               if (game.bingoMode === "superfast") {
                   drawInterval = 3000;
               }
 
               const autoDrawInterval = setInterval(() => {
-                  if (game.gameEnded || !game.gameStarted) { 
+                  if (game.gameEnded || !game.gameStarted) {
                       clearInterval(autoDrawInterval);
-                      game.autoDrawInterval = null; 
+                      game.autoDrawInterval = null;
                       return;
                   }
-                  autoDrawNumber(game); 
+                  autoDrawNumber(game);
               }, drawInterval);
               game.autoDrawInterval = autoDrawInterval;
+          }
+          if (game.drawMode === "manual" && game.drawer && game.players[game.drawer] && game.players[game.drawer].ws) {
+             game.players[game.drawer].ws.send(JSON.stringify({ type: "BINGO_YOUR_TURN_TO_DRAW", message: "Sıradaki sayıyı çekebilirsiniz.", lobbyCode: game.lobbyCode }));
           }
       }
   }, 1000);
@@ -602,7 +619,7 @@ export const joinGame = async (ws, data) => {
     player.ws = ws; 
     player.userName = userInfo.username;
     player.name = userInfo.name;
-
+    player.avatar=userInfo.avatar;
     const hasCompleted = player.completedBingo || false;
 
     return ws.send(JSON.stringify({
@@ -615,6 +632,7 @@ export const joinGame = async (ws, data) => {
            id: p.userId,
            userName: p.userName,
            name: p.name,
+           avatar: p.avatar,
            completed: p.completedBingo || false
        })),
       gameStarted: game.gameStarted,
@@ -638,6 +656,7 @@ export const joinGame = async (ws, data) => {
     markedNumbers: [],
     userName: userInfo.username,
     name: userInfo.name,
+    avatar: userInfo.avatar,
     userId: ws.userId,
     completedBingo: false
   };
@@ -647,7 +666,8 @@ export const joinGame = async (ws, data) => {
     player: {
       id: ws.userId,
       name: userInfo.name,
-      userName: userInfo.username
+      userName: userInfo.username,
+       avatar: userInfo.avatar
     },
     notification: { 
     key: "notifications.playerJoined", 
@@ -665,6 +685,7 @@ export const joinGame = async (ws, data) => {
         id: p.userId,
         userName: p.userName,
         name: p.name,
+        avatar: p.avatar,
         completed: p.completedBingo || false
     })),
     gameStarted: game.gameStarted, 
@@ -674,7 +695,8 @@ export const joinGame = async (ws, data) => {
     drawer: game.drawer,
     userInfo: { 
       name: userInfo.name,
-      userName: userInfo.username
+      userName: userInfo.username,
+      avatar: userInfo.avatar
     },
     completedBingo: false,
     completedPlayers: getCompletedPlayersList(game), 
@@ -914,7 +936,8 @@ function getCompletedPlayersList(game) {
       .map(([id, player]) => ({
           id: id, 
           userId: player.userId, 
-          userName: player.userName
+          userName: player.userName,
+           avatar: player.avatar 
       }));
 }
 
