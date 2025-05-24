@@ -3,7 +3,7 @@ import { useAuthContext } from "../../shared/context/AuthContext";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
 import axios from "axios";
-
+import { useTranslation } from "react-i18next";
 const LIMIT = 30;
 
 export const useCommunityPage = () => {
@@ -11,7 +11,7 @@ export const useCommunityPage = () => {
   const { socket } = useWebSocket();
   const { showSnackbar } = useSnackbar();
   const token = localStorage.getItem("token");
-
+const{t}=useTranslation();
   const [communityMessages, setCommunityMessages] = useState([]);
   const [newCommunityMessage, setNewCommunityMessage] = useState("");
   const [isCommunityMessagingLoading, setIsCommunityMessagingLoading] =
@@ -209,7 +209,7 @@ export const useCommunityPage = () => {
         case "GROUP_CREATED":
           setAllGroups((prevAllGroups) => [...prevAllGroups, message.group]);
           showSnackbar({
-            message: "Grup başarıyla oluşturuldu!",
+            message: t("createdGroup"),
             severity: "success",
           });
           fetchUserGroups();
@@ -247,7 +247,7 @@ export const useCommunityPage = () => {
             setHasMoreGroup(false);
           }
           showSnackbar({
-            message: "Gruptan başarıyla ayrıldınız!",
+            message: t("leaveGroup"),
             severity: "success",
           });
           break;

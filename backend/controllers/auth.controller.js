@@ -14,15 +14,15 @@ export const userLogin = async (req, res) => {
         const { email, password, rememberMe } = req.body;
         const user = await User.findOne({ email });
 
-        const errorMessage = "Invalid email or password";
+        //const errorMessage = "Invalid email or password";
 
         if (!user) {
-            return res.status(401).json({ message: errorMessage });
+            return res.status(401).json({ code: "AUTH_INVALID_CREDENTIALS" });
         }
 
         const passwordMatches = await bcrypt.compare(password, user.password);
         if (!passwordMatches) {
-            return res.status(401).json({ message: errorMessage });
+            return res.status(401).json({ code: "AUTH_INVALID_CREDENTIALS" });
         }
 
         user.isOnline = true;
@@ -67,7 +67,7 @@ export const userLogin = async (req, res) => {
         });
     } catch (error) {
         console.error("Login error:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
     }
 };
 

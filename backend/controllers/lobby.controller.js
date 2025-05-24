@@ -298,7 +298,8 @@ export const joinLobby = async (req, res) => {
 
             if (gameInProgress) {
                 return res.status(403).json({
-                    message: `Bu lobide aktif bir ${gameTypeMessage} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.`
+                  errorKey: "lobby.gameInProgress",
+                    errorParams: { gameTypeIdentifier: gameTypeMessage }
                 });
             }
         }

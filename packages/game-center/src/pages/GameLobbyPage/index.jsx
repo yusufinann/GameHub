@@ -21,27 +21,28 @@ import LobbyPasswordModal from "../../shared/components/LobbyPasswordModal";
 import LobbyDeletedModal from "./LobbyDeletedModal";
 import { useLobbyContext } from "../../shared/context/LobbyContext/context";
 import { useTranslation } from "react-i18next";
+
 const GameLobbyPage = () => {
   const { link } = useParams();
   const navigate = useNavigate();
-  const { 
-    deleteLobby, 
-    leaveLobby, 
-    deletedLobbyInfo, 
-    clearDeletedLobbyInfo,   
-    userLeftInfo, 
-    setUserLeftInfo 
+  const {
+    deleteLobby,
+    leaveLobby,
+    deletedLobbyInfo,
+    clearDeletedLobbyInfo,
+    userLeftInfo,
+    setUserLeftInfo,
   } = useLobbyContext();
-  
+
   const handleCloseSnackbar = () => {
     setUserLeftInfo(null);
   };
-  
+
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDeletingLobby, setIsDeletingLobby] = useState(false);
   const [isLeavingLobby, setIsLeavingLobby] = useState(false);
 
-  const{t}=useTranslation();
+  const { t } = useTranslation();
   const {
     lobbyDetails,
     loading,
@@ -52,17 +53,8 @@ const GameLobbyPage = () => {
     isPasswordModalOpen,
     handleJoin,
     handlePasswordModalClose,
-    isMember 
+    isMember,
   } = useGameLobbyPage();
-
-
-  const checkIsMember = () => {
-    if (!members || !userId) return false;
-    return members.some(member => member.id === userId);
-  };
-
-
-  const userIsMember = isMember !== undefined ? isMember : checkIsMember();
 
   const handleDeletedModalClose = () => {
     clearDeletedLobbyInfo();
@@ -80,15 +72,15 @@ const GameLobbyPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!loading && lobbyDetails && !userIsMember && !isPasswordModalOpen) {
-      setError("Access denied. You are not a member of this lobby.");
+    if (!loading && lobbyDetails && !isMember && !isPasswordModalOpen && !error) {
+      // The AccessDeniedScreen will be rendered by the main logic below
     }
-  }, [loading, lobbyDetails, userIsMember, isPasswordModalOpen]);
+  }, [loading, lobbyDetails, isMember, isPasswordModalOpen, error, setError]);
 
   const toggleFullscreen = () => {
     const gameLobbyElement = document.getElementById("gameLobbyPage");
 
-    if (!document.fullscreenElement) {
+    if (!document.fullscreenElement && gameLobbyElement) {
       gameLobbyElement.requestFullscreen().catch((err) => {
         console.error(`Error attempting to enable fullscreen: ${err.message}`);
       });
@@ -100,6 +92,7 @@ const GameLobbyPage = () => {
   };
 
   const handleDeleteLobby = async () => {
+    if (!lobbyDetails) return;
     setIsDeletingLobby(true);
     try {
       await deleteLobby(lobbyDetails.lobbyCode);
@@ -111,6 +104,7 @@ const GameLobbyPage = () => {
   };
 
   const handleLeaveLobby = async () => {
+    if (!lobbyDetails || !userId) return;
     setIsLeavingLobby(true);
     try {
       await leaveLobby(lobbyDetails.lobbyCode, userId);
@@ -140,15 +134,20 @@ const GameLobbyPage = () => {
     return <LoadingScreen />;
   }
 
-  if (isPasswordModalOpen) {
+  if (isPasswordModalOpen && lobbyDetails) {
     return (
       <LobbyPasswordModal
         open={isPasswordModalOpen}
-        onClose={handlePasswordModalClose} 
+        onClose={handlePasswordModalClose}
         onSubmit={handleJoin}
         lobbyDetails={lobbyDetails}
+        // theme={theme} // Pass theme if available and needed by LobbyPasswordModal
       />
     );
+  }
+
+  if (isPasswordModalOpen && !lobbyDetails) {
+      return <LoadingScreen />;
   }
 
   if (error) {
@@ -156,16 +155,17 @@ const GameLobbyPage = () => {
   }
 
   if (!lobbyDetails) {
-    return null;
+    return <ErrorScreen error={t("Lobby data could not be loaded.")} navigate={navigate} t={t} />;
   }
 
-  if (!userIsMember) {
+  if (!isMember) {
     return (
-      <AccessDeniedScreen navigate={navigate} t={t}/>
+      <AccessDeniedScreen navigate={navigate} t={t} />
     );
   }
 
-  const isHost = lobbyDetails.createdBy === userId;
+  const isHost = String(lobbyDetails.createdBy) === String(userId);
+
   return (
     <>
       <Box
@@ -179,11 +179,11 @@ const GameLobbyPage = () => {
           ...(isFullscreen && {
             minHeight: "100vh",
             p: 2,
-            bgcolor: "#f5f5f5",
+            bgcolor: "#f5f5f5", // Example fullscreen background
           }),
         }}
       >
-        <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
+        <Tooltip title={isFullscreen ? t("Exit Fullscreen") : t("Enter Fullscreen")}>
           <IconButton
             onClick={toggleFullscreen}
             sx={{
@@ -201,8 +201,12 @@ const GameLobbyPage = () => {
             {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
           </IconButton>
         </Tooltip>
-        <MembersList members={members} t={t}    lobbyCode={lobbyDetails.lobbyCode} 
-          currentLobbyCreatorId={lobbyDetails.createdBy} />
+        <MembersList
+          members={members}
+          t={t}
+          lobbyCode={lobbyDetails.lobbyCode}
+          currentLobbyCreatorId={lobbyDetails.createdBy}
+        />
         <GameArea
           lobbyInfo={lobbyDetails}
           link={link}
@@ -219,19 +223,19 @@ const GameLobbyPage = () => {
         open={Boolean(userLeftInfo && userLeftInfo.lobbyCode === lobbyDetails?.lobbyCode)}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ 
-          vertical: 'bottom', 
-          horizontal: 'center' 
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
         }}
-        sx={{ 
-          marginBottom: 4 
+        sx={{
+          marginBottom: 4
         }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
+        <Alert
+          onClose={handleCloseSnackbar}
           severity="info"
           variant="filled"
-          sx={{ 
+          sx={{
             width: '100%',
             display: 'flex',
             alignItems: 'center',
@@ -258,7 +262,7 @@ const LoadingScreen = () => (
   </Box>
 );
 
-const ErrorScreen = ({ error, navigate,t }) => (
+const ErrorScreen = ({ error, navigate, t }) => (
   <Box
     sx={{
       display: "flex",
@@ -267,10 +271,12 @@ const ErrorScreen = ({ error, navigate,t }) => (
       height: "100vh",
       flexDirection: "column",
       gap: 2,
+      textAlign: "center",
+      p: 2,
     }}
   >
     <Typography variant="h6" color="error">
-      {error}
+      {typeof error === 'string' ? error : t("An unexpected error occurred.")}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
       {t("Go Main Screen")}
@@ -278,7 +284,7 @@ const ErrorScreen = ({ error, navigate,t }) => (
   </Box>
 );
 
-const AccessDeniedScreen = ({ navigate,t }) => (
+const AccessDeniedScreen = ({ navigate, t }) => (
  <Box
     sx={{
       display: "flex",
@@ -291,13 +297,11 @@ const AccessDeniedScreen = ({ navigate,t }) => (
       p: 2,
     }}
   >
- <Typography variant="h5" color="error">
+    <Typography variant="h5" color="error">
       {t("Access Denied")}
     </Typography>
     <Typography variant="body1">
-      {t(
-        "You are not a member of this lobby or do not have permission to access it."
-      )}
+      {t("You are not a member of this lobby or do not have permission to access it.")}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
       {t("Go to Main Screen")}

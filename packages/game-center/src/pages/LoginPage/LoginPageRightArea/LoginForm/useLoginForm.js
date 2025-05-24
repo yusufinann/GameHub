@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import { login, validateToken } from "./api";
+import { login, validateToken } from "./api"; // "./api" yolunun doğru olduğundan emin olun
 import { useNavigate } from "react-router-dom";
 import crypto from 'crypto-js';
-import { useAuthContext } from "../../../../shared/context/AuthContext";
+import { useAuthContext } from "../../../../shared/context/AuthContext"; // Yolun doğruluğunu kontrol edin
 import { useTranslation } from "react-i18next";
 
 const useLoginForm = () => {
@@ -16,7 +16,8 @@ const useLoginForm = () => {
   const [error, setError] = useState(null);
   const [savedUser, setSavedUser] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const {t}=useTranslation();
+  const { t } = useTranslation();
+
   const validateTokenFromAPI = useCallback(async (token) => {
     try {
       const response = await validateToken(token);
@@ -44,7 +45,7 @@ const useLoginForm = () => {
       const encryptedUser = localStorage.getItem("savedUser");
       if (encryptedUser) {
         try {
-          const decryptedBytes = crypto.AES.decrypt(encryptedUser, 'secret_key');
+          const decryptedBytes = crypto.AES.decrypt(encryptedUser, 'secret_key'); // Güvenlik için 'secret_key'i daha güvenli bir yerden alın
           const decryptedString = decryptedBytes.toString(crypto.enc.Utf8);
 
           if (decryptedString) {
@@ -71,7 +72,7 @@ const useLoginForm = () => {
         }
       }
     }
-  }, [validateTokenFromAPI, isNavigating, clearSavedUser]); 
+  }, [validateTokenFromAPI, isNavigating, clearSavedUser]);
 
   const handleSubmit = async (event) => {
     if (event && event.preventDefault) {
@@ -80,8 +81,10 @@ const useLoginForm = () => {
     setLoading(true);
     setError(null);
 
+    // Çeviri JSON yapınıza göre güncellendi:
+    // "login": { "EMAIL_PASSWORD_REQUIRED": "E-posta ve şifre zorunludur." }
     if (!email || !password) {
-      setError("Email and password are required.");
+      setError(t("login.EMAIL_PASSWORD_REQUIRED"));
       setLoading(false);
       return;
     }
@@ -99,11 +102,11 @@ const useLoginForm = () => {
           email: user.email,
           id: user.id,
           name: user.name || '',
-          avatar: user.avatar || null 
+          avatar: user.avatar || null
         };
         const encrypted = crypto.AES.encrypt(
           JSON.stringify(userInfoToSave),
-          'secret_key'
+          'secret_key' // Güvenlik için 'secret_key'i daha güvenli bir yerden alın
         ).toString();
         localStorage.setItem("savedUser", encrypted);
       } else {
@@ -112,19 +115,31 @@ const useLoginForm = () => {
 
       navigate("/");
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed");
+      const errorCode = err?.response?.data?.code;
+      let displayError;
+
+      // Çeviri JSON yapınıza göre güncellendi:
+      // "login": { "AUTH_INVALID_CREDENTIALS": "...", "error": { "generic": "..." } }
+      if (errorCode) {
+        displayError = t(`login.${errorCode}`, { defaultValue: t("login.error.generic") });
+      } else {
+        displayError = t("login.error.generic");
+      }
+
+      setError(displayError);
       setIsNavigating(false);
       setLoading(false);
     }
   };
 
   const quickLogin = async (event) => {
-    if (savedUser && savedUser.email) { 
-
+    if (savedUser && savedUser.email) {
+      // Çeviri JSON yapınıza göre güncellendi:
+      // "login": { "PASSWORD_REQUIRED": "Lütfen şifrenizi girin." }
       if (password) {
         handleSubmit(event);
       } else {
-        setError(t("Enter your password")); 
+        setError(t("login.PASSWORD_REQUIRED"));
       }
     } else {
         console.warn("Quick login attempted with invalid savedUser. Clearing.")
@@ -138,7 +153,7 @@ const useLoginForm = () => {
     setEmail("");
     setPassword("");
     setRememberMe(false);
-    setError(null); 
+    setError(null);
   }, []);
 
   return {
@@ -148,11 +163,11 @@ const useLoginForm = () => {
     rememberMe,
     loading,
     error,
-    savedUser, 
+    savedUser,
     handleEmailChange: useCallback((e) => setEmail(e.target.value), []),
     handlePasswordChange: useCallback((e) => {
         setPassword(e.target.value);
-        if(error) setError(null); 
+        if(error) setError(null);
     }, [error]),
     handleRememberMeChange: useCallback((e) => setRememberMe(e.target.checked), []),
     handleClickShowPassword: useCallback(() => setShowPassword(p => !p), []),

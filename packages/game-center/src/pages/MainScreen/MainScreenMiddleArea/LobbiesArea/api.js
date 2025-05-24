@@ -21,20 +21,24 @@ api.interceptors.request.use((config) => {
 // Lobiye katılma
 export const joinLobby = async (lobbyCode, password = "") => {
   try {
-    // 2 saniye gecikme ekle
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
     const response = await api.post(
       `${config.apiEndpoints.joinLobby}/${lobbyCode}`,
       { password }
     );
     return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || "Lobiye katılma başarısız.";
+  }
+  catch (error) {
+    let errorToThrow;
+    if (error.response && error.response.data) {
+      errorToThrow = new Error(error.response.data.message || 'API request failed');
+      errorToThrow.data = error.response.data;
+    } else {
+      errorToThrow = new Error('An unexpected error occurred. Please try again.');
+      errorToThrow.data = { errorKey: "common.error" }; 
+    }
+    throw errorToThrow; 
   }
 };
-
-// Lobi detaylarını getirme
 export const getLobbyDetails = async (lobbyCode) => {
   try {
     // 2 saniye gecikme ekle

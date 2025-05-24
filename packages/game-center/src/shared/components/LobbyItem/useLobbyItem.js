@@ -3,6 +3,7 @@ import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
 import { getLobbyDetails, joinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
 import { useLobbyContext } from "../../context/LobbyContext/context";
+import { useTranslation } from "react-i18next";
 
 export const useLobbyItem = (lobby, currentUser) => {
   const {
@@ -11,7 +12,7 @@ export const useLobbyItem = (lobby, currentUser) => {
     setIsJoined,
     membersByLobby,
   } = useLobbyContext();
-
+const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [isJoining, setIsJoining] = useState(false);
@@ -27,7 +28,7 @@ export const useLobbyItem = (lobby, currentUser) => {
     setIsJoined(isMember);
   }, [isMember, setIsJoined]);
 
-  const handleJoin = async (password = "") => {
+ const handleJoin = async (password = "") => {
     setError("");
     setIsErrorModalOpen(false);
     setIsJoining(true);
@@ -68,15 +69,36 @@ export const useLobbyItem = (lobby, currentUser) => {
       setIsJoined(true);
       navigate(`/lobby/${lobby.lobbyCode}`);
 
+      const successMessage = joinResponse.data?.successKey 
+        ? t(joinResponse.data.successKey)
+        : joinResponse.data?.message || t("lobby.success.joined"); 
+
       showSnackbar({
-        message: joinResponse.message || "Successfully joined the lobby.",
+        message: successMessage,
         severity: "success",
       });
-    } catch (err) {
-      setError(err);
+    } catch (err) { 
+      let displayErrorMessage;
+      const errorData = err.data || {}; 
+
+      if (errorData.errorKey) {
+        const translationParams = {};
+        if (errorData.errorParams) {
+          if (errorData.errorParams.gameTypeIdentifier) {
+            translationParams.gameType = t(`gameNames.${errorData.errorParams.gameTypeIdentifier}`);
+          }
+        }
+        displayErrorMessage = t(errorData.errorKey, translationParams);
+      } else if (err.message) { 
+        displayErrorMessage = err.message;
+      } else {
+        displayErrorMessage = t("common.error"); 
+      }
+
+      setError(displayErrorMessage);
       setIsErrorModalOpen(true);
       showSnackbar({
-        message: err,
+        message: displayErrorMessage,
         severity: "error",
       });
     } finally {

@@ -13,6 +13,7 @@ import {
 import { Visibility, VisibilityOff, Lock, Public } from "@mui/icons-material";
 import ErrorModal from "./ErrorModal";
 import JoiningLobbyAnimation from "./JoiningLobbyAnimation";
+import { useTranslation } from "react-i18next";
 
 const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme }) => {
   const [password, setPassword] = useState("");
@@ -20,21 +21,46 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   const handleErrorModalClose = useCallback(() => {
     setIsErrorModalOpen(false);
+    setErrorMessage("");
   }, []);
+
+  const processAndSetErrorMessage = (error) => {
+    let displayMsg;
+    const errorPayload = error?.response?.data || error?.data || error;
+
+    if (errorPayload && errorPayload.errorKey) {
+      const translationParams = {};
+      if (errorPayload.errorParams && errorPayload.errorParams.gameTypeIdentifier) {
+        translationParams.gameType = t(`gameNames.${errorPayload.errorParams.gameTypeIdentifier}`);
+      }
+      displayMsg = t(errorPayload.errorKey, translationParams);
+    } else if (errorPayload && errorPayload.message) {
+      displayMsg = errorPayload.message;
+    } else if (error instanceof Error && error.message) {
+      displayMsg = error.message;
+    } else if (typeof errorPayload === 'string') {
+      displayMsg = errorPayload;
+    } else {
+      displayMsg = t("common.error");
+    }
+    setErrorMessage(displayMsg);
+  };
 
   const handlePasswordSubmit = async () => {
     if (!password) return;
     setIsLoading(true);
+    setErrorMessage("");
     try {
       await onSubmit(password);
       onClose();
     } catch (error) {
-      console.error('Lobiye katılma hatası:', error);
+      console.error('Lobiye katılma hatası (LobbyPasswordModal - Şifreli):', error);
       setIsErrorModalOpen(true);
-      setErrorMessage(error);
+      processAndSetErrorMessage(error);
     } finally {
       setIsLoading(false);
     }
@@ -42,12 +68,13 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
 
   const handlePublicJoin = async () => {
     setIsLoading(true);
+    setErrorMessage("");
     try {
       await onSubmit("");
     } catch (error) {
-      console.error('Lobiye katılma hatası:', error);
+      console.error('Lobiye katılma hatası (LobbyPasswordModal - Herkese Açık):', error);
       setIsErrorModalOpen(true);
-      setErrorMessage(error);
+      processAndSetErrorMessage(error);
     } finally {
       setIsLoading(false);
     }
@@ -106,12 +133,12 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
             }}
           >
             <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  mb: 3 
+                  mb: 3
                 }}
               >
                 <Box
@@ -123,7 +150,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     width: 60,
                     height: 60,
                     borderRadius: '50%',
-                    bgcolor: isPasswordProtected 
+                    bgcolor: isPasswordProtected
                       ? palette.warning?.main || 'rgba(255, 180, 0, 1)'
                       : palette.success?.main || '#2E7D32',
                     color: 'white',
@@ -135,11 +162,11 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     <Public fontSize="large" />
                   )}
                 </Box>
-                
-                <Typography 
-                  id="lobby-join-modal-title" 
-                  variant="h5" 
-                  component="h2" 
+
+                <Typography
+                  id="lobby-join-modal-title"
+                  variant="h5"
+                  component="h2"
                   fontWeight="bold"
                   sx={{
                     backgroundImage: palette.text?.title || 'linear-gradient(45deg, #ff6b6b, #ff8e53)',
@@ -149,31 +176,31 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     textAlign: 'center',
                   }}
                 >
-                  {isPasswordProtected ? 'Enter Lobby Password' : 'Join Public Lobby'}
+                  {isPasswordProtected ? t('lobby.passwordModal.titleProtected') : t('lobby.passwordModal.titlePublic')}
                 </Typography>
               </Box>
 
               {isPasswordProtected ? (
                 <>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    mb={3} 
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    mb={3}
                     textAlign="center"
                   >
-                    This lobby is protected. Please enter the password to join.
+                    {t('lobby.passwordModal.descriptionProtected')}
                   </Typography>
-                  
+
                   <TextField
                     fullWidth
                     type={showPassword ? "text" : "password"}
-                    label="Password"
+                    label={t('lobby.passwordModal.passwordLabel')}
                     variant="outlined"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyPress={(e) => { if (e.key === 'Enter') handlePasswordSubmit(); }}
+                    onKeyPress={(e) => { if (e.key === 'Enter' && password) handlePasswordSubmit(); }}
                     disabled={isLoading}
-                    sx={{ 
+                    sx={{
                       mb: 3,
                       '& .MuiOutlinedInput-root': {
                         '& fieldset': {
@@ -201,11 +228,11 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                       ),
                     }}
                   />
-                  
+
                   <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
-                    <Button 
-                      onClick={onClose} 
-                      variant="outlined" 
+                    <Button
+                      onClick={onClose}
+                      variant="outlined"
                       disabled={isLoading}
                       sx={{
                         borderColor: palette.primary?.light || '#81C784',
@@ -216,11 +243,11 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                         },
                       }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
-                    <Button 
-                      onClick={handlePasswordSubmit} 
-                      variant="contained" 
+                    <Button
+                      onClick={handlePasswordSubmit}
+                      variant="contained"
                       disabled={isLoading || !password}
                       sx={{
                         backgroundColor: palette.primary?.main || '#3f51b5',
@@ -230,26 +257,26 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                       }}
                     >
-                      Join
+                      {t('lobby.passwordModal.joinButton')}
                     </Button>
                   </Box>
                 </>
               ) : (
                 <>
-                  <Typography 
-                    id="lobby-join-modal-description" 
-                    variant="body1" 
-                    mb={3} 
+                  <Typography
+                    id="lobby-join-modal-description"
+                    variant="body1"
+                    mb={3}
                     textAlign="center"
                     color="text.secondary"
                   >
-                    This lobby is open to everyone. No password required.
+                    {t('lobby.passwordModal.descriptionPublic')}
                   </Typography>
-                  
+
                   <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
-                    <Button 
-                      onClick={onClose} 
-                      variant="outlined" 
+                    <Button
+                      onClick={onClose}
+                      variant="outlined"
                       disabled={isLoading}
                       sx={{
                         borderColor: palette.primary?.light || '#81C784',
@@ -260,11 +287,11 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                         },
                       }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
-                    <Button 
-                      onClick={handlePublicJoin} 
-                      variant="contained" 
+                    <Button
+                      onClick={handlePublicJoin}
+                      variant="contained"
                       disabled={isLoading}
                       sx={{
                         backgroundColor: palette.success?.main || '#2E7D32',
@@ -274,7 +301,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                       }}
                     >
-                      Join Lobby
+                      {t('lobby.passwordModal.joinLobbyButton')}
                     </Button>
                   </Box>
                 </>

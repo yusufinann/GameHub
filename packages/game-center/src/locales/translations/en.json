@@ -776,7 +776,7 @@
     "error": {
       "codeRequired": "Lobby code is required.",
       "notFoundOrInactive": "Lobby not found or is not active.",
-      "gameInProgress": "An active {{gameType}} is in progress in this lobby. Please wait for the game to end or join another lobby.",
+      "GAME_IN_PROGRESS": "An active {{gameType}} game is in progress. Please wait or join another lobby.",
       "invalidPassword": "Invalid password.",
       "lobbyFull": "Lobby is full. Cannot join.",
       "alreadyInLobby": "You are already in this lobby.",
@@ -786,6 +786,16 @@
       "updateSettingsFailed": "Failed to update lobby settings.",
       "hostOnlyAction": "Only the host can perform this action.",
       "notInLobby": "You are not currently in this lobby."
+    },
+     "gameInProgress": "A {{gameType}} game is currently active in this lobby. Please wait for the game to end or join another lobby."
+    ,"passwordModal": {
+      "titleProtected": "Enter Lobby Password",
+      "titlePublic": "Join Public Lobby",
+      "descriptionProtected": "This lobby is password protected. Please enter the password to join.",
+      "passwordLabel": "Password",
+      "joinButton": "Join",
+      "descriptionPublic": "This lobby is open to everyone. No password required.",
+      "joinLobbyButton": "Join Lobby"
     },
     "success": {
       "hostReturned": "You have returned to the lobby as the host.",
@@ -838,12 +848,28 @@
     "minLength": "{{fieldName}} must be at least {{count}} characters long.",
     "maxLength": "{{fieldName}} cannot be more than {{count}} characters long."
   },
+  "gameNames": {
+    "Bingo": "Bingo",
+    "Hangman": "Hangman"
+  },
   "game_bingo":"bingo game",
   "game_hangman":"hangman game",
  "joined":"joined",
  "gameEndedByHost":"Game ended by the host.",
  "needMorePlayers": "You need at least 2 players to start the game. Waiting for more players to join...",
-  "readyToStart": "Your lobby is ready! You can start the game whenever you're ready."
+  "readyToStart": "Your lobby is ready! You can start the game whenever you're ready.",
+  "createdGroup":"Group created successfully!",
+   "leaveGroup":"Left from group Successfully!",
+   "login": {
+    "error": {
+      "generic": "An unexpected error occurred. Please try again later."
+    },
+    "enterPassword": "Enter your password",
+    "AUTH_INVALID_CREDENTIALS": "The email or password you entered is incorrect. Please try again.",
+    "INTERNAL_SERVER_ERROR": "Our servers are having a bit of trouble. Please try again soon.",
+    "EMAIL_PASSWORD_REQUIRED": "Email and password are required.",
+    "PASSWORD_REQUIRED": "Please enter your password."
+  }
   
 
 

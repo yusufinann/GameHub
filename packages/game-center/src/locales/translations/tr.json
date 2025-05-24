@@ -11,8 +11,8 @@
   "Learn More": "Daha Fazla Bilgi",
   "Remember me": "Beni Hatırla",
   "Login": "Giriş",
-  "Logout":"Çıkış",
-  "Logging out...":"Çıkış Yapılıyor...",
+  "Logout": "Çıkış",
+  "Logging out...": "Çıkış Yapılıyor...",
   "Email Address": "E‑posta Adresi",
   "Password": "Şifre",
   "Enter your password": "Şifrenizi giriniz",
@@ -94,7 +94,6 @@
     }
   },
 
-
   "gameData": {
     "Valorant": {
       "title": "Valorant",
@@ -138,22 +137,22 @@
     "thumbnailAltText": "{{title}} ekran görüntüsü {{number}}",
     "browseButton": "Gözat"
   },
-  "All":"Tümü",
-  "Normal":"Normal",
-  "Event":"Etkinlik",
-  "My Groups":"Gruplarım",
-  "Error Loading Data":"Veri Yüklenirken Hata Oluştu",
-  "Player":"Oyuncu",
-  "Average":"Ortalama",
-  "Game Time":"Oyun Zamanı",
-  "Average score per game":"Oyun başı ortalama skor",
-  "Game History":"Oyun Geçmişi",
-  "More Players":"Daha Fazla Oyuncu",
-  "Upcoming Events":"Yaklaşan Etkinlikler",
-  "Person Capacity":"Kişi Kapasitesi",
-  "There are no upcoming events":"Yaklaşan etkinlk bulunmuyor",
-  "You can follow new events from here when they are added":"Yeni etkinlikler eklendiğinde buradan takip edebilirsiniz",
-  "Competition Styles":"Rekabet Stilleri",
+  "All": "Tümü",
+  "Normal": "Normal",
+  "Event": "Etkinlik",
+  "My Groups": "Gruplarım",
+  "Error Loading Data": "Veri Yüklenirken Hata Oluştu",
+  "Player": "Oyuncu",
+  "Average": "Ortalama",
+  "Game Time": "Oyun Zamanı",
+  "Average score per game": "Oyun başı ortalama skor",
+  "Game History": "Oyun Geçmişi",
+  "More Players": "Daha Fazla Oyuncu",
+  "Upcoming Events": "Yaklaşan Etkinlikler",
+  "Person Capacity": "Kişi Kapasitesi",
+  "There are no upcoming events": "Yaklaşan etkinlk bulunmuyor",
+  "You can follow new events from here when they are added": "Yeni etkinlikler eklendiğinde buradan takip edebilirsiniz",
+  "Competition Styles": "Rekabet Stilleri",
 
   "activePlayersTitle": "Aktif Oyuncular",
   "playersActiveCount": "{{count}} oyuncu aktif",
@@ -286,8 +285,8 @@
     }
   },
   "Game Modes & Rules": "Oyun Modları ve Kurallar",
-  "Active Lobbies":"Aktif Lobiler",
-  "Rows per page":"Sayfa başına satır",
+  "Active Lobbies": "Aktif Lobiler",
+  "Rows per page": "Sayfa başına satır",
   "eventEnded": "Etkinlik sona erdi",
   "eventContinues": "Etkinlik devam ediyor",
   "startsOnDate": "{{date}} tarihinde başlıyor",
@@ -295,39 +294,39 @@
   "hoursUnit": "sa",
   "minutesUnit": "dk",
   "secondsUnit": "sn",
-  "Open Lobby":"Şifresiz Lobi",
-  "Join":"Katıl",
-  "Delete Lobby":"Lobiyi Sil",
-  "Edit Lobby":"Lobiyi Güncelle",
-  "Go to Lobby":"Lobiye Git",
+  "Open Lobby": "Şifresiz Lobi",
+  "Join": "Katıl",
+  "Delete Lobby": "Lobiyi Sil",
+  "Edit Lobby": "Lobiyi Güncelle",
+  "Go to Lobby": "Lobiye Git",
   "lobbyTypeEvent": "Etkinlik",
   "lobbyTypeNormal": "Normal",
   "membersLabel": "{{count}}{{maxPart}} Üye",
   "unnamedLobby": "İsimsiz Lobi",
   "lobbyFullError": "Lobi dolu!",
   "joinLobbyError": "Lobiye katılırken bir hata oluştu.",
-  "Settings":"Ayarlar",
-  "Sound Effects":"Ses Efektleri",
-  "Notifications":"Bildirimler",
-  "Bingo Game":"Tombala Oyunu",
-  "Other Game":"Diğer Oyun",
-  "Leave Lobby":"Lobiden Ayrıl",
-  "Members":"Üyeler",
-  "This event is over":"Bu etkinlik sona erdi",
-  "Event starts in":"Etkinlik başlıyor",
-  "Hours":"Saat",
-  "Minute":"Dakika",
-  "Second":"Saniye",
-  "Host":"Kurucu",
-  "Chat":"Sohbet",
+  "Settings": "Ayarlar",
+  "Sound Effects": "Ses Efektleri",
+  "Notifications": "Bildirimler",
+  "Bingo Game": "Tombala Oyunu",
+  "Other Game": "Diğer Oyun",
+  "Leave Lobby": "Lobiden Ayrıl",
+  "Members": "Üyeler",
+  "This event is over": "Bu etkinlik sona erdi",
+  "Event starts in": "Etkinlik başlıyor",
+  "Hours": "Saat",
+  "Minute": "Dakika",
+  "Second": "Saniye",
+  "Host": "Kurucu",
+  "Chat": "Sohbet",
   "sendMessagePlaceholder": "Bir ifade gönderin...",
-  "COMMUNITY":"Topluluk",
-  "Create Community Group":"Yeni Topluluk Grubu Oluştur",
-  "Group Name":"Grup Adı",
-  "Group Description (Optional)":"Grup Açıklaması (Opsiyonel)",
-  "Max Members (min 2)":"Maksimum Üye (min 2)",
-  "Password Protect?":"Şifreli",
-  "Create":"Oluştur",
+  "COMMUNITY": "Topluluk",
+  "Create Community Group": "Yeni Topluluk Grubu Oluştur",
+  "Group Name": "Grup Adı",
+  "Group Description (Optional)": "Grup Açıklaması (Opsiyonel)",
+  "Max Members (min 2)": "Maksimum Üye (min 2)",
+  "Password Protect?": "Şifreli",
+  "Create": "Oluştur",
   "joinProtectedGroupTitle": "Korumalı Gruba Katıl",
   "joinGroupTitle": "Gruba Katıl",
   "protectedGroupPrompt": "Bu grup şifre korumalıdır. Lütfen katılmak için şifreyi girin.",
@@ -335,7 +334,7 @@
   "joinGroupPromptNoPassword": "Üye olmak için aşağıdaki 'Gruba Katıl' düğmesine tıklayın.",
   "Cancel": "İptal",
   "joinGroup": "Gruba Katıl",
-  "Communities":"Topluluklar",
+  "Communities": "Topluluklar",
   "myGroupsTitle": "GRUPLARIM",
   "searchPlaceholder": "Ara...",
   "createNewGroupTooltip": "Yeni grup oluştur",
@@ -343,7 +342,7 @@
   "membersCountLabel": "{{count}}/{{max}} üye",
   "leaveGroupTooltip": "Grubu Terk Et",
   "deleteGroupTooltip": "Grubu Sil",
-  "JOIN GROUPS":"Gruplara Katıl",
+  "JOIN GROUPS": "Gruplara Katıl",
   "statusOnline": "Çevrimiçi",
   "statusOffline": "Çevrimdışı",
   "toolbarTitleAll": "Hepsi",
@@ -391,14 +390,14 @@
   "joinGroupButtonLabel": "GRUBA KATIL",
   "connectionNotAvailableError": "Bağlantı mevcut değil.",
   "selectChatPlaceholder": "Sohbete başlamak için bir arkadaş veya grup seçin",
-  "noMessage":"Mesaj bulunmuyor",
+  "noMessage": "Mesaj bulunmuyor",
   "typeYourMessagePlaceholder": "Mesajınızı yazın...",
-  "globalCommunityTitle": "Global Topluluk", 
+  "globalCommunityTitle": "Global Topluluk",
   "communityPageTitle": "TOPLULUK",
-  "All users":"Tüm kullanıcılar",
-  "Conversation":"Sohbetler",
-  "Customize your preferences":"Tercihlerinizi özelleştirin",
-  "Saved":"Kaydedildi",
+  "All users": "Tüm kullanıcılar",
+  "Conversation": "Sohbetler",
+  "Customize your preferences": "Tercihlerinizi özelleştirin",
+  "Saved": "Kaydedildi",
   "themeCard": {
     "currentThemeDark": "Koyu Tema",
     "currentThemeNeonOcean": "Neon Ocean Tema",
@@ -438,10 +437,10 @@
     "english": "İngilizce",
     "preferenceNote": "Tercih ettiğiniz dil tüm arayüz metinlerine uygulanacaktır."
   },
-  "Neon and refreshing look":"Neon ve ferahlatıcı görünüm",
-  "Dark view":"Koyu görünüm",
-   "Light View":"Açık görünüm",
- "profile": {
+  "Neon and refreshing look": "Neon ve ferahlatıcı görünüm",
+  "Dark view": "Koyu görünüm",
+  "Light View": "Açık görünüm",
+  "profile": {
     "errorPrefix": "Hata:",
     "noUserFound": "Kullanıcı bulunamadı",
     "removeFriendButton": "Arkadaşı Çıkar",
@@ -449,7 +448,7 @@
     "addFriendButton": "Arkadaş Ekle",
     "joinedSince": "Katılma tarihi: {{date}}",
     "levelProgress": "Seviye İlerlemesi",
-   "stats": {
+    "stats": {
       "overall": {
         "totalGames": "Toplam Oynanan Oyun",
         "winRate": "Genel Kazanma Oranı",
@@ -457,19 +456,18 @@
       },
       "friends": "Arkadaşlar"
     },
-  
-   
+
     "tabs": {
       "statistics": "İstatistikler",
       "history": "Geçmiş",
       "achievements": "Başarılar"
     }
   },
-    "Win Rate":"Kazanma Oranı",
-    "Longest Streak":"En uzun galibiyet serisi",
-    "Guess Accuracy":"Tahmin Doğruluğu",
-   "Bingo":"Tombala",
-  "Hangman":"Adam Asmaca",
+  "Win Rate": "Kazanma Oranı",
+  "Longest Streak": "En uzun galibiyet serisi",
+  "Guess Accuracy": "Tahmin Doğruluğu",
+  "Bingo": "Tombala",
+  "Hangman": "Adam Asmaca",
   "hangmanOverallStats": {
     "loading": "Adam Asmaca İstatistikleri Yükleniyor...",
     "error": "Adam Asmaca istatistikleri yüklenirken hata oluştu: {{error}}",
@@ -510,7 +508,7 @@
     "pagination": {
       "rowsPerPage": "Sayfa başına satır:",
       "rowsPerPageAria": "sayfa başına satır seçici",
-     "displayingGames_one": "{{count}} oyundan {{from}}-{{to}} arası",
+      "displayingGames_one": "{{count}} oyundan {{from}}-{{to}} arası",
       "displayingGames_other": "{{count}} oyundan {{from}}-{{to}} arası",
       "pageInfo": "{{currentPage}} / {{totalPages}}",
       "firstPage": "İlk Sayfa",
@@ -544,7 +542,7 @@
     "notAvailableRank": "-",
     "noGameHistory": "Oyun geçmişi bulunmamaktadır."
   },
- "bingoOverallStats": {
+  "bingoOverallStats": {
     "loading": "Genel istatistikler yükleniyor...",
     "error": "İstatistikler yüklenirken hata oluştu: {{error}}",
     "noStats": "Henüz genel istatistik bulunmamaktadır.",
@@ -572,26 +570,26 @@
     "createButton": "Lobi Oluştur",
     "cancelButton": "İptal"
   },
-    "Start Time":  "Başlangıç Zamanı",
-    "End Time":  "Bitiş Zamanı",
-    "noActiveLobby":"Aktif Lobi Bulunmadı.",
-    "createdMessage":"Lobi Başarıyla Oluşturuldu",
-    "Lobby Code":"Lobi Kodu",
-    "Lobby Link":"Lobi Linki",
-    "Link not found":"Link bulunamadı",
-    "Lobby Members":"Lobi Üyeleri",
-    "Close":"Kapat" ,
-    "noMembers":"Henüz başka üye yok",
-    "Lobby Name":"Lobby Adı",
-    "Password Protection":"Şifre Koruması",
-    "Enable Password":"Şifre Etkinleştir",
-    "helperText":"Geçerli parolayı korumak için boş bırakın",
-    "click":"Seçenekler için tıkla",
-    "Send Message":"Mesaj gönder",
-    "inviteLobby":"Lobiye davet et",
-    "Hangman Game":"Adam Asmaca Oyunu",
-    "Uno Game":"Uno Oyunu",
-    "Chess Game":"Satranç Oyunu",
+  "Start Time": "Başlangıç Zamanı",
+  "End Time": "Bitiş Zamanı",
+  "noActiveLobby": "Aktif Lobi Bulunmadı.",
+  "createdMessage": "Lobi Başarıyla Oluşturuldu",
+  "Lobby Code": "Lobi Kodu",
+  "Lobby Link": "Lobi Linki",
+  "Link not found": "Link bulunamadı",
+  "Lobby Members": "Lobi Üyeleri",
+  "Close": "Kapat",
+  "noMembers": "Henüz başka üye yok",
+  "Lobby Name": "Lobby Adı",
+  "Password Protection": "Şifre Koruması",
+  "Enable Password": "Şifre Etkinleştir",
+  "helperText": "Geçerli parolayı korumak için boş bırakın",
+  "click": "Seçenekler için tıkla",
+  "Send Message": "Mesaj gönder",
+  "inviteLobby": "Lobiye davet et",
+  "Hangman Game": "Adam Asmaca Oyunu",
+  "Uno Game": "Uno Oyunu",
+  "Chess Game": "Satranç Oyunu",
   "Kick Player": "Oyuncuyu At",
   "Confirm Kick": "Atmayı Onayla",
   "Are you sure you want to kick": "Bu oyuncuyu atmak istediğinizden emin misiniz",
@@ -641,7 +639,7 @@
     "cancelButtonText": "İptal",
     "startButtonText": "Oyunu Başlat"
   },
-   "bingoGameWaiting": {
+  "bingoGameWaiting": {
     "lobbyTitle": "Tombala Oyun Lobisi",
     "hostMessage": "Siz ev sahibisiniz! Herkes hazır olduğunda oyunu başlatın.",
     "guestMessage": "Lütfen ev sahibinin oyunu başlatmasını bekleyin.",
@@ -681,12 +679,11 @@
     "submitButton": "Gönder",
     "winMessage": "Tebrikler, kazandınız!",
     "eliminationMessage": "Elendiniz!"
-    
   },
   "volume": {
-      "mute": "Sesi Kapat",
-      "unmute": "Sesi Aç"
-    },
+    "mute": "Sesi Kapat",
+    "unmute": "Sesi Aç"
+  },
   "playerList": {
     "title": "Oyuncular",
     "status": {
@@ -719,13 +716,13 @@
     "cancelButton": "İptal",
     "startButton": "Oyunu Başlat"
   },
-    "titleGameOver": "Oyun Bitti - Lobi (Host)",
-      "titleWaiting": "Oyun Lobisi (Host)",
-      "descriptionCanStartNew": "Yeni bir oyun başlatabilirsin.",
-      "descriptionWaitingForPlayers": "Oyuncuların katılmasını bekliyorsun. Hazır olduğunda oyunu başlatabilirsin!",
-       "defaultNamePrefix": "Oyuncu",
-       "Set New Game":"Yeni Oyun Ayarla",
-        "notifications": {
+  "titleGameOver": "Oyun Bitti - Lobi (Host)",
+  "titleWaiting": "Oyun Lobisi (Host)",
+  "descriptionCanStartNew": "Yeni bir oyun başlatabilirsin.",
+  "descriptionWaitingForPlayers": "Oyuncuların katılmasını bekliyorsun. Hazır olduğunda oyunu başlatabilirsin!",
+  "defaultNamePrefix": "Oyuncu",
+  "Set New Game": "Yeni Oyun Ayarla",
+  "notifications": {
     "playerJoined": "{{playerName}} oyuna katıldı!",
     "rejoinedSuccess": "Oyuna başarıyla yeniden bağlandınız.",
     "joinedSuccess": "Tombala oyununa başarıyla katıldınız!",
@@ -751,10 +748,10 @@
     "invalidBingoCall": "Geçersiz Tombala çağrısı. Kartınız tamamlanmamış veya sayılar yanlış.",
     "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
   },
-  "joinedMessage":"Tombala oyununa başarıyla katıldınız",
-  "Game has started!":"Oyun başladı!",
-  "leftlobby":"lobiden ayrıldı",
-   "common": {
+  "joinedMessage": "Tombala oyununa başarıyla katıldınız",
+  "Game has started!": "Oyun başladı!",
+  "leftlobby": "lobiden ayrıldı",
+  "common": {
     "error": "Bir hata oluştu. Lütfen tekrar deneyin.",
     "success": "İşlem başarılı.",
     "loading": "Yükleniyor...",
@@ -768,7 +765,7 @@
     "error": {
       "codeRequired": "Lobi kodu gereklidir.",
       "notFoundOrInactive": "Lobi bulunamadı veya aktif değil.",
-      "gameInProgress": "Bu lobide aktif bir {{gameType}} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
+      "GAME_IN_PROGRESS": "Bu lobide aktif bir {{gameType}} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
       "invalidPassword": "Geçersiz şifre.",
       "lobbyFull": "Lobi dolu. Katılamazsınız.",
       "alreadyInLobby": "Zaten bu lobidesiniz.",
@@ -778,12 +775,23 @@
       "updateSettingsFailed": "Lobi ayarları güncellenemedi.",
       "hostOnlyAction": "Bu işlemi sadece lobi sahibi yapabilir.",
       "notInLobby": "Şu anda bu lobide değilsiniz."
-    },
+    }, 
+    "gameInProgress": "Bu lobide aktif bir {{gameType}} oyunu devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın."
+    ,"passwordModal": {
+      "titleProtected": "Lobi Şifresini Girin",
+      "titlePublic": "Herkese Açık Lobiye Katıl",
+      "descriptionProtected": "Bu lobi şifre korumalıdır. Katılmak için lütfen şifreyi girin.",
+      "passwordLabel": "Şifre",
+      "joinButton": "Katıl",
+      "descriptionPublic": "Bu lobi herkese açıktır. Şifre gerekmez.",
+      "joinLobbyButton": "Lobiye Katıl"
+    }
+    ,
     "success": {
       "hostReturned": "Lobiye host olarak geri döndünüz.",
       "joined": "'{{lobbyName}}' lobisine başarıyla katıldınız.",
       "created": "Lobi başarıyla oluşturuldu!",
-       "updated": "Lobi başarıyla güncellendi!",
+      "updated": "Lobi başarıyla güncellendi!",
       "left": "Lobiden ayrıldınız.",
       "settingsUpdated": "Lobi ayarları başarıyla güncellendi.",
       "kicked": "Lobi sahibi tarafından lobiden atıldınız."
@@ -829,9 +837,27 @@
     "required": "{{fieldName}} alanı zorunludur.",
     "minLength": "{{fieldName}} en az {{count}} karakter uzunluğunda olmalıdır.",
     "maxLength": "{{fieldName}} en fazla {{count}} karakter uzunluğunda olabilir."
-  }, "game_bingo":"tombala oyunu",
-  "game_hangman":"adam asmaca oyunu",
-  "joined":"katıldı","gameEndedByHost":"Oyun host tarafından sonlandırıldı.",
-    "needMorePlayers": "Oyunu başlatmak için en az 2 oyuncuya ihtiyacınız var. Daha fazla oyuncunun katılması bekleniyor...",
-    "readyToStart": "Lobiniz hazır! Oyunu istediğiniz zaman başlatabilirsiniz."
+  },
+   "gameNames": {
+    "Bingo": "Tombala",
+    "Hangman": "Adam Asmaca"
+  },
+  "game_bingo": "tombala oyunu",
+  "game_hangman": "adam asmaca oyunu",
+  "joined": "katıldı",
+  "gameEndedByHost": "Oyun host tarafından sonlandırıldı.",
+  "needMorePlayers": "Oyunu başlatmak için en az 2 oyuncuya ihtiyacınız var. Daha fazla oyuncunun katılması bekleniyor...",
+  "readyToStart": "Lobiniz hazır! Oyunu istediğiniz zaman başlatabilirsiniz.",
+  "createdGroup":"Grup başarıyla oluşturuldu!",
+  "leaveGroup":"Gruptan başarıyla ayrıldınız!",
+   "login": {
+    "error": {
+      "generic": "Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin."
+    },
+    "enterPassword": "Şifrenizi girin",
+    "AUTH_INVALID_CREDENTIALS": "Girdiğiniz e-posta veya şifre yanlış. Lütfen tekrar deneyin.",
+    "INTERNAL_SERVER_ERROR": "Sunucularımızda bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
+    "EMAIL_PASSWORD_REQUIRED": "E-posta ve şifre zorunludur.", 
+    "PASSWORD_REQUIRED": "Lütfen şifrenizi girin."
+  }
 }
