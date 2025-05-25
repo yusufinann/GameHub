@@ -303,8 +303,11 @@ export const joinLobby = async (req, res) => {
                 });
             }
         }
-        if (lobby.password && !bcrypt.compareSync(password, lobby.password)) {
-            return res.status(401).json({ message: "Geçersiz şifre." });
+      if (lobby.password && !bcrypt.compareSync(password, lobby.password)) {
+            return res.status(401).json({
+                errorKey: "lobby.invalidPassword", 
+                message: "Geçersiz şifre." 
+            });
         }
 
         if (user.id === lobby.createdBy) {

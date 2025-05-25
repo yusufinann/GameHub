@@ -15,7 +15,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useLobbyItem } from "./useLobbyItem";
 import LobbyPasswordModal from "../LobbyPasswordModal";
 import { Event, Group, People } from "@mui/icons-material";
-import ErrorModal from "../ErrorModal";
+import MessageModal from "../MessageModal";
 import LobbyEditModal from "./LobbyEditModal";
 import { useLobbyContext } from "../../context/LobbyContext/context";
 import { useTranslation } from "react-i18next";
@@ -66,17 +66,22 @@ function LobbyItem({ lobby }) {
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    message: "",
+    severity: "error",
+    title: undefined,
+  });
+
   const {
     isJoining,
-    error: joinError,
+    error: joinErrorData,
     handleJoin,
     handleDelete,
     isDeleting,
-    isErrorModalOpen: isJoinErrorModalOpen,
-    closeErrorModal: closeJoinErrorModal,
+    clearError: clearJoinErrorData,
   } = useLobbyItem(lobby, currentUser);
 
-  const [isLobbyFullError, setIsLobbyFullError] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
@@ -84,43 +89,83 @@ function LobbyItem({ lobby }) {
   );
 
   useEffect(() => {
-    setContextIsJoined(isMember);
+    if (typeof setContextIsJoined === 'function') {
+        setContextIsJoined(isMember);
+    }
   }, [isMember, setContextIsJoined]);
-
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
   const [endDate, endTime] = lobby.endTime?.split("T") || [null, null];
 
   const isCreator = currentUser?.id === lobby.createdBy;
 
-  const handleJoinClick = useCallback(async () => {
+  const showMessage = useCallback((message, severity = "error", title = undefined) => {
+    setModalConfig({ message, severity, title });
+    setIsMessageModalOpen(true);
+  }, []);
+
+
+  const handleJoinClick = useCallback(async (passwordProvided) => {
     try {
       const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
       if (lobby.maxMembers && currentMembersCount >= lobby.maxMembers && !isMember) {
-        setIsLobbyFullError(true);
+        showMessage(
+          t('lobby.warning.lobbyFull'),
+          "warning",
+          t('Warning')
+        );
         return;
       }
 
-      if (lobby.password && !isMember) {
+      if (lobby.password && !isMember && typeof passwordProvided !== 'string') {
         setIsPasswordModalOpen(true);
       } else {
-        await handleJoin();
+        await handleJoin(typeof passwordProvided === 'string' ? passwordProvided : "");
       }
     } catch (error) {
-      // console.error("Unexpected error in handleJoinClick:", error);
+      console.error("Unexpected error in handleJoinClick (not from API):", error);
+       if (!joinErrorData) { 
+          showMessage(error.message || t('common.error'), "error", t('Error'));
+      }
     }
-  }, [lobby, membersByLobby, handleJoin, isMember]);
+  }, [lobby, membersByLobby, handleJoin, isMember, t, showMessage, joinErrorData]);
 
 
-  const handleErrorModalClose = useCallback(() => {
-    if (isLobbyFullError) {
-      setIsLobbyFullError(false);
-    }
-    if (isJoinErrorModalOpen) {
-      closeJoinErrorModal();
-    }
-  }, [isLobbyFullError, isJoinErrorModalOpen, closeJoinErrorModal]);
+  useEffect(() => {
+    if (joinErrorData && joinErrorData.message) {
+      let message = joinErrorData.message;
+      let severity = joinErrorData.severity || "error";
+      let title = "";
 
+      if (joinErrorData.errorKey) {
+        switch (joinErrorData.errorKey) {
+          case "lobby.gameInProgress":
+          case "lobby.full":
+            title = t('Warning');
+            severity = "warning";
+            break;
+          case "lobby.invalidPassword":
+            title = t('passwordModal.invalidPasswordTitle');
+            severity = "warning";
+            break;
+          default:
+            title = severity === "warning" ? t('Warning') : t('Error');
+        }
+      } else {
+        title = severity === "warning" ? t('Warning') : t('Error');
+      }
+      
+      showMessage(message, severity, title);
+    }
+  }, [joinErrorData, t, showMessage]);
+
+
+  const handleMessageModalClose = useCallback(() => {
+    setIsMessageModalOpen(false);
+    if (joinErrorData) {
+        clearJoinErrorData();
+    }
+  }, [clearJoinErrorData, joinErrorData]);
 
   const handleEditClick = useCallback(() => {
     setIsEditModalOpen(true);
@@ -150,13 +195,6 @@ function LobbyItem({ lobby }) {
 
   const membersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
 
-  let currentErrorMessage = "";
-  if (isLobbyFullError) {
-    currentErrorMessage = t('lobbyFullError');
-  } else if (isJoinErrorModalOpen && joinError) {
-    currentErrorMessage = joinError;
-  }
-
   const renderModals = () => {
     return (
       <>
@@ -165,9 +203,10 @@ function LobbyItem({ lobby }) {
             open={isPasswordModalOpen}
             onClose={closePasswordModal}
             onSubmit={async (password) => {
-              await handleJoin(password);
-              if (!joinError && !isJoinErrorModalOpen) {
-                 setIsPasswordModalOpen(false);
+              try {
+                await handleJoinClick(password);
+              } catch (err) {
+                console.error("Error in LobbyPasswordModal onSubmit after calling handleJoinClick:", err);
               }
             }}
             lobbyDetails={{
@@ -179,13 +218,13 @@ function LobbyItem({ lobby }) {
           />
         )}
 
-        {(isLobbyFullError || isJoinErrorModalOpen) && (
-          <ErrorModal
-            open={true}
-            onClose={handleErrorModalClose}
-            errorMessage={currentErrorMessage}
-          />
-        )}
+        <MessageModal
+            open={isMessageModalOpen}
+            onClose={handleMessageModalClose}
+            message={modalConfig.message}
+            severity={modalConfig.severity}
+            title={modalConfig.title}
+        />
 
         {isEditModalOpen && (
           <LobbyEditModal
@@ -283,6 +322,7 @@ function LobbyItem({ lobby }) {
                   endDate={endDate}
                   endTime={endTime}
                   isMobile={isMobile}
+                  t={t}
                 />
               )}
             </Stack>
@@ -303,7 +343,7 @@ function LobbyItem({ lobby }) {
                 lobbyCode={lobby.lobbyCode}
                 existingLobbyCode={existingLobby?.lobbyCode}
                 onDelete={handleDeleteCallback}
-                onJoin={handleJoinClick}
+                onJoin={() => handleJoinClick()}
                 onNavigate={handleNavigate}
                 isMobile={isMobile}
                 onEdit={isCreator ? handleEditClick : undefined}

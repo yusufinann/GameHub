@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
-import { getLobbyDetails, joinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
+import { getLobbyDetails, joinLobby as apiJoinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
 import { useLobbyContext } from "../../context/LobbyContext/context";
 import { useTranslation } from "react-i18next";
 
@@ -12,29 +12,30 @@ export const useLobbyItem = (lobby, currentUser) => {
     setIsJoined,
     membersByLobby,
   } = useLobbyContext();
-const { t } = useTranslation();
+  const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
+
   const [isJoining, setIsJoining] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
     (member) => member.id === currentUser?.id
   );
 
   useEffect(() => {
-    setIsJoined(isMember);
-  }, [isMember, setIsJoined]);
+     if (typeof setIsJoined === 'function') {
+        setIsJoined(isMember);
+     }
+  }, [isMember, setIsJoined, lobby.lobbyCode]);
 
- const handleJoin = async (password = "") => {
-    setError("");
-    setIsErrorModalOpen(false);
+  const handleJoin = async (password = "") => {
+    setError(null);
     setIsJoining(true);
 
     try {
-      const joinResponse = await joinLobby(lobby.lobbyCode, password);
+      const joinResponse = await apiJoinLobby(lobby.lobbyCode, password);
       const updatedLobby = await getLobbyDetails(lobby.lobbyCode);
 
       setMembersByLobby((prevState) => {
@@ -44,62 +45,98 @@ const { t } = useTranslation();
           (m) => m.id === currentUser.id
         );
 
+        let newMembersList;
         if (existingMemberIndex >= 0) {
-          const updatedMembers = [...currentMembers];
-          updatedMembers[existingMemberIndex] = {
-            ...updatedMembers[existingMemberIndex],
+          newMembersList = [...currentMembers];
+          newMembersList[existingMemberIndex] = {
+            ...newMembersList[existingMemberIndex],
             isHost,
+            name: currentUser.name,
+            avatar: currentUser.avatar,
           };
-          return { ...prevState, [lobby.lobbyCode]: updatedMembers };
         } else {
-          return {
-            ...prevState,
-            [lobby.lobbyCode]: [
-              ...currentMembers,
-              {
-                id: currentUser.id,
-                name: currentUser.name,
-                avatar: currentUser.avatar,
-                isHost,
-              },
-            ],
-          };
+          newMembersList = [
+            ...currentMembers,
+            {
+              id: currentUser.id,
+              name: currentUser.name,
+              avatar: currentUser.avatar,
+              isHost,
+            },
+          ];
         }
+        return { ...prevState, [lobby.lobbyCode]: newMembersList };
       });
-      setIsJoined(true);
+
+      if (typeof setIsJoined === 'function') {
+        setIsJoined(true);
+      }
       navigate(`/lobby/${lobby.lobbyCode}`);
 
-      const successMessage = joinResponse.data?.successKey 
-        ? t(joinResponse.data.successKey)
-        : joinResponse.data?.message || t("lobby.success.joined"); 
+      const successMessage = joinResponse.data?.successKey
+        ? t(joinResponse.data.successKey, { lobbyName: updatedLobby.lobbyName })
+        : joinResponse.data?.message || t("lobby.success.joined", { lobbyName: updatedLobby.lobbyName });
 
       showSnackbar({
         message: successMessage,
         severity: "success",
       });
-    } catch (err) { 
+      return joinResponse;
+    } catch (err) {
+      console.error("Lobiye katılma hatası (useLobbyItem):", err);
+      const errorPayload = err.response?.data || err.data || err;
       let displayErrorMessage;
-      const errorData = err.data || {}; 
+      let errorSeverity = "error";
+      let errorKey = null;
+      let errorParams = null;
 
-      if (errorData.errorKey) {
-        const translationParams = {};
-        if (errorData.errorParams) {
-          if (errorData.errorParams.gameTypeIdentifier) {
-            translationParams.gameType = t(`gameNames.${errorData.errorParams.gameTypeIdentifier}`);
-          }
+      if (errorPayload && errorPayload.errorKey) {
+        errorKey = errorPayload.errorKey;
+        errorParams = errorPayload.errorParams || {};
+        const translationParams = { ...errorParams };
+        if (errorParams.gameTypeIdentifier) {
+          translationParams.gameType = t(`gameNames.${errorParams.gameTypeIdentifier}`, { defaultValue: errorParams.gameTypeIdentifier });
         }
-        displayErrorMessage = t(errorData.errorKey, translationParams);
-      } else if (err.message) { 
+        displayErrorMessage = t(errorKey, translationParams) || errorPayload.message;
+
+        switch (errorKey) {
+          case "lobby.gameInProgress":
+          case "lobby.full":
+          case "lobby.invalidPassword":
+          case "lobby.alreadyInAnotherLobby":
+            errorSeverity = "warning";
+            break;
+          default:
+            errorSeverity = "error";
+        }
+      } else if (errorPayload && errorPayload.message) {
+        displayErrorMessage = errorPayload.message;
+        const status = err.response?.status;
+        if (status === 400 || status === 401 || status === 403 || status === 404) {
+          errorSeverity = "warning";
+           if (status === 404 && !displayErrorMessage) displayErrorMessage = t('common.notFound', { resource: t('lobby.lobby') });
+           if (status === 401 && !displayErrorMessage) displayErrorMessage = t('error.unauthorized');
+        }
+      } else if (err.message) {
         displayErrorMessage = err.message;
+      } else if (typeof errorPayload === 'string') {
+        displayErrorMessage = errorPayload;
+        errorSeverity = "info";
       } else {
-        displayErrorMessage = t("common.error"); 
+        displayErrorMessage = t("common.error");
       }
 
-      setError(displayErrorMessage);
-      setIsErrorModalOpen(true);
+      const structuredError = {
+        message: displayErrorMessage,
+        severity: errorSeverity,
+        errorKey: errorKey,
+        errorParams: errorParams
+      };
+      setError(structuredError);
+
       showSnackbar({
         message: displayErrorMessage,
-        severity: "error",
+        severity: errorSeverity,
       });
     } finally {
       setIsJoining(false);
@@ -111,25 +148,42 @@ const { t } = useTranslation();
       event.stopPropagation();
     }
     setIsDeleting(true);
-    setError("");
-    setIsErrorModalOpen(false);
+    setError(null);
+
     try {
       await contextDeleteLobby(lobbyCode);
-
       showSnackbar({
-        message: "Lobby successfully deleted.",
+        message: t("lobby.success.deleted"),
         severity: "success",
       });
     } catch (caughtError) {
-      console.error("Error deleting lobby (raw):", caughtError);
-      const errorMessage = caughtError.response?.data?.message || caughtError.message || "An error occurred while deleting the lobby.";
-      console.error("Parsed error message for UI (delete):", errorMessage);
+      console.error("Lobi silme hatası (useLobbyItem - raw):", caughtError);
+      const errorPayload = caughtError.response?.data || caughtError.data || caughtError;
+      let displayErrorMessage;
+      let errorKey = null;
 
-      setError(errorMessage);
-      setIsErrorModalOpen(true);
+      if (errorPayload && errorPayload.errorKey) {
+         errorKey = errorPayload.errorKey;
+         displayErrorMessage = t(errorKey, errorPayload.errorParams || {}) || errorPayload.message;
+      } else if (errorPayload && errorPayload.message) {
+        displayErrorMessage = errorPayload.message;
+      } else if (caughtError.message) {
+        displayErrorMessage = caughtError.message;
+      } else {
+        displayErrorMessage = t("lobby.error.deleteFailed");
+      }
+      
+      console.error("Lobi silme hatası (useLobbyItem - parsed):", displayErrorMessage);
+      
+      const structuredError = {
+        message: displayErrorMessage,
+        severity: "error",
+        errorKey: errorKey
+      };
+      setError(structuredError);
 
       showSnackbar({
-        message: errorMessage,
+        message: displayErrorMessage,
         severity: "error",
       });
     } finally {
@@ -137,10 +191,9 @@ const { t } = useTranslation();
     }
   };
 
-  const closeErrorModal = () => {
-    setIsErrorModalOpen(false);
-    setError("");
-  };
+  const clearError = () => {
+    setError(null);
+  }
 
   return {
     isJoining,
@@ -148,9 +201,7 @@ const { t } = useTranslation();
     error,
     handleJoin,
     handleDelete,
-    setError,
     isDeleting,
-    isErrorModalOpen,
-    closeErrorModal,
+    clearError,
   };
 };

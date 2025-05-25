@@ -11,56 +11,92 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Lock, Public } from "@mui/icons-material";
-import ErrorModal from "./ErrorModal";
+import MessageModal from "./MessageModal";
 import JoiningLobbyAnimation from "./JoiningLobbyAnimation";
 import { useTranslation } from "react-i18next";
 
 const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [isInternalMessageModalOpen, setIsInternalMessageModalOpen] = useState(false);
+  const [internalModalConfig, setInternalModalConfig] = useState({ message: "", severity: "error", title: undefined });
+
   const { t } = useTranslation();
 
-  const handleErrorModalClose = useCallback(() => {
-    setIsErrorModalOpen(false);
-    setErrorMessage("");
+  const handleInternalMessageModalClose = useCallback(() => {
+    setIsInternalMessageModalOpen(false);
   }, []);
 
-  const processAndSetErrorMessage = (error) => {
-    let displayMsg;
+  const showInternalMessage = (message, severity = "error", title = undefined) => {
+    setInternalModalConfig({ message, severity, title });
+    setIsInternalMessageModalOpen(true);
+  };
+
+  const processAndShowInternalMessage = (error) => {
     const errorPayload = error?.response?.data || error?.data || error;
+    let displayMsg;
+    let currentSeverity = "error";
+    let customTitle = undefined;
 
     if (errorPayload && errorPayload.errorKey) {
-      const translationParams = {};
+      const translationParams = { ...errorPayload.errorParams };
       if (errorPayload.errorParams && errorPayload.errorParams.gameTypeIdentifier) {
         translationParams.gameType = t(`gameNames.${errorPayload.errorParams.gameTypeIdentifier}`);
       }
       displayMsg = t(errorPayload.errorKey, translationParams);
+
+      switch (errorPayload.errorKey) {
+        case "lobby.gameInProgress":
+        case "lobby.full":
+          currentSeverity = "warning";
+          customTitle = t('Warning');
+          break;
+        case "lobby.invalidPassword":
+          currentSeverity = "warning";
+          customTitle = t('passwordModal.invalidPasswordTitle');
+          break;
+        default:
+          currentSeverity = "error";
+          customTitle = t('Error');
+      }
     } else if (errorPayload && errorPayload.message) {
       displayMsg = errorPayload.message;
+      const status = error?.response?.status;
+      if (status === 400 || status === 401 || status === 403 || status === 404) {
+        currentSeverity = "warning";
+        customTitle = t('common.warningTitle');
+        if (status === 404 && !displayMsg) displayMsg = t('common.notFound', { resource: t('lobby.lobby') });
+        if (status === 401 && !displayMsg) displayMsg = t('error.unauthorized');
+      } else {
+        currentSeverity = "error";
+        customTitle = t('Error');
+      }
     } else if (error instanceof Error && error.message) {
       displayMsg = error.message;
+      currentSeverity = "error";
+      customTitle = t('Error');
     } else if (typeof errorPayload === 'string') {
       displayMsg = errorPayload;
+      currentSeverity = "info";
+      customTitle = t('common.infoTitle');
     } else {
       displayMsg = t("common.error");
+      currentSeverity = "error";
+      customTitle = t('Error');
     }
-    setErrorMessage(displayMsg);
+    showInternalMessage(displayMsg, currentSeverity, customTitle);
   };
 
   const handlePasswordSubmit = async () => {
     if (!password) return;
     setIsLoading(true);
-    setErrorMessage("");
     try {
       await onSubmit(password);
-      onClose();
     } catch (error) {
-      console.error('Lobiye katılma hatası (LobbyPasswordModal - Şifreli):', error);
-      setIsErrorModalOpen(true);
-      processAndSetErrorMessage(error);
+      console.error('Lobiye katılma hatası (LobbyPasswordModal - onSubmit catch):', error);
+      processAndShowInternalMessage(error);
     } finally {
       setIsLoading(false);
     }
@@ -68,13 +104,11 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
 
   const handlePublicJoin = async () => {
     setIsLoading(true);
-    setErrorMessage("");
     try {
       await onSubmit("");
     } catch (error) {
-      console.error('Lobiye katılma hatası (LobbyPasswordModal - Herkese Açık):', error);
-      setIsErrorModalOpen(true);
-      processAndSetErrorMessage(error);
+      console.error('Lobiye katılma hatası (LobbyPasswordModal - onSubmit catch):', error);
+      processAndShowInternalMessage(error);
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +210,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     textAlign: 'center',
                   }}
                 >
-                  {isPasswordProtected ? t('lobby.passwordModal.titleProtected') : t('lobby.passwordModal.titlePublic')}
+                  {isPasswordProtected ? t('passwordModal.titleProtected') : t('passwordModal.titlePublic')}
                 </Typography>
               </Box>
 
@@ -188,13 +222,13 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     mb={3}
                     textAlign="center"
                   >
-                    {t('lobby.passwordModal.descriptionProtected')}
+                    {t('passwordModal.descriptionProtected')}
                   </Typography>
 
                   <TextField
                     fullWidth
                     type={showPassword ? "text" : "password"}
-                    label={t('lobby.passwordModal.passwordLabel')}
+                    label={t('passwordModal.passwordLabel')}
                     variant="outlined"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -218,7 +252,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
+                            aria-label={t('common.togglePasswordVisibility')}
                             onClick={handleTogglePasswordVisibility}
                             edge="end"
                           >
@@ -252,12 +286,12 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                       sx={{
                         backgroundColor: palette.primary?.main || '#3f51b5',
                         '&:hover': {
-                          backgroundColor: palette.primary?.darker || '#3a9f71',
+                          backgroundColor: palette.primary?.darker || '#303f9f',
                         },
                         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                       }}
                     >
-                      {t('lobby.passwordModal.joinButton')}
+                      {t('passwordModal.joinButton')}
                     </Button>
                   </Box>
                 </>
@@ -270,7 +304,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                     textAlign="center"
                     color="text.secondary"
                   >
-                    {t('lobby.passwordModal.descriptionPublic')}
+                    {t('passwordModal.descriptionPublic')}
                   </Typography>
 
                   <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
@@ -296,12 +330,12 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                       sx={{
                         backgroundColor: palette.success?.main || '#2E7D32',
                         '&:hover': {
-                          backgroundColor: palette.success?.medium || '#4c9f38',
+                          backgroundColor: palette.success?.dark || '#1B5E20',
                         },
                         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                       }}
                     >
-                      {t('lobby.passwordModal.joinLobbyButton')}
+                      {t('passwordModal.joinLobbyButton')}
                     </Button>
                   </Box>
                 </>
@@ -323,10 +357,12 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
         <JoiningLobbyAnimation />
       </Modal>
 
-      <ErrorModal
-        open={isErrorModalOpen}
-        onClose={handleErrorModalClose}
-        errorMessage={errorMessage}
+      <MessageModal
+        open={isInternalMessageModalOpen}
+        onClose={handleInternalMessageModalClose}
+        message={internalModalConfig.message}
+        severity={internalModalConfig.severity}
+        title={internalModalConfig.title}
       />
     </>
   );

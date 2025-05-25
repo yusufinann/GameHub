@@ -1,4 +1,119 @@
 {
+  "Conversations": "Sohbetler",
+  "common": {
+    "errorTitle": "Hata",
+    "warningTitle": "Uyarı",
+    "successTitle": "Başarılı",
+    "infoTitle": "Bilgi",
+    "confirm": "Onayla",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "update": "Güncelle",
+    "create": "Oluştur",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "leave": "Ayrıl",
+    "error": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "success": "İşlem başarılı.",
+    "loading": "Yükleniyor...",
+    "close": "Kapat",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "notifications": {
+    "groupJoinedSuccess": "Başarıyla '{groupName}' grubuna katıldınız.",
+    "messageSent": "Mesaj gönderildi.",
+    "settingsSaved": "Ayarlar başarıyla kaydedildi.",
+    "playerJoined": "{{playerName}} oyuna katıldı!",
+    "rejoinedSuccess": "Oyuna başarıyla yeniden bağlandınız.",
+    "joinedSuccess": "Tombala oyununa başarıyla katıldınız!",
+    "gameStarted": "Oyun başladı!",
+    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})",
+    "gameOverAllNumbers": "Tüm numaralar çekildi - Final Sıralaması",
+    "gameOverAllCompleted": "Tüm oyuncular tamamladı - Final Sıralaması"
+  },
+  "error": {
+    "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",
+    "friendNotFound": "Arkadaş bulunamadı (ID: {friendId}).",
+    "generic": "Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.",
+    "failedToSendMessage": "Mesaj gönderilemedi.",
+    "failedToLoadMessages": "Mesajlar yüklenemedi.",
+    "failedToLoadMoreMessages": "Daha fazla mesaj yüklenemedi."
+  },
+  "chat": {
+    "selectFriend": "Sohbet etmek için bir arkadaş seçin",
+    "selectFriendOrGroup": "Sohbete başlamak için bir arkadaş veya grup seçin",
+    "typeMessage": "Bir mesaj yazın...",
+    "noMessagesYet": "Henüz mesaj yok. Sohbeti başlatın!",
+    "loadMoreMessages": "Daha fazla mesaj yükle"
+  },
+  "dialog": {
+    "createFriendGroup": {
+      "title": "Arkadaş Grubu Oluştur",
+      "groupNameLabel": "Grup Adı",
+      "groupNamePlaceholder": "Grup adını girin",
+      "descriptionLabel": "Açıklama",
+      "descriptionPlaceholder": "Grup açıklamasını girin (isteğe bağlı)",
+      "passwordLabel": "Şifre (İsteğe Bağlı)",
+      "passwordPlaceholder": "Şifre girin (isteğe bağlı)",
+      "createButton": "Grup Oluştur"
+    },
+    "updateFriendGroup": {
+      "title": "Arkadaş Grubunu Güncelle",
+      "groupNameLabel": "Grup Adı",
+      "descriptionLabel": "Açıklama",
+      "currentPasswordLabel": "Mevcut Şifre (grup özelse)",
+      "newPasswordLabel": "Yeni Şifre (İsteğe Bağlı)",
+      "newPasswordHelper": "Mevcut şifreyi korumak için veya şifre ayarlanmamışsa boş bırakın.",
+      "confirmNewPasswordLabel": "Yeni Şifreyi Onayla",
+      "updateButton": "Grubu Güncelle"
+    }
+  },
+  "conversationList": {
+    "tabs": {
+      "all": "Tümü",
+      "friends": "Arkadaşlar",
+      "groups": "Gruplar",
+      "requests": "İstekler"
+    },
+    "actions": {
+      "createGroup": "Grup Oluştur",
+      "deleteGroup": "Grubu Sil",
+      "leaveGroup": "Gruptan Ayrıl",
+      "editGroup": "Grubu Düzenle",
+      "acceptRequest": "Kabul Et",
+      "rejectRequest": "Reddet"
+    },
+    "empty": {
+      "noConversations": "Henüz sohbet yok.",
+      "noFriends": "Henüz arkadaş yok. Biraz ekle!",
+      "noGroups": "Henüz grup yok. Oluştur veya birine katıl!",
+      "noRequests": "Bekleyen arkadaşlık isteği yok."
+    },
+    "searchPlaceholder": "Sohbetleri ara..."
+  },
+  "friendGroups": {
+    "createSuccess": "Arkadaş grubu '{groupName}' başarıyla oluşturuldu.",
+    "createError": "Arkadaş grubu oluşturulamadı: {error}",
+    "updateSuccess": "Arkadaş grubu '{groupName}' başarıyla güncellendi.",
+    "updateError": "Arkadaş grubu güncellenemedi: {error}",
+    "deleteSuccess": "Arkadaş grubu '{groupName}' başarıyla silindi.",
+    "deleteError": "Arkadaş grubu silinemedi: {error}",
+    "leaveSuccess": "Arkadaş grubu '{groupName}'ndan başarıyla ayrıldınız.",
+    "leaveError": "Arkadaş grubundan ayrılamadınız: {error}",
+    "joinError": "Arkadaş grubuna katılamadınız: {error}",
+    "fetchError": "Arkadaş grupları getirilemedi: {error}"
+  },
+  "confirmations": {
+    "deleteGroup": {
+      "title": "Silmeyi Onayla",
+      "message": "'{groupName}' grubunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    },
+    "leaveGroup": {
+      "title": "Ayrılmayı Onayla",
+      "message": "'{groupName}' grubundan ayrılmak istediğinizden emin misiniz?"
+    }
+  },
   "Forgot password": "Şifrimi Unuttum!",
   "Use a different account": "Farklı bir hesap kullan",
   "Your preferred language will be applied to all interface texts": "Tercih ettiğiniz dil tüm arayüz metinlerine uygulanacaktır",
@@ -41,7 +156,6 @@
   "FULLY READY!": "TAMAMEN HAZIR!",
   "Popular Games": "Popüler Oyunlar",
   "Search users...": "Kullanıcı Ara...",
-
   "mainScreen": {
     "slide1": {
       "title": "Birlikte Oyna, Her Yerde Bağlan",
@@ -71,7 +185,6 @@
     "live": "CANLI",
     "released": "Yayınlandı",
     "play": "Oyna",
-
     "valheim": {
       "title": "Valheim",
       "description": "Efsanevi Viking savaşçılarının ölümden sonra yaşadığı mitolojik dünya Valheim'da hayatta kalmak için savaşın. Valhalla'ya layık olduğunuzu kanıtlamak için tehlikeli ormanları keşfedin ve dağları tırmanın."
@@ -93,7 +206,6 @@
       "description": "Hogwarts Miras'ında sihir dünyasına adım atın. Büyücülük okulundaki maceranızda kendi karakterinizi yaratın ve kadim sırları keşfedin."
     }
   },
-
   "gameData": {
     "Valorant": {
       "title": "Valorant",
@@ -153,7 +265,6 @@
   "There are no upcoming events": "Yaklaşan etkinlk bulunmuyor",
   "You can follow new events from here when they are added": "Yeni etkinlikler eklendiğinde buradan takip edebilirsiniz",
   "Competition Styles": "Rekabet Stilleri",
-
   "activePlayersTitle": "Aktif Oyuncular",
   "playersActiveCount": "{{count}} oyuncu aktif",
   "playersActiveCount_plural": "{{count}} oyuncu aktif",
@@ -343,6 +454,9 @@
   "leaveGroupTooltip": "Grubu Terk Et",
   "deleteGroupTooltip": "Grubu Sil",
   "JOIN GROUPS": "Gruplara Katıl",
+  "No friends yet": "Henüz arkadaşın yok",
+  "Friends": "Arkadaşlar",
+  "Friend Groups": "Arkadaş Grupları",
   "statusOnline": "Çevrimiçi",
   "statusOffline": "Çevrimdışı",
   "toolbarTitleAll": "Hepsi",
@@ -456,7 +570,6 @@
       },
       "friends": "Arkadaşlar"
     },
-
     "tabs": {
       "statistics": "İstatistikler",
       "history": "Geçmiş",
@@ -722,15 +835,6 @@
   "descriptionWaitingForPlayers": "Oyuncuların katılmasını bekliyorsun. Hazır olduğunda oyunu başlatabilirsin!",
   "defaultNamePrefix": "Oyuncu",
   "Set New Game": "Yeni Oyun Ayarla",
-  "notifications": {
-    "playerJoined": "{{playerName}} oyuna katıldı!",
-    "rejoinedSuccess": "Oyuna başarıyla yeniden bağlandınız.",
-    "joinedSuccess": "Tombala oyununa başarıyla katıldınız!",
-    "gameStarted": "Oyun başladı!",
-    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})",
-    "gameOverAllNumbers": "Tüm numaralar çekildi - Final Sıralaması",
-    "gameOverAllCompleted": "Tüm oyuncular tamamladı - Final Sıralaması"
-  },
   "errors": {
     "hostOnlyStart": "Sadece lobi sahibi oyunu başlatabilir.",
     "gameNotFound": "Tombala oyunu bulunamadı.",
@@ -748,26 +852,16 @@
     "invalidBingoCall": "Geçersiz Tombala çağrısı. Kartınız tamamlanmamış veya sayılar yanlış.",
     "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
   },
+  "activeLobbyOtherGame": "Başka bir oyun için aktif bir lobiniz bulunmaktadır. Bu oyun için yeni bir lobi oluşturmadan önce mevcut lobinizi kapatmanız veya o lobiye gitmeniz gerekmektedir.",
   "joinedMessage": "Tombala oyununa başarıyla katıldınız",
   "Game has started!": "Oyun başladı!",
   "leftlobby": "lobiden ayrıldı",
-  "common": {
-    "error": "Bir hata oluştu. Lütfen tekrar deneyin.",
-    "success": "İşlem başarılı.",
-    "loading": "Yükleniyor...",
-    "save": "Kaydet",
-    "cancel": "İptal",
-    "close": "Kapat",
-    "yes": "Evet",
-    "no": "Hayır"
-  },
   "lobby": {
     "error": {
       "codeRequired": "Lobi kodu gereklidir.",
       "notFoundOrInactive": "Lobi bulunamadı veya aktif değil.",
       "GAME_IN_PROGRESS": "Bu lobide aktif bir {{gameType}} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
-      "invalidPassword": "Geçersiz şifre.",
-      "lobbyFull": "Lobi dolu. Katılamazsınız.",
+  
       "alreadyInLobby": "Zaten bu lobidesiniz.",
       "joinFailed": "Lobiye katılırken bir hata oluştu. Lütfen tekrar deneyin.",
       "createFailed": "Lobi oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
@@ -775,18 +869,13 @@
       "updateSettingsFailed": "Lobi ayarları güncellenemedi.",
       "hostOnlyAction": "Bu işlemi sadece lobi sahibi yapabilir.",
       "notInLobby": "Şu anda bu lobide değilsiniz."
-    }, 
-    "gameInProgress": "Bu lobide aktif bir {{gameType}} oyunu devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın."
-    ,"passwordModal": {
-      "titleProtected": "Lobi Şifresini Girin",
-      "titlePublic": "Herkese Açık Lobiye Katıl",
-      "descriptionProtected": "Bu lobi şifre korumalıdır. Katılmak için lütfen şifreyi girin.",
-      "passwordLabel": "Şifre",
-      "joinButton": "Katıl",
-      "descriptionPublic": "Bu lobi herkese açıktır. Şifre gerekmez.",
-      "joinLobbyButton": "Lobiye Katıl"
-    }
-    ,
+    },
+    "invalidPassword": "Girdiğiniz şifre yanlış. Lütfen tekrar deneyin.",
+    "warning": {
+      "lobbyFull": "Lobi dolu.Katılamazsınız."
+    },
+    "gameInProgress": "Bu lobide aktif bir {{gameType}} oyunu devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
+   
     "success": {
       "hostReturned": "Lobiye host olarak geri döndünüz.",
       "joined": "'{{lobbyName}}' lobisine başarıyla katıldınız.",
@@ -819,6 +908,16 @@
       "host": "Host"
     }
   },
+   "passwordModal": {
+      "titleProtected": "Lobi Şifresini Girin",
+      "titlePublic": "Herkese Açık Lobiye Katıl",
+      "descriptionProtected": "Bu lobi şifre korumalıdır. Katılmak için lütfen şifreyi girin.",
+      "passwordLabel": "Şifre",
+      "joinButton": "Katıl",
+      "descriptionPublic": "Bu lobi herkese açıktır. Şifre gerekmez.",
+      "joinLobbyButton": "Lobiye Katıl",
+       "invalidPasswordTitle": "Geçersiz Lobi Şifresi"
+    },
   "notification": {
     "userJoinedLobby": "{{userName}} lobiye katıldı.",
     "userLeftLobby": "{{userName}} lobiden ayrıldı.",
@@ -838,7 +937,7 @@
     "minLength": "{{fieldName}} en az {{count}} karakter uzunluğunda olmalıdır.",
     "maxLength": "{{fieldName}} en fazla {{count}} karakter uzunluğunda olabilir."
   },
-   "gameNames": {
+  "gameNames": {
     "Bingo": "Tombala",
     "Hangman": "Adam Asmaca"
   },
@@ -848,16 +947,17 @@
   "gameEndedByHost": "Oyun host tarafından sonlandırıldı.",
   "needMorePlayers": "Oyunu başlatmak için en az 2 oyuncuya ihtiyacınız var. Daha fazla oyuncunun katılması bekleniyor...",
   "readyToStart": "Lobiniz hazır! Oyunu istediğiniz zaman başlatabilirsiniz.",
-  "createdGroup":"Grup başarıyla oluşturuldu!",
-  "leaveGroup":"Gruptan başarıyla ayrıldınız!",
-   "login": {
+  "createdGroup": "Grup başarıyla oluşturuldu!",
+  "leaveGroup": "Gruptan başarıyla ayrıldınız!",
+  "login": {
     "error": {
       "generic": "Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin."
     },
     "enterPassword": "Şifrenizi girin",
     "AUTH_INVALID_CREDENTIALS": "Girdiğiniz e-posta veya şifre yanlış. Lütfen tekrar deneyin.",
     "INTERNAL_SERVER_ERROR": "Sunucularımızda bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
-    "EMAIL_PASSWORD_REQUIRED": "E-posta ve şifre zorunludur.", 
+    "EMAIL_PASSWORD_REQUIRED": "E-posta ve şifre zorunludur.",
     "PASSWORD_REQUIRED": "Lütfen şifrenizi girin."
-  }
+  },
+  "Warning": "Uyarı"
 }

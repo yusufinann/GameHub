@@ -1,62 +1,93 @@
 import React, { useState } from "react";
 import { Box, Button, useTheme } from "@mui/material";
 import { Add, ArrowForward } from "@mui/icons-material";
-import { useLocation, useParams } from "react-router-dom";
-import ErrorModal from "../../../../shared/components/ErrorModal";
+import { useLocation, useParams, useNavigate } from "react-router-dom"; 
+import MessageModal from "../../../../shared/components/MessageModal";
 import CreateLobbyModal from "../../../../shared/components/CreateLobbyModal";
 import DummyImage from "../../../../assets/bingoPulse-bg.png";
 import FingerPushingButton from "./FingerPushingButton";
 import { useTranslation } from "react-i18next";
 import dummyHangman from "../../../../assets/hangman-rmBg.png";
+
 function CreateLobby({ existingLobby }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
- 
+
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+    message: "",
+    severity: "error",
+    title: undefined,
+  });
+
   const location = useLocation();
   const { gameId } = useParams();
+  const navigate = useNavigate(); 
   const theme = useTheme();
-  const{t}=useTranslation();
+  const { t } = useTranslation();
 
   const isGameDetailRoute = location.pathname.includes("game-detail");
   const hasLobbyForCurrentGame =
     isGameDetailRoute && existingLobby?.game === parseInt(gameId, 10);
- const dummyImage =
+
+  const dummyImage =
     gameId === '1'
-      ? DummyImage        // DOĞRUDAN dosya yolu
+      ? DummyImage
       : gameId === '2'
       ? dummyHangman
       : '';
-  const handleOpenModal = () => {
-    if (
-      (!isGameDetailRoute && existingLobby) ||
-      (isGameDetailRoute && hasLobbyForCurrentGame)
-    ) {
-      setIsModalOpen(true);
-    } else if (isGameDetailRoute && existingLobby && !hasLobbyForCurrentGame) {
-      setIsErrorModalOpen(true);
-    } else {
-      setIsModalOpen(true);
-    }
 
-    // Animation for button press
+  const showMessage = (message, severity = "error", title = undefined, onModalClose) => {
+    setModalConfig({ message, severity, title, onModalClose });
+    setIsMessageModalOpen(true);
+  };
+
+  const handleOpenModal = () => {
     setIsPressed(true);
     setTimeout(() => setIsPressed(false), 200);
+
+    if (isGoToLobbyAction) {
+      if (existingLobby?.lobbyCode) {
+        navigate(`/lobby/${existingLobby.lobbyCode}`);
+      } else {
+        showMessage(
+          t("errors.lobbyNotFound"),
+          "error",
+          t("Error")
+        );
+      }
+    } else if (isGameDetailRoute && existingLobby && !hasLobbyForCurrentGame) {
+   
+      showMessage(
+        t("activeLobbyOtherGame"),
+        "warning", 
+        t("Warning")
+      );
+    } else {
+      // "Create A Lobby" durumu
+      setIsCreateModalOpen(true);
+    }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
   };
 
-  const handleCloseErrorModal = () => {
-    setIsErrorModalOpen(false);
+  const handleCloseMessageModal = () => {
+    if (modalConfig.onModalClose) {
+      modalConfig.onModalClose();
+    }
+    setIsMessageModalOpen(false);
   };
 
   const isGoToLobbyAction =
-    (!isGameDetailRoute && existingLobby) ||
-    (isGameDetailRoute && hasLobbyForCurrentGame);
-  const buttonText = isGoToLobbyAction ? t("Go to Your Lobby") : t("Create A Lobby");
+    existingLobby &&
+    ((!isGameDetailRoute) || (isGameDetailRoute && hasLobbyForCurrentGame));
+
+  const buttonText = isGoToLobbyAction
+    ? t( "Go to your Lobby")
+    : t("Create A Lobby");
   const ButtonIcon = isGoToLobbyAction ? ArrowForward : Add;
 
   return (
@@ -86,7 +117,7 @@ function CreateLobby({ existingLobby }) {
           },
         }}
       >
-       <Box
+        <Box
           component="img"
           src={dummyImage}
           alt="Game Background Art"
@@ -98,6 +129,7 @@ function CreateLobby({ existingLobby }) {
             width: "180px",
             height: "180px",
             objectFit: "contain",
+            opacity: 0.7, 
           }}
         />
 
@@ -110,14 +142,13 @@ function CreateLobby({ existingLobby }) {
             height: "120px",
             background:
               theme.palette.mode === "light"
-                ? "rgba(43, 138, 106, 0.15)"
-                : "rgba(255, 255, 255, 0.08)",
+                ? "rgba(43, 138, 106, 0.1)" 
+                : "rgba(255, 255, 255, 0.05)", 
             borderRadius: "50%",
-            filter: "blur(60px)",
+            filter: "blur(50px)", 
           }}
         />
 
-        {/* Main Content Area */}
         <Box
           sx={{
             position: "relative",
@@ -127,13 +158,11 @@ function CreateLobby({ existingLobby }) {
             alignItems: "center",
           }}
         >
-          {/* Interactive Finger Animation */}
           <FingerPushingButton
             isHovering={isHovering || isPressed}
             onClick={handleOpenModal}
           />
 
-          {/* Action Button */}
           <Button
             onClick={handleOpenModal}
             onMouseEnter={() => setIsHovering(true)}
@@ -168,7 +197,7 @@ function CreateLobby({ existingLobby }) {
                     : "0px 6px 20px rgba(80, 120, 230, 0.5)",
               },
               "&:active": {
-                transform: "translateY(0px) scale(1)",
+                transform: "translateY(0px) scale(1)", // scale(1) daha iyi
                 boxShadow:
                   theme.palette.mode === "light"
                     ? "0px 2px 8px rgba(43, 138, 106, 0.4)"
@@ -185,12 +214,16 @@ function CreateLobby({ existingLobby }) {
         </Box>
       </Box>
 
-      {/* Modals */}
-      <CreateLobbyModal open={isModalOpen} onClose={handleCloseModal} />
-      <ErrorModal
-        open={isErrorModalOpen}
-        onClose={handleCloseErrorModal}
-        errorMessage="You already have an active lobby for another game. Please close your existing lobby before creating a new one."
+      <CreateLobbyModal
+        open={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+      />
+      <MessageModal
+        open={isMessageModalOpen}
+        onClose={handleCloseMessageModal}
+        message={modalConfig.message}
+        severity={modalConfig.severity}
+        title={modalConfig.title}
       />
     </>
   );

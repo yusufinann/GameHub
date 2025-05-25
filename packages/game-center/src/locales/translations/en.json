@@ -1,111 +1,224 @@
 {
-     "Forgot password" :"Forgot password",
-     "Use a different account":"Use a different account",
-     "Your preferred language will be applied to all interface texts":"Your preferred language will be applied to all interface texts",
-     "English":"English",
-     "Turkish":"Turkish",
-     "Discover Your Next":"Discover Your Next",
-     "Gaming Adventure":"Gaming Adventure",
-     "Access thousands of games in one place":"Access thousands of games in one place",
-     "Explore Games":"Explore Games",
-     "Learn More":"Learn More",
-     "Remember me":"Remember me",
-     "Login":"Login",
-     "Logout":"Logout",
-     "Logging out...":"Logging out...",
-     "Email Address": "Email Address",
-     "Password":"Password",
-     "Enter your password":"Enter your password",
-     "Hot & New":"Hot & New",
-     "Error":"Error",
-     "Featured Games":"Featured Games",
-     "Browse Games":"Browse Games",
-     "Welcome":"Welcome",
-     "mainScreen": {
-          "slide1": {
-            "title": "Play Together, Connect Everywhere",
-            "buttonText": "JOIN NOW"
-          },
-          "slide2": {
-            "title": "Live Lobbies, Instant Battles",
-            "buttonText": "START PLAYING"
-          },
-          "slide3": {
-            "title": "Game. Connect. Conquer.",
-            "buttonText": "ENTER GAME ZONE"
-          }
-        },
-        "alt": {
-          "gameCharacter": "Game character"
-        },
-        "navigation": {
-          "previousSlide": "Previous slide",
-          "nextSlide": "Next slide",
-          "slideCounter": "{{current}} / {{total}}"
-        },
-        "Performance Metrics":"Performance Metrics",
-        "Avg Score":"Avg Score",
-        "Total Games":"Total Games",
-        "Wins":"Wins",
-        "Losses":"Losses",
-        "Bingo Stats":"Bingo Stats",
-        "Score":"Score",
-        "Rank":"Rank",
-        "Trend Games":"Trend Games",
-        "Game Stories":"Game Stories",
-        "Lobby Creator":"Lobby Creator",
-        "Go to your Lobby":"Go to your Lobby",
-        "Create A Lobby":"Create A Lobby",
-        "Popular Games":"Popular Games",
-        "section": {
-          "gameStories": "Game Stories"
-        },
-        "game": {
-          "live": "LIVE",
-          "released": "Released",
-          "play": "Play",
-          
-          "valheim": {
-            "title": "Valheim",
-            "description": "Fight for survival in the mythical world of Valheim, where legendary Viking warriors live after death. Explore dangerous forests and climb mountains to prove you are worthy of Valhalla."
-          },
-          "halflife": {
-            "title": "Half-Life: Alyx",
-            "description": "In this new chapter of Half-Life set in virtual reality, you are humanity's only hope against the Combine's increasing power."
-          },
-          "traffic": {
-            "title": "Traffic Police",
-            "description": "Serve as a traffic police officer, catch those who violate traffic rules, and maintain order in the city."
-          },
-          "reddead": {
-            "title": "Red Dead Redemption",
-            "description": "Struggle to survive as an outlaw in the last days of the Wild West. An epic adventure where concepts of revenge, honor, and loyalty are tested."
-          },
-          "hogwarts": {
-            "title": "Hogwarts Legacy",
-            "description": "Step into the wizarding world in Hogwarts Legacy. Create your own character and discover ancient secrets in your adventure at the school of wizardry."
-          }
-        },
-        "Search users...":"Search users...",
-        "Game Paradise Awaits": "Game Paradise Awaits",
-        "Play Now": "Play Now",
-        "Try Preview": "Try Preview",
-        "Preview Mode": "Preview Mode",
-        "FULLY READY!": "FULLY READY!",
-        
-        "gameData": {
-          "Valorant": {
-            "title": "Valorant",
-            "description": "A 5v5 character-based tactical shooter where precise gunplay meets unique agent abilities.",
-            "genre": "Tactical Shooter"
-          },
-          "Cyberpunk": {
-            "title": "Cyberpunk 2077",
-            "description": "An open-world action-adventure RPG set in Night City, a megalopolis obsessed with power, glamour and body modification.",
-            "genre": "RPG"
-          }
-        },
-        "Action": "Action",
+  "Conversations": "Conversations",
+  "common": {
+    "errorTitle": "Error",
+    "warningTitle": "Warning",
+    "successTitle": "Success",
+    "infoTitle": "Information",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "update": "Update",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "leave": "Leave",
+    "error": "An error occurred. Please try again.",
+    "success": "Operation successful.",
+    "loading": "Loading...",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "notifications": {
+    "groupJoinedSuccess": "Successfully joined group '{groupName}'.",
+    "messageSent": "Message sent.",
+    "settingsSaved": "Settings saved successfully.",
+    "playerJoined": "{{playerName}} joined the game!",
+    "rejoinedSuccess": "Successfully reconnected to the game.",
+    "joinedSuccess": "Successfully joined the Bingo game!",
+    "gameStarted": "Game has started!",
+    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
+    "gameOverAllNumbers": "All numbers drawn - Final Rankings",
+    "gameOverAllCompleted": "All players completed - Final Rankings"
+  },
+  "error": {
+    "couldNotFetchGroupDetails": "Could not fetch group details for ID: {groupId}.",
+    "friendNotFound": "Friend with ID: {friendId} not found.",
+    "generic": "An unexpected error occurred. Please try again.",
+    "failedToSendMessage": "Failed to send message.",
+    "failedToLoadMessages": "Failed to load messages.",
+    "failedToLoadMoreMessages": "Failed to load more messages."
+  },
+  "chat": {
+    "selectFriend": "Select a friend to chat",
+    "selectFriendOrGroup": "Select a friend or group to start chatting",
+    "typeMessage": "Type a message...",
+    "noMessagesYet": "No messages yet. Start the conversation!",
+    "loadMoreMessages": "Load more messages"
+  },
+  "dialog": {
+    "createFriendGroup": {
+      "title": "Create Friend Group",
+      "groupNameLabel": "Group Name",
+      "groupNamePlaceholder": "Enter group name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Enter group description (optional)",
+      "passwordLabel": "Password (Optional)",
+      "passwordPlaceholder": "Enter password (optional)",
+      "createButton": "Create Group"
+    },
+    "updateFriendGroup": {
+      "title": "Update Friend Group",
+      "groupNameLabel": "Group Name",
+      "descriptionLabel": "Description",
+      "currentPasswordLabel": "Current Password (if group is private)",
+      "newPasswordLabel": "New Password (Optional)",
+      "newPasswordHelper": "Leave blank to keep current or if no password is set.",
+      "confirmNewPasswordLabel": "Confirm New Password",
+      "updateButton": "Update Group"
+    }
+  },
+  "conversationList": {
+    "tabs": {
+      "all": "All",
+      "friends": "Friends",
+      "groups": "Groups",
+      "requests": "Requests"
+    },
+    "actions": {
+      "createGroup": "Create Group",
+      "deleteGroup": "Delete Group",
+      "leaveGroup": "Leave Group",
+      "editGroup": "Edit Group",
+      "acceptRequest": "Accept",
+      "rejectRequest": "Reject"
+    },
+    "empty": {
+      "noConversations": "No conversations yet.",
+      "noFriends": "No friends yet. Add some!",
+      "noGroups": "No groups yet. Create or join one!",
+      "noRequests": "No pending friend requests."
+    },
+    "searchPlaceholder": "Search conversations..."
+  },
+  "friendGroups": {
+    "createSuccess": "Friend group '{groupName}' created successfully.",
+    "createError": "Failed to create friend group: {error}",
+    "updateSuccess": "Friend group '{groupName}' updated successfully.",
+    "updateError": "Failed to update friend group: {error}",
+    "deleteSuccess": "Friend group '{groupName}' deleted successfully.",
+    "deleteError": "Failed to delete friend group: {error}",
+    "leaveSuccess": "Successfully left friend group '{groupName}'.",
+    "leaveError": "Failed to leave friend group: {error}",
+    "joinError": "Failed to join friend group: {error}",
+    "fetchError": "Failed to fetch friend groups: {error}"
+  },
+  "confirmations": {
+    "deleteGroup": {
+      "title": "Confirm Deletion",
+      "message": "Are you sure you want to delete the group '{groupName}'? This action cannot be undone."
+    },
+    "leaveGroup": {
+      "title": "Confirm Leave",
+      "message": "Are you sure you want to leave the group '{groupName}'?"
+    }
+  },
+  "Forgot password": "Forgot password",
+  "Use a different account": "Use a different account",
+  "Your preferred language will be applied to all interface texts": "Your preferred language will be applied to all interface texts",
+  "English": "English",
+  "Turkish": "Turkish",
+  "Discover Your Next": "Discover Your Next",
+  "Gaming Adventure": "Gaming Adventure",
+  "Access thousands of games in one place": "Access thousands of games in one place",
+  "Explore Games": "Explore Games",
+  "Learn More": "Learn More",
+  "Remember me": "Remember me",
+  "Login": "Login",
+  "Logout": "Logout",
+  "Logging out...": "Logging out...",
+  "Email Address": "Email Address",
+  "Password": "Password",
+  "Enter your password": "Enter your password",
+  "Hot & New": "Hot & New",
+  "Error": "Error",
+  "Featured Games": "Featured Games",
+  "Browse Games": "Browse Games",
+  "Welcome": "Welcome",
+  "mainScreen": {
+    "slide1": {
+      "title": "Play Together, Connect Everywhere",
+      "buttonText": "JOIN NOW"
+    },
+    "slide2": {
+      "title": "Live Lobbies, Instant Battles",
+      "buttonText": "START PLAYING"
+    },
+    "slide3": {
+      "title": "Game. Connect. Conquer.",
+      "buttonText": "ENTER GAME ZONE"
+    }
+  },
+  "alt": {
+    "gameCharacter": "Game character"
+  },
+  "navigation": {
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "slideCounter": "{{current}} / {{total}}"
+  },
+  "Performance Metrics": "Performance Metrics",
+  "Avg Score": "Avg Score",
+  "Total Games": "Total Games",
+  "Wins": "Wins",
+  "Losses": "Losses",
+  "Bingo Stats": "Bingo Stats",
+  "Score": "Score",
+  "Rank": "Rank",
+  "Trend Games": "Trend Games",
+  "Game Stories": "Game Stories",
+  "Lobby Creator": "Lobby Creator",
+  "Go to your Lobby": "Go to your Lobby",
+  "Create A Lobby": "Create A Lobby",
+  "Popular Games": "Popular Games",
+  "section": {
+    "gameStories": "Game Stories"
+  },
+  "game": {
+    "live": "LIVE",
+    "released": "Released",
+    "play": "Play",
+    "valheim": {
+      "title": "Valheim",
+      "description": "Fight for survival in the mythical world of Valheim, where legendary Viking warriors live after death. Explore dangerous forests and climb mountains to prove you are worthy of Valhalla."
+    },
+    "halflife": {
+      "title": "Half-Life: Alyx",
+      "description": "In this new chapter of Half-Life set in virtual reality, you are humanity's only hope against the Combine's increasing power."
+    },
+    "traffic": {
+      "title": "Traffic Police",
+      "description": "Serve as a traffic police officer, catch those who violate traffic rules, and maintain order in the city."
+    },
+    "reddead": {
+      "title": "Red Dead Redemption",
+      "description": "Struggle to survive as an outlaw in the last days of the Wild West. An epic adventure where concepts of revenge, honor, and loyalty are tested."
+    },
+    "hogwarts": {
+      "title": "Hogwarts Legacy",
+      "description": "Step into the wizarding world in Hogwarts Legacy. Create your own character and discover ancient secrets in your adventure at the school of wizardry."
+    }
+  },
+  "Search users...": "Search users...",
+  "Game Paradise Awaits": "Game Paradise Awaits",
+  "Play Now": "Play Now",
+  "Try Preview": "Try Preview",
+  "Preview Mode": "Preview Mode",
+  "FULLY READY!": "FULLY READY!",
+  "gameData": {
+    "Valorant": {
+      "title": "Valorant",
+      "description": "A 5v5 character-based tactical shooter where precise gunplay meets unique agent abilities.",
+      "genre": "Tactical Shooter"
+    },
+    "Cyberpunk": {
+      "title": "Cyberpunk 2077",
+      "description": "An open-world action-adventure RPG set in Night City, a megalopolis obsessed with power, glamour and body modification.",
+      "genre": "RPG"
+    }
+  },
+  "Action": "Action",
   "RPG": "RPG",
   "Sports": "Sports",
   "Horror": "Horror",
@@ -136,23 +249,23 @@
     "thumbnailAltText": "{{title}} screenshot {{number}}",
     "browseButton": "Browse"
   },
-  "All":"All",
-  "Normal":"Normal",
-  "Event":"Event",
-  "My Groups":"My Groups",
-  "Error Loading Data":"Error Loading Data",
-  "Player":"Player",
-  "Average":"Average",
-  "Game Time":"Game Time",
-  "Average score per game":"Average score per game",
-  "Game History":"Game History",
-  "More Players":"More Players",
-  "Upcoming Events":"Upcoming Events",
-  "Person Capacity":"Person Capacity",
-  "Competition Styles":"Competition Styles",
-  "There are no upcoming events":"There are no upcoming events",
+  "All": "All",
+  "Normal": "Normal",
+  "Event": "Event",
+  "My Groups": "My Groups",
+  "Error Loading Data": "Error Loading Data",
+  "Player": "Player",
+  "Average": "Average",
+  "Game Time": "Game Time",
+  "Average score per game": "Average score per game",
+  "Game History": "Game History",
+  "More Players": "More Players",
+  "Upcoming Events": "Upcoming Events",
+  "Person Capacity": "Person Capacity",
+  "Competition Styles": "Competition Styles",
+  "There are no upcoming events": "There are no upcoming events",
   "You can follow new events from here when they are added": "You can follow new events from here when they are added",
-   "activePlayersTitle": "Active Players",
+  "activePlayersTitle": "Active Players",
   "playersActiveCount": "{{count}} player active",
   "playersActiveCount_plural": "{{count}} players active",
   "gameInfoTitle": "Game Info",
@@ -282,9 +395,9 @@
       }
     }
   },
-  "Game Modes & Rules":"Game Modes & Rules",
-  "Active Lobbies":"Active Lobbies",
-  "Rows per page":"Rows per page",
+  "Game Modes & Rules": "Game Modes & Rules",
+  "Active Lobbies": "Active Lobbies",
+  "Rows per page": "Rows per page",
   "eventEnded": "Event has ended",
   "eventContinues": "The event continues",
   "startsOnDate": "Starts on {{date}}",
@@ -292,39 +405,39 @@
   "hoursUnit": "h",
   "minutesUnit": "m",
   "secondsUnit": "s",
-  "Password Protected Lobby":"Password Protected Lobby",
-  "Open Lobby":"Open Lobby",
-  "Delete Lobby":"Delete Lobby",
-  "Edit Lobby":"Edit Lobby",
-  "Go to Lobby":"Go to Lobby",
-  "Join":"Join",
+  "Password Protected Lobby": "Password Protected Lobby",
+  "Open Lobby": "Open Lobby",
+  "Delete Lobby": "Delete Lobby",
+  "Edit Lobby": "Edit Lobby",
+  "Go to Lobby": "Go to Lobby",
+  "Join": "Join",
   "lobbyTypeEvent": "Event",
   "lobbyTypeNormal": "Normal",
   "membersLabel": "{{count}}{{maxPart}} Members",
   "unnamedLobby": "Unnamed Lobby",
   "lobbyFullError": "Lobby is full!",
   "joinLobbyError": "There was an error joining the lobby.",
-  "Sound Effects":"Sound Effects",
-  "Settings":"Settings",
-  "Notifications":"Notifications",
-  "Bingo Game":"Bingo Game",
-  "Other Game":"Other Game",
-  "Leave Lobby":"Leave Lobby",
-  "Members":"Members",
-  "This event is over":"This event is over",
-  "Event starts in":"Event starts in",
-  "Hours":"Hours",
-  "Minute":"Minute",
-  "Host":"Host",
-  "Chat":"Chat",
+  "Sound Effects": "Sound Effects",
+  "Settings": "Settings",
+  "Notifications": "Notifications",
+  "Bingo Game": "Bingo Game",
+  "Other Game": "Other Game",
+  "Leave Lobby": "Leave Lobby",
+  "Members": "Members",
+  "This event is over": "This event is over",
+  "Event starts in": "Event starts in",
+  "Hours": "Hours",
+  "Minute": "Minute",
+  "Host": "Host",
+  "Chat": "Chat",
   "sendMessagePlaceholder": "Send an expression...",
-  "COMMUNITY":"COMMUNITY",
-  "Create Community Group":"Create New Gaming Group",
-  "Group Name":"Group Name",
-  "Group Description (Optional)":"Group Description (Optional)",
-  "Max Members (min 2)":"Max Members (min 2)",
-  "Password Protect?":"Password Protect?",
-  "Create":"Create",
+  "COMMUNITY": "COMMUNITY",
+  "Create Community Group": "Create New Gaming Group",
+  "Group Name": "Group Name",
+  "Group Description (Optional)": "Group Description (Optional)",
+  "Max Members (min 2)": "Max Members (min 2)",
+  "Password Protect?": "Password Protect?",
+  "Create": "Create",
   "joinProtectedGroupTitle": "Join Protected Group",
   "joinGroupTitle": "Join Group",
   "protectedGroupPrompt": "This group is password protected. Please enter the password to join.",
@@ -332,7 +445,7 @@
   "joinGroupPromptNoPassword": "Click 'Join Group' below to become a member.",
   "Cancel": "Cancel",
   "joinGroup": "Join Group",
-  "Communities":"Communities",
+  "Communities": "Communities",
   "myGroupsTitle": "MY GROUPS",
   "searchPlaceholder": "Search...",
   "createNewGroupTooltip": "Create new group",
@@ -340,10 +453,10 @@
   "membersCountLabel": "{{count}}/{{max}} members",
   "leaveGroupTooltip": "Leave Group",
   "deleteGroupTooltip": "Delete Group",
-  "JOIN GROUPS":"JOIN GROUPS",
-  "No friends yet":"No friends yet",
-  "Friends":"Arkadaşlar",
-  "Friend Groups":"Arkadaş Grupları",
+  "JOIN GROUPS": "JOIN GROUPS",
+  "No friends yet": "No friends yet",
+  "Friends": "Arkadaşlar",
+  "Friend Groups": "Arkadaş Grupları",
   "statusOnline": "Online",
   "statusOffline": "Offline",
   "toolbarTitleAll": "All",
@@ -360,7 +473,6 @@
   "tabLabelFriendGroups": "Friend Groups",
   "deleteGroupDialogTitle": "Delete Group?",
   "deleteGroupDialogMessage": "Are you sure you want to delete this group? This action cannot be undone.",
- 
   "deleteButtonLabel": "Delete",
   "updateFriendGroupDialogTitle": "Update Friend Group: {{groupName}}",
   "friendGroupNameLabel": "Friend Group Name",
@@ -392,14 +504,14 @@
   "joinGroupButtonLabel": "JOIN GROUP",
   "connectionNotAvailableError": "Connection not available.",
   "selectChatPlaceholder": "Select a friend or group to start chatting",
-  "noMessage":"There is no message",
+  "noMessage": "There is no message",
   "typeYourMessagePlaceholder": "Type your message...",
-  "globalCommunityTitle": "Global Community", 
+  "globalCommunityTitle": "Global Community",
   "communityPageTitle": "COMMUNITY",
-  "All users":"All users",
-  "Conversation":"Conversation",
-  "Customize your preferences":"Customize your preferences",
-  "Saved":"Saved",
+  "All users": "All users",
+  "Conversation": "Conversation",
+  "Customize your preferences": "Customize your preferences",
+  "Saved": "Saved",
   "themeCard": {
     "currentThemeDark": "Dark Theme",
     "currentThemeNeonOcean": "Neon Ocean Theme",
@@ -439,9 +551,9 @@
     "english": "English",
     "preferenceNote": "Your preferred language will be applied to all interface texts."
   },
-  "Neon and refreshing look":"Neon and refreshing look",
-  "Dark view":"Dark view",
-  "Light View":"Light View",
+  "Neon and refreshing look": "Neon and refreshing look",
+  "Dark view": "Dark view",
+  "Light View": "Light View",
   "profile": {
     "errorPrefix": "Error:",
     "noUserFound": "No user found",
@@ -457,18 +569,17 @@
         "totalPlayTime": "Total Play Time"
       },
       "friends": "Friends"
-    }, 
-
+    },
     "tabs": {
       "statistics": "Statistics",
       "history": "History",
       "achievements": "Achievements"
     }
   },
-    "Win Rate":"Win Rate",
-    "Longest Streak":"Longest Streak",
-    "Guess Accuracy":"Guess Accuracy",
-    "hangmanOverallStats": {
+  "Win Rate": "Win Rate",
+  "Longest Streak": "Longest Streak",
+  "Guess Accuracy": "Guess Accuracy",
+  "hangmanOverallStats": {
     "loading": "Loading Hangman Stats...",
     "error": "Error loading Hangman statistics: {{error}}",
     "noStats": "No Hangman statistics available yet.",
@@ -508,7 +619,7 @@
     "pagination": {
       "rowsPerPage": "Rows per page:",
       "rowsPerPageAria": "rows per page selector",
-     "displayingGames_one": "{{from}}-{{to}} of {{count}} game",
+      "displayingGames_one": "{{from}}-{{to}} of {{count}} game",
       "displayingGames_other": "{{from}}-{{to}} of {{count}} games",
       "pageInfo": "{{currentPage}} / {{totalPages}}",
       "firstPage": "First Page",
@@ -521,8 +632,8 @@
       "lastPageAria": "last page"
     }
   },
-  "Bingo":"Bingo",
-  "Hangman":"Hangman",
+  "Bingo": "Bingo",
+  "Hangman": "Hangman",
   "bingoPlayerStats": {
     "loading": "Loading statistics...",
     "error": "Error loading statistics: {{error}}",
@@ -544,7 +655,7 @@
     "notAvailableRank": "-",
     "noGameHistory": "No game history available."
   },
-"bingoOverallStats": {
+  "bingoOverallStats": {
     "loading": "Loading overall statistics...",
     "error": "Error loading statistics: {{error}}",
     "noStats": "No overall statistics available yet.",
@@ -571,52 +682,49 @@
     "togglePasswordVisibilityAria": "toggle password visibility",
     "createButton": "Create Lobby"
   },
-                     
-    "Start Time": "Start Time",
-    "End Time": "End Time",
-    "noActiveLobby":"No active lobby found.",
-    "createdMessage":"Lobby Created Successfully",
-    "Lobby Code":"Lobby Code",
-    "Lobby Link":"Lobby Link",
-    "Link not found":"Link not found",
-    "Lobby Members":"Lobby Members",
-    "Close":"Close",
-    "noMembers":"No other members yet",
-    "Lobby Name":"Lobby Name",
-    "Enable Password":"Enable Password",
-    "Password Protection":"Password Protection",
-    "helperText":"Leave blank to keep the current password",
-    "click":"Click for options",
-    "Send Message":"Send Message",
-    "inviteLobby":"Invite to lobby",
-    "Hangman Game":"Hangman Game",
-    "Uno Game":"Uno Game",
-    "Chess Game":"Chess Game",
-    "Kick Player": "Kick Player",
+  "Start Time": "Start Time",
+  "End Time": "End Time",
+  "noActiveLobby": "No active lobby found.",
+  "createdMessage": "Lobby Created Successfully",
+  "Lobby Code": "Lobby Code",
+  "Lobby Link": "Lobby Link",
+  "Link not found": "Link not found",
+  "Lobby Members": "Lobby Members",
+  "Close": "Close",
+  "noMembers": "No other members yet",
+  "Lobby Name": "Lobby Name",
+  "Enable Password": "Enable Password",
+  "Password Protection": "Password Protection",
+  "helperText": "Leave blank to keep the current password",
+  "click": "Click for options",
+  "Send Message": "Send Message",
+  "inviteLobby": "Invite to lobby",
+  "Hangman Game": "Hangman Game",
+  "Uno Game": "Uno Game",
+  "Chess Game": "Chess Game",
+  "Kick Player": "Kick Player",
   "Confirm Kick": "Confirm Kick",
   "Are you sure you want to kick": "Are you sure you want to kick",
   "Kick": "Kick",
-  "Waiting for connection...":"Waiting for connection...",
-  "Your Ticket":"Your Ticket",
-  "Drawn Numbers":"Drawn Numbers",
-  "Bingo Completed!":"Bingo Completed!",
-  "Call Bingo!":"Call Bingo!",
-    "Draw Number":"Draw Number",
-    "Active Numbers":"Active Numbers",
-    
+  "Waiting for connection...": "Waiting for connection...",
+  "Your Ticket": "Your Ticket",
+  "Drawn Numbers": "Drawn Numbers",
+  "Bingo Completed!": "Bingo Completed!",
+  "Call Bingo!": "Call Bingo!",
+  "Draw Number": "Draw Number",
+  "Active Numbers": "Active Numbers",
   "drawnNumbers": {
     "pageIndicator": "Page {{currentPage}} of {{totalPages}}",
     "noPages": "Page 1 of 1",
     "previousPage": "Previous Page",
     "nextPage": "Next Page"
   },
-  "Bingo Completed":"Bingo Completed",
-  "Players Who Completed Bingo":"Players Who Completed Bingo",
-  "No players have completed Bingo yet":"No players have completed Bingo yet",
-  "Current Rankings":"Current Rankings",
-  "View All":"View All",
-  "Complete Rankings":"Complete Rankings",
- 
+  "Bingo Completed": "Bingo Completed",
+  "Players Who Completed Bingo": "Players Who Completed Bingo",
+  "No players have completed Bingo yet": "No players have completed Bingo yet",
+  "Current Rankings": "Current Rankings",
+  "View All": "View All",
+  "Complete Rankings": "Complete Rankings",
   "startGameDialog": {
     "title": "Game Mode and Drawing Options",
     "drawingMode": {
@@ -642,8 +750,8 @@
     },
     "cancelButtonText": "Cancel",
     "startButtonText": "Start Game"
-},
-"bingoGameWaiting": {
+  },
+  "bingoGameWaiting": {
     "lobbyTitle": "Bingo Game Lobby",
     "hostMessage": "You're the host! Start the game when everyone is ready.",
     "guestMessage": "Please wait for the host to start the game.",
@@ -655,27 +763,22 @@
     "startGameButton": "Start Game ({{currentPlayers}}/{{maxPlayers}})",
     "waitingForHost": "Waiting for host to start..."
   },
-
-
-  "Game Loading...":"Game Loading...",
-  "hangmanLoadingErrorMessage":"There was a problem loading the game. Please refresh the page or click then try again.",
-  "hangmanNoPlayers":"No players have joined yet.",
-
-  "hangmanStartWarning":"At least 1 other player is required to start the game.",
-  "Game Over - Waiting Screen":"Game Over - Waiting Screen",
-  "Welcome to Lobby!":"Welcome to Lobby!",
-  "Joined Players":"Joined Players",
-    
-    "waitingForHost": "Waiting for the host ({{hostName}}) to {{action}}... Please wait patiently.",
-    
-      "startGame": "start the game",
-      "startNewGame": "start a new game",
-      "NoJoinedPlayer":"No other players have joined yet.",
-      "GameOverWaitHost":" The game is over. Wait for the host for the new game.",
-      "ChooseLetter":"Choose a letter",
-      "Category":"Category",
-      "Queue":"Queue",
-       "gameplay": {
+  "Game Loading...": "Game Loading...",
+  "hangmanLoadingErrorMessage": "There was a problem loading the game. Please refresh the page or click then try again.",
+  "hangmanNoPlayers": "No players have joined yet.",
+  "hangmanStartWarning": "At least 1 other player is required to start the game.",
+  "Game Over - Waiting Screen": "Game Over - Waiting Screen",
+  "Welcome to Lobby!": "Welcome to Lobby!",
+  "Joined Players": "Joined Players",
+  "waitingForHost": "Waiting for the host ({{hostName}}) to {{action}}... Please wait patiently.",
+  "startGame": "start the game",
+  "startNewGame": "start a new game",
+  "NoJoinedPlayer": "No other players have joined yet.",
+  "GameOverWaitHost": " The game is over. Wait for the host for the new game.",
+  "ChooseLetter": "Choose a letter",
+  "Category": "Category",
+  "Queue": "Queue",
+  "gameplay": {
     "categoryLabel": "Category",
     "categoryUndefined": "UNDEFINED",
     "turnLabel": "Turn",
@@ -688,14 +791,12 @@
     "submitButton": "Submit",
     "winMessage": "Congratulations, you won!",
     "eliminationMessage": "You were eliminated!"
-   
   },
-   "volume": {
+  "volume": {
     "mute": "Mute sound",
     "unmute": "Unmute sound"
   },
-  
-     "playerList": {
+  "playerList": {
     "title": "Players",
     "status": {
       "won": "Won!",
@@ -712,13 +813,13 @@
     "currentTurnIndicator": "Turn",
     "undefinedPlayer": "Player"
   },
-  "Game on":"Game on",
-  "willStart":"The game will start soon!",
-  "hostCanStart":"Host can start a new game.",
-  "backLobby":"Back to Lobby",
-  "Game Over!":"Game Over!",
-  "Correct Word":"Correct Word",
-  "End Game (Host)":"End Game (Host)",
+  "Game on": "Game on",
+  "willStart": "The game will start soon!",
+  "hostCanStart": "Host can start a new game.",
+  "backLobby": "Back to Lobby",
+  "Game Over!": "Game Over!",
+  "Correct Word": "Correct Word",
+  "End Game (Host)": "End Game (Host)",
   "hostSetupModal": {
     "title": "New Game Settings",
     "description": "Select a category for the word that players will guess. The word will be chosen randomly.",
@@ -727,21 +828,12 @@
     "cancelButton": "Cancel",
     "startButton": "Start Game"
   },
-   "titleGameOver": "Game Over - Lobby (Host)",
-      "titleWaiting": "Game Lobby (Host)",
-      "descriptionCanStartNew": "You can start a new game.",
-      "descriptionWaitingForPlayers": "Waiting for players to join. You can start the game when ready!",
-      "defaultNamePrefix": "Player",
-      "Set New Game":"Set New Game",
-      "notifications": {
-    "playerJoined": "{{playerName}} joined the game!",
-    "rejoinedSuccess": "Successfully reconnected to the game.",
-    "joinedSuccess": "Successfully joined the Bingo game!",
-    "gameStarted": "Game has started!",
-    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
-    "gameOverAllNumbers": "All numbers drawn - Final Rankings",
-    "gameOverAllCompleted": "All players completed - Final Rankings"
-  },
+  "titleGameOver": "Game Over - Lobby (Host)",
+  "titleWaiting": "Game Lobby (Host)",
+  "descriptionCanStartNew": "You can start a new game.",
+  "descriptionWaitingForPlayers": "Waiting for players to join. You can start the game when ready!",
+  "defaultNamePrefix": "Player",
+  "Set New Game": "Set New Game",
   "errors": {
     "hostOnlyStart": "Only the host can start the game.",
     "gameNotFound": "Bingo game not found.",
@@ -757,28 +849,19 @@
     "manualDrawOnlyDrawer": "Only the selected player can draw numbers in manual mode.",
     "allNumbersDrawnManual": "All numbers have been drawn (manual draw).",
     "invalidBingoCall": "Invalid Bingo call. Your ticket is not complete or numbers are incorrect.",
-    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})"
+    "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
+    "couldNotFetchGroupDetails": ""
   },
-  "joinedMessage":"Successfully joined the Bingo game",
-  "Game has started!":"Game has started!",
-  "leftlobby":"left from lobby",
-   "common": {
-    "error": "An error occurred. Please try again.",
-    "success": "Operation successful.",
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "yes": "Yes",
-    "no": "No"
-  },
+  "activeLobbyOtherGame": "You have an active lobby for another game. Please close your current lobby or navigate to it before creating a new one for this game.",
+  "joinedMessage": "Successfully joined the Bingo game",
+  "Game has started!": "Game has started!",
+  "leftlobby": "left from lobby",
   "lobby": {
     "error": {
       "codeRequired": "Lobby code is required.",
       "notFoundOrInactive": "Lobby not found or is not active.",
       "GAME_IN_PROGRESS": "An active {{gameType}} game is in progress. Please wait or join another lobby.",
-      "invalidPassword": "Invalid password.",
-      "lobbyFull": "Lobby is full. Cannot join.",
+   
       "alreadyInLobby": "You are already in this lobby.",
       "joinFailed": "Failed to join the lobby. Please try again.",
       "createFailed": "Failed to create the lobby. Please try again.",
@@ -787,21 +870,17 @@
       "hostOnlyAction": "Only the host can perform this action.",
       "notInLobby": "You are not currently in this lobby."
     },
-     "gameInProgress": "A {{gameType}} game is currently active in this lobby. Please wait for the game to end or join another lobby."
-    ,"passwordModal": {
-      "titleProtected": "Enter Lobby Password",
-      "titlePublic": "Join Public Lobby",
-      "descriptionProtected": "This lobby is password protected. Please enter the password to join.",
-      "passwordLabel": "Password",
-      "joinButton": "Join",
-      "descriptionPublic": "This lobby is open to everyone. No password required.",
-      "joinLobbyButton": "Join Lobby"
+       "invalidPassword": "The password you entered is incorrect. Please try again.",
+    "warning": {
+      "lobbyFull": "Lobby is full. Cannot join."
     },
+    "gameInProgress": "A {{gameType}} game is currently active in this lobby. Please wait for the game to end or join another lobby.",
+    
     "success": {
       "hostReturned": "You have returned to the lobby as the host.",
       "joined": "Successfully joined the lobby: {{lobbyName}}.",
       "created": "Lobby created successfully!",
-       "updated": "Lobby updated successfully!",
+      "updated": "Lobby updated successfully!",
       "left": "You have left the lobby.",
       "settingsUpdated": "Lobby settings updated successfully.",
       "kicked": "You have been kicked from the lobby by the host."
@@ -829,6 +908,16 @@
       "host": "Host"
     }
   },
+  "passwordModal": {
+      "titleProtected": "Enter Lobby Password",
+      "titlePublic": "Join Public Lobby",
+      "descriptionProtected": "This lobby is password protected. Please enter the password to join.",
+      "passwordLabel": "Password",
+      "joinButton": "Join",
+      "descriptionPublic": "This lobby is open to everyone. No password required.",
+      "joinLobbyButton": "Join Lobby",
+      "invalidPasswordTitle": "Invalid Password"
+    },
   "notification": {
     "userJoinedLobby": "{{userName}} joined the lobby.",
     "userLeftLobby": "{{userName}} left the lobby.",
@@ -852,15 +941,15 @@
     "Bingo": "Bingo",
     "Hangman": "Hangman"
   },
-  "game_bingo":"bingo game",
-  "game_hangman":"hangman game",
- "joined":"joined",
- "gameEndedByHost":"Game ended by the host.",
- "needMorePlayers": "You need at least 2 players to start the game. Waiting for more players to join...",
+  "game_bingo": "bingo game",
+  "game_hangman": "hangman game",
+  "joined": "joined",
+  "gameEndedByHost": "Game ended by the host.",
+  "needMorePlayers": "You need at least 2 players to start the game. Waiting for more players to join...",
   "readyToStart": "Your lobby is ready! You can start the game whenever you're ready.",
-  "createdGroup":"Group created successfully!",
-   "leaveGroup":"Left from group Successfully!",
-   "login": {
+  "createdGroup": "Group created successfully!",
+  "leaveGroup": "Left from group Successfully!",
+  "login": {
     "error": {
       "generic": "An unexpected error occurred. Please try again later."
     },
@@ -869,9 +958,6 @@
     "INTERNAL_SERVER_ERROR": "Our servers are having a bit of trouble. Please try again soon.",
     "EMAIL_PASSWORD_REQUIRED": "Email and password are required.",
     "PASSWORD_REQUIRED": "Please enter your password."
-  }
-  
-
-
-  
+  },
+  "Warning": "Warning"
 }
