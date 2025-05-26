@@ -22,6 +22,21 @@ async function getUserInfo(userId) {
 // Tüm aktif bingo oyunlarını lobbyCode bazında saklıyoruz.
 export const bingoGames = {};
 
+
+const PLAYER_COLORS = [
+  '#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF',
+  '#A0C4FF', '#BDB2FF', '#FFC6FF', '#FF8A80', '#FFD180',
+  '#FFFF8D', '#B9F6CA', '#84FFFF', '#82B1FF', '#B388FF', '#FF80AB'
+];
+
+function shuffleArray(array) {
+  const newArray = [...array]; // Orijinal diziyi değiştirmemek için kopya oluştur
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
 /**
  * Yardımcı: Belirtilen aralıktaki sayıları karıştırarak dizi olarak döner.
  */
@@ -38,56 +53,263 @@ function generateShuffledNumbers(min, max) {
   return numbers;
 }
 
-/**
- * Yardımcı: Basit bir ticket oluşturur.
- * Örneğin, 15 benzersiz numaradan oluşan bir ticket.
- */
-function generateTicket() {
-  const shuffledNumbers = generateShuffledNumbers(1, 90);
-  return shuffledNumbers.slice(0, 15).sort((a, b) => a - b);
+function isValidSingleRow(rowLayout) {
+    if (!rowLayout || rowLayout.length !== 9) return false;
+    const trueCount = rowLayout.filter(Boolean).length;
+    if (trueCount !== 5) return false;
+
+    for (let i = 0; i < rowLayout.length - 1; i++) {
+        if (rowLayout[i] && rowLayout[i+1]) {
+            return false;
+        }
+    }
+    return true;
 }
 
-// Helper function to calculate score for a player
-function calculatePlayerScore(player, drawnNumbers) {
-  return player.markedNumbers.filter(num =>
-    player.ticket.includes(num) && drawnNumbers.includes(num)
-  ).length;
+function isValidDoubleRow(rowLayout) {
+    if (!rowLayout || rowLayout.length !== 9) return false;
+    const trueCount = rowLayout.filter(Boolean).length;
+    if (trueCount !== 5) return false;
+
+    let doubleTrueCount = 0;
+    let doubleTrueStartIndex = -1;
+
+    for (let i = 0; i < rowLayout.length - 1; i++) {
+        if (rowLayout[i] && rowLayout[i+1]) {
+            if (i > 0 && rowLayout[i-1] && rowLayout[i] && rowLayout[i+1]) return false;
+            if (rowLayout[i] && rowLayout[i+1] && i + 2 < rowLayout.length && rowLayout[i+2]) return false;
+
+            doubleTrueCount++;
+            if (doubleTrueStartIndex === -1) {
+                doubleTrueStartIndex = i;
+            }
+        }
+    }
+
+    if (doubleTrueCount !== 1) return false;
+
+    for (let i = 0; i < rowLayout.length; i++) {
+        if (rowLayout[i]) {
+            if (i === doubleTrueStartIndex || i === doubleTrueStartIndex + 1) {
+                continue;
+            }
+            if (i + 1 < rowLayout.length && rowLayout[i+1]) {
+                if (!(i + 1 === doubleTrueStartIndex || i + 1 === doubleTrueStartIndex + 1)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 
-// Helper function to get player rankings
+function generateBingoTicket() {
+    const MAX_MAIN_ATTEMPTS = 2000;
+    const MAX_ROW_ATTEMPTS = 200;
+
+    let mainAttempts = 0;
+
+    while (mainAttempts < MAX_MAIN_ATTEMPTS) {
+        mainAttempts++;
+        const allShuffledNumbers = generateShuffledNumbers(1, 90);
+        // Bilet için 15 sayı seç (henüz sıralama veya karıştırma yok)
+        const chosenTicketNumbers = allShuffledNumbers.slice(0, 15);
+        // Bu 15 sayıyı kendi içinde karıştır 
+        const ticketNumbersForGrid = shuffleArray(chosenTicketNumbers);
+        let numberSourceIdx = 0;
+
+        let layout = Array(3).fill(null).map(() => Array(9).fill(false));
+        const numbersGrid = Array(3).fill(null).map(() => Array(9).fill(null));
+
+        const rowIndicesPool = [0, 1, 2];
+        const shuffledRowIndices = shuffleArray(rowIndicesPool);
+
+        const pairRowIndices = [shuffledRowIndices[0], shuffledRowIndices[1]];
+        const singleRowIndex = shuffledRowIndices[2];
+
+        let layoutGenerationSuccessful = true;
+
+        for (const rowIndex of pairRowIndices) {
+            let rowAttempt = 0;
+            let validDoubleRowGenerated = false;
+            while (rowAttempt < MAX_ROW_ATTEMPTS && !validDoubleRowGenerated) {
+                rowAttempt++;
+                let currentRowLayout = Array(9).fill(false);
+                const allCols = Array.from({ length: 9 }, (_, i) => i);
+
+                const pairStartCol = Math.floor(Math.random() * 8);
+                currentRowLayout[pairStartCol] = true;
+                currentRowLayout[pairStartCol + 1] = true;
+
+                const availableColsForSingles = allCols.filter(
+                    c => c !== pairStartCol && c !== pairStartCol + 1
+                );
+
+                if (availableColsForSingles.length < 3) continue;
+
+                const shuffledAvailableCols = shuffleArray(availableColsForSingles);
+
+                for (let i = 0; i < 3; i++) {
+                    currentRowLayout[shuffledAvailableCols[i]] = true;
+                }
+
+                if (isValidDoubleRow(currentRowLayout)) {
+                    layout[rowIndex] = currentRowLayout;
+                    validDoubleRowGenerated = true;
+                }
+            }
+            if (!validDoubleRowGenerated) {
+                layoutGenerationSuccessful = false;
+                break;
+            }
+        }
+
+        if (!layoutGenerationSuccessful) continue;
+
+        let singleRowAttempt = 0;
+        let validSingleRowGenerated = false;
+        while (singleRowAttempt < MAX_ROW_ATTEMPTS && !validSingleRowGenerated) {
+            singleRowAttempt++;
+            let currentRowLayout = Array(9).fill(false);
+            const allCols = Array.from({ length: 9 }, (_, i) => i);
+            const shuffledCols = shuffleArray(allCols);
+
+            for (let i = 0; i < 5; i++) {
+                currentRowLayout[shuffledCols[i]] = true;
+            }
+
+            if (isValidSingleRow(currentRowLayout)) {
+                layout[singleRowIndex] = currentRowLayout;
+                validSingleRowGenerated = true;
+            }
+        }
+
+        if (!validSingleRowGenerated) {
+            layoutGenerationSuccessful = false;
+        }
+
+        if (!layoutGenerationSuccessful) continue;
+
+        let emptyColumnFound = false;
+        for (let c = 0; c < 9; c++) {
+            if (!layout[0][c] && !layout[1][c] && !layout[2][c]) {
+                emptyColumnFound = true;
+                break;
+            }
+        }
+
+        if (!emptyColumnFound) {
+            if (!isValidDoubleRow(layout[pairRowIndices[0]]) ||
+                !isValidDoubleRow(layout[pairRowIndices[1]]) ||
+                !isValidSingleRow(layout[singleRowIndex])) {
+                continue;
+            }
+
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (layout[r][c]) {
+                       
+                        if (numberSourceIdx < ticketNumbersForGrid.length) {
+                            numbersGrid[r][c] = ticketNumbersForGrid[numberSourceIdx++];
+                        } else {
+                            layoutGenerationSuccessful = false; break;
+                        }
+                    }
+                }
+                if (!layoutGenerationSuccessful) break;
+            }
+
+            if (!layoutGenerationSuccessful) continue;
+
+            return { numbersGrid, layout };
+        }
+    }
+    // Hata durumunda (çok nadir de olsa) boş veya hata içeren bir nesne döner.
+    return { numbersGrid: null, layout: null, error: "Failed to generate valid ticket layout under current constraints." };
+}
+
 function getGameRankings(game) {
-  const rankings = Object.entries(game.players)
-    .map(([playerId, player]) => ({
-      playerId,
-      userName: player.userName,
-       avatar: player.avatar,
-      score: calculatePlayerScore(player, game.drawnNumbers),
-      completedAt: player.completedAt || null
-    }))
+  if (!game || !game.players) return [];
+  const drawnNumbers = game.drawnNumbers || [];
+  return Object.entries(game.players)
+    .map(([playerId, player]) => {
+        let score = 0;
+        if (player.ticket && player.ticket.numbersGrid && player.markedNumbers) {
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const num = player.ticket.numbersGrid[r][c];
+                    if (num && player.markedNumbers.includes(num) && drawnNumbers.includes(num)) {
+                        score++;
+                    }
+                }
+            }
+        }
+        return {
+            playerId,
+            userName: player.userName,
+            avatar: player.avatar,
+            score: score,
+            completedAt: player.completedAt || null
+        };
+    })
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
-      if (a.completedAt && b.completedAt) return a.completedAt - b.completedAt;
+      if (a.completedAt && b.completedAt) return new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime();
       if (a.completedAt) return -1;
       if (b.completedAt) return 1;
       return 0;
     });
-
-  return rankings;
 }
-/**
- * Yardımcı: Belirtilen oyundaki tüm oyunculara mesaj gönderir.
- */
+
+
+function getCompletedPlayersList(game) {
+  if (!game || !game.players) {
+      return [];
+  }
+  return Object.entries(game.players)
+      .filter(([, player]) => player && player.completedAt)
+      .map(([id, player]) => ({
+          id: id, 
+          userId: player.userId, 
+          userName: player.userName,
+           avatar: player.avatar 
+      }));
+}
+
+
 export function broadcastToGame(game, data) {
   const messageData = { ...data, lobbyCode: game.lobbyCode };
   const message = JSON.stringify(messageData);
   Object.values(game.players).forEach((player) => {
-    if (player.ws.readyState === player.ws.OPEN) {
+    if (player.ws && player.ws.readyState === player.ws.OPEN) {
       player.ws.send(message, (err) => {
         if (err) console.error("Bingo mesaj gönderme hatası:", err);
       });
     }
   });
 }
+
+// Helper function to calculate score for a player
+function calculatePlayerScore(player, drawnNumbers) {
+  // player.ticket.numbersGrid is a 3x9 matrix. We need to iterate through it.
+  let score = 0;
+  if (player.ticket && player.ticket.numbersGrid) {
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 9; c++) {
+        const num = player.ticket.numbersGrid[r][c];
+        if (num && player.markedNumbers.includes(num) && drawnNumbers.includes(num)) {
+          score++;
+        }
+      }
+    }
+  }
+  return score;
+}
+
+/**
+ * Yardımcı: Belirtilen oyundaki tüm oyunculara mesaj gönderir.
+ */
+
 function broadcastGameStatus(game) {
   const completedPlayersList = getCompletedPlayersList(game);
   broadcastToGame(game, {
@@ -451,7 +673,7 @@ export const startGame = (ws, data) => {
       if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
           const player = game.players[playerId];
           player.markedNumbers = [];
-          player.ticket = generateTicket();
+          player.ticket = generateBingoTicket();
           delete player.completedAt;
           delete player.completedBingo;
       }
@@ -485,6 +707,7 @@ export const startGame = (ws, data) => {
                       avatar: currentPlayer.avatar, 
                       ticket: currentPlayer.ticket,
                       markedNumbers: currentPlayer.markedNumbers,
+                      color: currentPlayer.color 
                   };
               }),
               competitionMode: game.competitionMode,
@@ -529,7 +752,6 @@ export const joinGame = async (ws, data) => {
     );
   }
 
-  // Fetch user information from database
   const userInfo = await getUserInfo(ws.userId);
   if (!userInfo) {
     return ws.send(
@@ -540,7 +762,6 @@ export const joinGame = async (ws, data) => {
     );
   }
 
-  // Find lobby from MongoDB
   const lobby = await Lobby.findOne({ lobbyCode: lobbyCode });
   if (!lobby) {
     return ws.send(
@@ -551,12 +772,10 @@ export const joinGame = async (ws, data) => {
     );
   }
 
-   //AKTİF OYUN KONTROLÜ ---
-  // 1. Diğer Bingo oyunlarında aktif mi?
   for (const otherLobbyCodeInMap in bingoGames) {
-    if (bingoGames.hasOwnProperty(otherLobbyCodeInMap)) {
+    if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
       const otherGame = bingoGames[otherLobbyCodeInMap];
-      if (otherGame.players[ws.userId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
+      if (otherGame.players && otherGame.players[ws.userId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
         const errorMessage = `Zaten başka bir Tombala oyununda (${otherLobbyCodeInMap}) aktifsiniz. Yeni bir oyuna katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
         console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${otherLobbyCodeInMap} (Bingo) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
         ws.send(JSON.stringify({
@@ -569,11 +788,10 @@ export const joinGame = async (ws, data) => {
     }
   }
 
-  // 2. Aktif Hangman oyunlarında aktif mi?
   for (const hangmanLobbyCode in hangmanGames) {
-    if (hangmanGames.hasOwnProperty(hangmanLobbyCode)) {
+    if (Object.prototype.hasOwnProperty.call(hangmanGames, hangmanLobbyCode)) {
       const hangmanGame = hangmanGames[hangmanLobbyCode];
-      if (hangmanGame.players[ws.userId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
+      if (hangmanGame.players && hangmanGame.players[ws.userId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
         const errorMessage = `Zaten bir Adam Asmaca oyununda (${hangmanLobbyCode}) aktifsiniz. Tombala oyununa katılmak için lütfen önce Adam Asmaca oyununuzdan ayrılın veya oyunu tamamlayın.`;
         console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${hangmanLobbyCode} (Hangman) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
         ws.send(JSON.stringify({
@@ -586,22 +804,24 @@ export const joinGame = async (ws, data) => {
     }
   }
 
-  // Create game if it doesn't exist
   if (!bingoGames[lobbyCode]) {
+    const shuffledColorsForGame = shuffleArray(PLAYER_COLORS); 
     bingoGames[lobbyCode] = {
       lobbyCode,
       players: {},
       drawnNumbers: [],
       activeNumbers: [],
       numberPool: generateShuffledNumbers(1, 90),
-      gameStarted: false, 
-      gameEnded: false,   
+      gameStarted: false,
+      gameEnded: false,
       host: lobby.createdBy.toString(),
       drawMode: 'auto',
       drawer: null,
-        bingoMode: 'classic', 
-    competitionMode: 'competitive',
-    rankings: []
+      bingoMode: 'classic',
+      competitionMode: 'competitive',
+      rankings: [],
+      _availableColors: shuffledColorsForGame,
+      _colorIndex: 0
     };
   }
 
@@ -614,51 +834,74 @@ export const joinGame = async (ws, data) => {
     }));
   }
 
+  const mapPlayerToClient = (player) => ({
+    id: player.userId,
+    userName: player.userName,
+    name: player.name,
+    avatar: player.avatar,
+    completed: player.completedBingo || false,
+    color: player.color
+  });
+
   if (game.players[ws.userId]) {
     const player = game.players[ws.userId];
-    player.ws = ws; 
+    player.ws = ws;
     player.userName = userInfo.username;
     player.name = userInfo.name;
-    player.avatar=userInfo.avatar;
-    const hasCompleted = player.completedBingo || false;
+    player.avatar = userInfo.avatar;
 
     return ws.send(JSON.stringify({
-      type: "BINGO_JOIN", 
+      type: "BINGO_JOIN",
       message: "Oyuna başarıyla yeniden bağlandınız.",
       ticket: player.ticket,
       markedNumbers: player.markedNumbers || [],
-      isHost: game.host === ws.userId,
-      players: Object.values(game.players).map(p => ({
-           id: p.userId,
-           userName: p.userName,
-           name: p.name,
-           avatar: p.avatar,
-           completed: p.completedBingo || false
-       })),
+      isHost: String(game.host) === String(ws.userId),
+      players: Object.values(game.players).map(mapPlayerToClient),
       gameStarted: game.gameStarted,
       drawnNumbers: game.drawnNumbers,
       activeNumbers: game.activeNumbers,
       drawMode: game.drawMode,
       drawer: game.drawer,
-      completedBingo: hasCompleted,
+      completedBingo: player.completedBingo || false,
       completedPlayers: getCompletedPlayersList(game),
       bingoMode: game.bingoMode,
       competitionMode: game.competitionMode,
       gameId: game.gameId,
-      rankings: game.rankings || (game.gameStarted ? getGameRankings(game) : []), 
+      rankings: game.rankings || (game.gameStarted ? getGameRankings(game) : []),
+      playerColor: player.color
     }));
   }
 
-  const ticket = generateTicket();
+  let playerColorToAssign;
+  if (game._availableColors && game._availableColors.length > 0) {
+    playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
+    game._colorIndex++;
+  } else {
+    playerColorToAssign = PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
+    console.warn(`[Bingo Server] Lobi ${lobbyCode} için karıştırılmış renkler tükendi veya bulunamadı. Rastgele renk atandı: ${playerColorToAssign}`);
+    // Eğer renkler tükendiyse ve yeni renkler eklenmiyorsa, _availableColors'ı yeniden doldurabiliriz.
+    if (!game._availableColors || game._availableColors.length === 0) {
+        game._availableColors = shuffleArray(PLAYER_COLORS);
+        game._colorIndex = 0;
+        if (game._availableColors.length > 0) { // Yeniden doldurduktan sonra bir renk al
+            playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
+            game._colorIndex++;
+        }
+    }
+  }
+
+  const newTicket = generateBingoTicket();
+
   game.players[ws.userId] = {
-    ticket,
+    ticket: newTicket,
     ws,
     markedNumbers: [],
     userName: userInfo.username,
     name: userInfo.name,
     avatar: userInfo.avatar,
     userId: ws.userId,
-    completedBingo: false
+    completedBingo: false,
+    color: playerColorToAssign
   };
 
   broadcastToGame(game, {
@@ -667,45 +910,42 @@ export const joinGame = async (ws, data) => {
       id: ws.userId,
       name: userInfo.name,
       userName: userInfo.username,
-       avatar: userInfo.avatar
+      avatar: userInfo.avatar,
+      color: playerColorToAssign
     },
-    notification: { 
-    key: "notifications.playerJoined", 
-    params: { playerName: userInfo.name || userInfo.username } 
-  }
+    notification: {
+      key: "notifications.playerJoined",
+      params: { playerName: userInfo.name || userInfo.username }
+    }
   });
 
   ws.send(JSON.stringify({
     type: "BINGO_JOIN",
     message: "Oyuna başarıyla katıldınız.",
-    ticket,
+    ticket: newTicket,
     markedNumbers: [],
-    isHost: game.host === ws.userId,
-    players: Object.values(game.players).map(p => ({
-        id: p.userId,
-        userName: p.userName,
-        name: p.name,
-        avatar: p.avatar,
-        completed: p.completedBingo || false
-    })),
-    gameStarted: game.gameStarted, 
-    drawnNumbers: game.drawnNumbers, 
-    activeNumbers: game.activeNumbers, 
+    isHost: String(game.host) === String(ws.userId),
+    players: Object.values(game.players).map(mapPlayerToClient),
+    gameStarted: game.gameStarted,
+    drawnNumbers: game.drawnNumbers,
+    activeNumbers: game.activeNumbers,
     drawMode: game.drawMode,
     drawer: game.drawer,
-    userInfo: { 
+    userInfo: {
       name: userInfo.name,
       userName: userInfo.username,
       avatar: userInfo.avatar
     },
     completedBingo: false,
-    completedPlayers: getCompletedPlayersList(game), 
-    bingoMode: game.bingoMode, 
-    competitionMode: game.competitionMode, 
-    gameId: game.gameId, 
-    rankings: game.rankings || [], 
+    completedPlayers: getCompletedPlayersList(game),
+    bingoMode: game.bingoMode,
+    competitionMode: game.competitionMode,
+    gameId: game.gameId,
+    rankings: game.rankings || [],
+    playerColor: playerColorToAssign
   }));
 };
+
 export const handleBingoPlayerLeavePreGame = (lobbyCode, playerId) => {
     const game = bingoGames[lobbyCode];
     if (!game || !game.players[playerId]) {
@@ -857,19 +1097,97 @@ export const markNumber = (ws, data) => {
 
   const player = game.players[ws.userId];
 
+  // Check if the number is actually on the player's ticket
+  let numberFoundOnTicket = false;
+  if (player.ticket && player.ticket.numbersGrid) {
+      for(let r=0; r < 3; r++) {
+          if (player.ticket.numbersGrid[r].includes(number)) {
+              numberFoundOnTicket = true;
+              break;
+          }
+      }
+  }
+
+  if (!numberFoundOnTicket) {
+     return ws.send(JSON.stringify({
+      type: "BINGO_ERROR",
+      message: "Number not on your ticket."
+    }));
+  }
+  
+  // Check if the number has been drawn and is active (or was drawn)
+  if (!game.drawnNumbers.includes(number)) {
+      return ws.send(JSON.stringify({
+      type: "BINGO_ERROR",
+      message: "This number has not been drawn yet."
+    }));
+  }
+
+
   if (!player.markedNumbers.includes(number)) {
     player.markedNumbers.push(number);
 
-    broadcastToGame(game, {
-      type: "BINGO_NUMBER_MARKED",
-      playerId: ws.userId,
-      number,
-      markedNumbers: player.markedNumbers
-    });
+    // Check for BINGO (all 15 numbers on ticket marked AND drawn)
+    const allTicketNumbers = [];
+    if (player.ticket && player.ticket.numbersGrid) {
+        player.ticket.numbersGrid.forEach(row => {
+            row.forEach(num => {
+                if (num !== null) allTicketNumbers.push(num);
+            });
+        });
+    }
+    
+    const correctlyMarkedCount = player.markedNumbers.filter(mn => game.drawnNumbers.includes(mn) && allTicketNumbers.includes(mn)).length;
+
+    if (correctlyMarkedCount === 15 && !player.completedBingo) {
+        player.completedBingo = true;
+        player.completedAt = new Date(); 
+        
+        broadcastToGame(game, {
+            type: "BINGO_PLAYER_COMPLETED",
+            playerId: ws.userId,
+            playerName: player.name || player.userName,
+            avatar: player.avatar,
+            completedAt: player.completedAt,
+            notification: {
+                 key: "notifications.playerCompletedBingo",
+                 params: { playerName: player.name || player.userName }
+            }
+        });
+        broadcastGameStatus(game); // Update completed players list for everyone
+
+        // Check if all players have completed
+        const rankings = getGameRankings(game);
+        const completedPlayersInGame = rankings.filter(r => r.completedAt).length;
+        if (completedPlayersInGame === Object.keys(game.players).length && !game.gameEnded) {
+            game.gameEnded = true;
+            game.gameStarted = false;
+            broadcastToGame(game, {
+                type: "BINGO_GAME_OVER",
+                message: "All players completed! Final Rankings",
+                finalRankings: rankings
+            });
+            saveGameStatsToDB(game); 
+            if (game.autoDrawInterval) {
+                clearInterval(game.autoDrawInterval);
+                game.autoDrawInterval = null;
+            }
+        }
+    }
+
+
+    ws.send(JSON.stringify({
+        type: "BINGO_NUMBER_MARKED_CONFIRMED",
+        playerId: ws.userId,
+        number,
+        markedNumbers: player.markedNumbers,
+        completedBingo: player.completedBingo || false
+    }));
   }
 };
 
-// Yardımcı fonksiyon: Oyun istatistiklerini MongoDB'ye kaydeder
+
+
 async function saveGameStatsToDB(game) {
   console.log('saveGameStatsToDB fonksiyonu çağrıldı - Başlangıç Zamanı:', game.startedAt, 'Bitiş Zamanı:', new Date());
   try {
@@ -899,14 +1217,26 @@ async function saveGameStatsToDB(game) {
     }
     game.winner = winner;
 
-    const playersForDB = Object.values(game.players).map(player => ({
-      playerId: player.userId,
-      userName: player.userName,
-      score: calculatePlayerScore(player, game.drawnNumbers),
-      ticket: player.ticket,
-      completedAt: player.completedAt,
-      finalRank: player.finalRank
-    }));
+ const playersForDB = Object.values(game.players).map(player => {
+    let ticketNumbersForDB = [];
+    if (player.ticket && player.ticket.numbersGrid) {
+        player.ticket.numbersGrid.forEach(row => {
+            row.forEach(num => {
+                if (num !== null) {
+                    ticketNumbersForDB.push(num);
+                }
+            });
+        });
+    }
+    return {
+        playerId: player.userId,
+        userName: player.userName,
+        score: calculatePlayerScore(player, game.drawnNumbers),
+        ticket: ticketNumbersForDB.sort((a,b) => a-b), // Modelin beklediği sayı dizisi
+        completedAt: player.completedAt,
+        finalRank: player.finalRank
+    };
+});
 
     const newBingoGame = new BingoGame({
       gameId: game.gameId,
@@ -927,19 +1257,6 @@ async function saveGameStatsToDB(game) {
   }
 }
 
-function getCompletedPlayersList(game) {
-  if (!game || !game.players) {
-      return [];
-  }
-  return Object.entries(game.players)
-      .filter(([, player]) => player && player.completedAt)
-      .map(([id, player]) => ({
-          id: id, 
-          userId: player.userId, 
-          userName: player.userName,
-           avatar: player.avatar 
-      }));
-}
 
 
 export const checkBingo = (ws, data) => {
@@ -951,7 +1268,7 @@ export const checkBingo = (ws, data) => {
       return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun bulunamadı." }));
   }
 
-  if (!game.gameStarted) {
+  if (!game.gameStarted || game.gameEnded) {
        console.warn(`checkBingo Uyarısı: ${lobbyCode} için oyun aktif değil (başlamadı veya bitti).`);
        return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun aktif değil."}));
   }
@@ -965,57 +1282,65 @@ export const checkBingo = (ws, data) => {
 
   if (player.completedBingo) {
        console.log(`checkBingo Bilgi: Oyuncu (${player.userName}) zaten Bingo yapmış.`);
-       // İsteğe bağlı olarak tekrar Bingo yapmaya çalışanlara hata yerine mevcut durumu gönderebilirsiniz.
-       // Örneğin, kişisel sıralama bilgisi tekrar gönderilebilir.
-       // Şimdilik geçersiz sayıyoruz:
        return ws.send(JSON.stringify({ type: "BINGO_INVALID", message: "Zaten Bingo yaptınız." }));
   }
 
-  const { ticket } = player;
-
-  if (!Array.isArray(ticket) || ticket.length === 0) {
-      console.error(`checkBingo Hatası: Oyuncu (${player.userName}) için bilet geçersiz.`);
+  if (!player.ticket || !player.ticket.numbersGrid || !player.ticket.layout) {
+      console.error(`checkBingo Hatası: Oyuncu (${player.userName}) için bilet geçersiz veya eksik.`);
       return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bilet bilgisi geçersiz." }));
   }
+
+  const playerTicketNumbers = [];
+  player.ticket.numbersGrid.forEach(row => {
+      row.forEach(num => {
+          if (num !== null) {
+              playerTicketNumbers.push(num);
+          }
+      });
+  });
+
+  if (playerTicketNumbers.length !== 15) {
+      console.error(`checkBingo Hatası: Oyuncu (${player.userName}) için biletteki sayı adedi (${playerTicketNumbers.length}) geçersiz.`);
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: `Biletinizde beklenenden farklı sayıda (${playerTicketNumbers.length}) numara var.` }));
+  }
+
   if (!Array.isArray(game.drawnNumbers)) {
        console.error(`checkBingo Hatası: ${lobbyCode} için çekilen sayılar listesi geçersiz.`);
-       game.drawnNumbers = []; // Güvenlik için boş dizi ata
+       game.drawnNumbers = [];
   }
    if (!Array.isArray(player.markedNumbers)) {
        player.markedNumbers = [];
        console.warn(`checkBingo Uyarısı: Oyuncu (${player.userName}) için işaretlenen sayılar listesi yoktu, oluşturuldu.`);
   }
 
-  const isAllTicketNumbersDrawn = ticket.every((num) => game.drawnNumbers.includes(num));
-  const isAllTicketNumbersMarked = ticket.every(num => player.markedNumbers.includes(num));
+  const isAllTicketNumbersDrawn = playerTicketNumbers.every((num) => game.drawnNumbers.includes(num));
+  const isAllTicketNumbersMarked = playerTicketNumbers.every(num => player.markedNumbers.includes(num));
 
   if (isAllTicketNumbersDrawn && isAllTicketNumbersMarked) {
       if (!player.completedAt) {
-          player.completedAt = Date.now();
+          player.completedAt = new Date().toISOString();
           player.completedBingo = true;
       }
 
       const currentRankings = getGameRankings(game);
-      const playerRankInfo = currentRankings.find(r => r.playerId === ws.userId);
+      const playerRankInfo = currentRankings.find(r => String(r.playerId) === String(ws.userId));
       const playerRank = playerRankInfo ? playerRankInfo.rank : null;
-
       const currentCompletedPlayers = getCompletedPlayersList(game);
-
       const numberOfPlayers = Object.keys(game.players).length;
       const allNumbersDrawn = game.numberPool && game.numberPool.length === 0;
-      const allPlayersCompleted = currentCompletedPlayers.length === numberOfPlayers;
+      const allConnectedPlayersCompleted = currentCompletedPlayers.length === numberOfPlayers;
 
       let shouldGameEnd = false;
       let gameOverReason = "";
 
       if (game.competitionMode === 'non-competitive') {
           shouldGameEnd = true;
-          gameOverReason = `${player.userName} BINGO! Oyunu Kazandı!`;
+          gameOverReason = `${player.name || player.userName} BINGO! Oyunu Kazandı!`;
       } else {
-          if (numberOfPlayers <= 2) {
+          if (numberOfPlayers <= 1) {
               shouldGameEnd = true;
               gameOverReason = "Oyun Bitti - Final Sıralaması";
-          } else if (allPlayersCompleted) {
+          } else if (allConnectedPlayersCompleted) {
               shouldGameEnd = true;
               gameOverReason = "Oyun Bitti - Tüm Oyuncular Tamamladı";
           } else if (allNumbersDrawn) {
@@ -1024,7 +1349,21 @@ export const checkBingo = (ws, data) => {
           }
       }
 
-      if (shouldGameEnd) {
+      broadcastToGame(game, {
+          type: "BINGO_PLAYER_COMPLETED",
+          playerId: ws.userId,
+          playerName: player.name || player.userName,
+          avatar: player.avatar,
+          color: player.color,
+          completedAt: player.completedAt,
+          rank: playerRank,
+          notification: {
+               key: "notifications.playerCompletedBingo",
+               params: { playerName: player.name || player.userName }
+          }
+      });
+
+      if (shouldGameEnd && !game.gameEnded) {
           game.gameEnded = true;
           game.gameStarted = false;
           if (game.autoDrawInterval) {
@@ -1032,40 +1371,28 @@ export const checkBingo = (ws, data) => {
               game.autoDrawInterval = null;
           }
 
-          const finalRankings = getGameRankings(game);
+          const finalRankingsForGameOver = getGameRankings(game);
           broadcastToGame(game, {
               type: "BINGO_GAME_OVER",
               message: gameOverReason,
-              finalRankings: finalRankings,
+              finalRankings: finalRankingsForGameOver,
               gameId: game.gameId,
-              completedPlayers: currentCompletedPlayers
+              completedPlayers: getCompletedPlayersList(game)
           });
           saveGameStatsToDB(game).catch(err => console.error("saveGameStatsToDB Hatası (Oyun Sonu):", err));
 
-      } else {
-          broadcastToGame(game, {
-              type: "BINGO_CALL_SUCCESS",
-              playerId: ws.userId,
-              playerName: player.userName,
-              rank: playerRank,
-              rankings: currentRankings,
-              gameEnded: false,
-              gameId: game.gameId,
-              completedPlayers: currentCompletedPlayers
-          });
+      } else if (!game.gameEnded) {
+           broadcastToGame(game, {
+               type: "BINGO_GAME_STATUS",
+               rankings: currentRankings,
+               completedPlayers: currentCompletedPlayers,
+           });
       }
 
   } else {
-      let invalidReason = "Geçersiz Bingo çağrısı.";
-      if (!isAllTicketNumbersDrawn) {
-          invalidReason = "Biletinizdeki tüm numaralar henüz çekilmedi.";
-      } else if (!isAllTicketNumbersMarked) {
-          invalidReason = "Biletinizdeki tüm numaraları işaretlemediniz.";
-      }
-
       ws.send(JSON.stringify({
           type: "BINGO_INVALID",
-          message: invalidReason
+          message: "Geçersiz Bingo çağrısı."
       }));
   }
 };

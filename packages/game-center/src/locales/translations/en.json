@@ -959,5 +959,6 @@
     "EMAIL_PASSWORD_REQUIRED": "Email and password are required.",
     "PASSWORD_REQUIRED": "Please enter your password."
   },
-  "Warning": "Warning"
+  "Warning": "Warning",
+  "TicketLoading": "Loading Ticket..."
 }
