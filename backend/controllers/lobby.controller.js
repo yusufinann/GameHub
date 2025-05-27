@@ -281,33 +281,44 @@ export const joinLobby = async (req, res) => {
             let gameInProgress = false;
             let gameTypeMessage = "";
 
-            if (lobby.game === '1') {
+            if (lobby.game === '1') { // Bingo
                 const bingoGame = bingoGames[lobbyCode];
-         
                 if (bingoGame && bingoGame.gameStarted && !bingoGame.gameEnded) {
                     gameInProgress = true;
-                    gameTypeMessage = "Bingo";
+                    gameTypeMessage = "Tombala";
                 }
-            } else if (lobby.game === '2') {
+            } else if (lobby.game === '2') { // Hangman
                 const hangmanGame = hangmanGames[lobbyCode];
                 if (hangmanGame && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
                     gameInProgress = true;
-                    gameTypeMessage = "Hangman";
+                    gameTypeMessage = "Adam Asmaca";
                 }
             }
 
             if (gameInProgress) {
                 return res.status(403).json({
-                  errorKey: "lobby.gameInProgress",
+                    errorKey: "lobby.gameInProgress",
                     errorParams: { gameTypeIdentifier: gameTypeMessage }
                 });
             }
         }
-      if (lobby.password && !bcrypt.compareSync(password, lobby.password)) {
+
+        if (lobby.password && (!password || !bcrypt.compareSync(password, lobby.password))) {
             return res.status(401).json({
-                errorKey: "lobby.invalidPassword", 
-                message: "Geçersiz şifre." 
+                errorKey: "lobby.invalidPassword",
+                message: "Geçersiz şifre."
             });
+        }
+
+        let userIsPlayingActiveBingo = false;
+        for (const gameCode in bingoGames) {
+            if (bingoGames.hasOwnProperty(gameCode)) {
+                const bGame = bingoGames[gameCode];
+                if (bGame.players && bGame.players[user.id] && bGame.gameStarted && !bGame.gameEnded) {
+                    userIsPlayingActiveBingo = true;
+                    break;
+                }
+            }
         }
 
         if (user.id === lobby.createdBy) {
@@ -323,19 +334,21 @@ export const joinLobby = async (req, res) => {
                 );
                 if (hostMemberIndex !== -1) {
                     lobby.members[hostMemberIndex].isHost = true;
+                    lobby.members[hostMemberIndex].isPlayingBingo = userIsPlayingActiveBingo;
                 } else {
                     lobby.members.push({
                         id: user.id,
                         name: user.name,
                         avatar: user.avatar,
                         isHost: true,
+                        isPlayingBingo: userIsPlayingActiveBingo,
                     });
                 }
                 await lobby.save();
 
                 const otherMemberIds = lobby.members
-                .filter(member => member.id.toString() !== user.id.toString())
-                .map(member => member.id);
+                    .filter(member => member.id.toString() !== user.id.toString())
+                    .map(member => member.id);
 
                 if (otherMemberIds.length > 0) {
                     broadcastLobbyEvent(lobbyCode, "HOST_RETURNED", {
@@ -345,6 +358,7 @@ export const joinLobby = async (req, res) => {
                         lobbyCode: lobbyCode,
                         lobbyName: lobby.lobbyName,
                         isHost: true,
+                        isPlayingBingo: userIsPlayingActiveBingo,
                     }, otherMemberIds);
                 }
                 broadcastLobbyEvent(
@@ -358,8 +372,9 @@ export const joinLobby = async (req, res) => {
                             id: m.id,
                             name: m.name,
                             avatar: m.avatar,
-                            isHost: m.isHost
-                         }))
+                            isHost: m.isHost,
+                            isPlayingBingo: m.isPlayingBingo === true // Ensure boolean
+                        }))
                     },
                     null
                 );
@@ -370,7 +385,7 @@ export const joinLobby = async (req, res) => {
             }
         }
 
-        if (lobby.maxMembers && lobby.members.length >= lobby.maxMembers) {
+        if (lobby.maxMembers && lobby.members.length >= lobby.maxMembers && !lobby.members.some(m => m.id === user.id)) {
             return res.status(400).json({ message: "Lobi dolu." });
         }
 
@@ -379,41 +394,43 @@ export const joinLobby = async (req, res) => {
         );
 
         if (isUserAlreadyInLobby) {
-             if (user.id !== lobby.createdBy) {
+            if (user.id !== lobby.createdBy) {
                 return res.status(400).json({ message: "Zaten bu lobidesiniz." });
-             }
+            }
+            // Host zaten lobideyse ve timer ile geri dönmüyorsa, isPlayingBingo durumunu güncelleyebiliriz.
+            const memberIndex = lobby.members.findIndex(m => m.id === user.id);
+            if (memberIndex !== -1) {
+                lobby.members[memberIndex].isPlayingBingo = userIsPlayingActiveBingo;
+                await lobby.save();
+            }
         }
 
-        if (!isUserAlreadyInLobby) { // Sadece kullanıcı zaten lobide değilse ekle
+        if (!isUserAlreadyInLobby) {
             lobby.members.push({
                 id: user.id,
                 name: user.name,
                 avatar: user.avatar,
-                isHost: false,
+                isHost: user.id === lobby.createdBy,
+                isPlayingBingo: userIsPlayingActiveBingo,
             });
             await lobby.save();
-        } else if (isUserAlreadyInLobby && user.id === lobby.createdBy) {
-            // Host zaten lobideyse ve timer yoksa, tekrar save etmeye gerek yok
-            // Ancak lobi bilgisini döndürebiliriz.
-            // Bu durum yukarıdaki `if (user.id === lobby.createdBy)` bloğunda timer olmadığında ele alınabilir.
-            // Şimdilik, eğer host ise ve zaten lobideyse, mevcut lobi bilgisini döndürmek için devam etsin.
         }
 
 
-        const lobbyMembersExceptNewUser = lobby.members.filter(member => member.id !== user.id);
-        const memberIdsToNotify = lobbyMembersExceptNewUser.map(member => member.id);
+        const lobbyMembersExceptCurrentUser = lobby.members.filter(member => member.id !== user.id);
+        const memberIdsToNotify = lobbyMembersExceptCurrentUser.map(member => member.id);
 
-        // Sadece yeni katılan kullanıcılar için USER_JOINED event'i gönder
         if (!isUserAlreadyInLobby && memberIdsToNotify.length > 0) {
             broadcastLobbyEvent(lobbyCode, "USER_JOINED", {
                 userId: user.id,
                 name: user.name,
                 avatar: user.avatar,
                 lobbyName: lobby.lobbyName,
+                isHost: user.id === lobby.createdBy,
+                isPlayingBingo: userIsPlayingActiveBingo,
             }, memberIdsToNotify);
         }
 
-        // LOBBY_MEMBER_COUNT_UPDATED her zaman gönderilsin (yeni katılım, host geri dönüşü vb.)
         broadcastLobbyEvent(
             null,
             "LOBBY_MEMBER_COUNT_UPDATED",
@@ -425,25 +442,23 @@ export const joinLobby = async (req, res) => {
                     id: m.id,
                     name: m.name,
                     avatar: m.avatar,
-                    isHost: m.isHost
-                 }))
+                    isHost: m.isHost,
+                    isPlayingBingo: m.isPlayingBingo === true // Ensure boolean
+                }))
             },
             null
         );
 
-        // Host olmayan ve zaten lobide olan bir kullanıcı buraya gelirse (yukarıdaki if ile engellendi)
-        // yine de lobi bilgisini döndürür, ancak "Zaten bu lobidesiniz" mesajı daha önce gönderilmiş olur.
-        // Yeni katılan veya host olarak geri dönen için mesaj daha uygun.
         let message = "Lobiye başarıyla katıldınız.";
         if (isUserAlreadyInLobby && user.id === lobby.createdBy && !lobbyTimers.get(`host_leave_${lobby.id}`)) {
-             // Host zaten lobideyse ve timer yoksa, özel bir mesaj verilebilir veya mevcut mesaj kalabilir.
-             // Bu durum genelde beklenmez ama bir edge case olabilir.
+            message = "Host olarak lobi bilgileriniz güncellendi.";
         }
 
 
         res.status(200).json({
             message: message,
             lobby: lobby.toObject(),
+            isPlayingActiveBingo: userIsPlayingActiveBingo
         });
 
     } catch (error) {

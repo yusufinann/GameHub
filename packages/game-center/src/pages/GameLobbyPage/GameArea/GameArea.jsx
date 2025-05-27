@@ -22,7 +22,7 @@ import ChatArea from "./components/ChatArea/ChatArea";
 
 const SHOW_EXPRESSIONS_KEY = "showExpressions";
 
-const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby,t }) => {
+const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby,t}) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const [expressions, setExpressions] = useState([]);

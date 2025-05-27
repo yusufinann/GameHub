@@ -849,6 +849,7 @@
     "manualDrawOnlyDrawer": "Only the selected player can draw numbers in manual mode.",
     "allNumbersDrawnManual": "All numbers have been drawn (manual draw).",
     "invalidBingoCall": "Invalid Bingo call. Your ticket is not complete or numbers are incorrect.",
+    "alreadyInActiveGame": "You are already in another active {{gameType}} game ({{lobbyCode}}). To join a new {{gameType}} game, please leave your current game or complete it first.",
     "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
     "couldNotFetchGroupDetails": ""
   },
@@ -960,5 +961,16 @@
     "PASSWORD_REQUIRED": "Please enter your password."
   },
   "Warning": "Warning",
-  "TicketLoading": "Loading Ticket..."
+  "TicketLoading": "Loading Ticket...",
+  "activeGameErrorAlert": {
+    "title": "You Are Active in Another Game!",
+    "activeGameDetails": "Active Game Details",
+    "gameTypeLabel": "Game Type:",
+    "lobbyCodeLabel": "Lobby Code:",
+    "goToLobby": "Go to Active Game (Lobby: {{lobbyCode}})"
+  },
+  "gameTypes": {
+    "bingo": "Bingo", 
+    "hangman": "Hangman"
+  }
 }

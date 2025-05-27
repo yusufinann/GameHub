@@ -850,7 +850,8 @@
     "manualDrawOnlyDrawer": "Manuel modda sadece seçilen oyuncu sayı çekebilir.",
     "allNumbersDrawnManual": "Tüm numaralar çekildi (manuel çekiliş).",
     "invalidBingoCall": "Geçersiz Tombala çağrısı. Kartınız tamamlanmamış veya sayılar yanlış.",
-    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
+    "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})",
+    "alreadyInActiveGame": "Zaten başka bir aktif {{gameType}} oyununda ({{lobbyCode}}) bulunuyorsunuz. Yeni bir {{gameType}} oyununa katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın."
   },
   "activeLobbyOtherGame": "Başka bir oyun için aktif bir lobiniz bulunmaktadır. Bu oyun için yeni bir lobi oluşturmadan önce mevcut lobinizi kapatmanız veya o lobiye gitmeniz gerekmektedir.",
   "joinedMessage": "Tombala oyununa başarıyla katıldınız",
@@ -960,5 +961,16 @@
     "PASSWORD_REQUIRED": "Lütfen şifrenizi girin."
   },
   "Warning": "Uyarı",
-  "TicketLoading": "Bilet yükleniyor..."
+  "TicketLoading": "Bilet yükleniyor...",
+  "activeGameErrorAlert": {
+    "title": "Başka Bir Oyunda Aktifsiniz!",
+    "activeGameDetails": "Aktif Oyun Detayları",
+    "gameTypeLabel": "Oyun Türü:",
+    "lobbyCodeLabel": "Lobi Kodu:",
+    "goToLobby": "Aktif Oyuna Git (Lobi: {{lobbyCode}})"
+  },
+  "gameTypes": {
+    "bingo": "Tombala", 
+    "hangman": "Adam Asmaca"
+  }
 }

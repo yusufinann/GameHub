@@ -2,10 +2,10 @@ import React, { useMemo } from "react";
 import { Box, Card, Divider, useTheme} from "@mui/material";
 import LobbyItem from "../../../../../shared/components/LobbyItem/LobbyItem";
 import NoActiveLobbies from "../../../../GameDetail/GameDetailRightArea/components/NoActiveLobbies";
-import { useAuthContext } from "../../../../../shared/context/AuthContext"; 
+import { useAuthContext } from "../../../../../shared/context/AuthContext";
 
-export const LobbyList = ({ lobbies = [], activeTab }) => { 
-  const { currentUser } = useAuthContext(); 
+export const LobbyList = ({ lobbies = [], activeTab }) => {
+  const { currentUser } = useAuthContext();
   const theme = useTheme();
 
   const filteredLobbies = useMemo(() => {
@@ -19,27 +19,26 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
       filtered = lobbies.filter(lobby =>
         lobby.members && lobby.members.some(member => member.id === currentUser?.id)
       );
-    } 
+    }
 
     return filtered;
   }, [lobbies, activeTab, currentUser]);
 
 
-  // Lobby sorting function on filtered lobbies
   const sortedLobbies = useMemo(() => {
     return [...filteredLobbies].sort((a, b) => {
-      // First priority: Event type lobbies always come first
       if (a.lobbyType === "event" && b.lobbyType !== "event") return -1;
       if (a.lobbyType !== "event" && b.lobbyType === "event") return 1;
 
-      // Second priority: For event lobbies, sort by start time
       if (a.lobbyType === "event" && b.lobbyType === "event") {
         const dateA = new Date(`${a.startDate}T${a.startTime}`);
         const dateB = new Date(`${b.startDate}T${b.startTime}`);
+        if (isNaN(dateA.getTime()) && !isNaN(dateB.getTime())) return 1;
+        if (!isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return -1;
+        if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
         return dateA - dateB;
       }
 
-      // Third priority: For non-event lobbies, sort by creation time (if available)
       if (a.createdAt && b.createdAt) {
         return new Date(b.createdAt) - new Date(a.createdAt);
       }
@@ -52,15 +51,14 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
     <Box
       sx={{
         [theme.breakpoints.up('md')]: {
-          width: '100%', 
+          width: '100%',
         },
-        [theme.breakpoints.down('md')]: { 
-          width: '100%' 
+        [theme.breakpoints.down('md')]: {
+          width: '100%'
         },
         position: 'relative',
-        height: '65vh',
+        height: '55vh', 
         transition: 'width 0.3s ease',
-        overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: theme.palette.primary.main,
@@ -71,14 +69,14 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
         sx={{
           background: theme.palette.background.stripeBg,
           height: "100%",
-          overflow: "auto",
+          overflow: "auto", 
           position: "relative",
           boxShadow: theme.shadows[4],
           transition: "all 0.3s ease",
           "&:hover": {
             boxShadow: theme.shadows[8],
           },
-          p: 0,
+          p: 0, 
           borderRadius: 2,
         }}
       >
@@ -88,19 +86,16 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
               display: 'flex',
               flexDirection: 'column',
               backgroundColor: `${theme.palette.background.paper}20`,
-              height: '100%',
             }}
           >
             {sortedLobbies.map((lobby, index) => (
-              <React.Fragment key={lobby.lobbyCode || index}>
-               
-                  <LobbyItem lobby={lobby} />
-         
+              <React.Fragment key={lobby.lobbyCode || lobby.id || index}> 
+                <LobbyItem lobby={lobby} />
                 {index < sortedLobbies.length - 1 && (
                   <Divider
                     sx={{
                       backgroundColor: `${theme.palette.primary.darker}50`,
-                      mx: 2,                     
+                      mx: 2,
                     }}
                   />
                 )}
@@ -110,7 +105,7 @@ export const LobbyList = ({ lobbies = [], activeTab }) => {
         ) : (
           <Box
             sx={{
-              height: '100%',
+              height: '100%', 
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',

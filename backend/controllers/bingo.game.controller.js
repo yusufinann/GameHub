@@ -552,398 +552,370 @@ export const drawNumber = (ws, data) => {
 
 
 export const startGame = (ws, data) => {
-  const { lobbyCode, drawMode, drawer, bingoMode, competitionMode } = data;
-  const game = bingoGames[lobbyCode];
+    const { lobbyCode, drawMode, drawer, bingoMode, competitionMode } = data;
+    const game = bingoGames[lobbyCode];
 
-  if (!game) {
-     console.warn(`[Bingo Server] Oyun başlatma hatası (${lobbyCode}): İn-memory oyun state'i bulunamadı.`);
-    return ws.send(JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Oyun başlatılamadı: Lobi bilgisi sunucuda mevcut değil veya hazır değil.",
-    }));
-  }
-
-  if (game.host !== ws.userId) {
-    return ws.send(JSON.stringify({
-      type: "BINGO_ERROR",
-      error: {
-        key: "errors.hostOnlyStart",
-        message: "Sadece host oyunu başlatabilir.",
-      }
-    }));
-  }
-  if (game.gameStarted && !game.gameEnded) {
-    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
-  }
-  if (Object.keys(game.players).length === 0) {
-     return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için lobide en az bir oyuncu olmalı." }));
-  }
-
-  const playersToStartGameWith = {};
-  Object.keys(game.players).forEach(playerId => {
-    const player = game.players[playerId];
-    if (player && player.ws) {
-      playersToStartGameWith[playerId] = player;
+    if (!game) {
+        console.warn(`[Bingo Server] Oyun başlatma hatası (${lobbyCode}): İn-memory oyun state'i bulunamadı.`);
+        return ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            message: "Oyun başlatılamadı: Lobi bilgisi sunucuda mevcut değil veya hazır değil.",
+        }));
     }
-  });
 
-  if (Object.keys(playersToStartGameWith).length === 0) {
-    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
-  }
+    if (game.host !== ws.userId) {
+        return ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            error: {
+                key: "errors.hostOnlyStart",
+                message: "Sadece host oyunu başlatabilir.",
+            }
+        }));
+    }
+    if (game.gameStarted && !game.gameEnded) {
+        return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten başladı." }));
+    }
+    if (Object.keys(game.players).length === 0) {
+        return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için lobide en az bir oyuncu olmalı." }));
+    }
 
-  const problematicPlayers = [];
+    const playersToStartGameWith = {};
+    Object.keys(game.players).forEach(playerId => {
+        const player = game.players[playerId];
+        if (player && player.ws) {
+            playersToStartGameWith[playerId] = player;
+        }
+    });
 
-  for (const playerId in game.players) {
-    if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
-      const player = game.players[playerId];
-      const playerName = player.name || player.userName || `Oyuncu #${playerId}`;
+    if (Object.keys(playersToStartGameWith).length === 0) {
+        return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
+    }
 
-      for (const otherLobbyCodeInMap in bingoGames) {
+    const problematicBingoPlayers = [];
+    for (const playerId in playersToStartGameWith) {
+        if (Object.prototype.hasOwnProperty.call(playersToStartGameWith, playerId)) {
+            const player = playersToStartGameWith[playerId];
+            const playerName = player.name || player.userName || `Oyuncu #${playerId}`;
+
+            for (const otherLobbyCodeInMap in bingoGames) {
+                if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
+                    const otherGame = bingoGames[otherLobbyCodeInMap];
+                    if (
+                        otherLobbyCodeInMap !== lobbyCode && // Mevcut oyunu kontrol etme
+                        otherGame.players && otherGame.players[playerId] &&
+                        otherGame.gameStarted && !otherGame.gameEnded
+                    ) {
+                        if (!problematicBingoPlayers.find(p => p.id === playerId)) {
+                            problematicBingoPlayers.push({ id: playerId, name: playerName, activeLobby: otherLobbyCodeInMap });
+                        }
+                        break; // Bu oyuncu için başka Tombala oyunu aramayı bırak
+                    }
+                }
+            }
+        }
+    }
+
+    if (problematicBingoPlayers.length > 0) {
+        const playerNames = problematicBingoPlayers.map(p => `${p.name} (aktif Tombala lobisi: ${p.activeLobby})`).join(', ');
+        const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular zaten başka bir aktif Tombala oyununda: ${playerNames}. Lütfen bu oyuncuların mevcut Tombala oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
+        console.warn(`[Bingo Server] Tombala oyunu başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
+
+        ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            message: errorMessage,
+            details: {
+                reason: "ACTIVE_PLAYERS_IN_OTHER_BINGO_GAMES",
+                players: problematicBingoPlayers
+            }
+        }));
+        return;
+    }
+
+
+    ws.send(JSON.stringify({ type: 'ACKNOWLEDGEMENT', messageType: 'BINGO_START', timestamp: new Date().toISOString() }));
+
+    game.players = playersToStartGameWith;
+    game.drawnNumbers = [];
+    game.activeNumbers = [];
+    game.numberPool = generateShuffledNumbers(1, 90);
+    game.gameEnded = false;
+    game.drawMode = drawMode || 'auto';
+    game.drawer = (game.drawMode === "manual" && game.players[drawer]) ? drawer : null;
+    game.bingoMode = bingoMode || 'classic';
+    game.gameId = new mongoose.Types.ObjectId();
+    game.competitionMode = competitionMode || 'competitive';
+
+    if (game.autoDrawInterval) {
+        clearInterval(game.autoDrawInterval);
+        game.autoDrawInterval = null;
+    }
+
+    for (const playerId in game.players) {
+        if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
+            const player = game.players[playerId];
+            player.markedNumbers = [];
+            player.ticket = generateBingoTicket();
+            delete player.completedAt;
+            delete player.completedBingo;
+        }
+    }
+
+    let countdown = 5;
+    const countdownInterval = setInterval(() => {
+        broadcastToGame(game, {
+            type: "BINGO_COUNTDOWN",
+            countdown,
+        });
+        countdown--;
+
+        if (countdown < 0) {
+            clearInterval(countdownInterval);
+            game.startedAt = new Date();
+            game.gameStarted = true;
+            game.gameEnded = false;
+            broadcastToGame(game, {
+                type: "BINGO_STARTED",
+                message: "Oyun başladı!",
+                drawMode: game.drawMode,
+                drawer: game.drawMode === "manual" ? game.drawer : undefined,
+                bingoMode: game.bingoMode,
+                gameId: game.gameId,
+                players: Object.keys(game.players).map(playerId => {
+                    const currentPlayer = game.players[playerId];
+                    return {
+                        playerId: playerId,
+                        name: currentPlayer.name || currentPlayer.userName,
+                        avatar: currentPlayer.avatar,
+                        ticket: currentPlayer.ticket,
+                        markedNumbers: currentPlayer.markedNumbers,
+                        color: currentPlayer.color
+                    };
+                }),
+                competitionMode: game.competitionMode,
+                completedPlayers: []
+            });
+
+            if (game.drawMode === "auto") {
+                let drawInterval = 5000;
+                if (game.bingoMode === "superfast") {
+                    drawInterval = 3000;
+                }
+
+                const autoDrawInterval = setInterval(() => {
+                    if (game.gameEnded || !game.gameStarted) {
+                        clearInterval(autoDrawInterval);
+                        game.autoDrawInterval = null;
+                        return;
+                    }
+                    autoDrawNumber(game);
+                }, drawInterval);
+                game.autoDrawInterval = autoDrawInterval;
+            }
+            if (game.drawMode === "manual" && game.drawer && game.players[game.drawer] && game.players[game.drawer].ws) {
+                game.players[game.drawer].ws.send(JSON.stringify({ type: "BINGO_YOUR_TURN_TO_DRAW", message: "Sıradaki sayıyı çekebilirsiniz.", lobbyCode: game.lobbyCode }));
+            }
+        }
+    }, 1000);
+};
+
+export const joinGame = async (ws, data) => {
+    const { lobbyCode } = data;
+
+    if (!lobbyCode) {
+        return ws.send(
+            JSON.stringify({
+                type: "BINGO_ERROR",
+                message: "Lobi kodu belirtilmedi.",
+            })
+        );
+    }
+
+    const userInfo = await getUserInfo(ws.userId);
+    if (!userInfo) {
+        return ws.send(
+            JSON.stringify({
+                type: "BINGO_ERROR",
+                message: "Kullanıcı bilgileri alınamadı.",
+            })
+        );
+    }
+
+    const lobby = await Lobby.findOne({ lobbyCode: lobbyCode });
+    if (!lobby) {
+        return ws.send(
+            JSON.stringify({
+                type: "BINGO_ERROR",
+                message: "Lobi bulunamadı.",
+            })
+        );
+    }
+
+    for (const otherLobbyCodeInMap in bingoGames) {
         if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
-          const otherGame = bingoGames[otherLobbyCodeInMap];
-          if (
-            otherGame.players && otherGame.players[playerId] &&
-            otherGame.gameStarted &&
-            !otherGame.gameEnded &&
-            otherLobbyCodeInMap !== lobbyCode
-          ) {
-            if (!problematicPlayers.find(p => p.id === playerId)) {
-              problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Bingo', activeLobby: otherLobbyCodeInMap });
-            }
-            break;
-          }
+            const otherGame = bingoGames[otherLobbyCodeInMap];
+            if (
+                otherLobbyCodeInMap !== lobbyCode && 
+                otherGame.players && otherGame.players[ws.userId] &&
+                otherGame.gameStarted && !otherGame.gameEnded
+            ) {
+              const messageKey = "errors.alreadyInActiveGame";
+              //  const errorMessage = `Zaten başka bir aktif Tombala oyununda (${otherLobbyCodeInMap}) bulunuyorsunuz. Yeni bir Tombala oyununa katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
+                console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten aktif bir Tombala oyununda (${otherLobbyCodeInMap}). ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
+                ws.send(JSON.stringify({
+                    type: "BINGO_ERROR",
+                  //  message: errorMessage,
+                  messageKey: messageKey,
+                    activeGameInfo: {
+            gameType: 'Bingo',
+            lobbyCode: otherLobbyCodeInMap,
+            playerId: ws.userId 
         }
-      }
-      if (problematicPlayers.find(p => p.id === playerId)) continue;
-
-      for (const hangmanLobbyCode in hangmanGames) {
-        if (Object.prototype.hasOwnProperty.call(hangmanGames, hangmanLobbyCode)) {
-          const hangmanGame = hangmanGames[hangmanLobbyCode];
-          if (
-             hangmanGame.players && hangmanGame.players[playerId] &&
-             hangmanGame.gameStarted &&
-            !hangmanGame.gameEnded
-          ) {
-            if (!problematicPlayers.find(p => p.id === playerId)) {
-              problematicPlayers.push({ id: playerId, name: playerName, gameType: 'Hangman', activeLobby: hangmanLobbyCode });
+                }));
+                return;
             }
-            break;
-          }
         }
-      }
     }
-  }
 
-  if (problematicPlayers.length > 0) {
-    const playerNames = problematicPlayers.map(p => `${p.name} (${p.gameType} - Lobi: ${p.activeLobby})`).join(', ');
-    const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular başka aktif oyunlarda: ${playerNames}. Lütfen bu oyuncuların mevcut oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
-    console.warn(`[Bingo Server] Oyun başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
+
+    if (!bingoGames[lobbyCode]) {
+        const shuffledColorsForGame = shuffleArray(PLAYER_COLORS);
+        bingoGames[lobbyCode] = {
+            lobbyCode,
+            players: {},
+            drawnNumbers: [],
+            activeNumbers: [],
+            numberPool: generateShuffledNumbers(1, 90),
+            gameStarted: false,
+            gameEnded: false,
+            host: lobby.createdBy.toString(),
+            drawMode: 'auto',
+            drawer: null,
+            bingoMode: 'classic',
+            competitionMode: 'competitive',
+            rankings: [],
+            _availableColors: shuffledColorsForGame,
+            _colorIndex: 0
+        };
+    }
+
+    const game = bingoGames[lobbyCode];
+
+    if (game.gameStarted && !game.gameEnded && !game.players[ws.userId]) {
+        return ws.send(JSON.stringify({
+            type: "BINGO_ERROR",
+            message: "Bu lobide aktif bir oyun devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın."
+        }));
+    }
+
+    const mapPlayerToClient = (player) => ({
+        id: player.userId,
+        userName: player.userName,
+        name: player.name,
+        avatar: player.avatar,
+        completed: player.completedBingo || false,
+        color: player.color
+    });
+
+    if (game.players[ws.userId]) {
+        const player = game.players[ws.userId];
+        player.ws = ws;
+        player.userName = userInfo.username;
+        player.name = userInfo.name;
+        player.avatar = userInfo.avatar;
+
+        return ws.send(JSON.stringify({
+            type: "BINGO_JOIN",
+            message: "Oyuna başarıyla yeniden bağlandınız.",
+            ticket: player.ticket,
+            markedNumbers: player.markedNumbers || [],
+            isHost: String(game.host) === String(ws.userId),
+            players: Object.values(game.players).map(mapPlayerToClient),
+            gameStarted: game.gameStarted,
+            drawnNumbers: game.drawnNumbers,
+            activeNumbers: game.activeNumbers,
+            drawMode: game.drawMode,
+            drawer: game.drawer,
+            completedBingo: player.completedBingo || false,
+            completedPlayers: getCompletedPlayersList(game),
+            bingoMode: game.bingoMode,
+            competitionMode: game.competitionMode,
+            gameId: game.gameId,
+            rankings: game.rankings || (game.gameStarted ? getGameRankings(game) : []),
+            playerColor: player.color
+        }));
+    }
+
+    let playerColorToAssign;
+    if (game._availableColors && game._availableColors.length > 0) {
+        playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
+        game._colorIndex++;
+    } else {
+        playerColorToAssign = PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
+        console.warn(`[Bingo Server] Lobi ${lobbyCode} için karıştırılmış renkler tükendi veya bulunamadı. Rastgele renk atandı: ${playerColorToAssign}`);
+        if (!game._availableColors || game._availableColors.length === 0) {
+            game._availableColors = shuffleArray(PLAYER_COLORS);
+            game._colorIndex = 0;
+            if (game._availableColors.length > 0) {
+                playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
+                game._colorIndex++;
+            }
+        }
+    }
+
+    const newTicket = generateBingoTicket();
+
+    game.players[ws.userId] = {
+        ticket: newTicket,
+        ws,
+        markedNumbers: [],
+        userName: userInfo.username,
+        name: userInfo.name,
+        avatar: userInfo.avatar,
+        userId: ws.userId,
+        completedBingo: false,
+        color: playerColorToAssign
+    };
+
+    broadcastToGame(game, {
+        type: "BINGO_PLAYER_JOINED",
+        player: {
+            id: ws.userId,
+            name: userInfo.name,
+            userName: userInfo.username,
+            avatar: userInfo.avatar,
+            color: playerColorToAssign
+        },
+        notification: {
+            key: "notifications.playerJoined",
+            params: { playerName: userInfo.name || userInfo.username }
+        }
+    });
 
     ws.send(JSON.stringify({
-        type: "BINGO_ERROR",
-        message: errorMessage,
-        details: {
-            reason: "ACTIVE_PLAYERS_IN_OTHER_GAMES",
-            players: problematicPlayers
-        }
+        type: "BINGO_JOIN",
+        message: "Oyuna başarıyla katıldınız.",
+        ticket: newTicket,
+        markedNumbers: [],
+        isHost: String(game.host) === String(ws.userId),
+        players: Object.values(game.players).map(mapPlayerToClient),
+        gameStarted: game.gameStarted,
+        drawnNumbers: game.drawnNumbers,
+        activeNumbers: game.activeNumbers,
+        drawMode: game.drawMode,
+        drawer: game.drawer,
+        userInfo: {
+            name: userInfo.name,
+            userName: userInfo.username,
+            avatar: userInfo.avatar
+        },
+        completedBingo: false,
+        completedPlayers: getCompletedPlayersList(game),
+        bingoMode: game.bingoMode,
+        competitionMode: game.competitionMode,
+        gameId: game.gameId,
+        rankings: game.rankings || [],
+        playerColor: playerColorToAssign
     }));
-    return;
-  }
-
-  ws.send(JSON.stringify({ type: 'ACKNOWLEDGEMENT', messageType: 'BINGO_START', timestamp: new Date().toISOString() }));
-
-  game.players = playersToStartGameWith;
-
-  game.drawnNumbers = [];
-  game.activeNumbers = [];
-  game.numberPool = generateShuffledNumbers(1, 90);
-  game.gameEnded = false;
-  game.drawMode = drawMode || 'auto';
-  game.drawer = (game.drawMode === "manual" && game.players[drawer]) ? drawer : null;
-  game.bingoMode = bingoMode || 'classic';
-  game.gameId = new mongoose.Types.ObjectId();
-  game.competitionMode = competitionMode || 'competitive';
-
-  if (game.autoDrawInterval) {
-      clearInterval(game.autoDrawInterval);
-      game.autoDrawInterval = null;
-  }
-
-  for (const playerId in game.players) {
-      if (Object.prototype.hasOwnProperty.call(game.players, playerId)) {
-          const player = game.players[playerId];
-          player.markedNumbers = [];
-          player.ticket = generateBingoTicket();
-          delete player.completedAt;
-          delete player.completedBingo;
-      }
-  }
-
-  let countdown = 5;
-  const countdownInterval = setInterval(() => {
-      broadcastToGame(game, {
-          type: "BINGO_COUNTDOWN",
-          countdown,
-      });
-      countdown--;
-
-      if (countdown < 0) {
-          clearInterval(countdownInterval);
-          game.startedAt = new Date();
-          game.gameStarted = true;
-          game.gameEnded = false;
-          broadcastToGame(game, {
-              type: "BINGO_STARTED",
-              message: "Oyun başladı!",
-              drawMode: game.drawMode,
-              drawer: game.drawMode === "manual" ? game.drawer : undefined,
-              bingoMode: game.bingoMode,
-              gameId: game.gameId,
-            players: Object.keys(game.players).map(playerId => { 
-                  const currentPlayer = game.players[playerId]; 
-                  return {
-                      playerId: playerId,
-                      name: currentPlayer.name || currentPlayer.userName,
-                      avatar: currentPlayer.avatar, 
-                      ticket: currentPlayer.ticket,
-                      markedNumbers: currentPlayer.markedNumbers,
-                      color: currentPlayer.color 
-                  };
-              }),
-              competitionMode: game.competitionMode,
-              completedPlayers: []
-          });
-
-          if (game.drawMode === "auto") {
-              let drawInterval = 5000;
-              if (game.bingoMode === "superfast") {
-                  drawInterval = 3000;
-              }
-
-              const autoDrawInterval = setInterval(() => {
-                  if (game.gameEnded || !game.gameStarted) {
-                      clearInterval(autoDrawInterval);
-                      game.autoDrawInterval = null;
-                      return;
-                  }
-                  autoDrawNumber(game);
-              }, drawInterval);
-              game.autoDrawInterval = autoDrawInterval;
-          }
-          if (game.drawMode === "manual" && game.drawer && game.players[game.drawer] && game.players[game.drawer].ws) {
-             game.players[game.drawer].ws.send(JSON.stringify({ type: "BINGO_YOUR_TURN_TO_DRAW", message: "Sıradaki sayıyı çekebilirsiniz.", lobbyCode: game.lobbyCode }));
-          }
-      }
-  }, 1000);
-};
-/**
- * Oyuna katılma: Oyuncu, lobby bazlı bingo oyununa katılır ve kendine bir ticket alır.
- * Beklenen data örneği: { lobbyCode: "ABC123" }
- */
-export const joinGame = async (ws, data) => {
-  const { lobbyCode } = data;
-
-  if (!lobbyCode) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Lobi kodu belirtilmedi.",
-      })
-    );
-  }
-
-  const userInfo = await getUserInfo(ws.userId);
-  if (!userInfo) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Kullanıcı bilgileri alınamadı.",
-      })
-    );
-  }
-
-  const lobby = await Lobby.findOne({ lobbyCode: lobbyCode });
-  if (!lobby) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Lobi bulunamadı.",
-      })
-    );
-  }
-
-  for (const otherLobbyCodeInMap in bingoGames) {
-    if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
-      const otherGame = bingoGames[otherLobbyCodeInMap];
-      if (otherGame.players && otherGame.players[ws.userId] && otherGame.gameStarted && !otherGame.gameEnded && otherLobbyCodeInMap !== lobbyCode) {
-        const errorMessage = `Zaten başka bir Tombala oyununda (${otherLobbyCodeInMap}) aktifsiniz. Yeni bir oyuna katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
-        console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${otherLobbyCodeInMap} (Bingo) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
-        ws.send(JSON.stringify({
-            type: "BINGO_ERROR",
-            message: errorMessage,
-            activeGameInfo: { gameType: 'Bingo', lobbyCode: otherLobbyCodeInMap }
-        }));
-        return;
-      }
-    }
-  }
-
-  for (const hangmanLobbyCode in hangmanGames) {
-    if (Object.prototype.hasOwnProperty.call(hangmanGames, hangmanLobbyCode)) {
-      const hangmanGame = hangmanGames[hangmanLobbyCode];
-      if (hangmanGame.players && hangmanGame.players[ws.userId] && hangmanGame.gameStarted && !hangmanGame.gameEnded) {
-        const errorMessage = `Zaten bir Adam Asmaca oyununda (${hangmanLobbyCode}) aktifsiniz. Tombala oyununa katılmak için lütfen önce Adam Asmaca oyununuzdan ayrılın veya oyunu tamamlayın.`;
-        console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten ${hangmanLobbyCode} (Hangman) lobisindeki oyunda. ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
-        ws.send(JSON.stringify({
-            type: "BINGO_ERROR",
-            message: errorMessage,
-            activeGameInfo: { gameType: 'Hangman', lobbyCode: hangmanLobbyCode }
-        }));
-        return;
-      }
-    }
-  }
-
-  if (!bingoGames[lobbyCode]) {
-    const shuffledColorsForGame = shuffleArray(PLAYER_COLORS); 
-    bingoGames[lobbyCode] = {
-      lobbyCode,
-      players: {},
-      drawnNumbers: [],
-      activeNumbers: [],
-      numberPool: generateShuffledNumbers(1, 90),
-      gameStarted: false,
-      gameEnded: false,
-      host: lobby.createdBy.toString(),
-      drawMode: 'auto',
-      drawer: null,
-      bingoMode: 'classic',
-      competitionMode: 'competitive',
-      rankings: [],
-      _availableColors: shuffledColorsForGame,
-      _colorIndex: 0
-    };
-  }
-
-  const game = bingoGames[lobbyCode];
-
-  if (game.gameStarted && !game.gameEnded && !game.players[ws.userId]) {
-    return ws.send(JSON.stringify({
-      type: "BINGO_ERROR",
-      message: "Bu lobide aktif bir oyun devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın."
-    }));
-  }
-
-  const mapPlayerToClient = (player) => ({
-    id: player.userId,
-    userName: player.userName,
-    name: player.name,
-    avatar: player.avatar,
-    completed: player.completedBingo || false,
-    color: player.color
-  });
-
-  if (game.players[ws.userId]) {
-    const player = game.players[ws.userId];
-    player.ws = ws;
-    player.userName = userInfo.username;
-    player.name = userInfo.name;
-    player.avatar = userInfo.avatar;
-
-    return ws.send(JSON.stringify({
-      type: "BINGO_JOIN",
-      message: "Oyuna başarıyla yeniden bağlandınız.",
-      ticket: player.ticket,
-      markedNumbers: player.markedNumbers || [],
-      isHost: String(game.host) === String(ws.userId),
-      players: Object.values(game.players).map(mapPlayerToClient),
-      gameStarted: game.gameStarted,
-      drawnNumbers: game.drawnNumbers,
-      activeNumbers: game.activeNumbers,
-      drawMode: game.drawMode,
-      drawer: game.drawer,
-      completedBingo: player.completedBingo || false,
-      completedPlayers: getCompletedPlayersList(game),
-      bingoMode: game.bingoMode,
-      competitionMode: game.competitionMode,
-      gameId: game.gameId,
-      rankings: game.rankings || (game.gameStarted ? getGameRankings(game) : []),
-      playerColor: player.color
-    }));
-  }
-
-  let playerColorToAssign;
-  if (game._availableColors && game._availableColors.length > 0) {
-    playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
-    game._colorIndex++;
-  } else {
-    playerColorToAssign = PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
-    console.warn(`[Bingo Server] Lobi ${lobbyCode} için karıştırılmış renkler tükendi veya bulunamadı. Rastgele renk atandı: ${playerColorToAssign}`);
-    // Eğer renkler tükendiyse ve yeni renkler eklenmiyorsa, _availableColors'ı yeniden doldurabiliriz.
-    if (!game._availableColors || game._availableColors.length === 0) {
-        game._availableColors = shuffleArray(PLAYER_COLORS);
-        game._colorIndex = 0;
-        if (game._availableColors.length > 0) { // Yeniden doldurduktan sonra bir renk al
-            playerColorToAssign = game._availableColors[game._colorIndex % game._availableColors.length];
-            game._colorIndex++;
-        }
-    }
-  }
-
-  const newTicket = generateBingoTicket();
-
-  game.players[ws.userId] = {
-    ticket: newTicket,
-    ws,
-    markedNumbers: [],
-    userName: userInfo.username,
-    name: userInfo.name,
-    avatar: userInfo.avatar,
-    userId: ws.userId,
-    completedBingo: false,
-    color: playerColorToAssign
-  };
-
-  broadcastToGame(game, {
-    type: "BINGO_PLAYER_JOINED",
-    player: {
-      id: ws.userId,
-      name: userInfo.name,
-      userName: userInfo.username,
-      avatar: userInfo.avatar,
-      color: playerColorToAssign
-    },
-    notification: {
-      key: "notifications.playerJoined",
-      params: { playerName: userInfo.name || userInfo.username }
-    }
-  });
-
-  ws.send(JSON.stringify({
-    type: "BINGO_JOIN",
-    message: "Oyuna başarıyla katıldınız.",
-    ticket: newTicket,
-    markedNumbers: [],
-    isHost: String(game.host) === String(ws.userId),
-    players: Object.values(game.players).map(mapPlayerToClient),
-    gameStarted: game.gameStarted,
-    drawnNumbers: game.drawnNumbers,
-    activeNumbers: game.activeNumbers,
-    drawMode: game.drawMode,
-    drawer: game.drawer,
-    userInfo: {
-      name: userInfo.name,
-      userName: userInfo.username,
-      avatar: userInfo.avatar
-    },
-    completedBingo: false,
-    completedPlayers: getCompletedPlayersList(game),
-    bingoMode: game.bingoMode,
-    competitionMode: game.competitionMode,
-    gameId: game.gameId,
-    rankings: game.rankings || [],
-    playerColor: playerColorToAssign
-  }));
 };
 
 export const handleBingoPlayerLeavePreGame = (lobbyCode, playerId) => {
