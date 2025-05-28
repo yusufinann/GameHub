@@ -797,6 +797,7 @@
     "categoryUndefined": "UNDEFINED",
     "turnLabel": "Turn",
     "yourTurn": "YOU! ({{seconds}}s)",
+    "yourTurnSingle": "Your Turn",
     "loadingWord": "Loading...",
     "attemptsLeftLabel": "Attempts Left",
     "correctGuessesLabel": "Correct",
@@ -834,13 +835,25 @@
   "Game Over!": "Game Over!",
   "Correct Word": "Correct Word",
   "End Game (Host)": "End Game (Host)",
-  "hostSetupModal": {
-    "title": "New Game Settings",
-    "description": "Select a category for the word that players will guess. The word will be chosen randomly.",
+"hostSetupModal": {
+    "title": "Hangman Game Setup",
+    "description": "Configure the game settings before starting.",
+    "languageLabel": "Language",
+    "loadingLanguages": "Loading languages...",
+    "wordSourceLabel": "Word Source",
+    "wordSourceAutomatic": "Automatic Word",
+    "wordSourceCustom": "Custom Word",
     "categoryLabel": "Category",
-    "loadingCategories": "Categories loading...",
-    "cancelButton": "Cancel",
+    "selectLanguageFirst": "Select language first",
+    "loadingCategories": "Loading categories...",
+    "customWordLabel": "Custom Word",
+    "customWordHelper": "2-25 characters. Host will not play.",
+    "customCategoryLabel": "Custom Category (Optional)",
+    "customCategoryHelper": "Max 30 characters. If empty, a default will be used.",
     "startButton": "Start Game"
+  },"languages": {
+    "en": "English",
+    "tr": "Turkish"
   },
   "titleGameOver": "Game Over - Lobby (Host)",
   "titleWaiting": "Game Lobby (Host)",
@@ -980,5 +993,7 @@
   "gameTypes": {
     "bingo": "Bingo", 
     "hangman": "Hangman"
-  }
+  },
+  "Word Selection:": "Word Selection",
+  "wordLanguage":" Language of Word"
 }

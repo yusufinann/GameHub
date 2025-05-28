@@ -797,6 +797,7 @@
     "categoryUndefined": "TANIMSIZ",
     "turnLabel": "Sıra",
     "yourTurn": "SIRA SENDE! ({{seconds}}s)",
+    "yourTurnSingle": "Senin Sıran",
     "loadingWord": "Kelime Yükleniyor...",
     "attemptsLeftLabel": "Kalan Hak",
     "correctGuessesLabel": "Doğru Tahminler",
@@ -835,12 +836,25 @@
   "Correct Word": "Doğru Kelime",
   "End Game (Host)": "Oyunu Bitir (Sunucu)",
   "hostSetupModal": {
-    "title": "Yeni Oyun Ayarları",
-    "description": "Oyuncuların tahmin edeceği kelime için bir kategori seçin. Kelime rastgele seçilecektir.",
+    "title": "Adam Asmaca Oyunu Kurulumu",
+    "description": "Başlamadan önce oyun ayarlarını yapılandırın.",
+    "languageLabel": "Dil",
+    "loadingLanguages": "Diller yükleniyor...",
+    "wordSourceLabel": "Kelime Kaynağı",
+    "wordSourceAutomatic": "Otomatik Kelime",
+    "wordSourceCustom": "Özel Kelime",
     "categoryLabel": "Kategori",
+    "selectLanguageFirst": "Önce dil seçin",
     "loadingCategories": "Kategoriler yükleniyor...",
-    "cancelButton": "İptal",
+    "customWordLabel": "Özel Kelime",
+    "customWordHelper": "2-25 karakter. Oyunu kuran oynamaz.",
+    "customCategoryLabel": "Özel Kategori (İsteğe Bağlı)",
+    "customCategoryHelper": "En fazla 30 karakter. Boş bırakılırsa varsayılan kullanılır.",
     "startButton": "Oyunu Başlat"
+  },
+    "languages": {
+    "en": "İngilizce",
+    "tr": "Türkçe"
   },
   "titleGameOver": "Oyun Bitti - Lobi (Host)",
   "titleWaiting": "Oyun Lobisi (Host)",
@@ -978,5 +992,7 @@
   "gameTypes": {
     "bingo": "Tombala", 
     "hangman": "Adam Asmaca"
-  }
+  },
+  "Word Selection":"Kelime Seçimi",
+  "wordLanguage":"Kelimenin Dili"
 }

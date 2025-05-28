@@ -7,21 +7,19 @@ import {
   handleGetFriendRequests,
 } from "../controllers/friend.controller.js";
 import * as bingoGameController from "../controllers/bingo.game.controller.js";
-// Keep lobby controller import separate if initialized elsewhere
 import * as lobbyController from "../controllers/lobby.controller.js";
 import * as lobbyChatController from "../controllers/lobbyChat.controller.js";
 import * as communityChatController from "../controllers/communityChat.controller.js";
 import * as privateChatController from "../controllers/privateChat.controller.js";
 import * as groupChatController from "../controllers/groupChat.controller.js";
 import * as friendGroupChatController from "../controllers/friendGroupChat.controller.js";
-import * as hangmanGameController from "../controllers/hangman.controller.js";
+import * as hangmanGameController from "../controllers/hangman.controller.js"; // Düzeltilmiş import
 
 export const routeMessage = async (ws, message, broadcasters) => {
   try {
     const data = JSON.parse(message);
     console.log("İstemciden gelen mesaj:", data);
 
-    // Destructure broadcasters for easier use
     const {
       sendToSpecificUser,
       broadcastToOthers,
@@ -37,7 +35,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
     } = broadcasters;
 
     switch (data.type) {
-      // Friend Cases
       case "FRIEND_REQUEST":
         handleFriendRequest(ws, data);
         break;
@@ -54,7 +51,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
         handleGetFriendRequests(ws);
         break;
 
-      // Lobby Lifecycle & Event Cases
       case "LOBBY_CREATED":
         broadcastToOthers(ws, { type: "LOBBY_CREATED", data: data.data });
         break;
@@ -82,15 +78,13 @@ export const routeMessage = async (ws, message, broadcasters) => {
         });
         break;
       case "HOST_RETURNED":
-        // Assumes data.data contains userIds if specific broadcast is needed
         broadcastLobbyEvent(data.lobbyCode, "HOST_RETURNED", data.data);
         break;
-      case "KICK_PLAYER": // YENİ CASE
+      case "KICK_PLAYER":
         if (ws.userId) {
-          // Sadece giriş yapmış kullanıcılar (hostlar) kick atabilir
           await lobbyController.kickPlayerFromLobby(ws, data);
           sendToSpecificUser(data.playerIdToKick, {
-            type: "USER_KICKED", // İstemcinin ele alacağı özel tip
+            type: "USER_KICKED",
             lobbyCode: data.lobbyCode,
             reason: "Lobi sahibi tarafından lobiden çıkarıldınız.",
           });
@@ -105,7 +99,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
         break;
       case "EVENT_START_NOTIFICATION":
         broadcastToSpecificUsers(data.data.userIds, {
-          // Assuming data.data contains userIds array
           type: "EVENT_START_NOTIFICATION",
           lobbyCode: data.lobbyCode,
           data: data.data.notificationData,
@@ -120,14 +113,12 @@ export const routeMessage = async (ws, message, broadcasters) => {
         break;
       case "GAME_TERMINATED":
         broadcastToSpecificUsers(data.data.userIds, {
-          // Assuming data.data contains userIds array
           type: "GAME_TERMINATED",
           lobbyCode: data.lobbyCode,
           data: data.data.terminationData,
         });
         break;
 
-      // Bingo Game Cases
       case "BINGO_JOIN":
         bingoGameController.joinGame(ws, data);
         break;
@@ -144,7 +135,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
         bingoGameController.markNumber(ws, data);
         break;
 
-      // Lobby Invitation Case
       case "LOBBY_INVITATION":
         const { recipientId, lobby, sender } = data;
         if (recipientId) {
@@ -158,7 +148,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
         }
         break;
 
-      // Lobby Chat Cases
       case "SEND_EXPRESSION":
         const {
           lobbyCode,
@@ -199,18 +188,17 @@ export const routeMessage = async (ws, message, broadcasters) => {
         );
         break;
 
-      // Community Chat Case
       case "COMMUNITY_MESSAGE":
         if (!ws.userId) {
           console.error(
             "Kullanıcı ID'si bulunamadı, topluluk mesajı gönderilemez."
           );
-          return; // Exit early
+          return;
         }
         const { message: communityMessageText } = data;
         if (!communityMessageText) {
           console.error("Mesaj içeriği boş olamaz.");
-          return; // Exit early
+          return;
         }
         try {
           console.log(
@@ -236,16 +224,15 @@ export const routeMessage = async (ws, message, broadcasters) => {
         }
         break;
 
-      // Private Chat Case
       case "PRIVATE_MESSAGE":
         if (!ws.userId) {
           console.error("Kullanıcı ID'si bulunamadı, özel mesaj gönderilemez.");
-          return; // Exit early
+          return;
         }
         const { receiverId, message: privateMessageText } = data;
         if (!receiverId || !privateMessageText) {
           console.error("Alıcı ID'si veya mesaj içeriği eksik.");
-          return; // Exit early
+          return;
         }
         try {
           const savedMessage = await privateChatController.storePrivateMessage(
@@ -253,13 +240,11 @@ export const routeMessage = async (ws, message, broadcasters) => {
             receiverId,
             privateMessageText
           );
-          // Send to self
           sendToSpecificUser(ws.userId, {
             type: "RECEIVE_PRIVATE_MESSAGE",
             message: savedMessage,
             isSelf: true,
           });
-          // Send to receiver
           sendToSpecificUser(receiverId, {
             type: "RECEIVE_PRIVATE_MESSAGE",
             message: savedMessage,
@@ -274,9 +259,8 @@ export const routeMessage = async (ws, message, broadcasters) => {
         }
         break;
 
-      // Group Chat Cases
       case "CREATE_GROUP":
-        groupChatController.createGroup(ws, data, broadcastToAll); // Needs ws for response/initial state
+        groupChatController.createGroup(ws, data, broadcastToAll);
         break;
       case "JOIN_GROUP":
         groupChatController.joinGroup(
@@ -285,7 +269,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
           sendToSpecificUser,
           broadcastGroupEvent,
           broadcastToAll
-        ); // Needs ws
+        );
         break;
       case "LEAVE_GROUP":
         groupChatController.leaveGroup(
@@ -294,7 +278,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
           sendToSpecificUser,
           broadcastGroupEvent,
           broadcastToAll
-        ); 
+        );
         break;
       case "UPDATE_GROUP":
         groupChatController.updateGroup(
@@ -302,7 +286,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
           data,
           sendToSpecificUser,
           broadcastGroupEvent
-        ); // Needs ws
+        );
         break;
       case "DELETE_GROUP":
         groupChatController.deleteGroup(
@@ -311,13 +295,12 @@ export const routeMessage = async (ws, message, broadcasters) => {
           sendToSpecificUser,
           broadcastGroupEvent,
           broadcastToAll
-        ); 
+        );
         break;
       case "GROUP_MESSAGE":
-        groupChatController.sendGroupMessage(ws, data, broadcastGroupMessage); // Needs ws for senderId
+        groupChatController.sendGroupMessage(ws, data, broadcastGroupMessage);
         break;
 
-      // Friend Group Chat Cases
       case "JOIN_FRIEND_GROUP_WS":
         friendGroupChatController.joinFriendGroupWebSocket(
           ws,
@@ -333,7 +316,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
           data,
           broadcastFriendGroupEvent,
           broadcastToAll
-        ); 
+        );
         break;
       case "UPDATE_FRIEND_GROUP_WS":
         friendGroupChatController.updateFriendGroup(
@@ -349,14 +332,14 @@ export const routeMessage = async (ws, message, broadcasters) => {
           data,
           broadcastFriendGroupEvent,
           broadcastToAll
-        ); // Needs ws
+        );
         break;
       case "FRIEND_GROUP_MESSAGE_WS":
         friendGroupChatController.sendFriendGroupMessage(
           ws,
           data,
           broadcastFriendGroupMessage
-        ); 
+        );
         break;
       case "INVITE_FRIEND_TO_FRIEND_GROUP_WS":
         const { groupId: inviteGroupId, friendId } = data;
@@ -374,10 +357,9 @@ export const routeMessage = async (ws, message, broadcasters) => {
           broadcastFriendGroupEvent,
           broadcastToAll,
           sendToSpecificUser
-        ); 
+        );
         break;
       case "REJECT_FRIEND_GROUP_INVITATION_WS":
-   
         console.log(
           `User ${ws.userId} rejected invitation to group ${data.rejectedGroupId}`
         );
@@ -405,28 +387,35 @@ export const routeMessage = async (ws, message, broadcasters) => {
         hangmanGameController.getGameState(ws, data);
         break;
       case "HANGMAN_GET_CATEGORIES":
-        hangmanGameController.getCategories(ws);
+        if (typeof hangmanGameController.getCategories === 'function') {
+          hangmanGameController.getCategories(ws);
+        } else {
+          console.error("Error: hangmanGameController.getCategories is not a function in router.");
+          ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Server error processing category request." }));
+        }
         break;
-      case "HANGMAN_GET_WORDS_FOR_CATEGORY":
-        hangmanGameController.getWordsForCategory(ws, data);
+      case "HANGMAN_GET_LANGUAGE_CATEGORIES":
+        if (typeof hangmanGameController.getLanguageCategories === 'function') {
+          hangmanGameController.getLanguageCategories(ws, data);
+        } else {
+          console.error("Error: hangmanGameController.getLanguageCategories is not a function in router.");
+          ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Server error processing language category request." }));
+        }
         break;
 
-      // Default case for unknown types
       default:
         console.log("Bilinmeyen mesaj tipi:", data.type);
     }
 
-    
     sendAcknowledgement(ws, data);
   } catch (error) {
     console.error("Mesaj işleme hatası:", error);
- 
     if (ws.readyState === ws.OPEN) {
       ws.send(
         JSON.stringify({
           type: "ERROR",
           message: "Mesaj işlenirken bir sunucu hatası oluştu.",
-          originalMessageType: message?.type, // Include original type if possible
+          originalMessageType: message?.type,
         })
       );
     }
