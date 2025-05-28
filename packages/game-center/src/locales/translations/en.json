@@ -30,7 +30,21 @@
     "gameStarted": "Game has started!",
     "playerGotBingo": "{{playerName}} got Bingo! (Rank: {{rank}})",
     "gameOverAllNumbers": "All numbers drawn - Final Rankings",
-    "gameOverAllCompleted": "All players completed - Final Rankings"
+    "gameOverAllCompleted": "All players completed - Final Rankings",
+    "playerTimeout": "{{userName}} ran out of time!",
+    "a_player": "A player",
+    "eliminatedSuffix": "was eliminated",
+    "reasonPrefix": "Reason",
+    "reasonNoAttempts": "Ran out of attempts",
+    "reasonWrongWordAttempts": "Wrong word & no attempts left",
+    "correctLetter": "Correct letter!",
+    "incorrectLetter": "Incorrect letter.",
+    "playerLeftOrDisconnected": "{{playerName}} left or disconnected.",
+    "yourTurnInGame": "It's your turn in {{gameName}} lobby!",
+    "goToLobby": "Go to Lobby",
+    "yourTurnInLobbyDefault": "It's your turn in {{lobbyName}}.",
+    "yourTurn": "It's Your Turn!"
+    
   },
   "error": {
     "couldNotFetchGroupDetails": "Could not fetch group details for ID: {groupId}.",
@@ -928,6 +942,7 @@
     "gameEnded": "{{gameName}} has ended. Winner: {{winnerName}}",
     "playerKicked": "{{playerName}} was kicked from the lobby by the host."
   },
+  
   "user": {
     "profile": "Profile",
     "settings": "Settings",

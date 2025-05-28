@@ -137,6 +137,7 @@ function getGameRankings(game) {
       playerId: player.userId,
       userName: player.userName,
       name: player.name,
+      avatar: player.avatar || null,
       remainingAttempts: player.remainingAttempts,
       correctGuessesCount: player.correctGuesses.length,
       incorrectGuessesCount: player.incorrectGuesses.length,
@@ -182,6 +183,7 @@ export function getSharedGameState(game) {
 
   return {
     lobbyCode: game.lobbyCode,
+    lobbyName: game.lobbyName,
     maskedWord: currentMaskedWord,
     category: game.category,
     gameStarted: game.gameStarted,
@@ -380,6 +382,7 @@ export const joinGame = async (ws, data) => {
     if (!hangmanGames[lobbyCode]) {
         hangmanGames[lobbyCode] = {
             lobbyCode,
+            lobbyName: lobby.lobbyName,
             players: {},
             gameStarted: false,
             gameEnded: false,

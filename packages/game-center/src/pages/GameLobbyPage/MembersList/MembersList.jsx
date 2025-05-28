@@ -24,7 +24,6 @@ const handleKickPlayer = (playerIdToKick) => {
     }
   };
   const isCurrentUserTheHost = currentUser && currentLobbyCreatorId === currentUser.id;
-  console.log("isCurrentUserTheHost",isCurrentUserTheHost)
   return (
     <Paper
       elevation={8}

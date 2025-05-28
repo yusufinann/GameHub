@@ -30,7 +30,20 @@
     "gameStarted": "Oyun başladı!",
     "playerGotBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})",
     "gameOverAllNumbers": "Tüm numaralar çekildi - Final Sıralaması",
-    "gameOverAllCompleted": "Tüm oyuncular tamamladı - Final Sıralaması"
+    "gameOverAllCompleted": "Tüm oyuncular tamamladı - Final Sıralaması",
+    "playerTimeout": "{{userName}}'ın süresi doldu!",
+    "a_player": "Bir oyuncu",
+    "eliminatedSuffix": "elendi",
+    "reasonPrefix": "Sebep",
+    "reasonNoAttempts": "Deneme hakkı bitti",
+    "reasonWrongWordAttempts": "Yanlış kelime & deneme hakkı bitti",
+    "correctLetter": "Doğru harf!",
+    "incorrectLetter": "Yanlış harf.",
+    "playerLeftOrDisconnected": "{{playerName}} ayrıldı veya bağlantısı kesildi.",
+    "yourTurnInGame": "{{gameName}} lobisinde sıra sende!",
+    "goToLobby": "Lobiye Git",
+    "yourTurnInLobbyDefault": "{{lobbyName}}'de sıra sende.",
+    "yourTurn": "Sıra Sende!"
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",

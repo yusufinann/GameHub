@@ -9,8 +9,9 @@ import { FriendsProvider } from "../../shared/context/FriendsContext/context";
 import { GlobalNotificationProvider } from "../FriendsSidebar/context";
 import { GameSettingsProvider} from "../GameDetail/GameDetailRightArea/context";
 import { LobbyProvider } from "../../shared/context/LobbyContext/context";
+import GlobalTurnNotification from "../../shared/components/GlobalTurnNotification/GlobalTurnNotification";
+import { TurnNotificationProvider } from "../../shared/components/GlobalTurnNotification/context";
 function MainContainer() {
-  //  const theme = useTheme();
 
   return (
     <Box
@@ -26,9 +27,10 @@ function MainContainer() {
         <Sidebar />
 
         {/* Content Section */}
-
+<TurnNotificationProvider>
         <LobbyProvider>
           {" "}
+          <GlobalTurnNotification />
           <GlobalNotificationProvider>
             <FriendsProvider>
               <SnackbarProvider>
@@ -53,6 +55,7 @@ function MainContainer() {
             </FriendsProvider>
           </GlobalNotificationProvider>
         </LobbyProvider>
+        </TurnNotificationProvider>
       </WebSocketProvider>
     </Box>
   );

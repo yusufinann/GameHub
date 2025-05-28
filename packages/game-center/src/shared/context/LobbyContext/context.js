@@ -9,7 +9,7 @@ import { lobbyApi } from "../../../pages/MainScreen/api";
 import { useAuthContext } from "../AuthContext";
 import useLobbyWebSocket from "./useLobbyWebSocket";
 import { useWebSocket } from "../WebSocketContext/context";
-
+import { useTurnNotification } from "../../components/GlobalTurnNotification/context";
 const LobbyContext = createContext();
 
 export const LobbyProvider = ({ children }) => {
@@ -25,6 +25,9 @@ export const LobbyProvider = ({ children }) => {
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
   const [userLeftInfo, setUserLeftInfo] = useState(null); 
+
+const { showTurnNotification } = useTurnNotification(); 
+
   const isWebSocketUpdate = useLobbyWebSocket(
     socket,
     currentUser,
@@ -33,7 +36,8 @@ export const LobbyProvider = ({ children }) => {
     setMembersByLobby,
     setExistingLobby,
     membersByLobby,
-    setDeletedLobbyInfo,setUserLeftInfo
+    setDeletedLobbyInfo,setUserLeftInfo,
+    showTurnNotification
   );
 
   const fetchAndSetLobbies = useCallback(async () => {
@@ -230,7 +234,7 @@ export const LobbyProvider = ({ children }) => {
   const clearDeletedLobbyInfo = useCallback(() => {
     setDeletedLobbyInfo(null);
   }, []);
-
+  
   return (
     <LobbyContext.Provider
       value={{
@@ -251,7 +255,7 @@ export const LobbyProvider = ({ children }) => {
         isCreatingLobby,
         deletedLobbyInfo,
         setDeletedLobbyInfo,
-        clearDeletedLobbyInfo,userLeftInfo, setUserLeftInfo
+        clearDeletedLobbyInfo,userLeftInfo, setUserLeftInfo,
       }}
     >
       {children}

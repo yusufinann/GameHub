@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const useLobbyWebSocket = (
   socket,
@@ -9,20 +10,29 @@ const useLobbyWebSocket = (
   setMembersByLobby,
   setExistingLobby,
   membersByLobby,
-  setDeletedLobbyInfo,setUserLeftInfo
+  setDeletedLobbyInfo,
+  setUserLeftInfo,
+  showTurnNotification,
+  
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const{t}=useTranslation();
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      return;
+    }
 
     const handleWebSocketMessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket mesajı:", data);
-
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
+console.log("WebSocket mesajı:", data);
       if (!data.type) {
-        console.error("WebSocket mesajında type alanı eksik:", data);
         return;
       }
 
@@ -35,17 +45,17 @@ const useLobbyWebSocket = (
           case "USER_JOINED":
             handleUserJoined(data);
             break;
-            case "LOBBY_MEMBER_COUNT_UPDATED":
+          case "LOBBY_MEMBER_COUNT_UPDATED":
             handleLobbyMemberCountUpdate(data.data);
             break;
           case "USER_LEFT":
             handleUserLeft(data);
             break;
-            case "PLAYER_KICKED_BY_HOST": // Sunucudan gelen mesaj bu şekildeyse
-            handlePlayerKickedByHost(data.data); // data.data içinde kickedUserId, kickedUserName, lobbyCode olmalı
+          case "PLAYER_KICKED_BY_HOST":
+            handlePlayerKickedByHost(data.data);
             break;
-          case "USER_KICKED": // Eğer atılan kullanıcıya özel bu mesaj geliyorsa
-            handleUserKicked(data); // data içinde lobbyCode ve reason olmalı
+          case "USER_KICKED":
+            handleUserKicked(data);
             break;
           case "LOBBY_DELETED":
             handleLobbyDeleted(data.lobbyCode, data.data);
@@ -65,16 +75,28 @@ const useLobbyWebSocket = (
           case "LOBBY_UPDATED":
             handleLobbyUpdated(data.data);
             break;
+          case "HANGMAN_TURN_CHANGE":
+            if (currentUser?.id && data.sharedGameState?.currentPlayerId === currentUser.id) {
+              const gameLobbyCode = data.sharedGameState?.lobbyCode;
+              const gameLobbyName = data.sharedGameState?.lobbyName || (t ? t('Hangman', 'Adam Asmaca') : 'Adam Asmaca');
+            
+              if (gameLobbyCode && showTurnNotification) {
+                const message = t ? t('notifications.yourTurnInGame', { gameName: gameLobbyName }) : `lobby: ${gameLobbyName}`;
+                showTurnNotification(gameLobbyCode, gameLobbyName, message);
+              }
+            }
+            break;
           default:
-            // console.warn("Bilinmeyen WebSocket mesaj türü:", data.type);
             break;
         }
+      } catch (error) {
+        // Optional: Keep error logging for production monitoring if needed, or remove if truly not desired.
+        // console.error("[useLobbyWebSocket] Error processing WebSocket message:", error, "Message data:", data);
       } finally {
         setIsWebSocketUpdate(false);
       }
     };
 
-    // Yardımcı fonksiyonlar
     const handleLobbyCreated = (lobbyData) => {
       if (lobbyData.createdBy !== currentUser?.id) {
         setLobbies((prev) => {
@@ -91,10 +113,12 @@ const useLobbyWebSocket = (
 
     const handleUserJoined = (data) => {
       const { lobbyCode, data: userData } = data;
-
       setLobbies((prev) =>
         prev.map((lobby) => {
           if (lobby.lobbyCode === lobbyCode) {
+            if (lobby.members.some(member => member.id === userData.userId)) {
+              return lobby;
+            }
             return {
               ...lobby,
               members: [
@@ -111,62 +135,60 @@ const useLobbyWebSocket = (
           return lobby;
         })
       );
-
-      setMembersByLobby((prev) => ({
-        ...prev,
-        [lobbyCode]: [
-          ...(prev[lobbyCode] || []),
-          {
-            id: userData.userId,
-            name: userData.name,
-            avatar: userData.avatar,
-            isHost: userData.isHost,
-          },
-        ],
-      }));
+      setMembersByLobby((prev) => {
+        const currentMembers = prev[lobbyCode] || [];
+        if (currentMembers.some(member => member.id === userData.userId)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [lobbyCode]: [
+            ...currentMembers,
+            {
+              id: userData.userId,
+              name: userData.name,
+              avatar: userData.avatar,
+              isHost: userData.isHost,
+            },
+          ],
+        };
+      });
     };
+
     const handleLobbyMemberCountUpdate = (updateData) => {
-      const { lobbyCode,members } = updateData; 
-  
+      const { lobbyCode, members } = updateData;
       if (!lobbyCode || !members) {
-          console.error("LOBBY_MEMBER_COUNT_UPDATED event missing lobbyCode or members", updateData);
           return;
       }
-  
       setLobbies((prevLobbies) =>
           prevLobbies.map((lobby) =>
               lobby.lobbyCode === lobbyCode
-                  ? { ...lobby, members: members} 
+                  ? { ...lobby, members: members}
                   : lobby
           )
       );
-  
       setMembersByLobby((prevMembersByLobby) => ({
           ...prevMembersByLobby,
-          [lobbyCode]: members || [], 
+          [lobbyCode]: members || [],
       }));
-  };
+    };
+
     const handleUserLeft = (data) => {
-      const {
-        lobbyCode,
-        data: { userId,name},
-      } = data;
+      const { lobbyCode, data: { userId, name} } = data;
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
-            ? {
-                ...lobby,
-                members: lobby.members.filter((m) => m.id !== userId),
-              }
+            ? { ...lobby, members: lobby.members.filter((m) => m.id !== userId) }
             : lobby
         )
       );
-
       setMembersByLobby((prev) => ({
         ...prev,
         [lobbyCode]: (prev[lobbyCode] || []).filter((m) => m.id !== userId),
       }));
-      setUserLeftInfo({ lobbyCode, name });
+      if (currentUser?.id !== userId) {
+        setUserLeftInfo({ lobbyCode, name });
+      }
     };
 
     const handleLobbyDeleted = (lobbyCode, lobbyData) => {
@@ -174,7 +196,6 @@ const useLobbyWebSocket = (
         lobbyCode,
         reason: lobbyData?.reason || "Lobby has been deleted by the host.",
       });
-
       setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
       if (existingLobby?.lobbyCode === lobbyCode) {
         setExistingLobby(null);
@@ -188,14 +209,14 @@ const useLobbyWebSocket = (
     };
 
     const handleHostReturned = (data) => {
-      const { lobbyCode, data: hostData } = data;   
-
+      const { lobbyCode, data: hostData } = data;
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
             ? {
                 ...lobby,
                 status: "active",
+                createdBy: hostData.userId,
                 members: lobby.members.map((member) => ({
                   ...member,
                   isHost: member.id === hostData.userId,
@@ -206,53 +227,30 @@ const useLobbyWebSocket = (
       );
       setMembersByLobby((prev) => {
         const currentMembers = prev[lobbyCode] || [];
-
-        // Find if user already exists
-        const existingMemberIndex = currentMembers.findIndex(
-          (member) => member.id === hostData.userId
-        );
-
-        let updatedMembers;
-        if (existingMemberIndex !== -1) {
-          // Update existing member
-          updatedMembers = [...currentMembers];
-          updatedMembers[existingMemberIndex] = {
-            id: hostData.userId,
-            name: hostData.name,
-            avatar: hostData.avatar,
-            isHost: hostData.isHost,
-          };
-        } else {
-          // Add new member if not exists
-          updatedMembers = [
-            ...currentMembers,
-            {
-              id: hostData.userId,
-              name: hostData.name,
-              avatar: hostData.avatar,
-              isHost: hostData.isHost,
-            },
-          ];
+        const updatedMembers = currentMembers.map(member => ({
+          ...member,
+          isHost: member.id === hostData.userId,
+        }));
+        if (!updatedMembers.some(m => m.id === hostData.userId) && hostData.name && hostData.avatar !== undefined) {
+            updatedMembers.push({
+                id: hostData.userId,
+                name: hostData.name,
+                avatar: hostData.avatar,
+                isHost: true,
+            });
         }
-
-        return {
-          ...prev,
-          [lobbyCode]: updatedMembers,
-        };
+        return { ...prev, [lobbyCode]: updatedMembers };
       });
     };
 
     const handleLobbyExpired = (data) => {
       const { lobbyCode } = data;
       setLobbies((prev) => prev.filter((l) => l.lobbyCode !== lobbyCode));
-
-      // İlgili lobinin üye listesini temizle
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
         return newState;
       });
-
       if (existingLobby?.lobbyCode === lobbyCode) {
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
@@ -261,27 +259,18 @@ const useLobbyWebSocket = (
 
     const handleEventStatus = (data) => {
       const { lobbyCode, status, message } = data;
-      const isUserInLobby = membersByLobby[lobbyCode]?.some(member => member.id === currentUser?.id);
-    
+      const isUserInLobby = (membersByLobby[lobbyCode] || []).some(member => member.id === currentUser?.id);
       if (status === "ended") {
-        setLobbies((prev) =>
-          prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
-        );
-    
+        setLobbies((prev) => prev.filter((lobby) => lobby.lobbyCode !== lobbyCode));
         setMembersByLobby((prev) => {
           const newState = { ...prev };
           delete newState[lobbyCode];
           return newState;
         });
-    
         if (existingLobby?.lobbyCode === lobbyCode || isUserInLobby) {
           setExistingLobby(null);
           localStorage.removeItem("userLobby");
-    
-          setDeletedLobbyInfo({
-            lobbyCode,
-            reason: message || "Event has ended",
-          });
+          setDeletedLobbyInfo({ lobbyCode, reason: message || "Event has ended" });
         }
       } else {
         setLobbies((prev) =>
@@ -293,46 +282,37 @@ const useLobbyWebSocket = (
     };
 
     const handleLobbyRemoved = (lobbyCode) => {
-      const isUserInLobby = membersByLobby[lobbyCode]?.some(member => member.id === currentUser?.id);
-      
-      setLobbies((prev) =>
-        prev.filter((lobby) => lobby.lobbyCode !== lobbyCode)
-      );
-    
+      const isUserInLobby = (membersByLobby[lobbyCode] || []).some(member => member.id === currentUser?.id);
+      setLobbies((prev) => prev.filter((lobby) => lobby.lobbyCode !== lobbyCode));
       setMembersByLobby((prev) => {
         const newState = { ...prev };
         delete newState[lobbyCode];
         return newState;
       });
-    
       if (existingLobby?.lobbyCode === lobbyCode || isUserInLobby) {
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
-        setDeletedLobbyInfo({
-          lobbyCode,
-          reason: "Event has ended",
-        });
+        setDeletedLobbyInfo({ lobbyCode, reason: "The event or lobby has been removed." });
       }
     };
 
     const handleLobbyUpdated = (lobbyData) => {
       setLobbies((prev) =>
         prev.map((lobby) =>
-          lobby.lobbyCode === lobbyData.lobbyCode ? lobbyData : lobby
+          lobby.lobbyCode === lobbyData.lobbyCode ? { ...lobby, ...lobbyData } : lobby
         )
       );
+       if (existingLobby && existingLobby.lobbyCode === lobbyData.lobbyCode) {
+        setExistingLobby(prev => ({ ...prev, ...lobbyData }));
+      }
     };
 
     const handlePlayerKickedByHost = (kickData) => {
       const { lobbyCode, kickedUserId, kickedUserName } = kickData;
-
       setLobbies((prev) =>
         prev.map((lobby) =>
           lobby.lobbyCode === lobbyCode
-            ? {
-                ...lobby,
-                members: lobby.members.filter((m) => m.id !== kickedUserId),
-              }
+            ? { ...lobby, members: lobby.members.filter((m) => m.id !== kickedUserId) }
             : lobby
         )
       );
@@ -340,8 +320,6 @@ const useLobbyWebSocket = (
         ...prev,
         [lobbyCode]: (prev[lobbyCode] || []).filter((m) => m.id !== kickedUserId),
       }));
-
-      // Snackbar için bilgi ayarla (kendi atılma durumumuz "USER_KICKED" ile ele alınacak)
       if (currentUser?.id !== kickedUserId) {
         setUserLeftInfo({ lobbyCode, name: kickedUserName, reason: "kicked" });
       }
@@ -349,29 +327,24 @@ const useLobbyWebSocket = (
 
     const handleUserKicked = (kickData) => {
       const { lobbyCode, reason } = kickData;
-
       setDeletedLobbyInfo({
         lobbyCode,
         reason: reason || "You have been kicked from the lobby by the host.",
         isKicked: true,
       });
-
-      // Eğer atıldığı lobi, KENDİSİNİN HOST OLDUĞU AKTİF LOBİ ise (existingLobby),
-      // o zaman local state'i ve localStorage'ı temizle.
-      // Bu durum aslında pek olası değil, çünkü host kendini atamaz, ama güvenlik için kalabilir.
-      // Daha önemlisi, eğer host başka birini atıyorsa ve sunucu LOBBY_DELETED gönderiyorsa (host ayrılınca),
-      // o zaman burası zaten tetiklenmez, LOBBY_DELETED tetiklenir.
-      // Bu case daha çok, kullanıcının ÜYE OLDUĞU bir lobiden atılması için.
-      if (existingLobby?.lobbyCode === lobbyCode && existingLobby?.createdBy === currentUser?.id) {
-        console.warn("Host kendi host olduğu lobiden atıldı olarak işaretlendi, bu durum incelenmeli.", lobbyCode);
+      if (existingLobby?.lobbyCode === lobbyCode && existingLobby.createdBy === currentUser?.id) {
         setExistingLobby(null);
         localStorage.removeItem("userLobby");
+      } else if (existingLobby?.lobbyCode === lobbyCode && existingLobby.createdBy !== currentUser?.id){
+         setExistingLobby(null);
+         localStorage.removeItem("userLobby");
       }
     };
 
-
     socket.addEventListener("message", handleWebSocketMessage);
-    return () => socket.removeEventListener("message", handleWebSocketMessage);
+    return () => {
+      socket.removeEventListener("message", handleWebSocketMessage);
+    };
   }, [
     socket,
     currentUser,
@@ -381,6 +354,11 @@ const useLobbyWebSocket = (
     setExistingLobby,
     navigate,
     setDeletedLobbyInfo,
+    setUserLeftInfo,
+    showTurnNotification,
+    t,
+    location,
+    membersByLobby 
   ]);
 
   return isWebSocketUpdate;

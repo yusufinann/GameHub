@@ -97,7 +97,7 @@ const GameLobbyPage = () => {
     try {
       await deleteLobby(lobbyDetails.lobbyCode);
     } catch (err) {
-      setError("An error occurred while deleting the lobby.");
+      setError(t("errors.deletingLobby", "An error occurred while deleting the lobby."));
     } finally {
       setIsDeletingLobby(false);
     }
@@ -110,7 +110,7 @@ const GameLobbyPage = () => {
       await leaveLobby(lobbyDetails.lobbyCode, userId);
       navigate("/");
     } catch (err) {
-      setError("An error occurred while leaving the lobby.");
+      setError(t("errors.leavingLobby", "An error occurred while leaving the lobby."));
     } finally {
       setIsLeavingLobby(false);
     }
@@ -118,7 +118,7 @@ const GameLobbyPage = () => {
 
   if (
     deletedLobbyInfo &&
-    lobbyDetails &&
+    lobbyDetails && 
     deletedLobbyInfo.lobbyCode === lobbyDetails.lobbyCode
   ) {
     return (
@@ -129,6 +129,17 @@ const GameLobbyPage = () => {
       />
     );
   }
+  
+  if (deletedLobbyInfo && !lobbyDetails && deletedLobbyInfo.lobbyCode === link) {
+    return (
+      <LobbyDeletedModal
+        open={true}
+        reason={deletedLobbyInfo.reason}
+        onClose={handleDeletedModalClose}
+      />
+    );
+  }
+
 
   if (loading) {
     return <LoadingScreen />;
@@ -141,7 +152,6 @@ const GameLobbyPage = () => {
         onClose={handlePasswordModalClose}
         onSubmit={handleJoin}
         lobbyDetails={lobbyDetails}
-        // theme={theme} // Pass theme if available and needed by LobbyPasswordModal
       />
     );
   }
@@ -155,7 +165,7 @@ const GameLobbyPage = () => {
   }
 
   if (!lobbyDetails) {
-    return <ErrorScreen error={t("Lobby data could not be loaded.")} navigate={navigate} t={t} />;
+    return <ErrorScreen error={t("lobby.dataCouldNotBeLoaded", "Lobby data could not be loaded.")} navigate={navigate} t={t} />;
   }
 
   if (!isMember) {
@@ -178,23 +188,26 @@ const GameLobbyPage = () => {
           position: "relative",
           ...(isFullscreen && {
             minHeight: "100vh",
-            p: 2,
-            bgcolor: "#f5f5f5", // Example fullscreen background
+            maxHeight: "100vh",
+            overflow: "hidden", 
+            p: 2, 
+            bgcolor: "background.default", 
           }),
         }}
       >
-        <Tooltip title={isFullscreen ? t("Exit Fullscreen") : t("Enter Fullscreen")}>
+        <Tooltip title={isFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")}>
           <IconButton
             onClick={toggleFullscreen}
             sx={{
               position: "absolute",
-              top: 16,
-              right: 16,
-              zIndex: 1000,
-              bgcolor: "white",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              top: { xs: 8, sm: 16 },
+              right: { xs: 8, sm: 16 },
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+              bgcolor: "rgba(255, 255, 255, 0.7)",
+              backdropFilter: "blur(4px)",
+              boxShadow: 3,
               "&:hover": {
-                bgcolor: "rgba(255,255,255,0.9)",
+                bgcolor: "rgba(255, 255, 255, 0.9)",
               },
             }}
           >
@@ -209,7 +222,7 @@ const GameLobbyPage = () => {
         />
         <GameArea
           lobbyInfo={lobbyDetails}
-          link={link}
+          link={link} 
           members={members}
           isHost={isHost}
           onDelete={handleDeleteLobby}
@@ -242,7 +255,7 @@ const GameLobbyPage = () => {
             justifyContent: 'center'
           }}
         >
-          {userLeftInfo?.name} {t("leftlobby")}!
+          {userLeftInfo?.name} {t("notifications.userLeftLobby", { name: userLeftInfo?.name, defaultValue: `${userLeftInfo?.name} left the lobby!`})}
         </Alert>
       </Snackbar>
     </>
@@ -276,10 +289,10 @@ const ErrorScreen = ({ error, navigate, t }) => (
     }}
   >
     <Typography variant="h6" color="error">
-      {typeof error === 'string' ? error : t("An unexpected error occurred.")}
+      {typeof error === 'string' ? error : t("errors.unexpected", "An unexpected error occurred.")}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
-      {t("Go Main Screen")}
+      {t("navigation.goToMainScreen", "Go to Main Screen")}
     </Button>
   </Box>
 );
@@ -298,13 +311,13 @@ const AccessDeniedScreen = ({ navigate, t }) => (
     }}
   >
     <Typography variant="h5" color="error">
-      {t("Access Denied")}
+      {t("errors.accessDenied", "Access Denied")}
     </Typography>
     <Typography variant="body1">
-      {t("You are not a member of this lobby or do not have permission to access it.")}
+      {t("errors.accessDeniedMessage", "You are not a member of this lobby or do not have permission to access it.")}
     </Typography>
     <Button variant="contained" onClick={() => navigate("/")}>
-      {t("Go to Main Screen")}
+      {t("navigation.goToMainScreen", "Go to Main Screen")}
     </Button>
   </Box>
 );
