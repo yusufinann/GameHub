@@ -888,15 +888,18 @@
     "error": {
       "codeRequired": "Lobby code is required.",
       "notFoundOrInactive": "Lobby not found or is not active.",
-      "GAME_IN_PROGRESS": "An active {{gameType}} game is in progress. Please wait or join another lobby.",
-   
+      "GAME_IN_PROGRESS": "An active {{gameType}} game is in progress. Please wait or join another lobby.",   
       "alreadyInLobby": "You are already in this lobby.",
       "joinFailed": "Failed to join the lobby. Please try again.",
       "createFailed": "Failed to create the lobby. Please try again.",
       "leaveFailed": "Failed to leave the lobby.",
       "updateSettingsFailed": "Failed to update lobby settings.",
       "hostOnlyAction": "Only the host can perform this action.",
-      "notInLobby": "You are not currently in this lobby."
+      "notInLobby": "You are not currently in this lobby.",
+      "passwordsDoNotMatch": "The passwords do not match. Please try again.",
+      "identifierMissing": "Lobby identifier is missing.",
+      "genericUpdateFailed": "Failed to update the lobby. Please try again.",
+      "maxMembersLessThanCurrent": "Maximum members ({{newMaxMembers}}) cannot be less than current members ({{currentMembers}})."
     },
        "invalidPassword": "The password you entered is incorrect. Please try again.",
     "warning": {

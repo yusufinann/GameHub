@@ -889,14 +889,17 @@
       "codeRequired": "Lobi kodu gereklidir.",
       "notFoundOrInactive": "Lobi bulunamadı veya aktif değil.",
       "GAME_IN_PROGRESS": "Bu lobide aktif bir {{gameType}} devam ediyor. Lütfen oyunun bitmesini bekleyin veya başka bir lobiye katılın.",
-  
       "alreadyInLobby": "Zaten bu lobidesiniz.",
       "joinFailed": "Lobiye katılırken bir hata oluştu. Lütfen tekrar deneyin.",
       "createFailed": "Lobi oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.",
       "leaveFailed": "Lobiden ayrılırken hata oluştu.",
       "updateSettingsFailed": "Lobi ayarları güncellenemedi.",
       "hostOnlyAction": "Bu işlemi sadece lobi sahibi yapabilir.",
-      "notInLobby": "Şu anda bu lobide değilsiniz."
+      "notInLobby": "Şu anda bu lobide değilsiniz.",
+       "passwordsDoNotMatch": "Şifreler eşleşmiyor. Lütfen tekrar deneyin.",
+       "identifierMissing": "Lobi kodu veya kimlik bilgisi eksik.", 
+       "genericUpdateFailed":"Lobi ayarları güncellenemedi. Lütfen tekrar deneyin.",
+      "maxMembersLessThanCurrent": "Maksimum üye sayısı ({{newMaxMembers}}), mevcut üye sayısından ({{currentMembers}}) az olamaz."
     },
     "invalidPassword": "Girdiğiniz şifre yanlış. Lütfen tekrar deneyin.",
     "warning": {

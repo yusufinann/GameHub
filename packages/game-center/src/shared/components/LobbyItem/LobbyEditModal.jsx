@@ -99,29 +99,33 @@ function LobbyEditModal({ open, onClose, lobby }) {
 
     if (!lobby?.lobbyCode) {
       console.error("Lobby code is missing, cannot update.");
-      setSnackbar({ open: true, message: "Error: Lobby identifier missing.", severity: "error" });
+      setSnackbar({ open: true, message: t("lobby.error.identifierMissing"), severity: "error" });
       return;
     }
 
     if (passwordEnabled && formData.password) {
       if (formData.password !== formData.passwordConfirm) {
-        setSnackbar({ open: true, message: "Şifreler eşleşmiyor.", severity: "error" });
+        setSnackbar({ open: true, message: t("lobby.error.passwordsDoNotMatch"), severity: "error" });
         return;
       }
     }
 
     setLoading(true);
     try {
-      const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : null;
-      const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : null;
       const payload = {
         lobbyName: formData.lobbyName,
         game: formData.gameId,
         lobbyType: formData.eventType,
-        startTime: startTimeISO,
-        endTime: endTimeISO,
         maxMembers: formData.maxMembers,
       };
+
+      if (formData.eventType === 'event') {
+        const startTimeISO = formData.startTime ? new Date(formData.startTime).toISOString() : null;
+        const endTimeISO = formData.endTime ? new Date(formData.endTime).toISOString() : null;
+        if (startTimeISO) payload.startTime = startTimeISO;
+        if (endTimeISO) payload.endTime = endTimeISO;
+      }
+
 
       if (!passwordEnabled) {
         payload.password = null;
@@ -129,16 +133,35 @@ function LobbyEditModal({ open, onClose, lobby }) {
         payload.password = formData.password;
       }
 
+
       await apiUpdateLobby(lobby.lobbyCode, payload);
       setSnackbar({ open: true, message: t("lobby.success.updated"), severity: "success" });
       setTimeout(() => onClose(true), 1500);
     } catch (error) {
-      console.error("Lobby update error:", error);
-      setSnackbar({ open: true, message: error.message || "Lobby güncelleme başarısız.", severity: "error" });
+      console.error("Lobby update error details:", error);
+      let displayedMessage = t("lobby.error.genericUpdateFailed");
+
+      if (error.isApiError && error.data) {
+        if (error.data.messageKey) {
+          displayedMessage = t(error.data.messageKey, error.data.messageParams || {});
+        } else if (error.data.message) {
+          const directTranslation = t(error.data.message);
+          displayedMessage = directTranslation !== error.data.message ? directTranslation : error.data.message;
+        }
+      } else if (error.message) {
+        const directTranslation = t(error.message);
+        displayedMessage = directTranslation !== error.message ? directTranslation : error.message;
+      }
+
+      setSnackbar({
+        open: true,
+        message: displayedMessage,
+        severity: "error",
+      });
     } finally {
       setLoading(false);
     }
-  }, [formData, lobby, onClose, passwordEnabled]);
+  }, [formData, lobby, onClose, passwordEnabled, t]);
 
   if (!lobby) {
     return (
