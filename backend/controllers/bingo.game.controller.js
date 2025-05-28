@@ -591,47 +591,6 @@ export const startGame = (ws, data) => {
         return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyunu başlatmak için en az bir aktif (bağlı) oyuncu olmalı." }));
     }
 
-    const problematicBingoPlayers = [];
-    for (const playerId in playersToStartGameWith) {
-        if (Object.prototype.hasOwnProperty.call(playersToStartGameWith, playerId)) {
-            const player = playersToStartGameWith[playerId];
-            const playerName = player.name || player.userName || `Oyuncu #${playerId}`;
-
-            for (const otherLobbyCodeInMap in bingoGames) {
-                if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
-                    const otherGame = bingoGames[otherLobbyCodeInMap];
-                    if (
-                        otherLobbyCodeInMap !== lobbyCode && // Mevcut oyunu kontrol etme
-                        otherGame.players && otherGame.players[playerId] &&
-                        otherGame.gameStarted && !otherGame.gameEnded
-                    ) {
-                        if (!problematicBingoPlayers.find(p => p.id === playerId)) {
-                            problematicBingoPlayers.push({ id: playerId, name: playerName, activeLobby: otherLobbyCodeInMap });
-                        }
-                        break; // Bu oyuncu için başka Tombala oyunu aramayı bırak
-                    }
-                }
-            }
-        }
-    }
-
-    if (problematicBingoPlayers.length > 0) {
-        const playerNames = problematicBingoPlayers.map(p => `${p.name} (aktif Tombala lobisi: ${p.activeLobby})`).join(', ');
-        const errorMessage = `Oyun başlatılamadı çünkü bazı oyuncular zaten başka bir aktif Tombala oyununda: ${playerNames}. Lütfen bu oyuncuların mevcut Tombala oyunlarını bitirmelerini veya ayrılmalarını sağlayın.`;
-        console.warn(`[Bingo Server] Tombala oyunu başlatma engellendi (${lobbyCode}). Sorunlu oyuncular: ${playerNames}`);
-
-        ws.send(JSON.stringify({
-            type: "BINGO_ERROR",
-            message: errorMessage,
-            details: {
-                reason: "ACTIVE_PLAYERS_IN_OTHER_BINGO_GAMES",
-                players: problematicBingoPlayers
-            }
-        }));
-        return;
-    }
-
-
     ws.send(JSON.stringify({ type: 'ACKNOWLEDGEMENT', messageType: 'BINGO_START', timestamp: new Date().toISOString() }));
 
     game.players = playersToStartGameWith;
@@ -749,33 +708,6 @@ export const joinGame = async (ws, data) => {
             })
         );
     }
-
-    for (const otherLobbyCodeInMap in bingoGames) {
-        if (Object.prototype.hasOwnProperty.call(bingoGames, otherLobbyCodeInMap)) {
-            const otherGame = bingoGames[otherLobbyCodeInMap];
-            if (
-                otherLobbyCodeInMap !== lobbyCode && 
-                otherGame.players && otherGame.players[ws.userId] &&
-                otherGame.gameStarted && !otherGame.gameEnded
-            ) {
-              const messageKey = "errors.alreadyInActiveGame";
-              //  const errorMessage = `Zaten başka bir aktif Tombala oyununda (${otherLobbyCodeInMap}) bulunuyorsunuz. Yeni bir Tombala oyununa katılmak için lütfen önce mevcut oyununuzdan ayrılın veya oyunu tamamlayın.`;
-                console.warn(`[Bingo Server] Kullanıcı ${ws.userId} (${userInfo.username}) zaten aktif bir Tombala oyununda (${otherLobbyCodeInMap}). ${lobbyCode} (Bingo) lobisine katılım engellendi.`);
-                ws.send(JSON.stringify({
-                    type: "BINGO_ERROR",
-                  //  message: errorMessage,
-                  messageKey: messageKey,
-                    activeGameInfo: {
-            gameType: 'Bingo',
-            lobbyCode: otherLobbyCodeInMap,
-            playerId: ws.userId 
-        }
-                }));
-                return;
-            }
-        }
-    }
-
 
     if (!bingoGames[lobbyCode]) {
         const shuffledColorsForGame = shuffleArray(PLAYER_COLORS);

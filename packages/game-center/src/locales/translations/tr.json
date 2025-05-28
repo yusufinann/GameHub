@@ -975,13 +975,6 @@
   },
   "Warning": "Uyarı",
   "TicketLoading": "Bilet yükleniyor...",
-  "activeGameErrorAlert": {
-    "title": "Başka Bir Oyunda Aktifsiniz!",
-    "activeGameDetails": "Aktif Oyun Detayları",
-    "gameTypeLabel": "Oyun Türü:",
-    "lobbyCodeLabel": "Lobi Kodu:",
-    "goToLobby": "Aktif Oyuna Git (Lobi: {{lobbyCode}})"
-  },
   "gameTypes": {
     "bingo": "Tombala", 
     "hangman": "Adam Asmaca"

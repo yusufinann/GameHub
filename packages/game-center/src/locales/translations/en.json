@@ -977,13 +977,6 @@
   },
   "Warning": "Warning",
   "TicketLoading": "Loading Ticket...",
-  "activeGameErrorAlert": {
-    "title": "You Are Active in Another Game!",
-    "activeGameDetails": "Active Game Details",
-    "gameTypeLabel": "Game Type:",
-    "lobbyCodeLabel": "Lobby Code:",
-    "goToLobby": "Go to Active Game (Lobby: {{lobbyCode}})"
-  },
   "gameTypes": {
     "bingo": "Bingo", 
     "hangman": "Hangman"
