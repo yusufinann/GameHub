@@ -176,10 +176,16 @@ function getPlayerSpecificGameState(game, playerId) {
 
 export function getSharedGameState(game) {
   let allPlayersCorrectGuesses = new Set();
-    Object.values(game.players).forEach(p => {
-        p.correctGuesses.forEach(g => allPlayersCorrectGuesses.add(g));
-    });
+  Object.values(game.players).forEach(p => {
+    p.correctGuesses.forEach(g => allPlayersCorrectGuesses.add(g));
+  });
   const currentMaskedWord = game.word ? generateMaskedWord(game.word, Array.from(allPlayersCorrectGuesses)) : '';
+
+  const activePlayersForTimerCheck = game.playerOrder.filter(playerId => {
+    const p = game.players[playerId];
+    return p && !p.eliminated && !p.won;
+  });
+  const isMultiplayerTurnWithTimer = activePlayersForTimerCheck.length > 1;
 
   return {
     lobbyCode: game.lobbyCode,
@@ -190,7 +196,9 @@ export function getSharedGameState(game) {
     gameEnded: game.gameEnded,
     currentPlayerId: game.currentPlayerId,
     hostId: game.host,
-    turnEndsAt: (game.gameStarted && !game.gameEnded && game.turnStartTime) ? game.turnStartTime + 10000 : null,
+    turnEndsAt: (game.gameStarted && !game.gameEnded && game.turnStartTime && isMultiplayerTurnWithTimer)
+                  ? game.turnStartTime + 10000
+                  : null,
     playerStates: Object.fromEntries(
       Object.values(game.players).map(p => [p.userId, {
         userId: p.userId,
@@ -203,7 +211,7 @@ export function getSharedGameState(game) {
         isHost: game.host === p.userId,
       }])
     ),
-   rankings: game.gameEnded ? (game.rankingsSnapshot || []) : [], 
+    rankings: game.gameEnded ? (game.rankingsSnapshot || []) : [],
     wordLength: game.word ? game.word.length : 0,
   };
 }
@@ -285,45 +293,59 @@ game.rankingsSnapshot = getGameRankings(game);
 
 function startNextTurn(lobbyCode) {
   const game = hangmanGames[lobbyCode];
-  if (!game || game.gameEnded || !game.gameStarted) return;
+  if (!game || game.gameEnded || !game.gameStarted) {
+    return;
+  }
 
   clearTimeout(game.turnTimer);
-  game.turnTimer = null;
+  game.turnTimer = null; 
 
+  
   const activePlayersInOrder = game.playerOrder.filter(playerId => {
-      const p = game.players[playerId];
-      return p && !p.eliminated && !p.won;
+    const p = game.players[playerId];
+    return p && !p.eliminated && !p.won;
   });
 
+  
   if (activePlayersInOrder.length === 0) {
     const currentMaskedWord = getSharedGameState(game).maskedWord;
-    if (!currentMaskedWord.includes('_')) {
-        endGameProcedure(game, "HANGMAN_WORD_REVEALED_GAME_OVER", "Kelime açığa çıktı! Aktif oyuncular kazandı.");
+    if (currentMaskedWord && !currentMaskedWord.includes('_')) {
+   
+      endGameProcedure(game, "HANGMAN_WORD_REVEALED_GAME_OVER", "Kelime açığa çıktı! Aktif oyuncular kazandı.");
     } else {
-        endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Aktif oyuncu kalmadı, kimse kazanamadı.");
+   
+      endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "Aktif oyuncu kalmadı, kimse kazanamadı.");
     }
     return;
   }
+
   
   let nextPlayerIndex = 0;
   if (game.currentPlayerId) {
-      const lastPlayerIndexInActive = activePlayersInOrder.indexOf(game.currentPlayerId);
-      if (lastPlayerIndexInActive !== -1) {
-          nextPlayerIndex = (lastPlayerIndexInActive + 1) % activePlayersInOrder.length;
-      }
+    const lastPlayerIndexInActive = activePlayersInOrder.indexOf(game.currentPlayerId);
+    if (lastPlayerIndexInActive !== -1) {
+    
+      nextPlayerIndex = (lastPlayerIndexInActive + 1) % activePlayersInOrder.length;
+    }
+ 
   }
-  
+
   game.currentPlayerId = activePlayersInOrder[nextPlayerIndex];
-  game.turnStartTime = Date.now();
-  
+  game.turnStartTime = Date.now(); 
   broadcastToGame(game, {
     type: "HANGMAN_TURN_CHANGE",
-    sharedGameState: getSharedGameState(game),
   });
 
-  game.turnTimer = setTimeout(() => {
-    handleTurnTimeout(lobbyCode);
-  }, 10000);
+
+  if (activePlayersInOrder.length > 1) {
+    console.log(`[Hangman Controller] Lobi ${lobbyCode} - Çok oyunculu mod, ${game.currentPlayerId} için sunucu zamanlayıcısı başlatılıyor.`);
+    game.turnTimer = setTimeout(() => {
+      handleTurnTimeout(lobbyCode); 
+    }, 10000); 
+  } else {
+    console.log(`[Hangman Controller] Lobi ${lobbyCode} - Tek oyunculu mod veya tek aktif oyuncu, sunucu zamanlayıcısı başlatılmıyor.`);
+   
+  }
 }
 
 function handleTurnTimeout(lobbyCode) {
