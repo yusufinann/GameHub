@@ -299,11 +299,15 @@
   },
   "tabs": {
     "bingoModes": "Bingo Modes",
-    "competitionStyles": "Competition Styles"
+    "competitionStyles": "Competition Styles",
+     "hangmanLanguage": "Language Options", 
+    "wordChoice": "Word Choice"     
   },
   "sectionTitle": {
     "bingoModes": "Bingo Modes",
-    "competitionStyles": "Competition Styles"
+    "competitionStyles": "Competition Styles",
+     "hangmanLanguageModes": "Hangman Language Options",
+     "hangmanWordSourceModes": "Hangman Word Choice & Host Role"
   },
   "gameModes": {
     "bingo": {
@@ -344,12 +348,65 @@
           "2": "Score tracking"
         }
       },
+      
       "non-competitive": {
         "title": "Casual Mode",
         "features": {
           "0": "First win ends game",
           "1": "Friendly play",
           "2": "Quick matches"
+        }
+      }
+    },
+    "hangman": { 
+      "languageSelection": {
+        "title": "Language Options",
+        "modes": {
+          "english": {
+            "modeKey": "english",
+            "title": "English Language",
+            "icon": "🇬🇧",
+            "features": [
+              "Words and categories are in English.",
+              "Guess letters from the English alphabet."
+            ]
+          },
+          "turkish": {
+            "modeKey": "turkish",
+            "title": "Turkish Language",
+            "icon": "🇹🇷",
+            "features": [
+              "Kelimeler ve kategoriler Türkçe'dir.",
+              "Türk alfabesinden harf tahmin edin (ç, ğ, ı, ö, ş, ü)."
+            ]
+          }
+        }
+      },
+      "wordSource": {
+        "title": "Word Choice & Host Role",
+        "modes": {
+          "server": {
+            "modeKey": "server",
+            "title": "Server Provides Word (Host Plays)",
+            "icon": "💻",
+            "isCompetition": false, 
+            "features": [
+              "The game server randomly selects a word from a category.",
+              "The game host participates as a player.",
+              "Cooperative: All players (including host) try to guess."
+            ]
+          },
+          "host": {
+            "modeKey": "host",
+            "title": "Host Provides Word (Host Manages)",
+            "icon": "👤",
+            "isCompetition": true, 
+            "features": [
+              "The game host chooses a custom word and category.",
+              "The game host does not play but manages the game.",
+              "Competitive: Players guess the host's word."
+            ]
+          }
         }
       }
     }
@@ -585,10 +642,11 @@
       "friends": "Friends"
     },
     "tabs": {
-      "statistics": "Statistics",
-      "history": "History",
-      "achievements": "Achievements"
-    }
+    "bingoModes": "Bingo Modes",
+    "competitionStyles": "Competition Styles",
+    "hangmanLanguage": "Language Options", 
+    "wordChoice": "Word Choice"     
+  }
   },
   "Win Rate": "Win Rate",
   "Longest Streak": "Longest Streak",
@@ -840,7 +898,7 @@
     "description": "Configure the game settings before starting.",
     "languageLabel": "Language",
     "loadingLanguages": "Loading languages...",
-    "wordSourceLabel": "Word Source",
+    "wordSourceLabel": "Word Choice",
     "wordSourceAutomatic": "Automatic Word",
     "wordSourceCustom": "Custom Word",
     "categoryLabel": "Category",

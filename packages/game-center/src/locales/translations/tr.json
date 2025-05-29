@@ -298,11 +298,15 @@
   },
   "tabs": {
     "bingoModes": "Tombala Modları",
-    "competitionStyles": "Rekabet Stilleri"
+    "competitionStyles": "Rekabet Stilleri",
+      "hangmanLanguage": "Dil Seçenekleri",
+    "wordChoice": "Kelime Seçimi"
   },
   "sectionTitle": {
     "bingoModes": "Tombala Modları",
-    "competitionStyles": "Rekabet Stilleri"
+    "competitionStyles": "Rekabet Stilleri",
+     "hangmanLanguageModes": "Adam Asmaca Dil Seçenekleri",
+    "hangmanWordSourceModes": "Adam Asmaca Kelime Seçimi ve Host Rolü"
   },
   "gameModes": {
     "bingo": {
@@ -331,6 +335,58 @@
           "0": "Hızlı kararlar",
           "1": "3sn görünürlük",
           "2": "Ceza sistemi"
+        }
+      }
+    },
+    "hangman": {
+      "languageSelection": {
+        "title": "Dil Seçenekleri",
+        "modes": {
+          "english": {
+            "modeKey": "english",
+            "title": "İngilizce Dil",
+            "icon": "🇬🇧",
+            "features": [
+              "Kelimeler ve kategoriler İngilizce'dir.",
+              "İngiliz alfabesinden harf tahmin edin."
+            ]
+          },
+          "turkish": {
+            "modeKey": "turkish",
+            "title": "Türkçe Dil",
+            "icon": "🇹🇷",
+            "features": [
+              "Kelimeler ve kategoriler Türkçe'dir.",
+              "Türk alfabesinden harf tahmin edin (ç, ğ, ı, ö, ş, ü)."
+            ]
+          }
+        }
+      },
+      "wordSource": {
+        "title": "Kelime Kaynağı ve Sunucu Rolü",
+        "modes": {
+          "server": {
+            "modeKey": "server",
+            "title": "Kelimeyi Sunucu (Host) Sağlar (Sunucu Oynar)",
+            "icon": "💻",
+            "isCompetition": false,
+            "features": [
+              "Oyun sunucusu rastgele bir kategoriden bir kelime seçer.",
+              "Oyun sunucusu (lobi sahibi) bir oyuncu olarak katılır.",
+              "İşbirlikçi: Tüm oyuncular (sunucu dahil) tahmin etmeye çalışır."
+            ]
+          },
+          "host": {
+            "modeKey": "host",
+            "title": "Kelimeyi Sunucu Sağlar (Sunucu Yönetir)",
+            "icon": "👤",
+            "isCompetition": true,
+            "features": [
+              "Oyun sunucusu (lobi sahibi) özel bir kelime ve kategori seçer.",
+              "Oyun sunucusu oynamaz, oyunu yönetir.",
+              "Rekabetçi: Oyuncular sunucunun kelimesini tahmin eder."
+            ]
+          }
         }
       }
     },
