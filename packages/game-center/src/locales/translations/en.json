@@ -43,7 +43,8 @@
     "yourTurnInGame": "It's your turn in {{gameName}} lobby!",
     "goToLobby": "Go to Lobby",
     "yourTurnInLobbyDefault": "It's your turn in {{lobbyName}}.",
-    "yourTurn": "It's Your Turn!"
+    "yourTurn": "It's Your Turn!",
+    "playerCompletedBingo": "{{playerName}} completed Bingo!"
     
   },
   "error": {
@@ -1056,5 +1057,30 @@
     "hangman": "Hangman"
   },
   "Word Selection:": "Word Selection",
-  "wordLanguage":" Language of Word"
+  "wordLanguage":" Language of Word",
+  "rankingsDialog": {
+    "title": "Game Rankings",
+    "lobbyPrefix": "Lobby",
+    "tableHeaderRank": "Rank",
+    "tableHeaderPlayers": "Players",
+    "tableHeaderScore": "Score",
+    "tableHeaderStatus": "Status",
+    "tiedSuffix": "tied",
+    "playerDefaultPrefix": "Player",
+    "statusCompleted": "🎉 Bingo!",
+    "statusMixed": "🤏 Almost there",
+    "statusInProgress": "⏳ Waiting for bingo",
+    "mixedStatusCompletedSuffix": "completed",
+    "gameCompleteMessage": "Game Complete! Well played everyone!",
+    "playAgainButton": "Play Again",
+    "closeButton": "Close",
+    "confirmCloseDialog": {
+      "title": "Confirm Close",
+      "message": "The game is still in progress. Are you sure you want to close? Your current game state might not be saved if you proceed."
+    },
+    "cancelButton": "Cancel",
+    "closeAnywayButton": "Close Anyway"
+  },
+  "Player Completed":"Player Completed",
+  "Completed":"Completed"
 }

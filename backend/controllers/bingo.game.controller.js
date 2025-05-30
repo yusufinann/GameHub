@@ -1,6 +1,5 @@
 import Lobby from "../models/lobby.model.js";
 import { BingoGame } from '../models/bingo.game.model.js';
-import { hangmanGames } from './hangman.controller.js';
 import User from '../models/user.model.js';
 import mongoose from 'mongoose';
 // Helper function to get user info from MongoDB
@@ -231,7 +230,8 @@ function generateBingoTicket() {
 function getGameRankings(game) {
   if (!game || !game.players) return [];
   const drawnNumbers = game.drawnNumbers || [];
-  return Object.entries(game.players)
+
+  const playersWithScores = Object.entries(game.players)
     .map(([playerId, player]) => {
         let score = 0;
         if (player.ticket && player.ticket.numbersGrid && player.markedNumbers) {
@@ -247,18 +247,61 @@ function getGameRankings(game) {
         return {
             playerId,
             userName: player.userName,
+            name: player.name,
             avatar: player.avatar,
             score: score,
             completedAt: player.completedAt || null
         };
-    })
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (a.completedAt && b.completedAt) return new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime();
-      if (a.completedAt) return -1;
-      if (b.completedAt) return 1;
-      return 0;
     });
+
+  playersWithScores.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+
+    const aCompleted = !!a.completedAt;
+    const bCompleted = !!b.completedAt;
+
+    if (aCompleted && bCompleted) {
+      return new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime();
+    }
+    if (aCompleted && !bCompleted) {
+      return -1;
+    }
+    if (!aCompleted && bCompleted) {
+      return 1;
+    }
+    return (a.userName || '').localeCompare(b.userName || '');
+  });
+
+  const finalRankedPlayers = [];
+  if (playersWithScores.length > 0) {
+    let currentRank = 1;
+    finalRankedPlayers.push({ ...playersWithScores[0], rank: currentRank });
+
+    for (let i = 1; i < playersWithScores.length; i++) {
+      const currentPlayer = playersWithScores[i];
+      const previousPlayer = playersWithScores[i-1];
+
+      let isEffectivelyTied = false;
+      if (currentPlayer.score === previousPlayer.score) {
+        const currentPlayerCompleted = !!currentPlayer.completedAt;
+        const previousPlayerCompleted = !!previousPlayer.completedAt;
+
+        if (currentPlayerCompleted && previousPlayerCompleted) {
+          if (new Date(currentPlayer.completedAt).getTime() === new Date(previousPlayer.completedAt).getTime()) {
+            isEffectivelyTied = true;
+          }
+        } else if (!currentPlayerCompleted && !previousPlayerCompleted) {
+          isEffectivelyTied = true;
+        }
+      }
+
+      if (!isEffectivelyTied) {
+        currentRank++;
+      }
+      finalRankedPlayers.push({ ...currentPlayer, rank: currentRank });
+    }
+  }
+  return finalRankedPlayers;
 }
 
 
@@ -456,7 +499,7 @@ export const drawNumber = (ws, data) => {
           message: "Tüm numaralar çekildi.",
           finalRankings: rankings
       });
-      game.gameStarted = false;
+      saveGameStatsToDB(game);
       return;
   }
 
@@ -642,8 +685,9 @@ export const startGame = (ws, data) => {
                 players: Object.keys(game.players).map(playerId => {
                     const currentPlayer = game.players[playerId];
                     return {
-                        playerId: playerId,
-                        name: currentPlayer.name || currentPlayer.userName,
+                        id: playerId,
+                        name: currentPlayer.name,
+                        userName: currentPlayer.userName,
                         avatar: currentPlayer.avatar,
                         ticket: currentPlayer.ticket,
                         markedNumbers: currentPlayer.markedNumbers,
@@ -999,6 +1043,10 @@ export const markNumber = (ws, data) => {
     }));
   }
 
+  if (game.gameEnded) {
+      return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten bitti." }));
+  }
+
   const player = game.players[ws.userId];
 
   // Check if the number is actually on the player's ticket
@@ -1019,7 +1067,7 @@ export const markNumber = (ws, data) => {
     }));
   }
   
-  // Check if the number has been drawn and is active (or was drawn)
+  // Check if the number has been drawn
   if (!game.drawnNumbers.includes(number)) {
       return ws.send(JSON.stringify({
       type: "BINGO_ERROR",
@@ -1027,65 +1075,61 @@ export const markNumber = (ws, data) => {
     }));
   }
 
+  let potentialBingo = false; 
 
   if (!player.markedNumbers.includes(number)) {
     player.markedNumbers.push(number);
 
-    // Check for BINGO (all 15 numbers on ticket marked AND drawn)
-    const allTicketNumbers = [];
+    // Check if this mark leads to a potential Bingo (all 15 numbers on ticket marked AND drawn)
+    const allTicketNumbersOnCard = [];
     if (player.ticket && player.ticket.numbersGrid) {
         player.ticket.numbersGrid.forEach(row => {
             row.forEach(num => {
-                if (num !== null) allTicketNumbers.push(num);
+                if (num !== null) allTicketNumbersOnCard.push(num);
             });
         });
     }
     
-    const correctlyMarkedCount = player.markedNumbers.filter(mn => game.drawnNumbers.includes(mn) && allTicketNumbers.includes(mn)).length;
-
-    if (correctlyMarkedCount === 15 && !player.completedBingo) {
-        player.completedBingo = true;
-        player.completedAt = new Date(); 
-        
-        broadcastToGame(game, {
-            type: "BINGO_PLAYER_COMPLETED",
-            playerId: ws.userId,
-            playerName: player.name || player.userName,
-            avatar: player.avatar,
-            completedAt: player.completedAt,
-            notification: {
-                 key: "notifications.playerCompletedBingo",
-                 params: { playerName: player.name || player.userName }
-            }
-        });
-        broadcastGameStatus(game); // Update completed players list for everyone
-
-        // Check if all players have completed
-        const rankings = getGameRankings(game);
-        const completedPlayersInGame = rankings.filter(r => r.completedAt).length;
-        if (completedPlayersInGame === Object.keys(game.players).length && !game.gameEnded) {
-            game.gameEnded = true;
-            game.gameStarted = false;
-            broadcastToGame(game, {
-                type: "BINGO_GAME_OVER",
-                message: "All players completed! Final Rankings",
-                finalRankings: rankings
-            });
-            saveGameStatsToDB(game); 
-            if (game.autoDrawInterval) {
-                clearInterval(game.autoDrawInterval);
-                game.autoDrawInterval = null;
-            }
+    // Ensure the ticket actually has 15 numbers before checking
+    if (allTicketNumbersOnCard.length === 15) {
+        const correctlyMarkedCount = player.markedNumbers.filter(mn => game.drawnNumbers.includes(mn) && allTicketNumbersOnCard.includes(mn)).length;
+        if (correctlyMarkedCount === 15) {
+            potentialBingo = true; // Player has marked all numbers on their ticket that have been drawn.
+                                  // They are now eligible to call Bingo.
         }
     }
-
 
     ws.send(JSON.stringify({
         type: "BINGO_NUMBER_MARKED_CONFIRMED",
         playerId: ws.userId,
         number,
         markedNumbers: player.markedNumbers,
-        completedBingo: player.completedBingo || false
+        potentialBingo: potentialBingo 
+    }));
+  } else {
+    // Number already marked, send confirmation with current status
+    // Re-calculate potentialBingo status in case it's a resend or out-of-order message
+    const allTicketNumbersOnCard = [];
+    if (player.ticket && player.ticket.numbersGrid) {
+        player.ticket.numbersGrid.forEach(row => {
+            row.forEach(num => {
+                if (num !== null) allTicketNumbersOnCard.push(num);
+            });
+        });
+    }
+    if (allTicketNumbersOnCard.length === 15) {
+        const correctlyMarkedCount = player.markedNumbers.filter(mn => game.drawnNumbers.includes(mn) && allTicketNumbersOnCard.includes(mn)).length;
+        if (correctlyMarkedCount === 15) {
+            potentialBingo = true;
+        }
+    }
+
+    ws.send(JSON.stringify({
+        type: "BINGO_NUMBER_MARKED_CONFIRMED",
+        playerId: ws.userId,
+        number, // The number they tried to mark again
+        markedNumbers: player.markedNumbers,
+        potentialBingo: potentialBingo
     }));
   }
 };
@@ -1097,50 +1141,38 @@ async function saveGameStatsToDB(game) {
   try {
     const rankings = getGameRankings(game);
 
-    rankings.forEach((rankInfo, index) => {
-      const player = game.players[rankInfo.playerId];
-      if (player) {
-        player.finalRank = index + 1;
-      }
-    });
-
     const winnerRankInfo = rankings.find(rankInfo => rankInfo.rank === 1);
-
     let winner = null;
     if (winnerRankInfo) {
-      const winnerPlayer = game.players[winnerRankInfo.playerId];
-      if (winnerPlayer) { // Check if winnerPlayer exists
         winner = {
-          playerId: winnerPlayer.userId,
-          userName: winnerPlayer.userName,
-          completedAt: winnerPlayer.completedAt
+          playerId: winnerRankInfo.playerId,
+          userName: winnerRankInfo.userName,
+          completedAt: winnerRankInfo.completedAt
         };
-      } else {
-        console.warn("Winner player not found in game.players:", winnerRankInfo.playerId); // Warn if player not found
-      }
     }
     game.winner = winner;
 
- const playersForDB = Object.values(game.players).map(player => {
-    let ticketNumbersForDB = [];
-    if (player.ticket && player.ticket.numbersGrid) {
-        player.ticket.numbersGrid.forEach(row => {
-            row.forEach(num => {
-                if (num !== null) {
-                    ticketNumbersForDB.push(num);
-                }
+    const playersForDB = rankings.map(rankInfo => {
+        const player = game.players[rankInfo.playerId];
+        let ticketNumbersForDB = [];
+        if (player && player.ticket && player.ticket.numbersGrid) {
+            player.ticket.numbersGrid.forEach(row => {
+                row.forEach(num => {
+                    if (num !== null) {
+                        ticketNumbersForDB.push(num);
+                    }
+                });
             });
-        });
-    }
-    return {
-        playerId: player.userId,
-        userName: player.userName,
-        score: calculatePlayerScore(player, game.drawnNumbers),
-        ticket: ticketNumbersForDB.sort((a,b) => a-b), // Modelin beklediği sayı dizisi
-        completedAt: player.completedAt,
-        finalRank: player.finalRank
-    };
-});
+        }
+        return {
+            playerId: rankInfo.playerId,
+            userName: rankInfo.userName,
+            score: rankInfo.score,
+            ticket: ticketNumbersForDB.sort((a, b) => a - b),
+            completedAt: rankInfo.completedAt,
+            finalRank: rankInfo.rank
+        };
+    });
 
     const newBingoGame = new BingoGame({
       gameId: game.gameId,
@@ -1150,7 +1182,7 @@ async function saveGameStatsToDB(game) {
       players: playersForDB,
       drawnNumbers: game.drawnNumbers,
       drawMode: game.drawMode,
-      winner: game.winner,
+      winner: winner,
       createdBy: game.host
     });
 

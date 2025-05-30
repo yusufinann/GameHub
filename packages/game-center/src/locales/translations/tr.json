@@ -43,7 +43,8 @@
     "yourTurnInGame": "{{gameName}} lobisinde sıra sende!",
     "goToLobby": "Lobiye Git",
     "yourTurnInLobbyDefault": "{{lobbyName}}'de sıra sende.",
-    "yourTurn": "Sıra Sende!"
+    "yourTurn": "Sıra Sende!",
+     "playerCompletedBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",
@@ -1053,5 +1054,30 @@
     "hangman": "Adam Asmaca"
   },
   "Word Selection":"Kelime Seçimi",
-  "wordLanguage":"Kelimenin Dili"
+  "wordLanguage":"Kelimenin Dili",
+  "rankingsDialog": {
+    "title": "Oyun Sıralaması",
+    "lobbyPrefix": "Lobi",
+    "tableHeaderRank": "Sıra",
+    "tableHeaderPlayers": "Oyuncular",
+    "tableHeaderScore": "Skor",
+    "tableHeaderStatus": "Durum",
+    "tiedSuffix": "berabere",
+    "playerDefaultPrefix": "Oyuncu",
+    "statusCompleted": "🎉 Tombala!",
+    "statusMixed": "🤏 Neredeyse",
+    "statusInProgress": "⏳ Tombala bekleniyor",
+    "mixedStatusCompletedSuffix": "tamamladı",
+    "gameCompleteMessage": "Oyun Tamamlandı! Herkese tebrikler!",
+    "playAgainButton": "Tekrar Oyna",
+    "closeButton": "Kapat",
+    "confirmCloseDialog": {
+      "title": "Kapatmayı Onayla",
+      "message": "Oyun hala devam ediyor. Kapatmak istediğinizden emin misiniz? Devam ederseniz mevcut oyun durumunuz kaydedilmeyebilir."
+    },
+    "cancelButton": "İptal",
+    "closeAnywayButton": "Yine de Kapat"
+  },
+   "Player Completed":"Oyuncu tamamladı",
+  "Completed":"Tamamlanan"
 }
