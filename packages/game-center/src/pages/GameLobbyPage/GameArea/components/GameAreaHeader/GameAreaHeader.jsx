@@ -45,7 +45,7 @@ const GameAreaHeader = ({
         background: `linear-gradient(90deg, ${theme.palette.primary.darker}, ${theme.palette.success.main})`,
         color: theme.palette.text.contrast,
         boxShadow: `0 6px 24px ${theme.palette.primary.main}66`,
-        borderRadius: "16px 16px 0 0",
+        borderTopRighttRadius:'24px',
       }}
     >
       <Box

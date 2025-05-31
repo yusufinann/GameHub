@@ -16,9 +16,9 @@ import { useWebSocket } from "../../../shared/context/WebSocketContext/context";
 import { v4 as uuidv4 } from "uuid";
 import { GameSettingsContext } from "../../GameDetail/GameDetailRightArea/context";
 import GameAreaHeader from "./components/GameAreaHeader/GameAreaHeader";
-import GameContentArea from "./components/GameContentArea/GameContentArea";
+import GameContentArea from "./components/GameContentArea";
 import ChatArea from "./components/ChatArea/ChatArea";
-
+import QuickExpressionButtons from "./components/QuickExpressionButtons";
 
 const SHOW_EXPRESSIONS_KEY = "showExpressions";
 
@@ -34,8 +34,8 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     try {
       const savedValue = localStorage.getItem(SHOW_EXPRESSIONS_KEY);
       return savedValue === null ? true : JSON.parse(savedValue);
-    } catch (error) {
-      console.error("LocalStorage okuma hatası:", error);
+    } catch (error)
+      { // console.error("LocalStorage okuma hatası:", error); 
       return true; 
     }
   });
@@ -45,7 +45,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     try {
       localStorage.setItem(SHOW_EXPRESSIONS_KEY, JSON.stringify(showExpressions));
     } catch (error) {
-      console.error("LocalStorage yazma hatası:", error);
+      // console.error("LocalStorage yazma hatası:", error); 
     }
   }, [showExpressions]);
 
@@ -98,7 +98,6 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     }
   };
 
-  // Debounce function for performance optimisation
   const debounce = (func, delay) => {
     let timer;
     return function (...args) {
@@ -149,7 +148,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
       case 4:
         return "https://www.shutterstock.com/shutterstock/photos/1258437028/display_1500/stock-photo-logic-chess-game-logo-simple-illustration-of-logic-chess-game-logo-for-web-design-isolated-on-1258437028.jpg";
       default:
-        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombola/2-550x400.jpg"; 
+        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg"; 
     }
   };
 
@@ -161,12 +160,13 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
       sx={{
         height: "100%",
         width: "100%",
+        flexGrow: 1,
         display: "flex",
         flexDirection: "column",
-        background: theme.palette.background.gradientB,
         backdropFilter: "blur(12px)",
-        borderRadius: "24px",
-        overflow: "hidden",
+        borderTopRightRadius:'24px', 
+        borderBottomRightRadius:'24px',
+        overflow: "hidden", 
         position: "relative",
         border: `2px solid ${theme.palette.background.elevation[1]}`,
         '&::before': {
@@ -213,25 +213,22 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
         sx={{
           flex: 1,
           display: "flex",
-          overflow: "hidden",
-          p: 1,
-          position: "relative",
+          overflow: "hidden", 
+          position: "relative", 
           flexDirection: "column",
         }}
       >
         {/* Game and Chat Container */}
-        <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          {/* Game Content Area - Left Side */}
+        <Box sx={{ display: "flex", flex: 1, overflow: "hidden"}}>
           <GameContentArea
             lobbyInfo={lobbyInfo}
             currentUser={currentUser}
             socket={socket}
             members={members}
-            soundEnabled={soundEnabled}
+            soundEnabled={soundEnabled} 
             toggleSound={toggleSound}
-            soundEnabledRef={soundEnabledRef}
+            soundEnabledRef={soundEnabledRef} 
             centerExpressions={showExpressions ? centerExpressions : []}
-            onSendExpression={handleSendExpression}
             isChatOpen={isChatOpen}
             t={t}
           />
@@ -239,12 +236,13 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
           {/* Control Buttons */}
           <Box
             sx={{
-              position: 'relative',
+              position: 'relative', 
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
-              zIndex: 5
+              gap: 1,
+              m:1,
+              zIndex: 5, 
             }}
           >
             <IconButton
@@ -289,7 +287,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
                 height: 40,
                 border: `2px solid ${theme.palette.background.offwhite}`,
                 p: 0.5,
-                color: theme.palette.text.contrast,
+                color: theme.palette.text.contrast, 
               }}
             >
               {isChatOpen ? <CollapseIcon /> : <MessageIcon />}
@@ -299,23 +297,42 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
           {/* Chat Area - Right Side (Slidable) */}
           <Box
             sx={{
-              width: isChatOpen ? "30%" : "0%",
+              width: isChatOpen ? "30%" : "0%", 
+              minWidth: isChatOpen ? "250px" : "0%", 
+              maxWidth: "350px", 
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              transition: 'width 0.3s ease-in-out',
-              ml: isChatOpen ? 2 : 0,
+              transition: 'width 0.3s ease-in-out, min-width 0.3s ease-in-out, opacity 0.3s ease-in-out',
               opacity: isChatOpen ? 1 : 0,
+              boxSizing: 'border-box',
             }}
           >
-            <ChatArea
-              expressions={expressions}
-              onSendExpression={handleSendExpression}
-              isChatOpen={isChatOpen}
-              t={t}
-            />
+            {isChatOpen && ( 
+                <ChatArea
+                expressions={expressions}
+                onSendExpression={handleSendExpression}
+                isChatOpen={isChatOpen}
+                t={t}
+                />
+            )}
           </Box>
         </Box>
+        
+        <QuickExpressionButtons
+            onSendExpression={handleSendExpression}
+            position="relative" 
+            showToggleButton={true}
+            containerProps={{
+                sx: {
+                    position: 'absolute', 
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 15, 
+                }
+            }}
+        />
       </Box>
     </Paper>
   );

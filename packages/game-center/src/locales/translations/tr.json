@@ -1079,5 +1079,7 @@
     "closeAnywayButton": "Yine de Kapat"
   },
    "Player Completed":"Oyuncu tamamladı",
-  "Completed":"Tamamlanan"
+  "Completed":"Tamamlanan",
+  "LoadingGameInfo":"Oyun bilgisi yükleniyor...",
+  "Other Games":"Diğer Oyunlar"
 }

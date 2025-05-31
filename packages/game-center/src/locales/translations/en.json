@@ -1082,5 +1082,7 @@
     "closeAnywayButton": "Close Anyway"
   },
   "Player Completed":"Player Completed",
-  "Completed":"Completed"
+  "Completed":"Completed",
+  "LoadingGameInfo":"Loading game information...",
+  "Other Games": "Other Games"
 }

@@ -11,7 +11,7 @@ function Header({ count, isCollapsed, onToggle,t }) {
         alignItems: 'center',
         mb: 1,
         borderBottom: '2px solid #1a237e',
-        pb: 1,
+        p: 1,
       }}
     >
       {!isCollapsed && (

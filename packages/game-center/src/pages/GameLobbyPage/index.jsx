@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
-  CircularProgress,
-  Typography,
-  Button,
   IconButton,
   Tooltip,
   Snackbar,
@@ -21,6 +18,7 @@ import LobbyPasswordModal from "../../shared/components/LobbyPasswordModal";
 import LobbyDeletedModal from "./LobbyDeletedModal";
 import { useLobbyContext } from "../../shared/context/LobbyContext/context";
 import { useTranslation } from "react-i18next";
+import { LoadingScreen, ErrorScreen, AccessDeniedScreen } from "./LobbyStatusScreens";
 
 const GameLobbyPage = () => {
   const { link } = useParams();
@@ -70,12 +68,6 @@ const GameLobbyPage = () => {
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
-
-  useEffect(() => {
-    if (!loading && lobbyDetails && !isMember && !isPasswordModalOpen && !error) {
-      // The AccessDeniedScreen will be rendered by the main logic below
-    }
-  }, [loading, lobbyDetails, isMember, isPasswordModalOpen, error, setError]);
 
   const toggleFullscreen = () => {
     const gameLobbyElement = document.getElementById("gameLobbyPage");
@@ -140,7 +132,6 @@ const GameLobbyPage = () => {
     );
   }
 
-
   if (loading) {
     return <LoadingScreen />;
   }
@@ -154,10 +145,6 @@ const GameLobbyPage = () => {
         lobbyDetails={lobbyDetails}
       />
     );
-  }
-
-  if (isPasswordModalOpen && !lobbyDetails) {
-      return <LoadingScreen />;
   }
 
   if (error) {
@@ -181,11 +168,11 @@ const GameLobbyPage = () => {
       <Box
         id="gameLobbyPage"
         sx={{
-          p: 1,
-          height: "100vh",
+          height: "calc(100vh - 20px)",
           display: "flex",
-          gap: 1,
           position: "relative",
+          borderTopRightRadius:'24px', 
+          borderBottomRightRadius:'24px',
           ...(isFullscreen && {
             minHeight: "100vh",
             maxHeight: "100vh",
@@ -261,65 +248,5 @@ const GameLobbyPage = () => {
     </>
   );
 };
-
-const LoadingScreen = () => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-    }}
-  >
-    <CircularProgress />
-  </Box>
-);
-
-const ErrorScreen = ({ error, navigate, t }) => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      flexDirection: "column",
-      gap: 2,
-      textAlign: "center",
-      p: 2,
-    }}
-  >
-    <Typography variant="h6" color="error">
-      {typeof error === 'string' ? error : t("errors.unexpected", "An unexpected error occurred.")}
-    </Typography>
-    <Button variant="contained" onClick={() => navigate("/")}>
-      {t("navigation.goToMainScreen", "Go to Main Screen")}
-    </Button>
-  </Box>
-);
-
-const AccessDeniedScreen = ({ navigate, t }) => (
- <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      flexDirection: "column",
-      gap: 2,
-      textAlign: "center",
-      p: 2,
-    }}
-  >
-    <Typography variant="h5" color="error">
-      {t("errors.accessDenied", "Access Denied")}
-    </Typography>
-    <Typography variant="body1">
-      {t("errors.accessDeniedMessage", "You are not a member of this lobby or do not have permission to access it.")}
-    </Typography>
-    <Button variant="contained" onClick={() => navigate("/")}>
-      {t("navigation.goToMainScreen", "Go to Main Screen")}
-    </Button>
-  </Box>
-);
 
 export default GameLobbyPage;

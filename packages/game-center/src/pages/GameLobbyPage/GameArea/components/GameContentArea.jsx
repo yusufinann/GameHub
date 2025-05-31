@@ -2,9 +2,8 @@ import React, { useContext } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { BingoGame } from "@gamecenter/bingo-game";
 import { Hangman } from "@gamecenter/hangman-game";
-import ExpressionPanel from "../ChatArea/ExpressionPanel";
-import QuickExpressionButtons from "./QuickExpressionButtons";
-import { GameSettingsContext } from "../../../../GameDetail/GameDetailRightArea/context";
+import ExpressionPanel from "./ChatArea/ExpressionPanel";
+import { GameSettingsContext } from "../../../GameDetail/GameDetailRightArea/context";
 
 const GameContentArea = ({
   lobbyInfo,
@@ -12,7 +11,6 @@ const GameContentArea = ({
   socket,
   members,
   centerExpressions,
-  onSendExpression,
   isChatOpen,
   t
 }) => {
@@ -26,6 +24,13 @@ const GameContentArea = ({
   } = useContext(GameSettingsContext);
 
   const renderGameContent = () => {
+    if (!lobbyInfo) { 
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+                <Typography>{t("LoadingGameInfo")}</Typography>
+            </Box>
+        );
+    }
     switch (lobbyInfo.game) {
       case "1": // Bingo
         return (
@@ -35,7 +40,7 @@ const GameContentArea = ({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            pb: { xs: 3, sm: 3 }
+            flexGrow: 1, 
           }}>
             <BingoGame
               lobbyCode={lobbyInfo.lobbyCode}
@@ -59,8 +64,6 @@ const GameContentArea = ({
               alignItems: "center",
               width: "100%",
               height: "100%",
-              borderRadius: "24px",
-              
             }}
           >
             <Hangman
@@ -68,7 +71,7 @@ const GameContentArea = ({
               lobbyInfo={lobbyInfo}
               members={members}
               socket={socket}
-              user={currentUser}
+              user={currentUser} 
               toggleSound={toggleHangmanSound}
               hangmanSoundEnabled={hangmanSoundEnabled} 
               t={t}
@@ -84,12 +87,11 @@ const GameContentArea = ({
               alignItems: "center",
               width: "100%",
               height: "100%",
-              borderRadius: "24px",
+              borderRadius: "24px", 
               background: `${theme.palette.background.paper}B3`,
               backdropFilter: 'blur(8px)',
               boxShadow: `0 12px 32px ${theme.palette.background.elevation[2]}`,
               border: `1px solid ${theme.palette.background.offwhite}`,
-              pb: { xs: 3, sm: 3 }
             }}
           >
             <Typography
@@ -100,7 +102,7 @@ const GameContentArea = ({
                 textShadow: `1px 1px 2px ${theme.palette.background.elevation[1]}`
               }}
             >
-              Other Games
+              {t("Other Games")}
             </Typography>
           </Box>
         );
@@ -110,18 +112,18 @@ const GameContentArea = ({
   return (
     <Box
       sx={{
-        width: isChatOpen ? "70%" : "100%",
+        flexGrow: 1, 
+        width: isChatOpen ? "calc(100% - 30% - 64px)" : "calc(100% - 64px)", 
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.3s ease-in-out',
-        overflow: 'hidden',
-        pr: isChatOpen ? 1 : 0,
+        overflow: 'hidden', 
         position: 'relative', 
+        height: '100%'
       }}
     >
       <ExpressionPanel centerExpressions={centerExpressions} />
       {renderGameContent()}
-      <QuickExpressionButtons onSendExpression={onSendExpression} />
     </Box>
   );
 };
