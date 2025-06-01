@@ -1,7 +1,9 @@
 import React from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const LoadingFallback = () => {
+  const { t } = useTranslation();
   return (
     <Box
       display="flex"
@@ -17,7 +19,7 @@ const LoadingFallback = () => {
         color="textSecondary"
         sx={{ mt: 2 }}
       >
-        Loading...
+        {t("common.loading")}
       </Typography>
     </Box>
   );

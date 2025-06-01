@@ -1081,5 +1081,10 @@
    "Player Completed":"Oyuncu tamamladı",
   "Completed":"Tamamlanan",
   "LoadingGameInfo":"Oyun bilgisi yükleniyor...",
-  "Other Games":"Diğer Oyunlar"
+  "Other Games":"Diğer Oyunlar",
+  "notFound": {
+    "title": "404 - Sayfa Bulunamadı",
+    "message": "Üzgünüz, aradığınız sayfa bulunamadı veya taşınmış olabilir.",
+    "goHomeButton": "Ana Sayfaya Dön"
+  }
 }
