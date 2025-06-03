@@ -82,7 +82,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
         break;
       case "KICK_PLAYER":
         if (ws.userId) {
-          await lobbyController.kickPlayerFromLobby(ws, data);
+          await lobbyController.kickPlayerFromLobby(ws, data,sendToSpecificUser);
           sendToSpecificUser(data.playerIdToKick, {
             type: "USER_KICKED",
             lobbyCode: data.lobbyCode,

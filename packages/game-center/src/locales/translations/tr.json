@@ -44,7 +44,8 @@
     "goToLobby": "Lobiye Git",
     "yourTurnInLobbyDefault": "{{lobbyName}}'de sıra sende.",
     "yourTurn": "Sıra Sende!",
-     "playerCompletedBingo": "{{playerName}} Tombala yaptı! (Sıra: {{rank}})"
+     "playerCompletedBingo": "{{playerName}} Tombala yaptı!",
+     "connectedToGame": "Oyun sunucusuna başarıyla bağland."
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",

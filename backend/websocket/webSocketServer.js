@@ -8,7 +8,7 @@ import * as authController from "../controllers/auth.controller.js";
 import * as groupChatController from "../controllers/groupChat.controller.js";
 import * as friendGroupChatController from "../controllers/friendGroupChat.controller.js";
 
-const connectedClients = new Map(); 
+export const connectedClients = new Map(); 
 
 const setupWebSocket = (server) => {
     console.log("Initializing WebSocket server...");

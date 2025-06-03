@@ -1,11 +1,10 @@
-// bingo.models.js
 import mongoose from 'mongoose';
 
 const bingoGameSchema = new mongoose.Schema({
-  gameId: { // Yeni gameId alanı eklendi
+  gameId: {
     type: mongoose.Schema.Types.ObjectId,
-    default: mongoose.Types.ObjectId,
-    unique: true 
+    default: () => new mongoose.Types.ObjectId(),
+    unique: true
   },
   lobbyCode: {
     type: String,
@@ -53,10 +52,10 @@ const bingoGameSchema = new mongoose.Schema({
     userName: String,
     completedAt: Date
   },
-  createdBy: { // Oyunu kaydeden kullanıcı
+  createdBy: {
     type: String,
     required: true
   }
-}, { timestamps: true }); // opsiyonel: otomatik createdAt ve updatedAt
+}, { timestamps: true });
 
 export const BingoGame = mongoose.model('BingoGame', bingoGameSchema);

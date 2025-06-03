@@ -16,12 +16,12 @@ const{t}=useTranslation();
   const [newCommunityMessage, setNewCommunityMessage] = useState("");
   const [isCommunityMessagingLoading, setIsCommunityMessagingLoading] =
     useState(false);
-  const [isLoadingCommunityChat, setIsLoadingCommunityChat] = useState(false); // Renamed for clarity (initial load)
+  const [isLoadingCommunityChat, setIsLoadingCommunityChat] = useState(false); 
   const [communityPage, setCommunityPage] = useState(1);
   const [hasMoreCommunity, setHasMoreCommunity] = useState(false);
 
-  const [communityGroups, setCommunityGroups] = useState([]); // Groups user is in
-  const [allGroups, setAllGroups] = useState([]); // All available groups
+  const [communityGroups, setCommunityGroups] = useState([]); 
+  const [allGroups, setAllGroups] = useState([]); 
   const [isGroupListLoading, setIsGroupListLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupMessages, setGroupMessages] = useState([]);

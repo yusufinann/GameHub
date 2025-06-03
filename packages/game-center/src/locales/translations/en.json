@@ -44,7 +44,8 @@
     "goToLobby": "Go to Lobby",
     "yourTurnInLobbyDefault": "It's your turn in {{lobbyName}}.",
     "yourTurn": "It's Your Turn!",
-    "playerCompletedBingo": "{{playerName}} completed Bingo!"
+    "playerCompletedBingo": "{{playerName}} completed Bingo!",
+    "connectedToGame": "Connected to the game successfully."
     
   },
   "error": {

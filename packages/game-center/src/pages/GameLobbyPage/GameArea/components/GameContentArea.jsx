@@ -9,6 +9,7 @@ const GameContentArea = ({
   lobbyInfo,
   currentUser,
   socket,
+  isConnected,
   members,
   centerExpressions,
   isChatOpen,
@@ -52,6 +53,7 @@ const GameContentArea = ({
               toggleSound={toggleBingoSound}   
               soundEnabledRef={bingoSoundEnabledRef} 
               t={t}
+               isConnected={isConnected} 
             />
           </Box>
         );
@@ -75,6 +77,7 @@ const GameContentArea = ({
               toggleSound={toggleHangmanSound}
               hangmanSoundEnabled={hangmanSoundEnabled} 
               t={t}
+              isConnected={isConnected}
             />
           </Box>
         );

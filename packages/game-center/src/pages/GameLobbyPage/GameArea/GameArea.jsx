@@ -24,7 +24,7 @@ const SHOW_EXPRESSIONS_KEY = "showExpressions";
 
 const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLobby, isLeavingLobby,t}) => {
   const { currentUser } = useAuthContext();
-  const { socket } = useWebSocket();
+  const { socket,isConnected } = useWebSocket();
   const [expressions, setExpressions] = useState([]);
   const [centerExpressions, setCenterExpressions] = useState([]);
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -224,6 +224,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
             lobbyInfo={lobbyInfo}
             currentUser={currentUser}
             socket={socket}
+            isConnected={isConnected}
             members={members}
             soundEnabled={soundEnabled} 
             toggleSound={toggleSound}
