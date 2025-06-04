@@ -45,7 +45,8 @@
     "yourTurnInLobbyDefault": "It's your turn in {{lobbyName}}.",
     "yourTurn": "It's Your Turn!",
     "playerCompletedBingo": "{{playerName}} completed Bingo!",
-    "connectedToGame": "Connected to the game successfully."
+    "connectedToGame": "Connected to the game successfully.",
+    "playerKickedFromGameMidGame": "{{playerName}} was kicked from the game."
     
   },
   "error": {
@@ -1106,5 +1107,10 @@
     "goHomeButton": "Go to Homepage"
   },
   "Search Lobbies by Name...": "Search Lobbies by Name...",
-  "Game Not Found!": "Game Not Found!"
+  "Game Not Found!": "Game Not Found!",
+  "confirmDeleteLobbyTitle": "Confirm Delete Lobby",
+  "confirmDeleteLobbyMessage": "Are you sure you want to delete this lobby? This action cannot be undone.",
+  "confirmLeaveLobbyMessage": "Are you sure you want to leave this lobby?",
+  "confirmLeaveLobbyTitle": "Confirm Leave Lobby",
+    "kickConfirmationMessage": "Are you sure you want to kick {{name}}?"
 }

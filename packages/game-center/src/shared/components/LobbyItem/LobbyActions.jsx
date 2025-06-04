@@ -1,32 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IconButton, CircularProgress, Button, Box, Tooltip } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Visibility, Edit as EditIcon, Lock, LockOpen } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
+import ConfirmModal from '../ConfirmModal'; 
+
+
 export const LobbyActions = ({
   isJoined,
   isJoining,
   isCreator,
-  onDelete,
+  onDelete: onDeleteProp, 
   onJoin,
   onNavigate,
   onEdit,
   isMobile,
-  lobby ,
-  isDeleting
+  lobby,
+  isDeleting, 
 }) => {
+  const { t } = useTranslation();
   const hasPassword = lobby && lobby.password != null;
-  const{t}=useTranslation()
+
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+
+  const handleOpenDeleteConfirm = () => {
+    setConfirmDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteConfirm = () => {
+    setConfirmDeleteModalOpen(false);
+  };
+
+  const handleConfirmDelete = () => {
+    onDeleteProp();
+  };
+
   return (
     <>
       {isCreator && (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Tooltip title={t("Delete Lobby")}>
             <IconButton
-              onClick={onDelete}
+              onClick={handleOpenDeleteConfirm} 
               size="small"
-              disabled={isDeleting}
+              disabled={isDeleting} 
               sx={{
                 color: 'rgba(244, 67, 54, 0.7)',
                 "&:hover": {
@@ -35,7 +53,7 @@ export const LobbyActions = ({
                 },
               }}
             >
-              {isDeleting ? ( // Show CircularProgress if deleting
+              {isDeleting && !confirmDeleteModalOpen ? ( 
                 <CircularProgress size={24} sx={{ color: 'rgba(244, 67, 54, 1)' }} />
               ) : (
                 <DeleteIcon fontSize="medium" />
@@ -50,8 +68,8 @@ export const LobbyActions = ({
               sx={{
                 color: 'rgba(33, 150, 243, 0.7)',
                 "&:hover": {
-                  color: "rgba(33, 150, 243, 1)", 
-                  backgroundColor: "rgba(33, 150, 243, 0.1)", 
+                  color: "rgba(33, 150, 243, 1)",
+                  backgroundColor: "rgba(33, 150, 243, 0.1)",
                 },
               }}
             >
@@ -81,17 +99,16 @@ export const LobbyActions = ({
 
       {!isJoined && !isCreator && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Password Indicator */}
           <Tooltip title={hasPassword ? t("Password Protected Lobby") : t("Open Lobby")}>
             <IconButton
               size="small"
               sx={{
-                color: hasPassword 
-                  ? 'rgba(255, 152, 0, 0.7)' 
+                color: hasPassword
+                  ? 'rgba(255, 152, 0, 0.7)'
                   : 'rgba(76, 175, 80, 0.7)',
                 "&:hover": {
-                  color: hasPassword 
-                    ? 'rgba(255, 152, 0, 1)' 
+                  color: hasPassword
+                    ? 'rgba(255, 152, 0, 1)'
                     : 'rgba(76, 175, 80, 1)',
                 },
               }}
@@ -127,11 +144,22 @@ export const LobbyActions = ({
             {isJoining ? (
               <CircularProgress size={24} />
             ) : (
-             t("Join")
+              t("Join")
             )}
           </Button>
         </Box>
       )}
+      <ConfirmModal
+        open={confirmDeleteModalOpen}
+        onClose={handleCloseDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title={t('confirmDeleteLobbyTitle', 'Confirm Delete Lobby')}
+        message={t('confirmDeleteLobbyMessage', 'Are you sure you want to delete this lobby? This action cannot be undone.')}
+        confirmText={t('common.delete', 'Delete')}
+        cancelText={t('common.cancel', 'Cancel')} 
+        confirmButtonColor="error"
+        isLoading={isDeleting}
+      />
     </>
   );
 };

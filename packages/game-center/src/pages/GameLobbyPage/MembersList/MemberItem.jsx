@@ -1,72 +1,76 @@
 import React, { useState } from 'react';
-import { 
-  ListItem, 
-  Avatar, 
-  ListItemText, 
-  Typography, 
-  Box, 
-  useTheme, 
+import {
+  ListItem,
+  Avatar,
+  ListItemText,
+  Typography,
+  Box,
+  useTheme,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button
 } from '@mui/material';
 import { RemoveCircleOutline as KickIcon } from '@mui/icons-material';
+import ConfirmModal from '../../../shared/components/ConfirmModal';
 
 function MemberItem({ member, index, t, onKickPlayer, isCurrentUserHost, currentUserId }) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  
+  const [isKicking, setIsKicking] = useState(false); 
+
   const handleOpenConfirm = () => {
     setConfirmOpen(true);
   };
-  
+
   const handleCloseConfirm = () => {
     setConfirmOpen(false);
   };
 
-  const handleConfirmKick = () => {
+  const handleConfirmKick = async () => {
+     setIsKicking(true); 
     if (onKickPlayer) {
-      onKickPlayer(member.id);
+      try {
+        await onKickPlayer(member.id); 
+      } catch (error) {
+        console.error("Failed to kick player:", error);
+      }
     }
+    setIsKicking(false); 
     setConfirmOpen(false);
   };
-  
+
+  const playerName = member.name || `Player ${index + 1}`;
+
   return (
     <>
       <ListItem
         sx={{
           mb: 0.5,
-          bgcolor: member.isHost 
-            ? `${theme.palette.secondary.gold}26` 
+          bgcolor: member.isHost
+            ? `${theme.palette.secondary.gold}26`
             : 'transparent',
           borderRadius: '10px',
           '&:hover': {
-            bgcolor: member.isHost 
+            bgcolor: member.isHost
               ? `${theme.palette.secondary.gold}4D`
-              : `${theme.palette.secondary.main}33`, 
+              : `${theme.palette.secondary.main}33`,
           },
           position: 'relative',
-          pr: isCurrentUserHost && !member.isHost ? '50px' : '16px',
+          pr: isCurrentUserHost && !member.isHost && member.id !== currentUserId ? '50px' : '16px',
         }}
       >
         <Avatar
           src={member.avatar || undefined}
           sx={{
-            width: 50, 
+            width: 50,
             height: 50,
-            fontSize: '1rem', 
-            bgcolor: member.isHost 
-              ? theme.palette.secondary.gold 
+            fontSize: '1rem',
+            bgcolor: member.isHost
+              ? theme.palette.secondary.gold
               : theme.palette.secondary.main,
-            border: member.isHost 
-              ? `2px solid ${theme.palette.secondary.gold}` 
+            border: member.isHost
+              ? `2px solid ${theme.palette.secondary.gold}`
               : 'none',
-            boxShadow: member.isHost 
-              ? `0 0 8px ${theme.palette.secondary.gold}99` 
+            boxShadow: member.isHost
+              ? `0 0 8px ${theme.palette.secondary.gold}99`
               : 'none',
           }}
         >
@@ -83,7 +87,7 @@ function MemberItem({ member, index, t, onKickPlayer, isCurrentUserHost, current
                   color: theme.palette.text.primary,
                 }}
               >
-                {member.name || `Player ${index + 1}`}
+                {playerName}
               </Typography>
               {member.isHost && (
                 <Typography
@@ -91,7 +95,7 @@ function MemberItem({ member, index, t, onKickPlayer, isCurrentUserHost, current
                     fontSize: '0.7rem',
                     fontWeight: 'bold',
                     color: theme.palette.secondary.gold,
-                    bgcolor: `${theme.palette.secondary.gold}33`, 
+                    bgcolor: `${theme.palette.secondary.gold}33`,
                     px: 1,
                     py: 0.3,
                     borderRadius: '5px',
@@ -123,27 +127,20 @@ function MemberItem({ member, index, t, onKickPlayer, isCurrentUserHost, current
           </IconButton>
         )}
       </ListItem>
-      
-      {/* Confirmation Dialog */}
-      <Dialog
+
+      <ConfirmModal
         open={confirmOpen}
         onClose={handleCloseConfirm}
-      >
-        <DialogTitle>{t("Confirm Kick")}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t("Are you sure you want to kick")} {member.name || `Player ${index + 1}`}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm} color="primary">
-            {t("Cancel")}
-          </Button>
-          <Button onClick={handleConfirmKick} color="error" variant="contained">
-            {t("Kick")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmKick}
+        title={t("Confirm Kick", "Confirm Kick")}
+        message={t("kickConfirmationMessage", { name: playerName }, `Are you sure you want to kick ${playerName}?`)}
+        confirmText={t("Kick", "Kick")}
+        cancelText={t("Cancel", "Cancel")}
+        confirmButtonColor="error"
+        isLoading={isKicking} 
+        IconComponent={KickIcon} 
+        iconColor={theme.palette.error.main} 
+      />
     </>
   );
 }

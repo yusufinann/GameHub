@@ -245,7 +245,7 @@ function LobbyItem({ lobby }) {
           gap: "12px",
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
-          p: { xs: 2, sm: 2.5 },
+          p: { xs: 1, sm: 1.5 },
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           transition: "box-shadow 0.3s ease, background-color 0.3s ease",
           "&:hover": {

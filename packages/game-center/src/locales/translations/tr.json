@@ -45,7 +45,8 @@
     "yourTurnInLobbyDefault": "{{lobbyName}}'de sıra sende.",
     "yourTurn": "Sıra Sende!",
      "playerCompletedBingo": "{{playerName}} Tombala yaptı!",
-     "connectedToGame": "Oyun sunucusuna başarıyla bağland."
+     "connectedToGame": "Oyun sunucusuna başarıyla bağland.",
+      "playerKickedFromGameMidGame": "{{playerName}} oyundan atıldı."
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",
@@ -1102,5 +1103,11 @@
     "goHomeButton": "Ana Sayfaya Dön"
   },
   "Search Lobbies by Name...": "Lobi Adına Göre Ara...",
-  "Game Not Found!": "Oyun Bulunamadı!"
+  "Game Not Found!": "Oyun Bulunamadı!",
+   "confirmDeleteLobbyTitle": "LOBİ SİLME İŞLEMİ",
+  "confirmDeleteLobbyMessage": "Bu işlem geri alınamaz ve lobi silinecektir.",
+  "confirmLeaveLobbyMessage": "Bu lobiden ayrılmak istediğinizden emin misiniz?",
+  "confirmLeaveLobbyTitle": "LOBİDEN AYRILMA İŞLEMİ",
+      "kickConfirmationMessage": "{{name}} adlı oyuncuyu atmak istediğinize emin misiniz?"
+  
 }
