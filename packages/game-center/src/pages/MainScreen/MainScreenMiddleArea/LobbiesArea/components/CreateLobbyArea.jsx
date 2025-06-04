@@ -1,13 +1,15 @@
-import React, {useState} from 'react';
-import { Box, Button, Typography, Tabs, Tab, useTheme } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, TextField, Tabs, Tab, useTheme, InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search'; 
 import CreateLobbyModal from '../../../../../shared/components/CreateLobbyModal';
 import { useTranslation } from 'react-i18next';
 
-const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
+
+const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby, searchTerm, onSearchTermChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
-  const {t}=useTranslation();
+  const { t } = useTranslation();
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
   const handleTabChange = (e, newVal) => setActiveTab(newVal);
@@ -20,8 +22,8 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
         boxShadow: 2,
         display: 'flex',
         flexDirection: 'column',
-        borderTopLeftRadius: 1,
-        borderTopRightRadius: 1,
+        borderTopLeftRadius: theme.shape.borderRadius,
+        borderTopRightRadius: theme.shape.borderRadius,
       }}
     >
       <Box
@@ -29,28 +31,33 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          height: '5vh',
+          minHeight: '5vh', 
           mb: 2,
+          gap: 2, 
         }}
       >
-        <Typography 
-          variant="h6" 
-          fontWeight="bold" 
-          color={theme.palette.primary.text}    
+        <TextField
+          value={searchTerm}
+          onChange={(e) => onSearchTermChange(e.target.value)}
+          placeholder={t("Search Lobbies by Name...")}
+          variant="outlined"
+          size="small"
           sx={{
-            borderRadius: 2,
-            py: 1,
-            px: 2,
-            fontWeight: 'bold',
-            boxShadow: 3,
-            background: (theme) =>
-              `linear-gradient(45deg, 
-                ${theme.palette.primary.main} 30%,  
-                ${theme.palette.primary.light} 90%)`,
-          }}   
-        >
-          {t("Lobby Creator")}
-        </Typography>
+            flexGrow: 1, 
+            maxWidth: '60%', 
+            '& .MuiOutlinedInput-root': {
+              borderRadius: theme.shape.borderRadius,
+              backgroundColor: theme.palette.background.default, 
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+          }}
+        />
 
         <Button
           variant="contained"
@@ -58,20 +65,21 @@ const CreateLobbyArea = ({ activeTab, setActiveTab, existingLobby }) => {
           startIcon={<AddIcon />}
           onClick={handleOpenModal}
           sx={{
-            borderRadius: 2,
+            borderRadius: theme.shape.borderRadius,
             py: 1,
             px: 2,
             fontWeight: 'bold',
             boxShadow: 3,
-            background: (theme) =>
+            flexShrink: 0, 
+            background: (thm) => 
               `linear-gradient(45deg, 
-                ${theme.palette.primary.main} 30%,  
-                ${theme.palette.primary.light} 90%)`,
+                ${thm.palette.primary.main} 30%,  
+                ${thm.palette.primary.light} 90%)`,
             '&:hover': {
-              background: (theme) =>
+              background: (thm) =>
                 `linear-gradient(45deg, 
-                  ${theme.palette.primary.dark} 30%, 
-                  ${theme.palette.primary.main} 90%)`,
+                  ${thm.palette.primary.dark} 30%, 
+                  ${thm.palette.primary.main} 90%)`,
               transform: 'translateY(-2px)',
               transition: 'all 0.3s',
             },

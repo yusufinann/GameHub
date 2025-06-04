@@ -5,8 +5,9 @@ import { Box, CircularProgress } from '@mui/material';
 import { useLobbyContext } from '../../../../shared/context/LobbyContext/context';
 
 function LobbiesArea() {
-  const { lobbies, isLoading,existingLobby } = useLobbyContext();
+  const { lobbies, isLoading, existingLobby } = useLobbyContext();
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState(''); 
 
   if (isLoading) {
     return (
@@ -15,7 +16,8 @@ function LobbiesArea() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '70vh'
+          height: '70vh', 
+          width: '100%'   
         }}
       >
         <CircularProgress />
@@ -25,8 +27,18 @@ function LobbiesArea() {
 
   return (
     <>
-      <CreateLobbyArea activeTab={activeTab} setActiveTab={setActiveTab} existingLobby={existingLobby}/>
-      <LobbyList lobbies={lobbies} activeTab={activeTab} />
+      <CreateLobbyArea
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        existingLobby={existingLobby}
+        searchTerm={searchTerm} 
+        onSearchTermChange={setSearchTerm} 
+      />
+      <LobbyList
+        lobbies={lobbies}
+        activeTab={activeTab}
+        searchTerm={searchTerm} 
+      />
     </>
   );
 }

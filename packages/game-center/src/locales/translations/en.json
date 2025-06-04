@@ -1090,5 +1090,6 @@
     "title": "404 - Page Not Found",
     "message": "Sorry, the page you are looking for does not exist or may have been moved.",
     "goHomeButton": "Go to Homepage"
-  }
+  },
+  "Search Lobbies by Name...": "Search Lobbies by Name..."
 }

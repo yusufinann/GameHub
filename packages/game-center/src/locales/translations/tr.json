@@ -1087,5 +1087,6 @@
     "title": "404 - Sayfa Bulunamadı",
     "message": "Üzgünüz, aradığınız sayfa bulunamadı veya taşınmış olabilir.",
     "goHomeButton": "Ana Sayfaya Dön"
-  }
+  },
+  "Search Lobbies by Name...": "Lobi Adına Göre Ara..."
 }
