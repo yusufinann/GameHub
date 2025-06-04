@@ -1056,7 +1056,7 @@ export const updateLobby = async (req, res) => {
     }
 
     let detailsChanged = false;
-
+    const oldGameType = lobby.game;
     if (lobbyName !== undefined) {
       if (!lobbyName?.trim()) {
         return res.status(400).json({ message: "Lobi adı boş olamaz." });
@@ -1072,6 +1072,13 @@ export const updateLobby = async (req, res) => {
         return res.status(400).json({ message: "Oyun türü boş olamaz." });
       }
       if (lobby.game !== game) {
+         if (oldGameType === "1") {
+          await cleanupAndRemoveBingoGame(lobbyCode); // cleanupAndRemoveBingoGame bingo'ya özel, genele uygun değilse değiştirilmeli
+          console.log(`[LobbyUpdate-${lobbyCode}] Eski Bingo (${oldGameType}) durumu Redis'ten silindi.`);
+        } else if (oldGameType === "2") {
+          await deleteHangmanGameFromRedis(lobbyCode);
+          console.log(`[LobbyUpdate-${lobbyCode}] Eski Hangman (${oldGameType}) durumu Redis'ten silindi.`);
+        }
         lobby.game = game;
         detailsChanged = true;
       }

@@ -1,6 +1,6 @@
 export const GAME_KEY_PREFIX = "bingo:game:";
 export const GAME_EXPIRY_SECONDS = 24 * 60 * 60;
-export const ENDED_GAME_EXPIRY_SECONDS = 1 * 60 * 60;
+export const ENDED_GAME_EXPIRY_SECONDS = 15 * 60;
 export const PLAYER_COLORS = [
   "#FFADAD",
   "#FFD6A5",

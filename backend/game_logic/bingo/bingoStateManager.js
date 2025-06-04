@@ -60,6 +60,11 @@ export async function saveGameToRedis(lobbyCode, game) {
   const gameToSave = { ...game };
   delete gameToSave.autoDrawInterval;
 
+  
+if (gameToSave.hasOwnProperty('lobbyName')) {
+  delete gameToSave.lobbyName;
+}
+
   if (gameToSave.players) {
     const playersCopy = { ...gameToSave.players };
     Object.keys(playersCopy).forEach((playerId) => {

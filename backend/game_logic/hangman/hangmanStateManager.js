@@ -2,6 +2,8 @@ import redisClient from "../../redisClient.js";
 import { connectedClients } from "../../websocket/webSocketServer.js";
 import * as timerManager from './hangmanTimerManager.js';
 const HANGMAN_GAME_KEY_PREFIX = 'hangman:game:';
+export const GAME_EXPIRY_SECONDS = 24 * 60 * 60;
+export const ENDED_GAME_EXPIRY_SECONDS = 15 * 60;
 const getRedisKey = (lobbyCode) => `${HANGMAN_GAME_KEY_PREFIX}${lobbyCode}`;
 
 export async function getGameFromRedis(lobbyCode) {
@@ -22,6 +24,7 @@ export async function getGameFromRedis(lobbyCode) {
 export function prepareGameForRedis(gameObject) {
   const gameCopy = { ...gameObject };
   delete gameCopy.turnTimer;
+  delete gameCopy.lobbyName;
   if (gameCopy.players) {
     const newPlayers = {};
     for (const playerId in gameCopy.players) {
@@ -47,8 +50,19 @@ export async function saveGameToRedis(game) {
   try {
     const gameKey = getRedisKey(game.lobbyCode);
     const gameToSave = prepareGameForRedis(game);
-    await redisClient.set(gameKey, JSON.stringify(gameToSave));
-  } catch (error) {
+
+   const expirySeconds = gameToSave.gameEnded
+       ? ENDED_GAME_EXPIRY_SECONDS  
+       : GAME_EXPIRY_SECONDS; 
+
+    await redisClient.set(
+      gameKey,
+      JSON.stringify(gameToSave),
+      {
+        EX: expirySeconds,
+      }
+    );console.log(`[HangmanStateManager] Hangman game ${game.lobbyCode} saved to Redis with expiry ${expirySeconds}s. Game ended: ${gameToSave.gameEnded}`);
+  }  catch (error) {
     console.error(`Error stringifying or saving game ${game.lobbyCode} to Redis:`, error);
   }
 }

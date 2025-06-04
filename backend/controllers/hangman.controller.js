@@ -176,7 +176,9 @@ async function endGameProcedure(game, outcomeType, messageText) {
       });
   }
   game.rankingsSnapshot = getGameRankings(game);
-  await saveGameToRedis(game);
+   await saveGameStatsToDB(game); 
+   await saveGameToRedis(game);
+  console.log(`[HangmanController] Game ${game.lobbyCode} ended. Saved to Redis with TTL for ended games.`);
   const gameForBroadcast = hydrateGamePlayersWithWs(game);
   if (gameForBroadcast) {
       broadcastToGame(gameForBroadcast, {
@@ -185,8 +187,6 @@ async function endGameProcedure(game, outcomeType, messageText) {
         word: game.word,
       });
   }
-  await saveGameStatsToDB(game);
-  await deleteGameFromRedis(game.lobbyCode);
 }
 
 async function startNextTurn(lobbyCode) {
