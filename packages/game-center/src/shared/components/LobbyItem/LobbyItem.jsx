@@ -43,10 +43,7 @@ const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobi
   return (
     <Chip
       size={isMobile ? "small" : "medium"}
-      label={t('membersLabel', {
-        count: count || 0,
-        maxPart: maxMembers ? `/ ${maxMembers}` : ''
-      })}
+      label={`${count || 0}${maxMembers ? ` / ${maxMembers}` : ''}`}
       icon={<People sx={{ fontSize: isMobile ? 16 : 18 }} />}
       sx={{
         backgroundColor: theme.palette.warning.main,
@@ -54,6 +51,7 @@ const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobi
         fontWeight: 600,
         px: 0.5,
         borderRadius: "16px",
+        flexShrink: 0, 
       }}
     />
   );
@@ -104,7 +102,6 @@ function LobbyItem({ lobby }) {
     setIsMessageModalOpen(true);
   }, []);
 
-
   const handleJoinClick = useCallback(async (passwordProvided) => {
     try {
       const currentMembersCount = membersByLobby[lobby.lobbyCode]?.length || 0;
@@ -129,7 +126,6 @@ function LobbyItem({ lobby }) {
       }
     }
   }, [lobby, membersByLobby, handleJoin, isMember, t, showMessage, joinErrorData]);
-
 
   useEffect(() => {
     if (joinErrorData && joinErrorData.message) {
@@ -158,7 +154,6 @@ function LobbyItem({ lobby }) {
       showMessage(message, severity, title);
     }
   }, [joinErrorData, t, showMessage]);
-
 
   const handleMessageModalClose = useCallback(() => {
     setIsMessageModalOpen(false);
@@ -264,17 +259,21 @@ function LobbyItem({ lobby }) {
             top: 0,
             left: 0,
             right: 0,
-          }
+          },
+         
+          minHeight: { xs: "auto", sm: "140px" },
         }}
       >
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ height: "100%" }}>
+       
           <Box
             sx={{
               display: "flex",
               flexDirection: isMobile ? "column" : "row",
-              alignItems: "center",
+              alignItems: isMobile ? "flex-start" : "center", 
               justifyContent: "space-between",
               gap: 1.5,
+              minHeight: "fit-content",
             }}
           >
             <Typography
@@ -287,6 +286,9 @@ function LobbyItem({ lobby }) {
                 },
                 color: theme.palette.text.primary,
                 flexGrow: 1,
+                wordBreak: "break-word", 
+                lineHeight: 1.2,
+                maxWidth: isMobile ? "100%" : "70%", 
               }}
             >
               {lobby.lobbyName || t('unnamedLobby')}
@@ -297,16 +299,21 @@ function LobbyItem({ lobby }) {
           <Box
             sx={{
               display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              alignItems: isMobile ? "flex-start" : "center",
-              justifyContent: "space-between",
+              flexDirection: "column",
               gap: 2,
+              flexGrow: 1,
             }}
           >
-            <Stack
-              direction={isMobile ? "column" : "row"}
-              spacing={1.5}
-              sx={{ width: isMobile ? "100%" : "auto" }}
+           
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                alignItems: isMobile ? "flex-start" : "center",
+                gap: 1.5,
+                flexWrap: "wrap", 
+                minHeight: "fit-content",
+              }}
             >
               <MembersChip
                 count={membersCount}
@@ -315,25 +322,37 @@ function LobbyItem({ lobby }) {
                 isMobile={isMobile}
                 t={t}
               />
+              
               {lobby.lobbyType === "event" && (
-                <LobbyInfo
-                  startDate={startDate}
-                  startTime={startTime}
-                  endDate={endDate}
-                  endTime={endTime}
-                  isMobile={isMobile}
-                  t={t}
-                />
+                <Box 
+                  sx={{ 
+                    flexGrow: 1, 
+                    maxWidth: isMobile ? "100%" : "auto",
+                    minWidth: isMobile ? "100%" : "280px" 
+                  }}
+                >
+                  <LobbyInfo
+                    startDate={startDate}
+                    startTime={startTime}
+                    endDate={endDate}
+                    endTime={endTime}
+                    isMobile={isMobile}
+                    t={t}
+                  />
+                </Box>
               )}
-            </Stack>
+            </Box>
 
+           
             <Box
               sx={{
                 display: "flex",
-                gap: 1.5,
-                width: isMobile ? "100%" : "auto",
-                justifyContent: isMobile ? "flex-end" : "flex-start",
-                mt: isMobile ? 1 : 0,
+                justifyContent: isMobile ? "center" : "flex-end",
+                alignItems: "center",
+                gap: 1,
+                mt: "auto", 
+                minHeight: "40px", 
+                flexShrink: 0, 
               }}
             >
               <LobbyActions
