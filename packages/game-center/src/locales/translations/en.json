@@ -959,7 +959,9 @@
       "passwordsDoNotMatch": "The passwords do not match. Please try again.",
       "identifierMissing": "Lobby identifier is missing.",
       "genericUpdateFailed": "Failed to update the lobby. Please try again.",
-      "maxMembersLessThanCurrent": "Maximum members ({{newMaxMembers}}) cannot be less than current members ({{currentMembers}})."
+      "maxMembersLessThanCurrent": "Maximum members ({{newMaxMembers}}) cannot be less than current members ({{currentMembers}}).",
+      "validationFailed":"Form validation failed. Please check the fields."
+      
     },
        "invalidPassword": "The password you entered is incorrect. Please try again.",
     "warning": {
@@ -1027,7 +1029,19 @@
   "validation": {
     "required": "{{fieldName}} is required.",
     "minLength": "{{fieldName}} must be at least {{count}} characters long.",
-    "maxLength": "{{fieldName}} cannot be more than {{count}} characters long."
+    "maxLength": "{{fieldName}} cannot be more than {{count}} characters long.",
+    "lobbyNameRequired": "Lobby name is required.",
+      "lobbyNameMaxLength": "Lobby name cannot exceed {{maxLength}} characters.",
+      "gameRequired": "Please select a game.",
+      "maxMembersInvalid": "Max members must be between {{min}} and {{max}}.",
+      "eventStartDateRequired": "Event start date is required.",
+      "eventEndDateRequired": "Event end date is required.",
+      "eventEndDateAfterStart": "Event end date must be after the start date.",
+      "passwordMismatch": "Passwords do not match.",
+      "eventEndDateMustBeAfterStartDate": "Event end date must be after the start date.",
+      "eventStartDateMustBeBeforeEndDate": "Event start date must be before the end date.",
+      "passwordConfirmRequired": "Please confirm your password.",
+      "passwordConfirmMustBeEmptyIfPasswordIsEmpty": "If the password is empty, the confirmation must also be empty."
   },
   "gameNames": {
     "Bingo": "Bingo",
@@ -1091,5 +1105,6 @@
     "message": "Sorry, the page you are looking for does not exist or may have been moved.",
     "goHomeButton": "Go to Homepage"
   },
-  "Search Lobbies by Name...": "Search Lobbies by Name..."
+  "Search Lobbies by Name...": "Search Lobbies by Name...",
+  "Game Not Found!": "Game Not Found!"
 }

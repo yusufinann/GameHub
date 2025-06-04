@@ -957,7 +957,8 @@
        "passwordsDoNotMatch": "Şifreler eşleşmiyor. Lütfen tekrar deneyin.",
        "identifierMissing": "Lobi kodu veya kimlik bilgisi eksik.", 
        "genericUpdateFailed":"Lobi ayarları güncellenemedi. Lütfen tekrar deneyin.",
-      "maxMembersLessThanCurrent": "Maksimum üye sayısı ({{newMaxMembers}}), mevcut üye sayısından ({{currentMembers}}) az olamaz."
+      "maxMembersLessThanCurrent": "Maksimum üye sayısı ({{newMaxMembers}}), mevcut üye sayısından ({{currentMembers}}) az olamaz.",
+      "validationFailed":"Lobi ayarları doğrulaması başarısız oldu. Lütfen tüm alanların doğru şekilde doldurulduğundan emin olun."
     },
     "invalidPassword": "Girdiğiniz şifre yanlış. Lütfen tekrar deneyin.",
     "warning": {
@@ -1024,7 +1025,19 @@
   "validation": {
     "required": "{{fieldName}} alanı zorunludur.",
     "minLength": "{{fieldName}} en az {{count}} karakter uzunluğunda olmalıdır.",
-    "maxLength": "{{fieldName}} en fazla {{count}} karakter uzunluğunda olabilir."
+    "maxLength": "{{fieldName}} en fazla {{count}} karakter uzunluğunda olabilir.",
+    "lobbyNameRequired": "Lobi adı gereklidir.",
+    "lobbyNameMaxLength": "Lobi adı {{maxLength}} karakteri geçemez.",
+    "gameRequired": "Lütfen bir oyun seçin.",
+    "maxMembersInvalid": "Maksimum üye sayısı {{min}} ile {{max}} arasında olmalıdır.",
+    "eventStartDateRequired": "Etkinlik başlangıç tarihi gereklidir.",
+    "eventEndDateRequired": "Etkinlik bitiş tarihi gereklidir.",
+    "eventEndDateAfterStart": "Etkinlik bitiş tarihi başlangıç tarihinden sonra olmalıdır.",
+    "passwordMismatch": "Şifreler eşleşmiyor.",
+    "eventEndDateMustBeAfterStartDate": "Etkinlik bitiş tarihi, başlangıç tarihinden sonra olmalıdır.",
+    "eventStartDateMustBeBeforeEndDate": "Etkinlik başlangıç tarihi, bitiş tarihinden önce olmalıdır.",
+    "passwordConfirmRequired": "Şifre onayı gereklidir.",
+    "passwordConfirmMustBeEmptyIfPasswordIsEmpty": "Şifre boşsa, şifre onayı da boş olmalıdır."
   },
   "gameNames": {
     "Bingo": "Tombala",
@@ -1088,5 +1101,6 @@
     "message": "Üzgünüz, aradığınız sayfa bulunamadı veya taşınmış olabilir.",
     "goHomeButton": "Ana Sayfaya Dön"
   },
-  "Search Lobbies by Name...": "Lobi Adına Göre Ara..."
+  "Search Lobbies by Name...": "Lobi Adına Göre Ara...",
+  "Game Not Found!": "Oyun Bulunamadı!"
 }

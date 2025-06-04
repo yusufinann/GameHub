@@ -22,7 +22,6 @@ function GameSettings({ settings, onSettingsChange, gameId }) {
   } = useContext(GameSettingsContext);
   const theme = useTheme();
   const { t } = useTranslation();
-  console.log("SgameId in GameSettings: ", gameId);
 
   let currentSoundEnabled;
   let currentToggleSound;
