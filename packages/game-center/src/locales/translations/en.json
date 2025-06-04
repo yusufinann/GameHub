@@ -313,35 +313,34 @@
      "hangmanWordSourceModes": "Hangman Word Choice & Host Role"
   },
   "gameModes": {
-    "bingo": {
-      "classic": {
-        "title": "Classic Bingo",
-        "speed": "5s/number",
-        "features": {
-          "0": "Standard rules",
-          "1": "Live marking only",
-          "2": "No history"
-        }
-      },
-      "extended": {
-        "title": "Extended Time",
-        "speed": "10s/number",
-        "features": {
-          "0": "10s visibility",
-          "1": "2 numbers visible",
-          "2": "Mark history"
-        }
-      },
-      "superfast": {
-        "title": "Super Fast",
-        "speed": "3s/number",
-        "features": {
-          "0": "Quick decisions",
-          "1": "3s visibility",
-          "2": "Penalty system"
-        }
+   "bingo": {
+    "classic": {
+      "title": "Classic Bingo",
+      "speed": "5s/number",
+      "features": {
+        "0": "Dive into timeless fun with standard rules!",
+        "1": "Perfect pace for endless excitement",
+        "2": "Stay sharp—complacency is not allowed!"
       }
     },
+    "extended": {
+      "title": "Extended Time",
+      "speed": "10s/number",
+      "features": {
+        "0": "Savor every number with 10s to spare",
+        "1": "Relaxed vibes for a laid-back game",
+        "2": "Extra time to mark and chill"
+      }
+    },
+    "superfast": {
+      "title": "Super Fast",
+      "speed": "3s/number",
+      "features": {
+        "0": "Lightning-speed calls—think quick!",
+        "1": "Only 3s to spot your number—ready, set, go!"
+      }
+    }
+  },
     "competition": {
       "competitive": {
         "title": "Competitive Mode",
@@ -800,7 +799,7 @@
   "Current Rankings": "Current Rankings",
   "View All": "View All",
   "Complete Rankings": "Complete Rankings",
-  "startGameDialog": {
+ "startGameDialog": {
     "title": "Game Mode and Drawing Options",
     "drawingMode": {
       "auto": "Automatic Drawing",
@@ -817,11 +816,11 @@
       "nonCompetitiveLabel": "Non-Competitive Mode (First Bingo Wins!) 🎉"
     },
     "description": {
-      "classicText": "<strong>Classic:</strong> One number every 5 seconds, displayed for 5 seconds; only the latest number can be marked, no history displayed.",
-      "extendedText": "<strong>Extended:</strong> One number every 5 seconds, displayed for 10 seconds; up to 2 numbers visible, history (previous number) is listed and markable.",
-      "superfastText": "<strong>Super Fast:</strong> One number every 3 seconds, displayed for 3 seconds; quick decisions required, wrong \"Bingo!\" calls are penalized.",
-      "competitiveText": "<strong>Competitive Mode:</strong> Players are ranked by score and completion time. The game continues until all numbers are drawn or all players have completed Bingo.",
-      "nonCompetitiveText": "<strong>Non-Competitive Mode:</strong> The first player to call \"Bingo!\" wins immediately, and the game ends."
+      "classicText": "Classic: One number every 5 seconds, displayed for 5 seconds; only the latest number can be marked.",
+      "extendedText": "Extended: One number every 10 seconds, displayed for 10 seconds. Only the latest number can be marked. Relaxed pace, have fun!",
+      "superfastText": "Super Fast: One number every 3 seconds, displayed for 3 seconds; quick decisions required.",
+      "competitiveText": "Competitive Mode: Players are ranked by score and completion time. The game continues until all numbers are drawn or all players have completed Bingo.",
+      "nonCompetitiveText": "Non-Competitive Mode: The first player to call \"Bingo!\" wins immediately, and the game ends."
     },
     "cancelButtonText": "Cancel",
     "startButtonText": "Start Game"

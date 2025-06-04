@@ -312,35 +312,34 @@
     "hangmanWordSourceModes": "Adam Asmaca Kelime Seçimi ve Host Rolü"
   },
   "gameModes": {
-    "bingo": {
-      "classic": {
-        "title": "Klasik Bingo",
-        "speed": "5sn/sayı",
-        "features": {
-          "0": "Standart kurallar",
-          "1": "Sadece canlı işaretleme",
-          "2": "Geçmiş yok"
-        }
-      },
-      "extended": {
-        "title": "Uzatılmış Süre",
-        "speed": "10sn/sayı",
-        "features": {
-          "0": "10sn görünürlük",
-          "1": "2 sayı görünür",
-          "2": "İşaretleme geçmişi"
-        }
-      },
-      "superfast": {
-        "title": "Süper Hızlı",
-        "speed": "3sn/sayı",
-        "features": {
-          "0": "Hızlı kararlar",
-          "1": "3sn görünürlük",
-          "2": "Ceza sistemi"
-        }
+   "bingo": {
+    "classic": {
+      "title": "Klasik Bingo",
+      "speed": "5s/sayı",
+      "features": {
+        "0": "Klasik eğlenceye atıl, standart kurallarla!",
+        "1": "Sonsuz heyecan için ideal tempo",
+        "2": "Dikkatini kaybetme—rahatlamak yasak!"
       }
     },
+    "extended": {
+      "title": "Uzun Süre",
+      "speed": "10s/sayı",
+      "features": {
+        "0": "Her sayıyı 10s ile yaşa",
+        "1": "Rahat bir oyun deneyimi",
+        "2": "İşaretlemek için ekstra zaman, rahatla!"
+      }
+    },
+    "superfast": {
+      "title": "Süper Hızlı",
+      "speed": "3s/sayı",
+      "features": {
+        "0": "Yıldırım hızıyla sayılar—hızlı düşün!",
+        "1": "Sadece 3s var—hazır ol, başla!"
+      }
+    }
+  },
     "hangman": {
       "languageSelection": {
         "title": "Dil Seçenekleri",
@@ -798,7 +797,7 @@
   "Current Rankings": "Güncel Sıralama",
   "View All": "Tümünü Gör",
   "Complete Rankings": "Tam Sıralama",
-  "startGameDialog": {
+   "startGameDialog": {
     "title": "Oyun Modu ve Çekiliş Seçenekleri",
     "drawingMode": {
       "auto": "Otomatik Çekiliş",
@@ -815,11 +814,11 @@
       "nonCompetitiveLabel": "Rekabetçi Olmayan Mod (İlk Tombala Kazanır!) 🎉"
     },
     "description": {
-      "classicText": "<strong>Klasik:</strong> Her 5 saniyede bir numara, 5 saniye görüntülenir; sadece son numara işaretlenebilir, geçmiş gösterilmez.",
-      "extendedText": "<strong>Uzatılmış:</strong> Her 5 saniyede bir numara, 10 saniye görüntülenir; en fazla 2 numara görünür, geçmiş (önceki numara) listelenir ve işaretlenebilir.",
-      "superfastText": "<strong>Süper Hızlı:</strong> Her 3 saniyede bir numara, 3 saniye görüntülenir; hızlı kararlar gerekir, yanlış \"Tombala!\" çağrıları cezalandırılır.",
-      "competitiveText": "<strong>Rekabetçi Mod:</strong> Oyuncular puana ve tamamlama süresine göre sıralanır. Tüm numaralar çekilene veya tüm oyuncular Tombala'yı tamamlayana kadar oyun devam eder.",
-      "nonCompetitiveText": "<strong>Rekabetçi Olmayan Mod:</strong> İlk \"Tombala!\" diyen oyuncu hemen kazanır ve oyun sona erer."
+      "classicText": "Klasik: Her 5 saniyede bir numara, 5 saniye görüntülenir; sadece son numara işaretlenebilir.",
+      "extendedText": "Uzun Süreli: Her 10 saniyede bir sayı, 10 saniye ekranda kalır. Sadece en son sayı işaretlenebilir. Rahat tempo, keyfini çıkar!",
+      "superfastText": "Süper Hızlı: Her 3 saniyede bir numara, 3 saniye görüntülenir; hızlı kararlar gerekir.",
+      "competitiveText": "Rekabetçi Mod: Oyuncular puana ve tamamlama süresine göre sıralanır. Tüm numaralar çekilene veya tüm oyuncular Tombala'yı tamamlayana kadar oyun devam eder.",
+      "nonCompetitiveText": "Rekabetçi Olmayan Mod: İlk \"Tombala!\" diyen oyuncu hemen kazanır ve oyun sona erer."
     },
     "cancelButtonText": "İptal",
     "startButtonText": "Oyunu Başlat"

@@ -133,16 +133,17 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
         opacity: 0.4
       } : {}
     }}>
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        height: '4px',
-        width: '30%',
-        background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-        transition: 'all 0.5s ease',
-        opacity: 0.7,
-        className: 'mode-highlight'
+      <Box
+        className="mode-highlight"
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          height: '4px',
+          width: '30%',
+          background: `linear-gradient(90deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+          transition: 'all 0.5s ease',
+          opacity: 0.7,
       }} />
 
       <Box sx={{
@@ -187,25 +188,28 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
       )}
 
       <Box component="ul" sx={{
-        pl: 2,
-        '& li': {
-          color: theme.palette.text.primary,
-          fontSize: '0.9rem',
-          mb: 0.5,
-          position: 'relative',
-          paddingLeft: isCompetition ? '15px' : '0',
-          '&:before': {
-            content: isCompetition ? '"▹"' : '"•"',
-            color: theme.palette.secondary.main,
-            marginRight: '8px',
-            fontSize: isCompetition ? '1rem' : '1.2rem',
-            position: isCompetition ? 'absolute' : 'static',
-            left: isCompetition ? 0 : 'auto'
-          }
-        }
+        pl: 0,
+        m: 0,
+        listStyle: 'none',
       }}>
         {mode.features.map((feature, idx) => (
-          <li key={idx}>{feature}</li>
+          <Box component="li" key={idx} sx={{
+            color: theme.palette.text.primary,
+            fontSize: '0.9rem',
+            mb: 0.5,
+            position: 'relative',
+            paddingLeft: isCompetition ? '15px' : '0',
+            '&:before': {
+              content: isCompetition ? '"▹"' : '"•"',
+              color: theme.palette.secondary.main,
+              marginRight: isCompetition ? '0px' : '8px',
+              fontSize: isCompetition ? '1rem' : '1.2rem',
+              position: isCompetition ? 'absolute' : 'static',
+              left: isCompetition ? 0 : 'auto',
+            }
+          }}>
+            {feature}
+          </Box>
         ))}
       </Box>
     </Paper>
@@ -216,7 +220,7 @@ function GameModeCard({ mode, theme, isCompetition = false }) {
 function GameInfoDetails({ game, filteredLobbies }) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { gameId } = useParams(); 
+  const { gameId } = useParams();
 
   const BINGO_GAME_ID = '1';
   const HANGMAN_GAME_ID = '2';
@@ -227,7 +231,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
     } else if (gameId === HANGMAN_GAME_ID) {
       return 'hangmanLanguage';
     }
-    return; 
+    return '';
   };
 
   const [activeTab, setActiveTab] = useState(getInitialActiveTab());
@@ -236,7 +240,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
 
   useEffect(() => {
     setActiveTab(getInitialActiveTab());
-  }, [gameId, t]); 
+  }, [gameId, t]);
 
 
   const allMemberAvatars = filteredLobbies
@@ -260,7 +264,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
   };
 
   const getGameModesData = () => {
-    if (gameId === BINGO_GAME_ID) { // Bingo
+    if (gameId === BINGO_GAME_ID) {
       return {
         bingo: [
           {
@@ -300,7 +304,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
           }
         ]
       };
-    } else if (gameId === HANGMAN_GAME_ID) { // Hangman
+    } else if (gameId === HANGMAN_GAME_ID) {
       const hangmanModesBase = t('gameModes.hangman', { returnObjects: true });
       if (hangmanModesBase && hangmanModesBase.languageSelection && hangmanModesBase.wordSource) {
         return {
@@ -315,7 +319,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
         };
       }
     }
-    return { bingo: [], competition: [], hangmanLanguage: [], hangmanWordSource: [] }; 
+    return { bingo: [], competition: [], hangmanLanguage: [], hangmanWordSource: [] };
   };
 
   const gameModesData = getGameModesData();
@@ -461,7 +465,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
               {gameModesData.hangmanLanguage?.map((mode) => (
-                <GameModeCard key={mode.modeKey} mode={mode} theme={theme} isCompetition={mode.isCompetition || false} />
+                <GameModeCard key={mode.modeKey || mode.title} mode={mode} theme={theme} isCompetition={mode.isCompetition || false} />
               ))}
             </Box>
            </Box>
@@ -473,7 +477,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
               {gameModesData.hangmanWordSource?.map((mode) => (
-                <GameModeCard key={mode.modeKey} mode={mode} theme={theme} isCompetition={mode.isCompetition || false} />
+                <GameModeCard key={mode.modeKey || mode.title} mode={mode} theme={theme} isCompetition={mode.isCompetition || false} />
               ))}
             </Box>
            </Box>
@@ -561,7 +565,7 @@ function GameInfoDetails({ game, filteredLobbies }) {
           background: theme.palette.background.paper, borderRadius: '16px', mt: 1,
           padding: { xs: 2, sm: 3 }, boxShadow: `0 4px 20px ${theme.palette.background.elevation[2]}`
         }}>
-          <Box sx={{ display: 'flex', gap: 2, mb: 3, borderBottom: `1px solid ${theme.palette.background.offwhite}`, pb: 1 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 3, borderBottom: `1px solid ${theme.palette.background.offwhite}`, pb: 1, flexWrap: 'wrap' }}>
             {tabButtonsToRender}
           </Box>
           {gameModeContentToRender}
@@ -595,7 +599,15 @@ function GameInfoDetails({ game, filteredLobbies }) {
                 '&:after': { content: `"${index + 1}"`, position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: theme.palette.primary.contrastText, fontWeight: 'bold', fontSize: '0.8rem', zIndex: 1 }
               }}>
                 <ListItemText
-                  primaryTypographyProps={{ color: theme.palette.text.primary, fontSize: '1.1rem', fontWeight: 500 }}
+                  slotProps={{
+                    primary: {
+                      sx: {
+                        color: theme.palette.text.primary,
+                        fontSize: '1.1rem',
+                        fontWeight: 500,
+                      },
+                    },
+                  }}
                   primary={t(stepKey)}
                 />
               </ListItem>
