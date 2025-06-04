@@ -23,6 +23,7 @@ import gamesRouter from './routes/dummyGames.routes.js';
 
 import { initializeWebSocket as initializeLobbyWebSocket } from "./controllers/lobby.controller.js";
 import { initializeFriendWebSocket } from "./controllers/friend.controller.js";
+import { restoreActiveBingoTimers } from "./controllers/bingo.game.controller.js";
 
 dotenv.config();
 
@@ -99,8 +100,10 @@ async function initializeApp() {
     server.listen(PORT, () => {
       console.log(`Sunucu ${PORT} portunda çalışıyor.`);
       console.log(`Frontend URL: ${FRONTEND_URL}`);
-      console.log(`Node Environment: ${NODE_ENV}`);
     });
+    restoreActiveBingoTimers(redisClient).catch(err => {
+        console.error("Failed to restore active bingo timers on startup:", err);
+      });
 
   } catch (err) {
     console.error("Uygulama başlatılırken kritik hata:", err);

@@ -10,11 +10,9 @@ export function generateBingoTicket() {
     const ticket = Array(3)
       .fill(null)
       .map(() => Array(9).fill(null));
-    const layout = Array(3)
-      .fill(null)
-      .map(() => Array(9).fill(false));
+    let generatedLayout = null; 
 
-    let validLayout = false;
+    let validLayoutFound = false;
     for (
       let layoutAttempt = 0;
       layoutAttempt < MAX_LAYOUT_ATTEMPTS;
@@ -24,112 +22,156 @@ export function generateBingoTicket() {
         .fill(null)
         .map(() => Array(9).fill(false));
       const colCounts = Array(9).fill(0);
-      const rowCellCounts = Array(3).fill(0);
+      
+     
+      const useThreeDoubleRows = Math.random() < 0.5; 
+      let possibleLayoutThisAttempt = true;
 
-      const rowIndices = shuffleArray([0, 1, 2]);
-      const doubleRowIndices = [rowIndices[0], rowIndices[1]];
-      const singleRowIndex = rowIndices[2];
-      let possibleLayout = true;
+      if (useThreeDoubleRows) {
+       
+        for (let r = 0; r < 3; r++) {
+          let rowPlaced = false;
+          for (let i = 0; i < MAX_LAYOUT_ATTEMPTS / 10; i++) {
+            const testRow = Array(9).fill(false);
+            const pairStartCol = Math.floor(Math.random() * 8); // 0-7 arası
+            testRow[pairStartCol] = true;
+            testRow[pairStartCol + 1] = true;
+            const remainingCols = shuffleArray(
+              Array.from({ length: 9 }, (_, k) => k).filter(
+                (k) => k !== pairStartCol && k !== pairStartCol + 1
+              )
+            );
+            if (remainingCols.length < 3) continue;
+            for (let j = 0; j < 3; j++) testRow[remainingCols[j]] = true;
 
-      for (const r of doubleRowIndices) {
-        let rowPlaced = false;
-        for (let i = 0; i < MAX_LAYOUT_ATTEMPTS / 10; i++) {
-          const testRow = Array(9).fill(false);
-          const pairStartCol = Math.floor(Math.random() * 8);
-          testRow[pairStartCol] = true;
-          testRow[pairStartCol + 1] = true;
-          const remainingCols = shuffleArray(
-            Array.from({ length: 9 }, (_, k) => k).filter(
-              (k) => k !== pairStartCol && k !== pairStartCol + 1
-            )
-          );
-          if (remainingCols.length < 3) continue;
-          for (let j = 0; j < 3; j++) testRow[remainingCols[j]] = true;
-          if (isValidDoubleRow(testRow)) {
-            tempLayout[r] = testRow;
-            rowPlaced = true;
+            if (isValidDoubleRow(testRow)) {
+              tempLayout[r] = testRow;
+              rowPlaced = true;
+              break;
+            }
+          }
+          if (!rowPlaced) {
+            possibleLayoutThisAttempt = false;
             break;
           }
         }
-        if (!rowPlaced) {
-          possibleLayout = false;
-          break;
+      } else {
+       
+        const rowIndices = shuffleArray([0, 1, 2]);
+        const doubleRowIndices = [rowIndices[0], rowIndices[1]];
+        const singleRowIndex = rowIndices[2];
+
+        for (const r of doubleRowIndices) {
+          let rowPlaced = false;
+          for (let i = 0; i < MAX_LAYOUT_ATTEMPTS / 10; i++) {
+            const testRow = Array(9).fill(false);
+            const pairStartCol = Math.floor(Math.random() * 8);
+            testRow[pairStartCol] = true;
+            testRow[pairStartCol + 1] = true;
+            const remainingCols = shuffleArray(
+              Array.from({ length: 9 }, (_, k) => k).filter(
+                (k) => k !== pairStartCol && k !== pairStartCol + 1
+              )
+            );
+            if (remainingCols.length < 3) continue;
+            for (let j = 0; j < 3; j++) testRow[remainingCols[j]] = true;
+            if (isValidDoubleRow(testRow)) {
+              tempLayout[r] = testRow;
+              rowPlaced = true;
+              break;
+            }
+          }
+          if (!rowPlaced) {
+            possibleLayoutThisAttempt = false;
+            break;
+          }
+        }
+        if (!possibleLayoutThisAttempt) continue; 
+
+        let singleRowPlaced = false;
+        for (let i = 0; i < MAX_LAYOUT_ATTEMPTS / 10; i++) {
+          const testRow = Array(9).fill(false);
+          const chosenCols = shuffleArray(Array.from({ length: 9 }, (_, k) => k));
+          for (let j = 0; j < 5; j++) testRow[chosenCols[j]] = true;
+          if (isValidSingleRow(testRow)) {
+            tempLayout[singleRowIndex] = testRow;
+            singleRowPlaced = true;
+            break;
+          }
+        }
+        if (!singleRowPlaced) {
+          possibleLayoutThisAttempt = false;
         }
       }
-      if (!possibleLayout) continue;
 
-      let singleRowPlaced = false;
-      for (let i = 0; i < MAX_LAYOUT_ATTEMPTS / 10; i++) {
-        const testRow = Array(9).fill(false);
-        const chosenCols = shuffleArray(Array.from({ length: 9 }, (_, k) => k));
-        for (let j = 0; j < 5; j++) testRow[chosenCols[j]] = true;
-        if (isValidSingleRow(testRow)) {
-          tempLayout[singleRowIndex] = testRow;
-          singleRowPlaced = true;
-          break;
-        }
-      }
-      if (!singleRowPlaced) continue;
+      if (!possibleLayoutThisAttempt) continue; 
 
+    
+      const currentRowCellCounts = Array(3).fill(0);
       for (let r = 0; r < 3; r++) {
         for (let c = 0; c < 9; c++) {
           if (tempLayout[r][c]) {
-            rowCellCounts[r]++;
+            currentRowCellCounts[r]++;
             colCounts[c]++;
           }
         }
       }
 
-      if (
-        rowCellCounts.every((count) => count === 5) &&
-        colCounts.every((count) => count >= 1 && count <= 3)
-      ) {
-        if (
-          isValidDoubleRow(tempLayout[doubleRowIndices[0]]) &&
-          isValidDoubleRow(tempLayout[doubleRowIndices[1]]) &&
-          isValidSingleRow(tempLayout[singleRowIndex])
-        ) {
-          for (let r = 0; r < 3; r++) layout[r] = [...tempLayout[r]];
-          validLayout = true;
-          break;
-        }
+      if (!currentRowCellCounts.every((count) => count === 5)) {
+        continue; 
       }
+      if (!colCounts.every((count) => count >= 1 && count <= 3)) {
+        continue; 
+      }
+      
+      
+      generatedLayout = tempLayout.map(r_item => [...r_item]); 
+      validLayoutFound = true;
+      break; 
     }
 
-    if (!validLayout) continue;
+    if (!validLayoutFound) {
+      continue; 
+    }
 
+  
     const numbersByCol = Array(9)
       .fill(null)
       .map((_, i) => {
         const min = i * 10 + (i === 0 ? 1 : 0);
-        const max = i * 10 + (i === 8 ? 10 : 9);
+        const max = i * 10 + (i === 8 ? 10 : 9); 
         return shuffleArray(
           Array.from({ length: max - min + 1 }, (_, k) => min + k)
         );
       });
 
+    let numberAssignmentError = false;
     for (let c = 0; c < 9; c++) {
       const colNumsToPlace = [];
       for (let r = 0; r < 3; r++) {
-        if (layout[r][c]) {
-          if (numbersByCol[c].length === 0)
-            return {
-              numbersGrid: null,
-              layout: null,
-              error: "Not enough numbers for column assignment.",
-            };
+        if (generatedLayout[r][c]) {
+          if (numbersByCol[c].length === 0) {
+       
+            numberAssignmentError = true;
+            break; 
+          }
           colNumsToPlace.push(numbersByCol[c].pop());
         }
       }
+      if (numberAssignmentError) break;
+
       colNumsToPlace.sort((a, b) => a - b);
       let currentNumIndex = 0;
       for (let r = 0; r < 3; r++) {
-        if (layout[r][c]) {
+        if (generatedLayout[r][c]) {
           ticket[r][c] = colNumsToPlace[currentNumIndex++];
         }
       }
     }
 
+    if (numberAssignmentError) continue; 
+
+   
     let finalCheckOk = true;
     for (let r = 0; r < 3; r++) {
       if (ticket[r].filter((n) => n !== null).length !== 5) {
@@ -138,25 +180,27 @@ export function generateBingoTicket() {
       }
     }
     if (!finalCheckOk) continue;
+
     for (let c = 0; c < 9; c++) {
       let count = 0;
       for (let r = 0; r < 3; r++) if (ticket[r][c] !== null) count++;
-      if (count === 0) {
+      if (count === 0) { 
         finalCheckOk = false;
         break;
       }
     }
     if (!finalCheckOk) continue;
 
-    return { numbersGrid: ticket, layout };
+    return { numbersGrid: ticket, layout: generatedLayout }; 
   }
+
   console.error(
-    "Failed to generate valid bingo ticket after MAX_MAIN_ATTEMPTS."
+    "MAX_MAIN_ATTEMPTS denemesinden sonra geçerli bir bingo bileti oluşturulamadı."
   );
   return {
     numbersGrid: null,
     layout: null,
-    error: "Failed to generate valid ticket layout.",
+    error: "Tüm denemelerden sonra geçerli bir bilet layout'u oluşturulamadı.",
   };
 }
 export function getGameRankings(game) {

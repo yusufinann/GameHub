@@ -87,7 +87,6 @@ if (gameToSave.hasOwnProperty('lobbyName')) {
         EX: expirySeconds, 
       }
     );
-    console.log(`[saveGameToRedis] Game for lobby ${lobbyCode} saved to Redis with TTL: ${expirySeconds}s. Game ended: ${gameToSave.gameEnded}`);
   } catch (error) {
     console.error(`[saveGameToRedis] Error saving game to Redis for lobby ${lobbyCode}:`, error);
   }
