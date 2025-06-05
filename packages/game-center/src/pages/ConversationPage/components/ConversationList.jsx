@@ -17,6 +17,7 @@ import {
   Badge,
   IconButton,
   Toolbar,
+  ListItemButton, 
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -46,7 +47,7 @@ const ConversationList = ({
 }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(initialTabValue);
-  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [selectedFriend, setSelectedFriend] = useState(null); 
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,20 +56,17 @@ const ConversationList = ({
     if (tabValue === 2) {
       fetchFriendGroups();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabValue]);
 
   useEffect(() => {
-    // Ensure tabValue is set correctly on initial render based on initialTabValue prop
     setTabValue(initialTabValue);
   }, [initialTabValue]);
 
-  // Set selected friend based on selectedConversation
   useEffect(() => {
     if (selectedConversation && selectedConversation.type === "private") {
       const friend = friends.find(f => f.id === selectedConversation.id);
       if (friend) {
-        setSelectedFriend(friend);
+        setSelectedFriend(friend); 
       }
     }
   }, [selectedConversation, friends]);
@@ -84,8 +82,6 @@ const ConversationList = ({
     }
 
     navigate(path);
-    setSelectedFriend(null);
-    onFriendSelect(null);
   };
 
   useEffect(() => {
@@ -101,13 +97,12 @@ const ConversationList = ({
     } else if (path.endsWith("/conversation/all/friend-group")) {
       setTabValue(2);
     } else if (path.endsWith("/conversation")) {
-      setTabValue(2); 
+      setTabValue(initialTabValue); 
     }
-  }, [location.pathname]);
+  }, [location.pathname, initialTabValue]);
 
   const handleFriendSelect = (friend) => {
-    setSelectedFriend(friend);
-    onFriendSelect(friend);
+    onFriendSelect(friend); 
     navigate(`/conversation/all/friend/${friend.id}`);
   };
 
@@ -139,7 +134,7 @@ const ConversationList = ({
               : theme.palette.grey[500],
           }}
         />
-        <Typography variant="body2">
+        <Typography variant="body2" component="span"> 
           {isOnline ? t("statusOnline") : t("statusOffline")}
         </Typography>
       </Box>
@@ -190,7 +185,7 @@ const ConversationList = ({
               sx={{ mr: 1 }}
             >
               <IconButton
-                color={theme.palette.text.primary}
+                sx={{ color: theme.palette.text.primary }} 
                 aria-label={t("friendRequestsAriaLabel")}
               >
                 <MailIcon />
@@ -206,62 +201,66 @@ const ConversationList = ({
             <List>
               {friends.map((friend) => (
                 <ListItem
-                  button
                   key={friend.id}
-                  selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
-                  onClick={() => handleFriendSelect(friend)}
-                  sx={{
-                    mb: 1,
-                    borderRadius: 2,
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      backgroundColor: theme.palette.action.hover,
-                      transform: "translateY(-2px)",
-                      boxShadow: 1,
-                    },
-                    "&.Mui-selected": {
-                      backgroundColor: theme.palette.success.lighter,
-                      "&:hover": {
-                        backgroundColor: theme.palette.success.light,
-                      },
-                    },
-                  }}
+                  disablePadding 
+                  sx={{ mb: 1 }} 
                 >
-                  <ListItemAvatar>
-                    <Badge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                      variant="dot"
-                      sx={{
-                        "& .MuiBadge-badge": {
-                          backgroundColor: friend.isOnline
-                            ? theme.palette.success.main
-                            : theme.palette.grey[500],
-                          boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                  <ListItemButton
+                    selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
+                    onClick={() => handleFriendSelect(friend)}
+                    sx={{
+                      borderRadius: 2,
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                        transform: "translateY(-2px)",
+                        boxShadow: 1,
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: theme.palette.success.lighter || theme.palette.success.light, 
+                        "&:hover": {
+                          backgroundColor: theme.palette.success.light || theme.palette.success.main, 
                         },
-                      }}
-                    >
-                      <Avatar
-                        src={friend.avatar || undefined}
+                      },
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        variant="dot"
                         sx={{
-                          bgcolor: friend.isOnline
-                            ? theme.palette.success.main
-                            : theme.palette.grey[400],
-                          boxShadow: 2,
+                          "& .MuiBadge-badge": {
+                            backgroundColor: friend.isOnline
+                              ? theme.palette.success.main
+                              : theme.palette.grey[500],
+                            boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                          },
                         }}
                       >
-                        {!friend.avatar && <PersonIcon />}
-                      </Avatar>
-                    </Badge>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="subtitle1" fontWeight="medium">
-                        {friend.username || friend.name || `User-${friend.id}`}
-                      </Typography>
-                    }
-                    secondary={renderFriendStatus(friend)}
-                  />
+                        <Avatar
+                          src={friend.avatar || undefined}
+                          sx={{
+                            bgcolor: friend.isOnline
+                              ? theme.palette.success.main
+                              : theme.palette.grey[400],
+                            boxShadow: 2,
+                          }}
+                        >
+                          {!friend.avatar && <PersonIcon />}
+                        </Avatar>
+                      </Badge>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle1" fontWeight="medium">
+                          {friend.username || friend.name || `User-${friend.id}`}
+                        </Typography>
+                      }
+                      secondary={renderFriendStatus(friend)}
+                      secondaryTypographyProps={{ component: 'div' }} 
+                    />
+                  </ListItemButton>
                 </ListItem>
               ))}
 
@@ -299,7 +298,7 @@ const ConversationList = ({
               onDeleteFriendGroup={onDeleteFriendGroup}
               onLeaveFriendGroup={handleLeaveFriendGroup}
               onEditFriendGroup={onEditFriendGroup}
-              t={t} 
+              t={t}
             />
           )}
 
@@ -324,7 +323,7 @@ const ConversationList = ({
                 onDeleteFriendGroup={onDeleteFriendGroup}
                 onLeaveFriendGroup={handleLeaveFriendGroup}
                 onEditFriendGroup={onEditFriendGroup}
-                t={t} 
+                t={t}
               />
               <Divider sx={{ my: 2 }} />
 
@@ -342,55 +341,60 @@ const ConversationList = ({
 
               {friends.map((friend) => (
                 <ListItem
-                  button
                   key={`all-friend-${friend.id}`}
-                  selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
-                  onClick={() => handleFriendSelect(friend)}
-                  sx={{
-                    mb: 1,
-                    borderRadius: 2,
-                    "&:hover": {
-                      backgroundColor: theme.palette.action.hover,
-                      transform: "translateY(-2px)",
-                      boxShadow: 1,
-                    },
-                    "&.Mui-selected": {
-                      backgroundColor: theme.palette.success.lighter,
-                    },
-                  }}
+                  disablePadding
+                  sx={{ mb: 1 }}
                 >
-                  <ListItemAvatar>
-                    <Badge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                      variant="dot"
-                      sx={{
-                        "& .MuiBadge-badge": {
-                          backgroundColor: friend.isOnline
-                            ? theme.palette.success.main
-                            : theme.palette.grey[500],
-                          boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-                        },
-                      }}
-                    >
-                      <Avatar
-                        src={friend.avatar || undefined}
+                  <ListItemButton
+                    selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
+                    onClick={() => handleFriendSelect(friend)}
+                    sx={{
+                      borderRadius: 2,
+                      transition: "all 0.2s", 
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                        transform: "translateY(-2px)",
+                        boxShadow: 1,
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: theme.palette.success.lighter || theme.palette.success.light, 
+                      },
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        variant="dot"
                         sx={{
-                          bgcolor: friend.isOnline
-                            ? theme.palette.success.main
-                            : theme.palette.grey[400],
+                          "& .MuiBadge-badge": {
+                            backgroundColor: friend.isOnline
+                              ? theme.palette.success.main
+                              : theme.palette.grey[500],
+                            boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                          },
                         }}
                       >
-                        {!friend.avatar && <PersonIcon />}
-                      </Avatar>
-                    </Badge>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      friend.username || friend.name || `User-${friend.id}`
-                    }
-                    secondary={renderFriendStatus(friend)}
-                  />
+                        <Avatar
+                          src={friend.avatar || undefined}
+                          sx={{
+                            bgcolor: friend.isOnline
+                              ? theme.palette.success.main
+                              : theme.palette.grey[400],
+                          }}
+                        >
+                          {!friend.avatar && <PersonIcon />}
+                        </Avatar>
+                      </Badge>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        friend.username || friend.name || `User-${friend.id}`
+                      }
+                      secondary={renderFriendStatus(friend)}
+                      secondaryTypographyProps={{ component: 'div' }} // FIX: Prevent p > div
+                    />
+                  </ListItemButton>
                 </ListItem>
               ))}
               {friends.length === 0 && (

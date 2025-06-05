@@ -12,16 +12,16 @@ import {
   Stars as StarsIcon,
 } from "@mui/icons-material";
 import LobbyTimer from "./LobbyTimer";
-import ConfirmModal from '../../../../../shared/components/ConfirmModal'; 
+import ConfirmModal from '../../../../../shared/components/ConfirmModal';
 
-const GameAreaHeader = ({ 
-  lobbyInfo, 
-  isHost, 
-  onDelete: onDeleteProp, 
-  onLeave: onLeaveProp,   
-  isDeletingLobby, 
+const GameAreaHeader = ({
+  lobbyInfo,
+  isHost,
+  onDelete: onDeleteProp,
+  onLeave: onLeaveProp,
+  isDeletingLobby,
   isLeavingLobby,
-  t 
+  t
 }) => {
   const theme = useTheme();
   const [confirmModalState, setConfirmModalState] = useState({
@@ -30,7 +30,7 @@ const GameAreaHeader = ({
     message: '',
     confirmText: '',
     confirmButtonColor: 'primary',
-    action: null, 
+    action: null,
   });
 
   const getGameName = (gameId) => {
@@ -44,7 +44,7 @@ const GameAreaHeader = ({
       case "4":
         return t("Chess Game");
       default:
-        return t("Other Game"); 
+        return t("Other Game");
     }
   };
 
@@ -92,7 +92,7 @@ const GameAreaHeader = ({
           background: `linear-gradient(90deg, ${theme.palette.primary.darker}, ${theme.palette.success.main})`,
           color: theme.palette.text.contrast,
           boxShadow: `0 6px 24px ${theme.palette.primary.main}66`,
-          borderTopRighttRadius:'24px', 
+          borderTopRighttRadius:'24px',
         }}
       >
         <Box
@@ -103,36 +103,38 @@ const GameAreaHeader = ({
             alignItems: "center",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography
+          {/* H4 VE H5'İ İÇEREN ANA BOX. H4 VE H5 ARASINDAKİ BOŞLUK İÇİN 'gap' EKLENDİ */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 /* veya istediğiniz bir değer */ }}>
+            <Typography // BU <h4> ETİKETİ
               variant="h4"
               sx={{
                 fontWeight: "bold",
                 display: "flex",
                 alignItems: "center",
-                gap: 1.5,
+                gap: 1.5, // GameIcon ve lobbyInfo.lobbyName arasındaki boşluk
                 color: theme.palette.text.contrast,
                 textShadow: `2px 2px 4px ${theme.palette.background.elevation[2]}`,
               }}
             >
               <GameIcon fontSize="large" />
               {lobbyInfo.lobbyName}
-              <Typography
-                variant="h5"
-                sx={{
-                  color: theme.palette.info.light,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  fontWeight: "bold",
-                  textShadow: `1px 1px 2px ${theme.palette.background.elevation[1]}`,
-                }}
-              >
-                <StarsIcon fontSize="large" />
-                {getGameName(lobbyInfo.game)}
-              </Typography>
             </Typography>
-            
+
+            {/* H5 ŞİMDİ H4'ÜN KARDEŞİ (sibling) */}
+            <Typography // BU <h5> ETİKETİ
+              variant="h5"
+              sx={{
+                color: theme.palette.info.light,
+                display: "flex",
+                alignItems: "center",
+                gap: 2, // StarsIcon ve getGameName arasındaki boşluk
+                fontWeight: "bold",
+                textShadow: `1px 1px 2px ${theme.palette.background.elevation[1]}`,
+              }}
+            >
+              <StarsIcon fontSize="large" />
+              {getGameName(lobbyInfo.game)}
+            </Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
@@ -140,9 +142,9 @@ const GameAreaHeader = ({
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleOpenDeleteConfirm} 
+                onClick={handleOpenDeleteConfirm}
                 startIcon={<ExitIcon />}
-                disabled={isDeletingLobby} 
+                disabled={isDeletingLobby}
                 sx={{
                   borderRadius: "16px",
                   textTransform: "none",
@@ -156,7 +158,6 @@ const GameAreaHeader = ({
                   },
                 }}
               >
-               
                 {isDeletingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : t('Delete Lobby')}
               </Button>
             )}
@@ -183,17 +184,16 @@ const GameAreaHeader = ({
               }}
               onClick={handleOpenLeaveConfirm}
             >
-      
               {isLeavingLobby ? <CircularProgress size={24} sx={{ color: theme.palette.text.contrast, mr: 1 }} /> : t('Leave Lobby')}
             </Button>
           </Box>
         </Box>
-        
+
         {lobbyInfo.lobbyType === "event" && (
-          <Box 
-            sx={{ 
-              px: 1.5, 
-              pb: 1, 
+          <Box
+            sx={{
+              px: 1.5,
+              pb: 1,
               borderTop: `1px solid ${theme.palette.primary.light}40`,
               mt: 0.5
             }}
@@ -211,7 +211,6 @@ const GameAreaHeader = ({
         message={confirmModalState.message}
         confirmText={confirmModalState.confirmText}
         confirmButtonColor={confirmModalState.confirmButtonColor}
-    
         isLoading={
           (confirmModalState.action === 'delete' && isDeletingLobby) ||
           (confirmModalState.action === 'leave' && isLeavingLobby)

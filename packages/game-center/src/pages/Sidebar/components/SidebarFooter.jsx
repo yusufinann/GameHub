@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import { Box, Popover, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
@@ -30,16 +30,17 @@ const StyledFooterItem = styled(Box)(({ theme }) => ({
   margin: "5px 0px",
   padding: "8px",
   borderRadius: "50%",
-  transition: "all 0.2s ease-in-out",
+  transition: "background-color 0.2s ease-in-out, color 0.2s ease-in-out",
   "&:hover": {
     color: theme.palette.primary.main,
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
     cursor: "pointer",
-    transform: "translateY(-2px)"
   },
 }));
 
-const ThemeOption = styled(Box)(({ theme, active }) => ({
+const OptionItem = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'active'
+})(({ theme, active }) => ({
   display: "flex",
   alignItems: "center",
   padding: "10px 16px",
@@ -48,46 +49,16 @@ const ThemeOption = styled(Box)(({ theme, active }) => ({
   cursor: "pointer",
   backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : "transparent",
   border: active ? `2px solid ${theme.palette.primary.main}` : "2px solid transparent",
-  transition: "all 0.2s ease-in-out",
+  transition: "background-color 0.2s ease-in-out, border-color 0.2s ease-in-out",
   "&:hover": {
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    transform: "translateY(-2px)"
   }
 }));
 
-const ThemePreview = styled(Box)(({ theme, isDark, isNeonOcean }) => ({
+const PreviewBox = styled(Box)(({ theme }) => ({
   width: "40px",
+  minHeight: "30px",
   height: "40px",
-  borderRadius: "8px",
-  marginRight: "12px",
-  background: isDark
-    ? "linear-gradient(to bottom, #1d2e4a, #0f1924)"
-    : isNeonOcean
-      ? "linear-gradient(to bottom, #48b6df, #1a6b99)"
-      : "linear-gradient(to bottom, #caecd5, #fff)",
-  border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
-  boxShadow: `0 4px 8px ${alpha(theme.palette.common.black, 0.1)}`
-}));
-
-const LanguageOption = styled(Box)(({ theme, active }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: "10px 16px",
-  margin: "8px",
-  borderRadius: "12px",
-  cursor: "pointer",
-  backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : "transparent",
-  border: active ? `2px solid ${theme.palette.primary.main}` : "2px solid transparent",
-  transition: "all 0.2s ease-in-out",
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    transform: "translateY(-2px)"
-  }
-}));
-
-const LanguageFlag = styled(Box)(({ theme }) => ({
-  width: "40px",
-  height: "30px",
   borderRadius: "8px",
   marginRight: "12px",
   display: "flex",
@@ -95,271 +66,190 @@ const LanguageFlag = styled(Box)(({ theme }) => ({
   justifyContent: "center",
   fontSize: "1.5rem",
   border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
-  boxShadow: `0 4px 8px ${alpha(theme.palette.common.black, 0.1)}`
+  boxShadow: `0 2px 4px ${alpha(theme.palette.common.black, 0.08)}`
 }));
 
+const ThemePreviewStyled = styled(PreviewBox, {
+  shouldForwardProp: (prop) => prop !== 'isDark' && prop !== 'isNeonOcean'
+})(({ theme, isDark, isNeonOcean }) => ({
+  background: isDark
+    ? "linear-gradient(to bottom, #1d2e4a, #0f1924)"
+    : isNeonOcean
+      ? "linear-gradient(to bottom, #48b6df, #1a6b99)"
+      : "linear-gradient(to bottom, #caecd5, #fff)",
+}));
+
+
 function SidebarFooter() {
-  const theme = useTheme();
+  const themeHook = useTheme();
   const { mode, setSpecificTheme } = useContext(ThemeContext);
-  const isDarkMode = mode === "dark";
-  const isNeonOceanMode = mode === "neonOcean";
   const { t, i18n } = useTranslation();
-  
+
   const [themeAnchorEl, setThemeAnchorEl] = useState(null);
-  const themeOpen = Boolean(themeAnchorEl);
-  
+  const themeButtonRef = useRef(null);
+
   const [langAnchorEl, setLangAnchorEl] = useState(null);
-  const langOpen = Boolean(langAnchorEl);
-  
+  const langButtonRef = useRef(null);
+
   const currentLanguage = i18n.language || "tr";
 
-  const handleThemeClick = (event) => {
-    setThemeAnchorEl(event.currentTarget);
+  const handleOpen = (event, setAnchorEl, buttonRef) => {
+    buttonRef.current = event.currentTarget;
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleThemeClose = () => {
-    setThemeAnchorEl(null);
-  };
-
-  const handleLanguageClick = (event) => {
-    setLangAnchorEl(event.currentTarget);
-  };
-
-  const handleLanguageClose = () => {
-    setLangAnchorEl(null);
+  const handleClose = (setAnchorEl, buttonRef) => {
+    setAnchorEl(null);
+    if (buttonRef.current) {
+      buttonRef.current.focus();
+    }
   };
 
   const handleThemeChange = (newMode) => {
     setSpecificTheme(newMode);
-    handleThemeClose();
+    handleClose(setThemeAnchorEl, themeButtonRef);
   };
-  
+
   const handleLanguageChange = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("language", lang);
-    handleLanguageClose();
+    handleClose(setLangAnchorEl, langButtonRef);
   };
 
   const bottomOptions = [
-    { 
-      name: "Language", 
-      icon: <LanguageIcon />, 
-      action: handleLanguageClick 
+    {
+      name: t('sidebarFooter.language', "Language"),
+      icon: <LanguageIcon />,
+      action: (event) => handleOpen(event, setLangAnchorEl, langButtonRef),
+      popoverId: 'language-popover',
     },
     {
-      name: "Theme",
+      name: t('sidebarFooter.theme', "Theme"),
       icon: <PaletteIcon />,
-      action: handleThemeClick
+      action: (event) => handleOpen(event, setThemeAnchorEl, themeButtonRef),
+      popoverId: 'theme-popover',
     },
-    { 
-      name: "AI Magic", 
-      icon: <AutoFixHighIcon />, 
-      action: () => {} 
+    {
+      name: t('sidebarFooter.aiMagic', "AI Magic"),
+      icon: <AutoFixHighIcon />,
+      action: () => { console.log("AI Magic clicked"); }
     },
   ];
 
+  const popoverPaperSlotProps = {
+    elevation: 3,
+    sx: {
+      borderRadius: "12px",
+      marginTop: "4px",
+    }
+  };
+
+  const popoverContentSx = {
+    p: 1,
+    width: "250px",
+    backgroundColor: themeHook.palette.background.card,
+    borderRadius: "inherit",
+  };
+
+  const popoverTitleSx = {
+    p: 1,
+    fontWeight: "bold",
+    textAlign: "center",
+    mb: 1,
+    color: themeHook.palette.text.primary,
+  };
+
+
   const themePopoverContent = (
-    <Box sx={{
-      p: 1,
-      width: "280px",
-      backgroundColor: theme.palette.background.card,
-      borderRadius: "16px",
-      boxShadow: `0 10px 25px ${alpha(theme.palette.common.black, 0.2)}`
-    }}>
-      <Typography
-        variant="h6"
-        sx={{
-          p: 1,
-          fontWeight: "bold",
-          textAlign: "center",
-          background: theme.palette.text.gradient,
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
+    <Box sx={popoverContentSx}>
+      <Typography variant="h6" sx={popoverTitleSx}>
         {t('themeCard.title')}
       </Typography>
-
-      <ThemeOption 
-        active={!isDarkMode && !isNeonOceanMode} 
-        onClick={() => handleThemeChange("light")}
-      >
-        <ThemePreview isDark={false} isNeonOcean={false} />
+      <OptionItem active={mode === "light"} onClick={() => handleThemeChange("light")}>
+        <ThemePreviewStyled isDark={false} isNeonOcean={false} />
         <Box>
-          <Typography variant="body1" fontWeight="bold">
-            {t('themeCard.lightThemeAriaLabel')} 
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t("Light View")}
-          </Typography>
+          <Typography variant="body1" fontWeight="medium">{t('themeCard.lightThemeAriaLabel')}</Typography>
+          <Typography variant="caption" color="text.secondary">{t("Light View")}</Typography>
         </Box>
-      </ThemeOption>
-      
-      <ThemeOption 
-        active={isNeonOceanMode} 
-        onClick={() => handleThemeChange("neonOcean")}
-      >
-        <ThemePreview isDark={false} isNeonOcean={true} />
+      </OptionItem>
+      <OptionItem active={mode === "neonOcean"} onClick={() => handleThemeChange("neonOcean")}>
+        <ThemePreviewStyled isDark={false} isNeonOcean={true} />
         <Box>
-          <Typography variant="body1" fontWeight="bold">
-            {t('themeCard.neonOceanThemeAriaLabel')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t("Neon and refreshing look")}
-          </Typography>
+          <Typography variant="body1" fontWeight="medium">{t('themeCard.neonOceanThemeAriaLabel')}</Typography>
+          <Typography variant="caption" color="text.secondary">{t("Neon and refreshing look")}</Typography>
         </Box>
-      </ThemeOption>
-      
-      <ThemeOption 
-        active={isDarkMode} 
-        onClick={() => handleThemeChange("dark")}
-      >
-        <ThemePreview isDark={true} isNeonOcean={false} />
+      </OptionItem>
+      <OptionItem active={mode === "dark"} onClick={() => handleThemeChange("dark")}>
+        <ThemePreviewStyled isDark={true} isNeonOcean={false} />
         <Box>
-          <Typography variant="body1" fontWeight="bold">
-            {t("themeCard.darkThemeAriaLabel")} 
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t("Dark view")}
-          </Typography>
+          <Typography variant="body1" fontWeight="medium">{t("themeCard.darkThemeAriaLabel")}</Typography>
+          <Typography variant="caption" color="text.secondary">{t("Dark view")}</Typography>
         </Box>
-      </ThemeOption>
+      </OptionItem>
     </Box>
   );
-  
+
   const languagePopoverContent = (
-    <Box sx={{
-      p: 1,
-      width: "280px",
-      backgroundColor: theme.palette.background.card,
-      borderRadius: "16px",
-      boxShadow: `0 10px 25px ${alpha(theme.palette.common.black, 0.2)}`
-    }}>
-      <Typography
-        variant="h6"
-        sx={{
-          p: 1,
-          fontWeight: "bold",
-          textAlign: "center",
-          background: theme.palette.text.gradient,
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
+    <Box sx={popoverContentSx}>
+      <Typography variant="h6" sx={popoverTitleSx}>
         {t('languageCard.title')}
       </Typography>
-
-      <LanguageOption 
-        active={currentLanguage.startsWith('tr')} 
-        onClick={() => handleLanguageChange("tr")}
-      >
-        <LanguageFlag>🇹🇷</LanguageFlag>
+      <OptionItem active={currentLanguage.startsWith('tr')} onClick={() => handleLanguageChange("tr")}>
+        <PreviewBox as="span">🇹🇷</PreviewBox>
         <Box>
-          <Typography variant="body1" fontWeight="bold">
-            {t('languageCard.turkish')} 
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Türkçe
-          </Typography>
+          <Typography variant="body1" fontWeight="medium">{t('languageCard.turkish')}</Typography>
+          <Typography variant="caption" color="text.secondary">Türkçe</Typography>
         </Box>
-      </LanguageOption>
-      
-      <LanguageOption 
-        active={currentLanguage.startsWith('en')} 
-        onClick={() => handleLanguageChange("en")}
-      >
-        <LanguageFlag>🇺🇸</LanguageFlag>
+      </OptionItem>
+      <OptionItem active={currentLanguage.startsWith('en')} onClick={() => handleLanguageChange("en")}>
+        <PreviewBox as="span">🇺🇸</PreviewBox>
         <Box>
-          <Typography variant="body1" fontWeight="bold">
-            {t('languageCard.english')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            English
-          </Typography>
+          <Typography variant="body1" fontWeight="medium">{t('languageCard.english')}</Typography>
+          <Typography variant="caption" color="text.secondary">English</Typography>
         </Box>
-      </LanguageOption>
+      </OptionItem>
     </Box>
   );
 
   return (
     <StyledFooter>
       {bottomOptions.map((option) => (
-        <StyledFooterItem 
+        <StyledFooterItem
           key={option.name}
           onClick={option.action}
           title={option.name}
+          aria-label={option.name}
+          aria-haspopup={!!option.popoverId}
+          aria-controls={option.popoverId || undefined}
+          ref={option.popoverId === 'theme-popover' ? themeButtonRef : option.popoverId === 'language-popover' ? langButtonRef : null}
         >
           {option.icon}
         </StyledFooterItem>
       ))}
 
-      {/* Theme Popover */}
       <Popover
-        open={themeOpen}
+        id="theme-popover"
+        open={Boolean(themeAnchorEl)}
         anchorEl={themeAnchorEl}
-        onClose={handleThemeClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        sx={{
-          "& .MuiPopover-paper": { 
-            borderRadius: "16px",
-            overflow: "visible",
-            mt: "-10px",
-            "&:before": {
-              content: '""',
-              position: "absolute",
-              bottom: "-8px",
-              left: "10%",
-              transform: "translateX(-50%) rotate(45deg)",
-              width: "16px",
-              height: "16px",
-              backgroundColor: theme.palette.background.card,
-              zIndex: 0
-            }
-          }
+        onClose={() => handleClose(setThemeAnchorEl, themeButtonRef)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        slotProps={{
+          paper: popoverPaperSlotProps
         }}
       >
         {themePopoverContent}
       </Popover>
-      
-      {/* Language Popover */}
+
       <Popover
-        open={langOpen}
+        id="language-popover"
+        open={Boolean(langAnchorEl)}
         anchorEl={langAnchorEl}
-        onClose={handleLanguageClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        sx={{
-          "& .MuiPopover-paper": { 
-            borderRadius: "16px",
-            overflow: "visible",
-            mt: "-10px",
-            "&:before": {
-              content: '""',
-              position: "absolute",
-              bottom: "-8px",
-              left: "10%",
-              transform: "translateX(-50%) rotate(45deg)",
-              width: "16px",
-              height: "16px",
-              backgroundColor: theme.palette.background.card,
-              zIndex: 0
-            }
-          }
+        onClose={() => handleClose(setLangAnchorEl, langButtonRef)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "center" }}
+        slotProps={{
+          paper: popoverPaperSlotProps
         }}
       >
         {languagePopoverContent}

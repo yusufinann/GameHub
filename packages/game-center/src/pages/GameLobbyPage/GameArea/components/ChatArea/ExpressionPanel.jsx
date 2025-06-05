@@ -16,9 +16,8 @@ import {
 } from "@mui/icons-material";
 
 import EmojiPickerPanel from "./EmojiPickerPanel";
-import { useTranslation } from "react-i18next";
 
-// Animation
+
 const expressionSlideUpFadeOut = keyframes`
   0% {
     opacity: 0;
@@ -34,12 +33,14 @@ const expressionSlideUpFadeOut = keyframes`
   }
 `;
 
-const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
+const AnimatedExpressionBox = styled(Box, {
+  shouldForwardProp: (prop) => prop !== '$animationtype' && prop !== 'theme' && prop !== 'sx' && prop !== 'as'
+})(({ theme, $animationtype }) => {
   const animations = {
     default: `${expressionSlideUpFadeOut} 3s ease-out forwards`,
   };
 
-  const selectedAnimation = animations[$animationType] || animations.default;
+  const selectedAnimation = animations[$animationtype] || animations.default;
 
   return {
     padding: theme.spacing(2, 4),
@@ -70,16 +71,27 @@ const AnimatedExpressionBox = styled(Box)(({ theme, $animationType }) => {
   };
 });
 
-// Main Expression Panel Component
-const ExpressionPanel = ({ centerExpressions}) => {
-  if (centerExpressions.length === 0) return null;
+const isPureEmoji = (str) => {
+  if (!str || typeof str !== 'string') return false;
+  const emojiRegex = /^(?:[\u2000-\u32FF\uE000-\uFFFF]|(?:\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDE4F\uDE80-\uDEFF]|\uD83E[\uDD00-\uDDFF]))+$/;
+  return emojiRegex.test(str);
+};
+
+const ExpressionPanel = ({ centerExpressions }) => {
+  const emojiExpressions = (centerExpressions || []).filter(
+    (expr) => expr && typeof expr.expression === 'string' && isPureEmoji(expr.expression)
+  );
+
+  if (emojiExpressions.length === 0) {
+    return null;
+  }
 
   return (
     <Box
       sx={{
         position: "fixed",
-        top: "70%",     // Sayfanın daha aşağısı
-        left: "10%",    // Sayfanın daha sağı
+        top: "70%",
+        left: "10%",
         pointerEvents: "none",
         display: "flex",
         flexDirection: "column",
@@ -88,10 +100,10 @@ const ExpressionPanel = ({ centerExpressions}) => {
         transform: "translate(-50%, -50%)",
       }}
     >
-      {centerExpressions.map((expr) => (
+      {emojiExpressions.map((expr) => (
         <AnimatedExpressionBox
           key={expr.id}
-          $animationType={expr.animationtype || "default"}
+          $animationtype={expr.animationtype || "default"}
         >
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -117,8 +129,8 @@ const ExpressionPanel = ({ centerExpressions}) => {
               color: "text.primary",
               textAlign: "center",
               marginTop: "8px",
-              fontSize: "2rem",
-              fontWeight: expr.expression.length < 3 ? "bold" : "normal",
+              fontSize: "2.5rem",
+              fontWeight: "bold",
             }}
           >
             {expr.expression}
@@ -129,12 +141,12 @@ const ExpressionPanel = ({ centerExpressions}) => {
   );
 };
 
-
-const ExpressionInput = ({ onSendExpression,t}) => {
+const ExpressionInput = ({ onSendExpression, t }) => {
   const [expressionInput, setExpressionInput] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const emojiPickerRef = useRef(null);
+
   const handleSendExpression = (expressionToSend) => {
     const expression = expressionToSend || expressionInput;
     if (expression.trim()) {
