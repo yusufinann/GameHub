@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography, Paper, IconButton, Button } from "@mui/material";
+import React, { useCallback, useMemo } from "react";
+import { Box, Typography, Paper, IconButton, Button, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
   ContentCopy as CopyIcon,
@@ -13,33 +13,81 @@ import LobbyMembers from "./LobbyMembers.jsx";
 import { useLobbyContext } from "../../context/LobbyContext/context.js";
 import { useTranslation } from "react-i18next";
 
-export const SuccessScreen = ({ setSnackbar, onClose }) => {
+export const SuccessScreen = React.memo(({ setSnackbar, onClose }) => {
+
   const navigate = useNavigate();
   const { 
     lobbyCode, 
     lobbyLink, 
     membersByLobby,
-    existingLobby
+    existingLobby 
   } = useLobbyContext();
- const{t}=useTranslation();
-  const members = membersByLobby[lobbyCode] || [];
+  const { t } = useTranslation();
 
-  const handleLinkClick = () => {
-    const generatedLink = lobbyLink || `${window.location.origin}/lobby/${lobbyCode}`;
-    
-    if (!generatedLink) {
-      setSnackbar({
-        open: true,
-        message: "Lobby link not found.",
-        severity: "error",
-      });
+
+  const members = useMemo(() => {
+   
+    return (lobbyCode && membersByLobby && membersByLobby[lobbyCode]) ? membersByLobby[lobbyCode] : [];
+  }, [membersByLobby, lobbyCode]);
+
+  const actualLobbyLink = useMemo(() => {
+    return lobbyLink || (lobbyCode ? `${window.location.origin}/lobby/${lobbyCode}` : "");
+  }, [lobbyLink, lobbyCode]);
+
+  const isLinkAvailable = useMemo(() => {
+    return Boolean(actualLobbyLink && !actualLobbyLink.includes("undefined") && actualLobbyLink !== "");
+  }, [actualLobbyLink]);
+
+  const handleLobbyLinkClick = useCallback(() => {
+    if (!isLinkAvailable) {
+      if (setSnackbar) {
+        setSnackbar({
+          open: true,
+          message: t("lobbyLinkNotFound"),
+          severity: "error",
+        });
+      }
       return;
     }
   
-    const path = new URL(generatedLink).pathname;
-    navigate(path);
-  };
+    try {
+      const path = new URL(actualLobbyLink).pathname; 
+      navigate(path);
+    } catch (error) {
+      console.error("Invalid lobby link URL:", actualLobbyLink, error);
+      if (setSnackbar) {
+        setSnackbar({
+          open: true,
+          message: t("invalidLobbyLink"),
+          severity: "error",
+        });
+      }
+    }
+  }, [actualLobbyLink, isLinkAvailable, navigate, setSnackbar, t]);
 
+  const handleCopyLobbyCode = useCallback(() => {
+    if (lobbyCode) {
+      handleCopy(lobbyCode, setSnackbar, t);
+    }
+  }, [lobbyCode, setSnackbar, t]);
+
+  const handleCopyLobbyLink = useCallback(() => {
+    if (isLinkAvailable) {
+      handleCopy(actualLobbyLink, setSnackbar, t);
+    }
+  }, [actualLobbyLink, isLinkAvailable, setSnackbar, t]);
+
+  const handleSocialShare = useCallback((platform) => {
+    if (isLinkAvailable) {
+      handleShare(platform, actualLobbyLink, t);
+    }
+  }, [actualLobbyLink, isLinkAvailable, t]);
+
+  const shareButtons = useMemo(() => [
+    { platform: "twitter", Icon: TwitterIcon, color: "rgb(29,161,242)", bgColor: "rgba(29,161,242,0.1)", hoverBgColor: "rgba(29,161,242,0.2)" },
+    { platform: "facebook", Icon: FacebookIcon, color: "rgb(59,89,152)", bgColor: "rgba(59,89,152,0.1)", hoverBgColor: "rgba(59,89,152,0.2)" },
+    { platform: "whatsapp", Icon: WhatsAppIcon, color: "rgb(37,211,102)", bgColor: "rgba(37,211,102,0.1)", hoverBgColor: "rgba(37,211,102,0.2)" },
+  ], []); 
   if (!existingLobby) {
     return (
       <Box sx={{ textAlign: "center", py: 4 }}>
@@ -54,25 +102,20 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
     <Box
       sx={{
         textAlign: "center",
-        py: 4,
+        py: { xs: 1, md: 2 },
+        px: { xs: 0.5, md: 1 },
         background: "linear-gradient(135deg, rgba(34,193,195,0.1) 0%, rgba(253,187,45,0.1) 100%)",
         borderRadius: 3,
+        overflow: "auto",
+        maxHeight: "90vh", 
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 2,
-          mb: 1,
-        }}
-      >
-        <CelebrationIcon sx={{ color: "rgba(253,187,45,1)", fontSize: 40 }} />
+      <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5} mb={2}>
+        <CelebrationIcon sx={{ color: "rgba(253,187,45,1)", fontSize: { xs: 32, md: 40 } }} />
         <Typography
           variant="h3"
+          component="h1"
           sx={{
-            fontWeight: 700,
             background: "linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -80,192 +123,196 @@ export const SuccessScreen = ({ setSnackbar, onClose }) => {
         >
           {t("createdMessage")}
         </Typography>
-      </Box>
+      </Stack>
 
       <Paper
         elevation={4}
         sx={{
-          p: 4,
+          p: { xs: 1, md: 2 },
           mb: 1,
-          mx: 2,
+          mx: { xs: 1, md: 2 },
           borderRadius: 3,
-          background: "rgb(165, 249, 190, 0.1)",
+          background: 'rgb(165, 249, 190, 0.1)',
           border: "1px solid rgba(34,193,195,0.3)",
+          backdropFilter: "blur(5px)",
         }}
       >
         <Typography
-          variant="h6"
+          variant="h5"
+          component="h2"
           sx={{
-            mb: 2,
-            color: "rgba(34,193,195,1)",
-            fontWeight: 600,
+            mb: 1,
+            color: "primary.dark",
+            fontSize: { xs: "1.25rem", md: "1.5rem" }
           }}
         >
           {t("Lobby Code")}
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-            mb: 1,
-            background: "white",
-            py: 2,
-            borderRadius: 2,
-          }}
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          spacing={1} 
+          mb={2.5}
+          sx={{ background: 'rgb(165, 249, 190, 0.1)', py: 1.5, px: 1.5, borderRadius: 2, boxShadow: 1, width: '100%', boxSizing: 'border-box' }}
         >
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
-              letterSpacing: 4,
-              color: "rgba(34,193,195,1)",
+              letterSpacing: 3,
+              color: "secondary.main",
+              userSelect: "all",
+              flexGrow: 1,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              textAlign: "center",
+              fontSize: { xs: "1.1rem", md: "1.25rem" }
             }}
           >
-            {lobbyCode}
+            {lobbyCode || "---"} 
           </Typography>
           <IconButton
-            onClick={() => handleCopy(lobbyCode, setSnackbar)}
-            sx={{
-              color: "rgba(253,187,45,1)",
-              "&:hover": {
-                backgroundColor: "rgba(253,187,45,0.1)",
-              },
-            }}
+            aria-label={t("copyLobbyCode")}
+            onClick={handleCopyLobbyCode}
+            disabled={!lobbyCode} 
+            color="secondary"
+            sx={{ "&:hover": { backgroundColor: "rgba(253,187,45,0.1)" }, flexShrink: 0 }}
           >
             <CopyIcon />
           </IconButton>
-        </Box>
+        </Stack>
 
         <Typography
-          variant="h6"
+          variant="h5"
+          component="h2"
           sx={{
             mb: 1,
-            color: "rgba(34,193,195,1)",
-            fontWeight: 600,
+            color: "primary.dark",
+            fontSize: { xs: "1.25rem", md: "1.5rem" }
           }}
         >
           {t("Lobby Link")}
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-            background: "white",
-            py: 2,
-            borderRadius: 2,
+        <Stack 
+          direction="row" 
+          alignItems="center" 
+          spacing={1} 
+          sx={{  
+            background: 'rgb(165, 249, 190, 0.1)', 
+            py: 1.5,             
+            px: 1.5, 
+            borderRadius: 2, 
+            boxShadow: 1, 
+            width: '100%',     
+            boxSizing: 'border-box' 
           }}
         >
           <Typography
-            variant="body1"
+            variant="body1" 
+            onClick={isLinkAvailable ? handleLobbyLinkClick : undefined}
             sx={{
-              color: "rgba(34,193,195,1)",
-              cursor: "pointer",
-              fontWeight: 700,
+              letterSpacing: { xs: 1, md: 2},
+              color: isLinkAvailable ? "secondary.main" : "text.disabled", 
+              userSelect: "all",
+              fontWeight:"700",
+              flexGrow: 1,       
+              minWidth: 0,          
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              textAlign: 'center',
+              cursor: isLinkAvailable ? "pointer" : "default",
               "&:hover": {
-                textDecoration: "underline",
+                textDecoration: isLinkAvailable ? "underline" : "none",
               },
+              fontSize: { xs: "0.8rem", md: "0.9rem" }
             }}
-            onClick={handleLinkClick}
           >
-            {lobbyLink || t("Link not found")}
+            {isLinkAvailable ? actualLobbyLink : t("linkNotAvailable")}
           </Typography>
           <IconButton
-            onClick={() => handleCopy(lobbyLink, setSnackbar)}
-            sx={{
-              color: "rgba(253,187,45,1)",
-              "&:hover": {
-                backgroundColor: "rgba(253,187,45,0.1)",
-              },
+            aria-label={t("copyLobbyLink")}
+            onClick={handleCopyLobbyLink}
+            disabled={!isLinkAvailable}
+            color="secondary"
+            sx={{ 
+              "&:hover": { backgroundColor: "rgba(253,187,45,0.1)" },
+              flexShrink: 0 
             }}
           >
             <CopyIcon />
           </IconButton>
-        </Box>
+        </Stack>
       </Paper>
 
-      <LobbyMembers members={members} t={t}/>
+      {/* members null/boş dizi kontrolü zaten useMemo içinde yapılıyor, members.length > 0 yeterli */}
+      {members.length > 0 && <LobbyMembers members={members} t={t} />}
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between", 
-          alignItems: "center", 
-          gap: 2,
-          mb: 1,
-          px: 2, 
-        }}
+      <Stack 
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between" 
+        alignItems="center" 
+        spacing={2}
+        mb={1}
+        px={{ xs: 1, md: 2 }}
       >
-        <Box
+        <Stack 
+          direction="row" 
+          spacing={1.5}
           sx={{
-            display: "flex",
-            gap: 2,
             "& .MuiIconButton-root": {
-              transition: "transform 0.2s",
+              transition: "transform 0.2s, background-color 0.2s",
               "&:hover": {
-                transform: "scale(1.1)",
+                transform: "scale(1.15)",
               },
             },
           }}
         >
-          <IconButton
-            onClick={() => handleShare("twitter", lobbyLink)}
-            sx={{
-              backgroundColor: "rgba(34,193,195,0.1)",
-              color: "rgba(34,193,195,1)",
-              "&:hover": {
-                backgroundColor: "rgba(34,193,195,0.2)",
-              },
-            }}
-          >
-            <TwitterIcon />
-          </IconButton>
-          <IconButton
-            onClick={() => handleShare("facebook", lobbyLink)}
-            sx={{
-              backgroundColor: "rgba(34,193,195,0.1)",
-              color: "rgba(34,193,195,1)",
-              "&:hover": {
-                backgroundColor: "rgba(34,193,195,0.2)",
-              },
-            }}
-          >
-            <FacebookIcon />
-          </IconButton>
-          <IconButton
-            onClick={() => handleShare("whatsapp", lobbyLink)}
-            sx={{
-              backgroundColor: "rgb(165, 249, 190, 0.2)",
-              color: "rgb(165, 249, 190)",
-              "&:hover": {
-                backgroundColor: "rgb(165, 249, 190, 0.3)",
-              },
-            }}
-          >
-            <WhatsAppIcon />
-          </IconButton>
-        </Box>
+          {shareButtons.map(({ platform, Icon, color, bgColor, hoverBgColor }) => (
+            <IconButton
+              key={platform}
+              aria-label={t(`shareOn`, { platform })}
+              onClick={() => handleSocialShare(platform)}
+              disabled={!isLinkAvailable}
+              sx={{
+                backgroundColor: bgColor,
+                color: color,
+                "&:hover": { backgroundColor: hoverBgColor },
+                "&.Mui-disabled": {
+                    backgroundColor: "action.disabledBackground",
+                    color: "action.disabled"
+                }
+              }}
+            >
+              <Icon />
+            </IconButton>
+          ))}
+        </Stack>
 
         <Button
           variant="contained"
           onClick={onClose}
+          size="large"
           sx={{
             background: "linear-gradient(45deg, rgba(34,193,195,1), rgba(253,187,45,1))",
             "&:hover": {
-              background: "linear-gradient(45deg, rgba(34,193,195,0.9), rgba(253,187,45,0.9))",
+              background: "linear-gradient(45deg, rgba(34,193,195,0.85), rgba(253,187,45,0.85))",
+              boxShadow: 3,
             },
-            px: 4,
-            py: 1.5,
-            fontSize: "1.1rem",
+            px: { xs: 3, md: 5 },
+            py: { xs: 1, md: 1.5 },
+            fontSize: { xs: "1rem", md: "1.1rem" },
             textTransform: "none",
             borderRadius: 2,
+            minWidth: { xs: '100%', sm: 'auto' }
           }}
         >
           {t("Close")}
         </Button>
-      </Box>
+      </Stack>
     </Box>
   );
-};
+});
+
+SuccessScreen.displayName = "SuccessScreen";

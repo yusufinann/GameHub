@@ -1,9 +1,7 @@
 import { Box, Typography, Paper, Avatar } from '@mui/material';
 
 function LobbyMembers({ members,t }) {
-  // Host üyeyi bul
   const hostMember = members.find(member => member.isHost);
-  // Diğer üyeleri filtrele (host hariç)
   const otherMembers = members.filter(member => !member.isHost);
 
   return (
@@ -18,7 +16,6 @@ function LobbyMembers({ members,t }) {
         border: '1px solid rgba(34,193,195,0.3)',
       }}
     >
-      {/* Başlık */}
       <Typography
         variant="h6"
         sx={{
@@ -32,7 +29,7 @@ function LobbyMembers({ members,t }) {
 
       <Box
         sx={{
-          background: 'white',
+          background: 'rgb(165, 249, 190, 0.1)',
           py: 2,
           borderRadius: 2,
         }}
