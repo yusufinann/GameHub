@@ -89,8 +89,7 @@ const{t}=useTranslation();
             display: 'flex',
             alignItems: 'center',
             width: 400,
-            borderRadius: 2,
-         //   background: `repeating-linear-gradient(45deg, ${theme.palette.primary.main}60, ${theme.palette.primary.main}60 10px, ${theme.palette.primary.light}30 10px, ${theme.palette.primary.light}30 20px)`,
+            borderRadius: 2,        
          background:theme.palette.background.gradientFadeBg,
              
           }}

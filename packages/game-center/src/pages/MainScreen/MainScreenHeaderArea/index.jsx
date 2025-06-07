@@ -1,81 +1,93 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { gameData } from "../../../utils/constants";
 import Header from "./components/Header";
-import MainScreenContent from "./components/MainScreenContent "; 
+import HeaderContent from "./components/HeaderContent";
+import { getSlidesData } from "./slideData"; 
+import { useMainScreenSlideshow } from "./useMainScreenSlideshow";
 
 const MainScreenHeader = () => {
   const [selectedGame, setSelectedGame] = useState(null);
   const theme = useTheme();
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down("lg"));
+
+  const slides = getSlidesData(theme);
+
+  const {
+    currentSlideIndex,
+    navigateToSlide,
+    pauseAutoplay,
+    resumeAutoplay,
+  } = useMainScreenSlideshow(slides.length);
+
+  const currentSlide = slides[currentSlideIndex];
+  const currentColor = currentSlide?.color || theme.palette.primary.main;
 
   useEffect(() => {
-    setSelectedGame(gameData[0]);
+    if (gameData && gameData.length > 0) {
+      setSelectedGame(gameData[0]);
+    }
   }, []);
 
-  if (!selectedGame) return null;
+  if (!selectedGame && gameData && gameData.length > 0) return null;
+  if (slides.length === 0) return null;
 
   return (
     <Box
       sx={{
-        minHeight: "50vh",
         position: "relative",
-        borderRadius: 4,
         overflow: "hidden",
-        bgcolor: theme.palette.primary.main,
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-        transition: 'transform 0.3s ease',
+        borderRadius: "24px",
+        p: 1,
+        background: theme.palette.background.gradientFadeBg,
       }}
-    >        
-      {/* Background pattern */}
+    >
       <Box
         sx={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: "100%",
-          height: "100%",
+          width: "120%", 
+          height: "120%",
           background: theme.palette.background.stripeBg,
-              zIndex: 1,
-          opacity: 0.8,
+          opacity: 0.3,
+          zIndex: 1,
         }}
       />
-      
-      {/* Content Layer */}
-      <Box
+
+      <Box 
         sx={{
           position: "relative",
-          zIndex: 2,
-          p: 2,
-          flex: 1,
+          zIndex: 2, 
           display: "flex",
           flexDirection: "column",
-          background: `linear-gradient(135deg, ${theme.palette.primary.dark}90 0%, transparent 40%, transparent 60%, ${theme.palette.primary.dark}80 100%)`,
-             
         }}
       >
-        {/* Header */}
-        <Header />
-        
-        {/* Main Content */}
+        <Box sx={{ flexShrink: 0 }}>
+          <Header theme={theme} currentSlideColor={currentColor} />
+        </Box>
+
         <Box
           sx={{
-            flex: 1,
             display: "flex",
+            flexDirection: "column",
             gap: 2,
-            flexDirection: isMediumScreen ? "column" : "row",
-            overflow: "hidden",
-            mt: 2,
           }}
+          onMouseEnter={pauseAutoplay}
+          onMouseLeave={resumeAutoplay}
         >
-          {/* Main Content Area - Now using our new component */}
-          <MainScreenContent theme={theme}/>
+          <Box
+            sx={{
+              display: "flex",
+              height: { xs: "20vh", sm: "30vh", md: "35vh" },
+            }}
+          >
+            <HeaderContent
+              theme={theme}
+              slides={slides} 
+              activeSlideIndex={currentSlideIndex}
+              onSlideNavigation={navigateToSlide}
+            />
+          </Box>
         </Box>
       </Box>
     </Box>
