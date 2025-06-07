@@ -14,8 +14,8 @@ import { useTranslation } from 'react-i18next';
 function LoginSrc() {
   const [currentImage, setCurrentImage] = useState(0);
   const images = [
-    "https://cdn.pixabay.com/photo/2024/10/07/20/38/ai-generated-9103752_1280.jpg",
-    "https://cdn.pixabay.com/photo/2024/10/03/14/13/orc-9093828_1280.jpg",
+    "https://images.pexels.com/photos/8803363/pexels-photo-8803363.jpeg?auto=compress&cs=tinysrgb&w=600",
+    "https://thewordsearch.com/v4/hangman/images/promo.png",
     "https://cdn.pixabay.com/photo/2024/03/02/15/41/ai-generated-8608836_1280.png",
   ];
 const{t}=useTranslation();

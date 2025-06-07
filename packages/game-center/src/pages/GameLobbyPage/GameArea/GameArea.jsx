@@ -140,7 +140,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
     const numericGameId = Number(gameId);
     switch (numericGameId) {
       case 1:
-        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg";
+        return "https://images.pexels.com/photos/8803363/pexels-photo-8803363.jpeg?auto=compress&cs=tinysrgb&w=600";
       case 2:
         return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ63bZ9-d9KLHmXM7kXcxhBTIG--ZPlT64tcQ&s";
       case 3:
@@ -148,7 +148,7 @@ const GameArea = ({ lobbyInfo, members, isHost, onDelete, onLeave, isDeletingLob
       case 4:
         return "https://www.shutterstock.com/shutterstock/photos/1258437028/display_1500/stock-photo-logic-chess-game-logo-simple-illustration-of-logic-chess-game-logo-for-web-design-isolated-on-1258437028.jpg";
       default:
-        return "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg"; 
+        return "https://images.pexels.com/photos/8803363/pexels-photo-8803363.jpeg?auto=compress&cs=tinysrgb&w=600"; 
     }
   };
 

@@ -7,7 +7,7 @@ export const GAMES = [
     title: "Bingo", // Original title used as a key
     translationKey: "games.Bingo",
     image:
-      "https://eddra.com/edadmin/uploads/image/online-takim-aktiviteleri/online-tombala/2-550x400.jpg",
+      "https://images.pexels.com/photos/8803363/pexels-photo-8803363.jpeg?auto=compress&cs=tinysrgb&w=600",
     genre: "Adventure",
     rating: 4.5,
     playTime: "20min",
