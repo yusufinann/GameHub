@@ -667,18 +667,61 @@ export const startGame = async (ws, data) => {
 };
 
 export const guessLetter = async (ws, data) => {
-  const { lobbyCode, letter } = data;
+  const { lobbyCode, letter: rawLetter } = data; 
   let game = await getGameFromRedis(lobbyCode);
-  if (!game || !game.gameStarted || game.gameEnded) { return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Game is not active." })); }
-  if (game.currentPlayerId !== ws.userId) { return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Not your turn." })); }
-  const player = game.players[ws.userId];
-  if (!player || player.eliminated || player.won || (!game.isHostParticipant && ws.userId === game.host)) { return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "You cannot make a guess." })); }
 
-  const normalizedLetter = letter.toLowerCase();
+  if (!game || !game.gameStarted || game.gameEnded) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Game is not active." }));
+  }
+  if (game.currentPlayerId !== ws.userId) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Not your turn." }));
+  }
+  const player = game.players[ws.userId];
+  if (!player || player.eliminated || player.won || (!game.isHostParticipant && ws.userId === game.host)) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "You cannot make a guess." }));
+  }
+
+  let processedLetter;
+  if (game.languageMode === 'tr') {
+    let intermediateLetter = rawLetter.toLocaleLowerCase('tr-TR');
+
+    const combiningDotAbove = String.fromCharCode(0x0307);
+    const problematicSequence = 'i' + combiningDotAbove; 
+
+    if (intermediateLetter === problematicSequence) {
+      processedLetter = 'i'; 
+     
+    } else if (intermediateLetter.length === 2 && intermediateLetter.charCodeAt(0) === 0x0069 && intermediateLetter.charCodeAt(1) === 0x0307) {
+
+      processedLetter = 'i';
+    
+    }
+    else {
+      processedLetter = intermediateLetter;
+    }
+  } else {
+    processedLetter = rawLetter.toLowerCase();
+  }
+
+
+  const normalizedLetter = processedLetter; 
+
   const validLetterRegex = game.languageMode === 'tr' ? /^[a-zçğıöşü]$/ : /^[a-z]$/;
-  if (!validLetterRegex.test(normalizedLetter)) { return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Invalid letter entered." })); }
+
+ if (game.languageMode === 'tr' && typeof intermediateLetter !== 'undefined') {
+    console.log(`[guessLetter DEBUG] Intermediate Letter (after toLocaleLowerCase('tr-TR')): '${intermediateLetter}', Length: ${intermediateLetter.length}, CharCodes: ${Array.from(intermediateLetter).map(c => c.charCodeAt(0).toString(16)).join(',')}`);
+  }
+  const regexTestResult = validLetterRegex.test(normalizedLetter);
+
+  if (!regexTestResult) {
+    console.error(`Invalid letter: OriginalRaw='${rawLetter}', NormalizedForRegex='${normalizedLetter}' (length: ${normalizedLetter.length}, charCodes: [${Array.from(normalizedLetter).map(c => c.charCodeAt(0).toString(16)).join(',')}]), LangMode='${game.languageMode}'. Regex test failed.`);
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Invalid letter entered." }));
+  }
+
   const alreadyGuessed = player.correctGuesses.includes(normalizedLetter) || player.incorrectGuesses.includes(normalizedLetter);
-  if (alreadyGuessed) { return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "This letter has already been guessed." })); }
+  if (alreadyGuessed) {
+    return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "This letter has already been guessed." }));
+  }
 
   let correctGuess = false;
   if (game.word.includes(normalizedLetter)) {
@@ -687,41 +730,41 @@ export const guessLetter = async (ws, data) => {
   } else {
     player.incorrectGuesses.push(normalizedLetter);
     player.remainingAttempts--;
-    if(player.remainingAttempts <= 0) {
-        player.eliminated = true;
+    if (player.remainingAttempts <= 0) {
+      player.eliminated = true;
     }
   }
 
   ws.send(JSON.stringify({
-      type: "HANGMAN_MY_GUESS_RESULT",
-      correct: correctGuess,
-      letter: normalizedLetter,
-      playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId),
-      sharedMaskedWord: getSharedGameState(game).maskedWord
+    type: "HANGMAN_MY_GUESS_RESULT",
+    correct: correctGuess,
+    letter: normalizedLetter, 
+    playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId),
+    sharedMaskedWord: getSharedGameState(game).maskedWord
   }));
 
   await saveGameToRedis(game);
-  timerManager.clearAndRemoveTimer(lobbyCode); // Clear timer after a guess
+  timerManager.clearAndRemoveTimer(lobbyCode);
 
   const gameForBroadcast = hydrateGamePlayersWithWs(game);
   if (gameForBroadcast) {
     broadcastToGame(gameForBroadcast, {
-        type: "HANGMAN_GUESS_MADE",
-        playerId: ws.userId,
-        userName: player.userName,
-        letter: normalizedLetter,
-        correct: correctGuess,
+      type: "HANGMAN_GUESS_MADE",
+      playerId: ws.userId,
+      userName: player.userName,
+      letter: normalizedLetter, 
+      correct: correctGuess,
     });
     if (player.eliminated) {
-        const gameAfterEliminationBroadcast = hydrateGamePlayersWithWs(await getGameFromRedis(lobbyCode)); // Get latest state
-         if(gameAfterEliminationBroadcast) {
-            broadcastToGame(gameAfterEliminationBroadcast, {
-                type: "HANGMAN_PLAYER_ELIMINATED",
-                playerId: ws.userId,
-                userName: player.userName,
-                reason: "no attempts left",
-            });
-         }
+      const gameAfterEliminationBroadcast = hydrateGamePlayersWithWs(await getGameFromRedis(lobbyCode));
+      if (gameAfterEliminationBroadcast) {
+        broadcastToGame(gameAfterEliminationBroadcast, {
+          type: "HANGMAN_PLAYER_ELIMINATED",
+          playerId: ws.userId,
+          userName: player.userName,
+          reason: "no attempts left",
+        });
+      }
     }
   }
 
@@ -732,8 +775,8 @@ export const guessLetter = async (ws, data) => {
   }
 
   const activePlayersLeft = game.playerOrder.filter(pid => {
-      const p = game.players[pid];
-      return p && !p.eliminated && !p.won;
+    const p = game.players[pid];
+    return p && !p.eliminated && !p.won;
   });
   if (activePlayersLeft.length === 0 && !game.gameEnded) {
     endGameProcedure(game, "HANGMAN_GAME_OVER_NO_WINNERS", "All players eliminated, no one won.");
@@ -741,10 +784,9 @@ export const guessLetter = async (ws, data) => {
   }
 
   if (!game.gameEnded) {
-      await startNextTurn(lobbyCode);
+    await startNextTurn(lobbyCode);
   }
 };
-
 export const guessWord = async (ws, data) => {
   const { lobbyCode, word } = data;
   let game = await getGameFromRedis(lobbyCode);
