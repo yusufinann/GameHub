@@ -394,14 +394,15 @@ export const joinLobby = async (req, res) => {
         "Redis client is not open, skipping userIsPlayingActiveBingo check via scan."
       );
     }
-
+    const lobbyIdStr = lobby.id?.toString() || lobby._id?.toString();
     if (user.id.toString() === lobby.createdBy.toString()) {
-      const hostReturnTimerKey = `host_leave_${lobby.id.toString()}`;
+      const hostReturnTimerKey = `host_leave_${lobbyIdStr}`;
       const existingTimer = lobbyTimers.get(hostReturnTimerKey);
 
       if (existingTimer) {
         clearTimeout(existingTimer);
         lobbyTimers.delete(hostReturnTimerKey);
+        console.log(`Host ${user.name} returned to lobby ${lobbyCode}. Deletion timer cancelled.`);
 
         const hostMemberIndex = lobby.members.findIndex(
           (member) => member.id.toString() === user.id.toString()
@@ -411,13 +412,16 @@ export const joinLobby = async (req, res) => {
           lobby.members[hostMemberIndex].isPlayingBingo =
             userIsPlayingActiveBingo;
         } else {
-          lobby.members.push({
-            id: user.id,
-            name: user.name,
-            avatar: user.avatar,
-            isHost: true,
-            isPlayingBingo: userIsPlayingActiveBingo,
-          });
+          // Bu durum normalde olmamalı eğer host zaten üyeyse, ama bir güvenlik önlemi
+          if (!lobby.members.some(m => m.id.toString() === user.id.toString())) {
+            lobby.members.push({
+              id: user.id,
+              name: user.name,
+              avatar: user.avatar,
+              isHost: true,
+              isPlayingBingo: userIsPlayingActiveBingo,
+            });
+          }
         }
         await lobby.save();
 
@@ -449,7 +453,7 @@ export const joinLobby = async (req, res) => {
             memberCount: lobby.members.length,
             maxMembers: lobby.maxMembers,
             members: lobby.members.map((m) => ({
-              id: m.id,
+              id: m.id.toString(),
               name: m.name,
               avatar: m.avatar,
               isHost: m.isHost,
@@ -532,7 +536,7 @@ export const joinLobby = async (req, res) => {
         memberCount: lobby.members.length,
         maxMembers: lobby.maxMembers,
         members: lobby.members.map((m) => ({
-          id: m.id,
+          id: m.id.toString(),
           name: m.name,
           avatar: m.avatar,
           isHost: m.isHost,
@@ -547,7 +551,7 @@ export const joinLobby = async (req, res) => {
       isUserAlreadyInLobby &&
       user.id.toString() === lobby.createdBy.toString()
     ) {
-      const hostReturnTimerKey = `host_leave_${lobby.id.toString()}`;
+      const hostReturnTimerKey = `host_leave_${lobbyIdStr}`;
       if (!lobbyTimers.get(hostReturnTimerKey)) {
         message = "Host olarak lobi bilgileriniz güncellendi.";
       }
@@ -566,6 +570,7 @@ export const joinLobby = async (req, res) => {
     });
   }
 };
+
 
 export const leaveLobby = async (req, res) => {
   const { lobbyCode } = req.params;
@@ -591,16 +596,15 @@ export const leaveLobby = async (req, res) => {
     const removedUser = lobby.members.splice(userIndex, 1)[0];
     const wasHost = removedUser.id.toString() === lobby.createdBy.toString();
     const playerIdToRemove = removedUser.id.toString();
+    const lobbyIdStr = lobby.id?.toString() || lobby._id?.toString();
 
     if (lobby.game === "1") {
       const bingoGame = await getBingoGameFromRedis(lobbyCode);
-      if (
-        bingoGame &&
-        bingoGame.players &&
-        bingoGame.players[playerIdToRemove]
-      ) {
+      if (bingoGame) {
         if (bingoGame.gameStarted && !bingoGame.gameEnded) {
-          await handleBingoPlayerLeaveMidGame(lobbyCode, playerIdToRemove);
+          if (bingoGame.players && bingoGame.players[playerIdToRemove]) {
+            await handleBingoPlayerLeaveMidGame(lobbyCode, playerIdToRemove);
+          }
         } else if (!bingoGame.gameStarted) {
           await handleBingoPlayerLeavePreGame(lobbyCode, playerIdToRemove);
         }
@@ -642,7 +646,7 @@ export const leaveLobby = async (req, res) => {
         memberCount: lobby.members.length,
         maxMembers: lobby.maxMembers,
         members: lobby.members.map((m) => ({
-          id: m.id,
+          id: m.id.toString(),
           name: m.name,
           avatar: m.avatar,
           isHost: m.isHost,
@@ -653,62 +657,48 @@ export const leaveLobby = async (req, res) => {
     );
 
     if (wasHost && lobby.lobbyType === "normal") {
-      if (lobby.members.length === 0) {
-        if (lobbyTimers.has(`start_${lobby.id.toString()}`)) {
-          clearTimeout(lobbyTimers.get(`start_${lobby.id.toString()}`));
-          lobbyTimers.delete(`start_${lobby.id.toString()}`);
-        }
-        if (lobbyTimers.has(`end_${lobby.id.toString()}`)) {
-          clearTimeout(lobbyTimers.get(`end_${lobby.id.toString()}`));
-          lobbyTimers.delete(`end_${lobby.id.toString()}`);
-        }
-        if (lobbyTimers.has(`host_leave_${lobby.id.toString()}`)) {
-          clearTimeout(lobbyTimers.get(`host_leave_${lobby.id.toString()}`));
-          lobbyTimers.delete(`host_leave_${lobby.id.toString()}`);
-        }
-        if (lobby.game === "1") {
-          await cleanupAndRemoveBingoGame(lobbyCode);
-        } else if (lobby.game === "2") {
-          await deleteHangmanGameFromRedis(lobbyCode);
-        }
-        await Lobby.deleteOne({ lobbyCode: lobbyCode });
-      } else {
-        const timerKey = `host_leave_${lobby.id.toString()}`;
-        let existingTimer = lobbyTimers.get(timerKey);
-        if (existingTimer) {
-          clearTimeout(existingTimer);
+      const timerKey = `host_leave_${lobbyIdStr}`;
+      let existingTimer = lobbyTimers.get(timerKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        lobbyTimers.delete(timerKey);
+      }
+
+      console.log(`Host ${user.name} left lobby ${lobbyCode}. Starting 8-hour deletion timer.`);
+      const deletionTimer = setTimeout(async () => {
+        try {
+          const currentLobby = await Lobby.findOne({ lobbyCode: lobbyCode }).lean();
+          if (currentLobby) {
+            console.log(`8-hour timer expired for lobby ${lobbyCode}. Deleting lobby.`);
+            broadcastLobbyEvent(
+                null,
+                "LOBBY_DELETED",
+                {
+                    lobbyCode: currentLobby.lobbyCode,
+                    reason: "Host geri dönmediği için lobi kapatıldı.",
+                },
+                null
+            );
+            if (currentLobby.game === "1") {
+              await cleanupAndRemoveBingoGame(lobbyCode);
+            } else if (currentLobby.game === "2") {
+              await deleteHangmanGameFromRedis(lobbyCode);
+            }
+            await Lobby.deleteOne({ lobbyCode: lobbyCode });
+          }
+        } catch (error) {
+          console.error("Host ayrılma zamanlayıcısı (silme) hatası:", error);
+        } finally {
           lobbyTimers.delete(timerKey);
         }
-
-        const deletionTimer = setTimeout(async () => {
-          try {
-            const currentLobby = await Lobby.findOne({
-              lobbyCode: lobbyCode,
-            }).lean();
-            if (currentLobby) {
-              broadcastLobbyEvent(lobbyCode, "LOBBY_DELETED", {
-                lobbyCode: lobbyCode,
-                reason: "Host geri dönmediği için lobi kapatıldı.",
-              });
-              if (currentLobby.game === "1") {
-                await cleanupAndRemoveBingoGame(lobbyCode);
-              } else if (currentLobby.game === "2") {
-                await deleteHangmanGameFromRedis(lobbyCode);
-              }
-              await Lobby.deleteOne({ lobbyCode: lobbyCode });
-            }
-          } catch (error) {
-            console.error("Host ayrılma zamanlayıcısı (silme) hatası:", error);
-          } finally {
-            lobbyTimers.delete(timerKey);
-          }
-        }, 8 * 60 * 60 * 1000);
-        lobbyTimers.set(timerKey, deletionTimer);
-      }
+      }, 8 * 60 * 60 * 1000);
+      lobbyTimers.set(timerKey, deletionTimer);
     }
 
-    if (lobby.members.length > 0 || !wasHost || lobby.lobbyType !== "normal") {
-      await lobby.save();
+    if (lobby.members.length > 0 || !wasHost || lobby.lobbyType !== "normal" || (wasHost && lobby.lobbyType === "normal")) {
+        await lobby.save();
+    } else if (lobby.members.length === 0 && wasHost && lobby.lobbyType === "normal") {
+        await lobby.save();
     }
 
     res.status(200).json({
@@ -722,6 +712,7 @@ export const leaveLobby = async (req, res) => {
     });
   }
 };
+
 
 export const kickPlayerFromLobby = async (ws, data, sendToSpecificUser) => {
   const { lobbyCode, playerIdToKick } = data;
@@ -822,13 +813,11 @@ export const kickPlayerFromLobby = async (ws, data, sendToSpecificUser) => {
 
     if (lobby.game === "1") {
       const bingoGame = await getBingoGameFromRedis(lobbyCode);
-      if (
-        bingoGame &&
-        bingoGame.players &&
-        bingoGame.players[actualKickedUserId]
-      ) {
+      if (bingoGame) {
         if (bingoGame.gameStarted && !bingoGame.gameEnded) {
-          await handleBingoPlayerLeaveMidGame(lobbyCode, actualKickedUserId);
+          if (bingoGame.players && bingoGame.players[actualKickedUserId]) {
+             await handleBingoPlayerLeaveMidGame(lobbyCode, actualKickedUserId);
+          }
         } else if (!bingoGame.gameStarted) {
           await handleBingoPlayerLeavePreGame(lobbyCode, actualKickedUserId);
         }
@@ -939,71 +928,59 @@ export const deleteLobby = async (req, res) => {
       const bingoGame = await getBingoGameFromRedis(lobbyCode);
       if (bingoGame) {
         if (typeof broadcastLobbyEvent === "function") {
-          broadcastLobbyEvent(
-            lobby.lobbyCode,
-            "GAME_TERMINATED",
-            {
-              lobbyCode: lobby.lobbyCode,
-              message: "Oyun iptal edildi (Lobi silindi).",
-            },
-            Object.keys(bingoGame.players || {})
-          );
+          const playerIds = Object.keys(bingoGame.players || {});
+          if (playerIds.length > 0) {
+            broadcastLobbyEvent(
+              lobby.lobbyCode, 
+              "GAME_TERMINATED",
+              {
+                lobbyCode: lobby.lobbyCode,
+                message: "Oyun iptal edildi (Lobi silindi).",
+              },
+              playerIds // Sadece oyundaki oyunculara gönderiliyor
+            );
+          }
         }
         await cleanupAndRemoveBingoGame(lobbyCode);
       }
     } else if (lobby.game === "2") {
       const hangmanGame = await getHangmanGameFromRedis(lobbyCode);
       if (hangmanGame) {
-        if (hangmanGame.turnTimer) {
-          // Assuming hangmanGame object from Redis might not have .turnTimer directly
-          // If hangman.controller manages timers outside Redis, this part might need adjustment
-          // or timer clearing would be handled by the game ending logic in hangman.controller
-          // For now, let's assume if it was fetched and had an in-memory timer ID, it would be cleared here.
-          // However, timers are usually not stored in Redis.
-        }
-        // Notify players if game was in progress
-        if (hangmanGame.gameStarted && !hangmanGame.gameEnded) {
-          // This broadcast should ideally use the hangman.controller's broadcastToGame
-          // to properly format the HANGMAN_GAME_TERMINATED message.
-          // For simplicity here, a direct ws.send loop is shown if player.ws were available.
-          // In reality, you'd call a function from hangman.controller to end and notify.
-          // e.g., await terminateHangmanGame(lobbyCode, "Lobi silindi, oyun sonlandırıldı.");
-          // For now, let's assume a placeholder for direct notification.
-          // This part is complex as `hangmanGame` from Redis won't have `ws` objects.
-          // A proper implementation would fetch active player IDs and use a central broadcast mechanism.
-        }
+        
         await deleteHangmanGameFromRedis(lobbyCode);
       }
     }
 
-    if (
-      lobby.members &&
-      lobby.members.length > 0 &&
-      typeof broadcastLobbyEvent === "function"
-    ) {
+
+    if (typeof broadcastLobbyEvent === "function") {
       broadcastLobbyEvent(
-        lobby.lobbyCode,
+        null, // Global yayın için (belirli bir lobi kanalı değil)
         "LOBBY_DELETED",
-        {
+        { 
           lobbyCode: lobby.lobbyCode,
-          message: "Lobi silindi.",
+          reason: "Lobi silindi.", 
         },
-        lobby.members.map((member) => member.id.toString())
+        null // Tüm kullanıcılara yayınlamak için (specificUserIds = null)
       );
     }
 
-    if (lobbyTimers.has(`start_${lobby.id.toString()}`)) {
-      clearTimeout(lobbyTimers.get(`start_${lobby.id.toString()}`));
-      lobbyTimers.delete(`start_${lobby.id.toString()}`);
+    
+    const lobbyIdStr = lobby.id?.toString() || lobby._id?.toString(); 
+    if (lobbyIdStr) {
+        if (lobbyTimers.has(`start_${lobbyIdStr}`)) {
+          clearTimeout(lobbyTimers.get(`start_${lobbyIdStr}`));
+          lobbyTimers.delete(`start_${lobbyIdStr}`);
+        }
+        if (lobbyTimers.has(`end_${lobbyIdStr}`)) {
+          clearTimeout(lobbyTimers.get(`end_${lobbyIdStr}`));
+          lobbyTimers.delete(`end_${lobbyIdStr}`);
+        }
+        if (lobbyTimers.has(`host_leave_${lobbyIdStr}`)) {
+          clearTimeout(lobbyTimers.get(`host_leave_${lobbyIdStr}`));
+          lobbyTimers.delete(`host_leave_${lobbyIdStr}`);
+        }
     }
-    if (lobbyTimers.has(`end_${lobby.id.toString()}`)) {
-      clearTimeout(lobbyTimers.get(`end_${lobby.id.toString()}`));
-      lobbyTimers.delete(`end_${lobby.id.toString()}`);
-    }
-    if (lobbyTimers.has(`host_leave_${lobby.id.toString()}`)) {
-      clearTimeout(lobbyTimers.get(`host_leave_${lobby.id.toString()}`));
-      lobbyTimers.delete(`host_leave_${lobby.id.toString()}`);
-    }
+
 
     const deletionResult = await Lobby.deleteOne({ lobbyCode: lobbyCode });
 
@@ -1073,7 +1050,7 @@ export const updateLobby = async (req, res) => {
       }
       if (lobby.game !== game) {
          if (oldGameType === "1") {
-          await cleanupAndRemoveBingoGame(lobbyCode); // cleanupAndRemoveBingoGame bingo'ya özel, genele uygun değilse değiştirilmeli
+          await cleanupAndRemoveBingoGame(lobbyCode); 
           console.log(`[LobbyUpdate-${lobbyCode}] Eski Bingo (${oldGameType}) durumu Redis'ten silindi.`);
         } else if (oldGameType === "2") {
           await deleteHangmanGameFromRedis(lobbyCode);
@@ -1144,7 +1121,7 @@ export const updateLobby = async (req, res) => {
             .status(400)
             .json({ message: "Geçersiz başlangıç zamanı formatı." });
         }
-        // Eğer tip 'event'e yeni değiştiriliyorsa veya startTime gerçekten güncelleniyorsa kontrol et
+        
         if (
           (originalLobbyType !== "event" && lobby.lobbyType === "event") ||
           String(originalStartTime) !== String(startTimeDate)

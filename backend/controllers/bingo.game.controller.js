@@ -911,96 +911,63 @@ export const joinGame = async (ws, data) => {
 
 export const handleBingoPlayerLeavePreGame = async (lobbyCode, playerId) => {
   let game = await getGameFromRedis(lobbyCode);
-  if (!game || !game.players[playerId]) {
-    console.log(
-      `[Bingo Leave PreGame-${lobbyCode}] Game not found or player ${playerId} not in game.players`
-    );
+
+  if (!game) {
+    console.log(`[Bingo Leave PreGame-${lobbyCode}] No Bingo game state to update for player ${playerId}. Lobby notified separately.`);
     return;
   }
 
   if (game.gameStarted && !game.gameEnded) {
-    console.warn(
-      `[Bingo Leave PreGame-${lobbyCode}] Called for an active game. Player ${playerId}. Should use MidGame handler.`
-    );
+    console.warn(`[Bingo Leave PreGame-${lobbyCode}] Called for an active game for player ${playerId}. MidGame handler should be used.`);
     return;
   }
 
-  const playerInfo = game.players[playerId];
-  const playerName =
-    playerInfo?.name ||
-    playerInfo?.userName ||
-    `Oyuncu ${playerId.substring(0, 6)}`;
-  delete game.players[playerId];
+  const playerWasFormallyInBingoPlayersList = !!game.players[playerId];
+  let playerNameForNotification = `Player ${playerId.substring(0, 6)}`;
 
-  if (
-    activePlayerSockets[lobbyCode] &&
-    activePlayerSockets[lobbyCode][playerId]
-  ) {
-    delete activePlayerSockets[lobbyCode][playerId];
-    if (Object.keys(activePlayerSockets[lobbyCode]).length === 0) {
-      delete activePlayerSockets[lobbyCode];
+  if (playerWasFormallyInBingoPlayersList) {
+    playerNameForNotification = game.players[playerId]?.name || game.players[playerId]?.userName || playerNameForNotification;
+    delete game.players[playerId];
+
+    if (activePlayerSockets[lobbyCode] && activePlayerSockets[lobbyCode][playerId]) {
+      delete activePlayerSockets[lobbyCode][playerId];
+      if (Object.keys(activePlayerSockets[lobbyCode]).length === 0) {
+        delete activePlayerSockets[lobbyCode];
+      }
     }
   }
 
-  if (
-    String(game.host) === String(playerId) &&
-    Object.keys(game.players).length > 0
-  ) {
-    console.log(
-      `[Bingo Leave PreGame-${lobbyCode}] Host ${playerName} left. Bingo game host logic might need update if applicable.`
-    );
-  }
-
-  if (Object.keys(game.players).length > 0) {
-    await saveGameToRedis(lobbyCode, game);
-
-    const mapPlayerToClientState = (pId, pData) => ({
-      id: pId,
-      userId: pData.userId,
-      userName: pData.userName,
-      name: pData.name,
-      avatar: pData.avatar,
-      color: pData.color,
-    });
-
-    const currentPlayersForBroadcast = Object.entries(game.players).map(
-      ([pId, pData]) => mapPlayerToClientState(pId, pData)
-    );
-
-    let hostIdForBroadcast = game.host;
-    if (
-      String(game.host) === String(playerId) &&
-      Object.keys(game.players).length > 0
-    ) {
-      hostIdForBroadcast = Object.keys(game.players)[0]; // Basit bir atama, daha karmaşık bir mantık gerekebilir
-    }
-
-    broadcastToGame(game, {
-      type: "BINGO_GAME_STATE_UPDATED",
-      lobbyCode: lobbyCode,
-      gameId: game.gameId,
-      players: currentPlayersForBroadcast,
-      isHost:
-        String(hostIdForBroadcast) === String(playerId) &&
-        Object.keys(game.players).length === 0
-          ? false
-          : String(hostIdForBroadcast) === String(game.host), // Güncel host durumu
-      gameStarted: game.gameStarted,
-      gameEnded: game.gameEnded,
-      drawMode: game.drawMode,
-      drawer: game.drawer,
-      bingoMode: game.bingoMode,
-      competitionMode: game.competitionMode,
-      host: hostIdForBroadcast, // Oyunun güncel hostunu gönder
-      message: `${playerName} oyundan ayrıldı (oyun başlamadan).`,
-      kickedPlayerId: playerId,
-    });
-  } else {
-    console.log(
-      `[Bingo Leave PreGame-${lobbyCode}] No players left in Bingo game. Deleting game state from Redis.`
-    );
+  if (Object.keys(game.players).length === 0 && playerWasFormallyInBingoPlayersList) {
+    console.log(`[Bingo Leave PreGame-${lobbyCode}] Last formal player ${playerNameForNotification} left. Deleting Bingo game state from Redis.`);
     await deleteBingoGameStateFromRedis(lobbyCode);
+  } else {
+    await saveGameToRedis(lobbyCode, game);
   }
+
+  const clientPlayersList = Object.values(game.players).map((p) => ({
+    id: p.userId,
+    userId: p.userId,
+    name: p.name,
+    userName: p.userName,
+    avatar: p.avatar,
+    color: p.color,
+  }));
+
+  broadcastToGame(game, {
+    type: "BINGO_GAME_STATE_UPDATED",
+    lobbyCode: lobbyCode,
+    gameId: game.gameId,
+    players: clientPlayersList,
+    host: game.host,
+    gameStarted: game.gameStarted,
+    gameEnded: game.gameEnded,
+    drawMode: game.drawMode,
+    drawer: game.drawer,
+    bingoMode: game.bingoMode,
+    competitionMode: game.competitionMode,
+    kickedPlayerId: playerId,
+    messagePlayerName: playerNameForNotification, // Oyuncu adını da gönderelim
+  });
 };
 
 export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
@@ -1011,7 +978,7 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
   }
   if (!game.gameStarted || game.gameEnded) {
     console.warn(
-      `[Bingo Leave MidGame-${lobbyCode}] Game not active (started: ${game.gameStarted}, ended: ${game.gameEnded}).`
+      `[Bingo Leave MidGame-${lobbyCode}] Game not active (started: ${game.gameStarted}, ended: ${game.gameEnded}). Player: ${playerId}`
     );
     return;
   }
@@ -1027,11 +994,11 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
   const playerName =
     playerLeaving.name ||
     playerLeaving.userName ||
-    `Oyuncu ${playerId.substring(0, 6)}`;
+    `Player ${playerId.substring(0, 6)}`;
   console.log(
     `[Bingo Leave MidGame-${lobbyCode}] Player ${playerName} (${playerId}) is leaving.`
   );
-  delete game.players[playerId];
+  delete game.players[playerId]; 
 
   if (
     activePlayerSockets[lobbyCode] &&
@@ -1045,15 +1012,34 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
 
   const remainingPlayerCount = Object.keys(game.players).length;
   let modeChangedToAuto = false;
+
+  // Güncellenmiş oyuncu listesini map'le (frontend'in beklediği formatta)
+  const updatedPlayersForFrontend = Object.values(game.players).map(p => ({
+    id: p.userId, // veya sadece p.id, frontend nasıl bekliyorsa
+    userId: p.userId,
+    name: p.name,
+    userName: p.userName,
+    avatar: p.avatar,
+    color: p.color,
+    completedBingo: p.completedBingo || !!p.completedAt, // Frontend'in kullandığı diğer alanlar
+  }));
+
   if (remainingPlayerCount > 0) {
-    broadcastToGame(game, {
+    // Diğer oyunculara ayrılma bilgisini ve GÜNCELLENMİŞ OYUNCU LİSTESİNİ gönder
+    broadcastToGame(game, { // 'game' objesi broadcastToGame'e lobbyCode vs. için gönderiliyor
       type: "BINGO_PLAYER_LEFT_MID_GAME",
-      playerId: playerId,
-      playerName: playerName,
+      lobbyCode: lobbyCode, // lobbyCode'u ekleyelim
+      playerId: playerId, // Ayrılan oyuncunun ID'si
+      playerName: playerName, // Ayrılan oyuncunun adı
+      players: updatedPlayersForFrontend, // GÜNCELLENMİŞ OYUNCU LİSTESİ
       notification: {
         key: "notifications.playerLeftMidGame",
         params: { playerName: playerName },
       },
+      // Gerekirse güncellenmiş host veya drawer bilgisi de gönderilebilir
+      host: game.host,
+      drawer: game.drawer,
+      drawMode: game.drawMode,
     });
 
     if (
@@ -1070,10 +1056,14 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
       game.drawMode = "auto";
       game.drawer = null;
       modeChangedToAuto = true;
+      // Draw mode değişikliğini de tüm oyunculara bildir
       broadcastToGame(game, {
         type: "BINGO_DRAW_MODE_CHANGED",
+        lobbyCode: lobbyCode,
         newDrawMode: "auto",
-        message: `Sayıyı çeken oyuncu (${playerName}) oyundan ayrıldığı için oyun otomatik sayı çekme moduna geçirildi.`,
+        drawer: null, // Artık drawer yok
+        players: updatedPlayersForFrontend, // Oyuncu listesini tekrar gönder
+        message: `The drawing player (${playerName}) left the game. Switched to automatic drawing mode.`,
       });
       await saveGameToRedis(lobbyCode, game);
 
@@ -1086,7 +1076,7 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
       }
     }
 
-    const currentRankings = getGameRankings(game);
+    const currentRankings = getGameRankings(game); // Güncellenmiş game.players ile sıralama al
     const completedPlayersCount = currentRankings.filter(
       (r) => r.completedAt
     ).length;
@@ -1094,10 +1084,10 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
     if (
       remainingPlayerCount > 0 &&
       completedPlayersCount === remainingPlayerCount &&
-      !game.gameEnded
+      !game.gameEnded // Oyun zaten bitmemişse
     ) {
       game.gameEnded = true;
-      game.gameStarted = false;
+      game.gameStarted = false; // Oyunu sonlandır
       game.rankings = currentRankings;
       if (gameIntervals[lobbyCode]) {
         clearTimeout(gameIntervals[lobbyCode]);
@@ -1105,31 +1095,55 @@ export const handleBingoPlayerLeaveMidGame = async (lobbyCode, playerId) => {
       }
       broadcastToGame(game, {
         type: "BINGO_GAME_OVER",
+        lobbyCode: lobbyCode,
         message:
-          "Kalan tüm oyuncular tamamladı (bir oyuncu ayrıldıktan sonra). Final Sıralaması:",
+          "All remaining players have completed Bingo after a player left. Final Rankings:",
         finalRankings: currentRankings,
+        players: updatedPlayersForFrontend, // Son oyuncu listesini gönder
       });
-      await saveGameStatsToDB(game);
+      await saveGameStatsToDB(game); // Oyun bittiği için DB'ye kaydet
+      // Oyun bitti, Redis'ten silmek yerine son durumu koruyabiliriz (ended: true ile)
+      // veya bir süre sonra temizlenecek şekilde TTL ayarlanabilir.
+      // Şimdilik son durumu kaydediyoruz.
+      await saveGameToRedis(lobbyCode, game);
+      return; // Oyun bittiği için fonksiyondan çık
     }
 
+    // Oyun bitmediyse, güncellenmiş game state'ini Redis'e kaydet
     if (!game.gameEnded) {
       await saveGameToRedis(lobbyCode, game);
     }
-  } else {
+
+  } else { // Kalan oyuncu yoksa oyunu bitir ve Redis'ten sil
+    console.log(`[Bingo Leave MidGame-${lobbyCode}] Last player ${playerName} left. Ending and removing game.`);
     game.gameEnded = true;
     game.gameStarted = false;
     if (gameIntervals[lobbyCode]) {
       clearTimeout(gameIntervals[lobbyCode]);
       delete gameIntervals[lobbyCode];
     }
-    await deleteBingoGameStateFromRedis(lobbyCode);
-    return;
+    // Oyunculara oyunun bittiğini (oyuncu kalmadığı için) bildir.
+    // Bu mesajı göndermek için broadcastToGame'in `game` objesini alması ve
+    // içinde lobbyCode olması gerekir. activePlayerSockets[lobbyCode] artık boş olacağı için
+    // bu mesaj kimseye gitmeyebilir eğer o an bağlı kimse yoksa.
+    // Ancak yine de durumu loglamak ve Redis'i temizlemek önemli.
+    broadcastToGame({ lobbyCode: lobbyCode, players: {} }, { // Dummy game objesi
+        type: "BINGO_GAME_OVER",
+        lobbyCode: lobbyCode,
+        message: "The last player left the game. Game over.",
+        finalRankings: [], // Oyuncu kalmadığı için boş sıralama
+        players: [],
+    });
+    await deleteBingoGameStateFromRedis(lobbyCode); // Redis'ten oyun durumunu sil
+    return; // Fonksiyondan çık
   }
 
-  if (!game.gameEnded && !modeChangedToAuto) {
-    await saveGameToRedis(lobbyCode, game);
-  }
+  // Bu satır artık yukarıdaki `if (!game.gameEnded)` bloğu içinde
+  // if (remainingPlayerCount > 0 && !game.gameEnded && !modeChangedToAuto) {
+  //   await saveGameToRedis(lobbyCode, game);
+  // }
 };
+
 
 export const markNumber = async (ws, data) => {
   const { lobbyCode, number } = data;

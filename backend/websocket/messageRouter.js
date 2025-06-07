@@ -13,12 +13,12 @@ import * as communityChatController from "../controllers/communityChat.controlle
 import * as privateChatController from "../controllers/privateChat.controller.js";
 import * as groupChatController from "../controllers/groupChat.controller.js";
 import * as friendGroupChatController from "../controllers/friendGroupChat.controller.js";
-import * as hangmanGameController from "../controllers/hangman.controller.js"; // Düzeltilmiş import
+import * as hangmanGameController from "../controllers/hangman.controller.js";
 
 export const routeMessage = async (ws, message, broadcasters) => {
   try {
     const data = JSON.parse(message);
-    console.log("İstemciden gelen mesaj:", data);
+    console.log("İstemciden gelen mesaj:", data); // For debugging
 
     const {
       sendToSpecificUser,
@@ -59,7 +59,10 @@ export const routeMessage = async (ws, message, broadcasters) => {
           lobbyChatController.clearChatHistory(data.lobbyCode);
           broadcastToAll({
             type: "LOBBY_DELETED",
-            lobbyCode: data.lobbyCode,
+            data: {
+              lobbyCode: data.lobbyCode,
+              reason: data.reason || "Lobi silindi",
+            }
           });
         }
         break;
@@ -71,23 +74,27 @@ export const routeMessage = async (ws, message, broadcasters) => {
         });
         break;
       case "LOBBY_UPDATED":
-        broadcastToAll(ws, {
+        broadcastToAll({
           type: "LOBBY_UPDATED",
-          lobbyCode: data.lobbyCode,
           data: data.data,
         });
         break;
       case "HOST_RETURNED":
-        broadcastLobbyEvent(data.lobbyCode, "HOST_RETURNED", data.data);
+        if (typeof lobbyController.broadcastLobbyEvent === 'function') {
+            lobbyController.broadcastLobbyEvent(data.lobbyCode, "HOST_RETURNED", data.data, data.data?.membersToNotify || null);
+        } else {
+            console.warn("HOST_RETURNED: lobbyController.broadcastLobbyEvent not available. Using passed broadcasters.");
+            const payload = { type: "HOST_RETURNED", data: data.data, lobbyCode: data.lobbyCode };
+            if (data.data && data.data.membersToNotify) {
+                 broadcastToSpecificUsers(data.data.membersToNotify, payload);
+            } else {
+                 broadcastToLobbyMembers(data.lobbyCode, "HOST_RETURNED", data.data);
+            }
+        }
         break;
       case "KICK_PLAYER":
         if (ws.userId) {
-          await lobbyController.kickPlayerFromLobby(ws, data,sendToSpecificUser);
-          sendToSpecificUser(data.playerIdToKick, {
-            type: "USER_KICKED",
-            lobbyCode: data.lobbyCode,
-            reason: "Lobi sahibi tarafından lobiden çıkarıldınız.",
-          });
+          await lobbyController.kickPlayerFromLobby(ws, data, sendToSpecificUser);
         } else {
           ws.send(
             JSON.stringify({
@@ -105,10 +112,9 @@ export const routeMessage = async (ws, message, broadcasters) => {
         });
         break;
       case "LOBBY_EXPIRED":
-        broadcastToOthers(ws, {
+        broadcastToAll({
           type: "LOBBY_EXPIRED",
           lobbyCode: data.lobbyCode,
-          data: data.data,
         });
         break;
       case "GAME_TERMINATED":
@@ -150,7 +156,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
 
       case "SEND_EXPRESSION":
         const {
-          lobbyCode,
+          lobbyCode: expressionLobbyCode,
           expression,
           senderName,
           senderUsername,
@@ -158,7 +164,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
           senderAvatar,
         } = data;
 
-        lobbyChatController.storeMessage(lobbyCode, {
+        lobbyChatController.storeMessage(expressionLobbyCode, {
           senderName,
           senderUsername,
           senderId,
@@ -166,12 +172,13 @@ export const routeMessage = async (ws, message, broadcasters) => {
           senderAvatar,
         });
 
-        await broadcastToLobbyMembers(lobbyCode, "RECEIVE_EXPRESSION", {
+        await broadcastToLobbyMembers(expressionLobbyCode, "RECEIVE_EXPRESSION", {
           expression,
           senderName,
           senderUsername,
           senderId,
           senderAvatar,
+          lobbyCode: expressionLobbyCode,
         });
         break;
 
@@ -201,20 +208,15 @@ export const routeMessage = async (ws, message, broadcasters) => {
           return;
         }
         try {
-          console.log(
-            `Topluluk mesajı alındı from userId: ${ws.userId}: ${communityMessageText}`
-          );
           const savedMessage =
             await communityChatController.storeCommunityMessage(
               ws.userId,
               communityMessageText
             );
-          console.log("Topluluk mesajı kaydedildi:", savedMessage);
           broadcastToAll({
             type: "RECEIVE_COMMUNITY_MESSAGE",
             message: savedMessage,
           });
-          console.log("Topluluk mesajı yayınlandı.");
         } catch (error) {
           console.error("Topluluk mesajı yayınlama hatası:", error);
           sendToSpecificUser(ws.userId, {
@@ -229,25 +231,25 @@ export const routeMessage = async (ws, message, broadcasters) => {
           console.error("Kullanıcı ID'si bulunamadı, özel mesaj gönderilemez.");
           return;
         }
-        const { receiverId, message: privateMessageText } = data;
-        if (!receiverId || !privateMessageText) {
+        const { receiverId: privateReceiverId, message: privateMessageText } = data;
+        if (!privateReceiverId || !privateMessageText) {
           console.error("Alıcı ID'si veya mesaj içeriği eksik.");
           return;
         }
         try {
-          const savedMessage = await privateChatController.storePrivateMessage(
+          const savedPrivateMessage = await privateChatController.storePrivateMessage(
             ws.userId,
-            receiverId,
+            privateReceiverId,
             privateMessageText
           );
           sendToSpecificUser(ws.userId, {
             type: "RECEIVE_PRIVATE_MESSAGE",
-            message: savedMessage,
+            message: savedPrivateMessage,
             isSelf: true,
           });
-          sendToSpecificUser(receiverId, {
+          sendToSpecificUser(privateReceiverId, {
             type: "RECEIVE_PRIVATE_MESSAGE",
-            message: savedMessage,
+            message: savedPrivateMessage,
             isSelf: false,
           });
         } catch (error) {
@@ -402,7 +404,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
           ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Server error processing language category request." }));
         }
         break;
-
       default:
         console.log("Bilinmeyen mesaj tipi:", data.type);
     }
@@ -411,11 +412,20 @@ export const routeMessage = async (ws, message, broadcasters) => {
   } catch (error) {
     console.error("Mesaj işleme hatası:", error);
     if (ws.readyState === ws.OPEN) {
+      let originalType = 'unknown';
+      try {
+        if (message && typeof message === 'string') {
+          const parsedMessage = JSON.parse(message);
+          originalType = parsedMessage.type || 'unknown';
+        }
+      } catch (parseError) {
+        // message might not be valid JSON, or not have a type
+      }
       ws.send(
         JSON.stringify({
           type: "ERROR",
           message: "Mesaj işlenirken bir sunucu hatası oluştu.",
-          originalMessageType: message?.type,
+          originalMessageType: originalType,
         })
       );
     }

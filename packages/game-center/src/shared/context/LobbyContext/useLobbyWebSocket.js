@@ -12,90 +12,17 @@ const useLobbyWebSocket = (
   membersByLobby,
   setDeletedLobbyInfo,
   setUserLeftInfo,
-  showTurnNotification,
-  
+  showTurnNotification
 ) => {
   const [isWebSocketUpdate, setIsWebSocketUpdate] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const{t}=useTranslation();
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!socket) {
       return;
     }
-
-    const handleWebSocketMessage = (event) => {
-      let data;
-      try {
-        data = JSON.parse(event.data);
-      } catch (e) {
-        return;
-      }
-console.log("WebSocket mesajı:", data);
-      if (!data.type) {
-        return;
-      }
-
-      setIsWebSocketUpdate(true);
-      try {
-        switch (data.type) {
-          case "LOBBY_CREATED":
-            handleLobbyCreated(data.data);
-            break;
-          case "USER_JOINED":
-            handleUserJoined(data);
-            break;
-          case "LOBBY_MEMBER_COUNT_UPDATED":
-            handleLobbyMemberCountUpdate(data.data);
-            break;
-          case "USER_LEFT":
-            handleUserLeft(data);
-            break;
-          case "PLAYER_KICKED_BY_HOST":
-            handlePlayerKickedByHost(data.data);
-            break;
-          case "USER_KICKED":
-            handleUserKicked(data);
-            break;
-          case "LOBBY_DELETED":
-            handleLobbyDeleted(data.lobbyCode, data.data);
-            break;
-          case "LOBBY_EXPIRED":
-            handleLobbyExpired(data);
-            break;
-          case "EVENT_STATUS":
-            handleEventStatus(data);
-            break;
-          case "HOST_RETURNED":
-            handleHostReturned(data);
-            break;
-          case "LOBBY_REMOVED":
-            handleLobbyRemoved(data.lobbyCode);
-            break;
-          case "LOBBY_UPDATED":
-            handleLobbyUpdated(data.data);
-            break;
-          case "HANGMAN_TURN_CHANGE":
-            if (currentUser?.id && data.sharedGameState?.currentPlayerId === currentUser.id) {
-              const gameLobbyCode = data.sharedGameState?.lobbyCode;
-              const gameLobbyName = data.sharedGameState?.lobbyName || (t ? t('Hangman', 'Adam Asmaca') : 'Adam Asmaca');
-            
-              if (gameLobbyCode && showTurnNotification) {
-                const message = t ? t('notifications.yourTurnInGame', { gameName: gameLobbyName }) : `lobby: ${gameLobbyName}`;
-                showTurnNotification(gameLobbyCode, gameLobbyName, message);
-              }
-            }
-            break;
-          default:
-            break;
-        }
-      } catch (error) {
-        // Optional: Keep error logging for production monitoring if needed, or remove if truly not desired.
-        // console.error("[useLobbyWebSocket] Error processing WebSocket message:", error, "Message data:", data);
-      } finally {
-        setIsWebSocketUpdate(false);
-      }
-    };
 
     const handleLobbyCreated = (lobbyData) => {
       if (lobbyData.createdBy !== currentUser?.id) {
@@ -191,7 +118,13 @@ console.log("WebSocket mesajı:", data);
       }
     };
 
-    const handleLobbyDeleted = (lobbyCode, lobbyData) => {
+    const handleLobbyDeleted = (lobbyData) => {
+      const lobbyCode = lobbyData.lobbyCode;
+
+      if (!lobbyCode) {
+        return;
+      }
+
       setDeletedLobbyInfo({
         lobbyCode,
         reason: lobbyData?.reason || "Lobby has been deleted by the host.",
@@ -341,6 +274,77 @@ console.log("WebSocket mesajı:", data);
       }
     };
 
+    const handleWebSocketMessage = (event) => {
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
+
+      if (!data.type) {
+        return;
+      }
+
+      setIsWebSocketUpdate(true);
+      try {
+        switch (data.type) {
+          case "LOBBY_CREATED":
+            handleLobbyCreated(data.data);
+            break;
+          case "USER_JOINED":
+            handleUserJoined(data);
+            break;
+          case "LOBBY_MEMBER_COUNT_UPDATED":
+            handleLobbyMemberCountUpdate(data.data);
+            break;
+          case "USER_LEFT":
+            handleUserLeft(data);
+            break;
+          case "PLAYER_KICKED_BY_HOST":
+            handlePlayerKickedByHost(data.data);
+            break;
+          case "USER_KICKED":
+            handleUserKicked(data);
+            break;
+          case "LOBBY_DELETED":
+            handleLobbyDeleted(data.data);
+            break;
+          case "LOBBY_EXPIRED":
+            handleLobbyExpired(data);
+            break;
+          case "EVENT_STATUS":
+            handleEventStatus(data);
+            break;
+          case "HOST_RETURNED":
+            handleHostReturned(data);
+            break;
+          case "LOBBY_REMOVED":
+            handleLobbyRemoved(data.lobbyCode);
+            break;
+          case "LOBBY_UPDATED":
+            handleLobbyUpdated(data.data);
+            break;
+          case "HANGMAN_TURN_CHANGE":
+            if (currentUser?.id && data.sharedGameState?.currentPlayerId === currentUser.id) {
+              const gameLobbyCode = data.sharedGameState?.lobbyCode;
+              const gameLobbyName = data.sharedGameState?.lobbyName || (t ? t('Hangman', 'Adam Asmaca') : 'Adam Asmaca');
+            
+              if (gameLobbyCode && showTurnNotification) {
+                const message = t ? t('notifications.yourTurnInGame', { gameName: gameLobbyName }) : `lobby: ${gameLobbyName}`;
+                showTurnNotification(gameLobbyCode, gameLobbyName, message);
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      } catch (error) {
+      } finally {
+        setIsWebSocketUpdate(false);
+      }
+    };
+
     socket.addEventListener("message", handleWebSocketMessage);
     return () => {
       socket.removeEventListener("message", handleWebSocketMessage);
@@ -358,7 +362,7 @@ console.log("WebSocket mesajı:", data);
     showTurnNotification,
     t,
     location,
-    membersByLobby 
+    membersByLobby
   ]);
 
   return isWebSocketUpdate;
