@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Snackbar, Alert, IconButton, Collapse, useTheme } from '@mui/material';
+import React, { useState, useEffect} from 'react';
+import { Box, Typography, IconButton, Collapse, useTheme } from '@mui/material';
 import {
   HourglassEmpty,
   ExpandLess as ExpandLessIcon,
@@ -8,12 +8,9 @@ import TimerIcon from '@mui/icons-material/Timer';
 
 const LobbyTimer = ({ lobbyInfo,t }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
-  const [showEndingSoon, setShowEndingSoon] = useState(false);
   const [eventStatus, setEventStatus] = useState('upcoming');
   const [isOpen, setIsOpen] = useState(true);
   const theme = useTheme();
-
-  const alertDismissedRef = useRef(false);
 
   useEffect(() => {
     if (lobbyInfo.lobbyType === 'event' && lobbyInfo.endTime) {
@@ -36,13 +33,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
 
         let targetTime = eventStatus === 'upcoming' ? startTime : endTime;
         const timeDiff = targetTime - now;
-        const fiveMinutesInMs = 5 * 60 * 1000;
-        if (eventStatus === 'ongoing' &&
-            (endTime - now) <= fiveMinutesInMs &&
-            (endTime - now) > 0 &&
-            !alertDismissedRef.current) {
-          setShowEndingSoon(true);
-        }
 
         if (timeDiff > 0) {
           const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
@@ -62,7 +52,7 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
         const remaining = calculateTimeRemaining();
         setTimeRemaining(remaining);
 
-        if (eventStatus === 'ended') {
+        if (eventStatus === 'ended' && remaining.total <= 0) {
           clearInterval(timerInterval);
         }
       }, 1000);
@@ -70,11 +60,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
       return () => clearInterval(timerInterval);
     }
   }, [lobbyInfo, eventStatus]);
-
-  const handleCloseAlert = () => {
-    setShowEndingSoon(false);
-    alertDismissedRef.current = true;
-  };
 
   const toggleTimer = () => {
     setIsOpen(!isOpen);
@@ -96,7 +81,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
           position: 'relative',
         }}
       >
-        {/* Toggle button centered at the bottom edge */}
         <IconButton
           onClick={toggleTimer}
           sx={{
@@ -122,7 +106,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
           {isOpen ? <ExpandLessIcon /> : <TimerIcon />}
         </IconButton>
 
-        {/* Collapsible timer content */}
         <Collapse in={isOpen} timeout={300} sx={{ width: '100%' }}>
           <Box
             sx={{
@@ -139,7 +122,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
               mt: 2
             }}
           >
-            {/* Display countdown if time remaining */}
             {eventStatus !== 'ended' && timeRemaining?.total > 0 ? (
               <Box
                 sx={{
@@ -240,29 +222,6 @@ const LobbyTimer = ({ lobbyInfo,t }) => {
           </Box>
         </Collapse>
       </Box>
-
-      {/* Alert when 5 minutes remaining */}
-      <Snackbar
-        open={showEndingSoon}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        onClose={handleCloseAlert}
-      >
-        <Alert
-          severity="warning"
-          onClose={handleCloseAlert}
-          variant="filled"
-          elevation={6}
-          sx={{
-            width: '100%',
-            fontSize: '0.875rem',
-            '& .MuiAlert-icon': {
-              fontSize: '1.25rem'
-            }
-          }}
-        >
-           {t("The event will end in 5 minutes")}!
-        </Alert>
-      </Snackbar>
     </>
   );
 };
