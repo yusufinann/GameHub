@@ -4,16 +4,16 @@ import MailIcon from '@mui/icons-material/Mail';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import { useTranslation } from 'react-i18next';
 import {useNavigate } from "react-router-dom";
-const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
+
+const FriendAvatar = memo(({ friend, onInvite, existingLobby }) => {
   const status = friend.isOnline ? 'online' : 'offline';
-  const{t}=useTranslation();
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
+
   const handleClick = (event) => {
-    if (friend.isOnline) {
-      setAnchorEl(event.currentTarget);
-    }
+    setAnchorEl(event.currentTarget);
   };
   
   const handleClose = () => {
@@ -21,7 +21,7 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
   };
 
   const handleMessageClick = () => {
-    navigate(`/conversation/all/friend/${friend.id}`)
+    navigate(`/conversation/all/friend/${friend.id}`);
     handleClose();
   };
 
@@ -31,7 +31,7 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
   };
   
   const handleIconClick = (event) => {
-    event.stopPropagation(); // Prevent avatar click handler from firing
+    event.stopPropagation(); // Prevent avatar click handler from firing if this icon is on top of clickable area
     setAnchorEl(event.currentTarget);
   };
 
@@ -47,15 +47,18 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
               background: friend.isOnline 
                 ? 'linear-gradient(45deg, #00d2ff 0%, #3a7bd5 100%)'
                 : 'linear-gradient(45deg, #808080 0%, #a0a0a0 100%)',
-              cursor: friend.isOnline ? 'pointer' : 'default',
+              // Make avatar clickable even when offline to open menu
+              cursor: 'pointer', 
               opacity: friend.isOnline ? 1 : 0.7, // Frame opacity reduced when offline
-              '&:hover': friend.isOnline ? {
+              '&:hover': { // Keep hover effect consistent, or differentiate if needed
                 transform: 'scale(1.05)',
-                boxShadow: '0 0 15px rgba(0, 210, 255, 0.5)',
-              } : {},
+                boxShadow: friend.isOnline 
+                  ? '0 0 15px rgba(0, 210, 255, 0.5)' 
+                  : '0 0 10px rgba(128, 128, 128, 0.5)', // Adjusted shadow for offline hover
+              },
               transition: 'all 0.3s ease',
             }}
-            onClick={handleClick}
+            onClick={handleClick} // This click opens the menu
           >
             <Badge
               overlap="circular"
@@ -69,12 +72,6 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
                       bgcolor: '#FF5252',
                       borderRadius: '50%',
                       boxShadow: '0 0 10px #FF5252',
-                      animation: 'pulse 1.5s infinite',
-                      '@keyframes pulse': {
-                        '0%': { transform: 'scale(0.95)', boxShadow: '0 0 0 0 rgba(255, 82, 82, 0.7)' },
-                        '70%': { transform: 'scale(1)', boxShadow: '0 0 0 5px rgba(255, 82, 82, 0)' },
-                        '100%': { transform: 'scale(0.95)', boxShadow: '0 0 0 0 rgba(255, 82, 82, 0)' }
-                      }
                     }}
                   />
                 ) : null
@@ -88,12 +85,11 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
                   height: 50,
                   border: '2px solid rgba(255, 255, 255, 0.8)',
                   transition: 'all 0.3s ease',
-                  filter: 'none', // Removed grayscale filter to keep image clear when offline
+                  filter: 'none',
                 }}
               />
             </Badge>
             
-            {/* Enhanced status indicator */}
             <Box
               sx={{
                 position: 'absolute',
@@ -110,44 +106,37 @@ const FriendAvatar = memo(({ friend,onInvite, existingLobby }) => {
                   ? '0 0 10px rgba(46, 213, 115, 0.7)' 
                   : '0 0 10px rgba(255, 71, 87, 0.7)',
                 zIndex: 3,
-                animation: status === 'online' ? 'fadeInOut 2s infinite' : 'none',
-                '@keyframes fadeInOut': {
-                  '0%': { opacity: 0.7 },
-                  '50%': { opacity: 1 },
-                  '100%': { opacity: 0.7 }
-                }
               }}
             />
           </Box>
         </Tooltip>
         
-        {/* Options icon with tooltip */}
-        {friend.isOnline && (
-          <Tooltip title={t("click")} placement="right">
-            <IconButton 
-              size="small" 
-              onClick={handleIconClick}
-              sx={{ 
-                position: 'absolute', 
-                top: -5, 
-                right: -5, 
-                bgcolor: 'rgba(0, 210, 255, 0.8)',
-                color: 'white',
-                width: 20,
-                height: 20,
-                fontSize: '12px',
-                zIndex: 2,
-                boxShadow: '0 0 5px rgba(0, 210, 255, 0.5)',
-                '&:hover': {
-                  bgcolor: 'rgba(0, 210, 255, 1)',
-                  transform: 'scale(1.1)'
-                },
-              }}
-            >
-              <Typography variant="caption" sx={{ fontWeight: 'bold' }}>+</Typography>
-            </IconButton>
-          </Tooltip>
-        )}
+        {/* Options icon with tooltip - Always visible */}
+        <Tooltip title={t("click")} placement="right">
+          <IconButton 
+            size="small" 
+            onClick={handleIconClick} // This click also opens the menu
+            sx={{ 
+              position: 'absolute', 
+              top: -5, 
+              right: -5, 
+              // Use a neutral or slightly adapted color if friend is offline, or keep it consistent
+              bgcolor: friend.isOnline ? 'rgba(0, 210, 255, 0.8)' : 'rgba(128, 128, 128, 0.8)', 
+              color: 'white',
+              width: 20,
+              height: 20,
+              fontSize: '12px',
+              zIndex: 2,
+              boxShadow: friend.isOnline ? '0 0 5px rgba(0, 210, 255, 0.5)' : '0 0 5px rgba(128, 128, 128, 0.5)',
+              '&:hover': {
+                bgcolor: friend.isOnline ? 'rgba(0, 210, 255, 1)' : 'rgba(128, 128, 128, 1)',
+                transform: 'scale(1.1)'
+              },
+            }}
+          >
+            <Typography variant="caption" sx={{ fontWeight: 'bold' }}>+</Typography>
+          </IconButton>
+        </Tooltip>
       </Box>
 
       <Menu

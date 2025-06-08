@@ -1248,27 +1248,23 @@ export const markNumber = async (ws, data) => {
 
 export const checkBingo = async (ws, data) => {
   const { lobbyCode } = data;
+
   let game = await getGameFromRedis(lobbyCode);
 
   if (!game) {
-    console.error(`checkBingo Hatası: ${lobbyCode} için oyun bulunamadı.`);
     return ws.send(
       JSON.stringify({ type: "BINGO_ERROR", message: "Oyun bulunamadı." })
     );
   }
+
   if (!game.gameStarted || game.gameEnded) {
-    console.warn(
-      `checkBingo Uyarısı: ${lobbyCode} için oyun aktif değil (başlamadı veya bitti).`
-    );
     return ws.send(
       JSON.stringify({ type: "BINGO_ERROR", message: "Oyun aktif değil." })
     );
   }
+
   const player = game.players[ws.userId];
   if (!player) {
-    console.error(
-      `checkBingo Hatası: Oyuncu (${ws.userId}) ${lobbyCode} oyununda bulunamadı.`
-    );
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
@@ -1276,6 +1272,7 @@ export const checkBingo = async (ws, data) => {
       })
     );
   }
+
   if (player.completedBingo) {
     return ws.send(
       JSON.stringify({
@@ -1284,10 +1281,8 @@ export const checkBingo = async (ws, data) => {
       })
     );
   }
+
   if (!player.ticket || !player.ticket.numbersGrid || !player.ticket.layout) {
-    console.error(
-      `checkBingo Hatası: Oyuncu (${player.userName}) için bilet geçersiz veya eksik.`
-    );
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
@@ -1302,10 +1297,8 @@ export const checkBingo = async (ws, data) => {
       if (num !== null) playerTicketNumbers.push(num);
     })
   );
+
   if (playerTicketNumbers.length !== 15) {
-    console.error(
-      `checkBingo Hatası: Oyuncu (${player.userName}) için biletteki sayı adedi (${playerTicketNumbers.length}) geçersiz.`
-    );
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
@@ -1313,6 +1306,7 @@ export const checkBingo = async (ws, data) => {
       })
     );
   }
+
   if (!Array.isArray(game.drawnNumbers)) game.drawnNumbers = [];
   if (!Array.isArray(player.markedNumbers)) player.markedNumbers = [];
 
@@ -1330,15 +1324,18 @@ export const checkBingo = async (ws, data) => {
     }
 
     const currentRankings = getGameRankings(game);
+
     const playerRankInfo = currentRankings.find(
       (r) => String(r.playerId) === String(ws.userId)
     );
     const playerRank = playerRankInfo ? playerRankInfo.rank : null;
+
     const currentCompletedPlayers = getCompletedPlayersList(game);
+
     const numberOfPlayers = Object.keys(game.players).length;
     const allNumbersDrawn = game.numberPool && game.numberPool.length === 0;
     const allConnectedPlayersCompleted =
-      currentCompletedPlayers.length === numberOfPlayers;
+      currentCompletedPlayers.length === numberOfPlayers && numberOfPlayers > 0;
 
     let shouldGameEnd = false;
     let gameOverReason = "";
@@ -1349,7 +1346,7 @@ export const checkBingo = async (ws, data) => {
         player.name || player.userName
       } BINGO! Oyunu Kazandı!`;
     } else {
-      if (numberOfPlayers <= 1) {
+      if (numberOfPlayers <= 1 && numberOfPlayers > 0) {
         shouldGameEnd = true;
         gameOverReason = "Oyun Bitti - Final Sıralaması";
       } else if (allConnectedPlayersCompleted) {
@@ -1382,7 +1379,9 @@ export const checkBingo = async (ws, data) => {
         clearInterval(gameIntervals[lobbyCode]);
         delete gameIntervals[lobbyCode];
       }
+
       const finalRankingsForGameOver = getGameRankings(game);
+
       broadcastToGame(game, {
         type: "BINGO_GAME_OVER",
         message: gameOverReason,
@@ -1390,7 +1389,9 @@ export const checkBingo = async (ws, data) => {
         gameId: game.gameId,
         completedPlayers: getCompletedPlayersList(game),
       });
+
       await saveGameStatsToDB(game);
+
     } else if (!game.gameEnded) {
       broadcastToGame(game, {
         type: "BINGO_GAME_STATUS",
@@ -1398,12 +1399,14 @@ export const checkBingo = async (ws, data) => {
         completedPlayers: currentCompletedPlayers,
       });
     }
+
     await saveGameToRedis(lobbyCode, game);
+
   } else {
     ws.send(
       JSON.stringify({
         type: "BINGO_INVALID",
-        message: "Geçersiz Bingo çağrısı.",
+        message: "Geçersiz Bingo çağrısı. Tüm numaralarınız çekilmemiş veya işaretlenmemiş.",
       })
     );
   }
