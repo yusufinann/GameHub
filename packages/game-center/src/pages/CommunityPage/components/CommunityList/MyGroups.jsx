@@ -26,12 +26,11 @@ const MyGroups = ({
   currentUser,
   isGroupListLoading,
   isGroupDeleting,
-  t // The translation function
+  t 
 }) => {
   const filteredMyGroups = groups?.filter(group =>
     group.groupName.toLowerCase().includes(myGroupSearch.toLowerCase())
   );
-
   return (
     <Box>
       <Box

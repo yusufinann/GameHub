@@ -22,7 +22,7 @@ export const CreateGroupDialog = ({
   setIsPasswordProtected,
   newGroupPassword,
   setNewGroupPassword,
-  maxMembers, 
+  maxMembers,
   setMaxMembers,
   handleCreateGroup,
   t
@@ -31,13 +31,22 @@ export const CreateGroupDialog = ({
   const handleMaxMembersChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (e.target.value === '' || (!isNaN(value))) {
-       setMaxMembers(e.target.value === '' ? '' : Math.max(2, value));
+      setMaxMembers(e.target.value === '' ? '' : Math.max(2, value));
     }
   };
 
-
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleCreateGroup(); } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        component: 'form',
+        onSubmit: (e) => {
+          e.preventDefault();
+          handleCreateGroup();
+        }
+      }}
+    >
       <DialogTitle>{t("Create Community Group")}</DialogTitle>
       <DialogContent>
         <TextField
@@ -50,7 +59,7 @@ export const CreateGroupDialog = ({
           variant="standard"
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
-          required 
+          required
         />
         <TextField
           margin="dense"
@@ -64,19 +73,19 @@ export const CreateGroupDialog = ({
           value={newGroupDescription}
           onChange={(e) => setNewGroupDescription(e.target.value)}
         />
-         <TextField
-            margin="dense"
-            id="maxMembers"
-            label={t("Max Members (min 2)")}
-            type="number"
-            fullWidth
-            variant="standard"
-            value={maxMembers}
-            onChange={handleMaxMembersChange}
-            InputProps={{ inputProps: { min: 2 } }} 
-            required 
-            helperText={maxMembers !== '' && Number(maxMembers) < 2 ? "Minimum 2 members required" : ""}
-            error={maxMembers !== '' && Number(maxMembers) < 2}
+        <TextField
+          margin="dense"
+          id="maxMembers"
+          label={t("Max Members (min 2)")}
+          type="number"
+          fullWidth
+          variant="standard"
+          value={maxMembers}
+          onChange={handleMaxMembersChange}
+          InputProps={{ inputProps: { min: 2 } }}
+          required
+          helperText={maxMembers !== '' && Number(maxMembers) < 2 ? "Minimum 2 members required" : ""}
+          error={maxMembers !== '' && Number(maxMembers) < 2}
         />
         <FormControlLabel
           control={
@@ -103,7 +112,7 @@ export const CreateGroupDialog = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("Cancel")}</Button>
-        <Button onClick={handleCreateGroup} variant="contained" type="submit">
+        <Button variant="contained" type="submit">
           {t("Create")}
         </Button>
       </DialogActions>
@@ -118,7 +127,7 @@ export const JoinGroupDialog = ({
   setJoinPassword,
   handleJoinGroup,
   requiresPassword,
-  t 
+  t
 }) => {
   return (
     <Dialog
@@ -138,7 +147,7 @@ export const JoinGroupDialog = ({
       <DialogContent>
         {requiresPassword ? (
           <>
-            <Typography sx={{ mb: 2 }}> 
+            <Typography sx={{ mb: 2 }}>
               {t('protectedGroupPrompt')}
             </Typography>
             <TextField
@@ -161,9 +170,9 @@ export const JoinGroupDialog = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('Cancel')}</Button> 
-        <Button onClick={handleJoinGroup} variant="contained" type="submit">
-          {t('joinGroup')} 
+        <Button onClick={onClose}>{t('Cancel')}</Button>
+        <Button variant="contained" type="submit">
+          {t('joinGroup')}
         </Button>
       </DialogActions>
     </Dialog>

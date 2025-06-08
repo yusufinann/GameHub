@@ -29,7 +29,13 @@ const config = {
     updateLobby: '/api/lobbies/update',
     
     // Game Endpoints
-    mockGames: '/api/games'
+    mockGames: '/api/games',
+
+    // Chat Endpoints 
+    allChatGroups: '/api/chat/groups',
+    userChatGroups: '/api/chat/user-groups',
+    communityChatHistory: '/api/chat/community', 
+    groupChatHistory: '/api/chat/groups/:groupId/history', 
   }
 };
 

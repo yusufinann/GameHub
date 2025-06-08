@@ -125,7 +125,8 @@ export const joinGroup = async (
       .populate({ path: "hostId", select: "username name avatar" })
       .populate({ path: "members", select: "username name avatar" });
 
-    broadcastToSender({
+    const targetUserId = ws.userId; // Gruba katılan kullanıcının ID'si
+    broadcastToSender(targetUserId, {
       type: "GROUP_JOINED_SUCCESS",
       group: formatGroupResponse(populatedGroup),
     });
@@ -245,12 +246,10 @@ export const getAllGroups = async (req, res) => {
     });
   } catch (error) {
     console.error("Grupları listeleme hatası:", error);
-    res
-      .status(500)
-      .json({
-        type: "ERROR",
-        message: "Gruplar listelenirken bir hata oluştu.",
-      });
+    res.status(500).json({
+      type: "ERROR",
+      message: "Gruplar listelenirken bir hata oluştu.",
+    });
   }
 };
 
@@ -270,12 +269,10 @@ export const getUserGroups = async (req, res) => {
     });
   } catch (error) {
     console.error("Kullanıcı gruplarını listeleme hatası:", error);
-    res
-      .status(500)
-      .json({
-        type: "ERROR",
-        message: "Kullanıcı grupları listelenirken bir hata oluştu.",
-      });
+    res.status(500).json({
+      type: "ERROR",
+      message: "Kullanıcı grupları listelenirken bir hata oluştu.",
+    });
   }
 };
 
@@ -500,12 +497,10 @@ export const getGroupChatHistory = async (req, res) => {
     });
   } catch (error) {
     console.error("Grup mesaj geçmişi alınırken hata:", error);
-    res
-      .status(500)
-      .json({
-        type: "ERROR",
-        message: "Grup mesaj geçmişi alınırken bir hata oluştu.",
-      });
+    res.status(500).json({
+      type: "ERROR",
+      message: "Grup mesaj geçmişi alınırken bir hata oluştu.",
+    });
   }
 };
 

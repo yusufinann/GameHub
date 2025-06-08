@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useWebSocket } from '../../../shared/context/WebSocketContext/context';
 import { useSnackbar } from '../../../shared/context/SnackbarContext';
 
 export const useGroupDialog = () => {
+
   const { socket } = useWebSocket();
   const { showSnackbar } = useSnackbar();
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false);
@@ -17,40 +18,42 @@ export const useGroupDialog = () => {
   const [joinGroupRequiresPassword, setJoinGroupRequiresPassword] = useState(false);
 
 
-  const handleCreateGroupDialogOpen = () => setCreateGroupDialogOpen(true);
-  const handleCreateGroupDialogClose = () => {
-      setCreateGroupDialogOpen(false);
-      setNewGroupName('');
-      setNewGroupDescription('');
-      setIsPasswordProtected(false);
-      setNewGroupPassword('');
-      setMaxMembers(8); 
+
+  const handleCreateGroupDialogOpen = () => {
+    setCreateGroupDialogOpen(true);
   }
 
-  const handleJoinGroupDialogOpen = useCallback((groupId, requiresPassword) => {
-    setSelectedJoinGroupId(groupId);
-    const passwordRequired = requiresPassword === true;
-    setJoinGroupRequiresPassword(passwordRequired);
-    setJoinGroupDialogOpen(true);
+  const handleCreateGroupDialogClose = useCallback(() => {
+    setCreateGroupDialogOpen(false);
+    setNewGroupName('');
+    setNewGroupDescription('');
+    setIsPasswordProtected(false);
+    setNewGroupPassword('');
+    setMaxMembers(8);
   }, []);
 
-  const handleJoinGroupDialogClose = () => {
-      setJoinGroupDialogOpen(false);
-      setJoinPassword('');
-      setSelectedJoinGroupId(null);
-      setJoinGroupRequiresPassword(false);
-  }
+  const handleJoinGroupDialogOpen = useCallback((groupId, requiresPassword) => {
+    setSelectedJoinGroupId(groupId); 
+    setJoinGroupRequiresPassword(requiresPassword === true);
+    setJoinGroupDialogOpen(true);
+  }, []); 
 
-  const handleCreateGroup = () => {
+  const handleJoinGroupDialogClose = useCallback(() => {
+    setJoinGroupDialogOpen(false);
+    setJoinPassword('');
+    setSelectedJoinGroupId(null);
+    setJoinGroupRequiresPassword(false);
+  }, []); 
+
+  const handleCreateGroup = useCallback(() => {
     if (!newGroupName.trim()) {
-      showSnackbar("Grup adı boş olamaz.", 'warning'); // "Group name cannot be empty."
+      showSnackbar("Grup adı boş olamaz.", 'warning');
       return;
     }
-    // Ensure maxMembers is a valid number >= 2
     const membersCount = Number(maxMembers);
     if (isNaN(membersCount) || membersCount < 2) {
-        showSnackbar("Maksimum üye sayısı en az 2 olmalıdır.", 'warning'); // "Maximum members must be at least 2."
-        return;
+      showSnackbar("Maksimum üye sayısı en az 2 olmalıdır.", 'warning');
+      return;
     }
 
     const groupData = {
@@ -58,46 +61,60 @@ export const useGroupDialog = () => {
       groupName: newGroupName,
       description: newGroupDescription,
       password: isPasswordProtected ? newGroupPassword : null,
-      maxMembers: membersCount, // <-- Send validated maxMembers
+      maxMembers: membersCount,
     };
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(groupData));
-      handleCreateGroupDialogClose(); // Close and reset fields
+      handleCreateGroupDialogClose();
     } else {
-      console.error("WebSocket bağlantısı açık değil, grup oluşturulamıyor."); // "WebSocket connection is not open, group cannot be created."
-      showSnackbar("Grup oluşturulamadı, WebSocket bağlantısı kapalı.", 'error'); // "Failed to create group, WebSocket connection is closed."
+      console.error("WebSocket bağlantısı açık değil, grup oluşturulamıyor.");
+      showSnackbar("Grup oluşturulamadı, WebSocket bağlantısı kapalı.", 'error');
     }
-  };
+  }, [
+    newGroupName,
+    newGroupDescription,
+    isPasswordProtected,
+    newGroupPassword,
+    maxMembers,
+    socket,
+    showSnackbar,
+    handleCreateGroupDialogClose
+  ]);
 
-  const handleJoinGroup = () => {
-    if (!selectedJoinGroupId) {
-      console.error("Grup ID'si seçilmedi."); // "Group ID not selected."
-      showSnackbar("Katılınacak grup seçilmedi.", 'error'); // "No group selected to join."
+  const handleJoinGroup = useCallback(() => {
+    if (selectedJoinGroupId === null || selectedJoinGroupId === undefined) {
+      console.error("HATA: Grup ID'si seçilmedi. Current selectedJoinGroupId:", selectedJoinGroupId);
+      showSnackbar("Katılınacak grup seçilmedi.", 'error');
       return;
     }
 
-    // If the group requires a password, ensure one is provided
     if (joinGroupRequiresPassword && !joinPassword.trim()) {
-        showSnackbar("Bu grup için şifre girmelisiniz.", 'warning'); // "You must enter a password for this group."
-        return;
+      showSnackbar("Bu grup için şifre girmelisiniz.", 'warning');
+      return;
     }
 
     const joinData = {
       type: "JOIN_GROUP",
       groupId: selectedJoinGroupId,
-      // Send password only if required, otherwise send null or omit
       password: joinGroupRequiresPassword ? joinPassword : null,
     };
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(joinData));
-      handleJoinGroupDialogClose(); // Close and reset fields
+      handleJoinGroupDialogClose(); // ID burada (başarılı işlem sonrası) null yapılacak
     } else {
-      console.error("WebSocket bağlantısı açık değil, gruba katılım başarısız."); // "WebSocket connection is not open, failed to join group."
-      showSnackbar("Gruba katılım başarısız, WebSocket bağlantısı kapalı.", 'error'); // "Failed to join group, WebSocket connection is closed."
+      console.error("WebSocket bağlantısı açık değil, gruba katılım başarısız.");
+      showSnackbar("Gruba katılım başarısız, WebSocket bağlantısı kapalı.", 'error');
     }
-  };
+  }, [
+    selectedJoinGroupId, 
+    joinGroupRequiresPassword,
+    joinPassword,
+    socket,
+    showSnackbar,
+    handleJoinGroupDialogClose
+  ]);
 
   return {
     createGroupDialogOpen,
@@ -106,9 +123,10 @@ export const useGroupDialog = () => {
     newGroupDescription,
     isPasswordProtected,
     newGroupPassword,
-    maxMembers, // <-- Expose state
+    maxMembers,
     joinPassword,
-    joinGroupRequiresPassword, // <-- Expose state
+    joinGroupRequiresPassword,
+    selectedJoinGroupId,
     handleCreateGroupDialogOpen,
     handleCreateGroupDialogClose,
     handleJoinGroupDialogOpen,
@@ -119,7 +137,7 @@ export const useGroupDialog = () => {
     setNewGroupDescription,
     setIsPasswordProtected,
     setNewGroupPassword,
-    setMaxMembers, // <-- Expose setter
+    setMaxMembers,
     setJoinPassword
   };
 };

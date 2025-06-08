@@ -44,7 +44,6 @@ function CommunityPage() {
     hasMoreGroup,           
     loadMoreMessages,     
     isLoadingMoreMessages,  
-    // currentUser is also returned, but we get it from AuthContext directly here
   } = useCommunityPage();
 
   const {
