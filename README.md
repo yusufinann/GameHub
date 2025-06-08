@@ -231,6 +231,7 @@ Lobby creators can keep their lobbies under full control:
     * Receive instant notification after successful update.
 * **🗑️ Lobby Deletion:** Delete your created lobby completely at any time.
     * Permanently remove the lobby with the delete icon in the lobby list.
+* **🚫 Kick Player (USER_KICKED):** The host has the authority to remove any player from their lobby at any time. This action immediately removes the player from the lobby and any active game within it.
 * **⏳ Automatic Lobby Deletion (Normal Lobbies):** In normal lobbies, if the host leaves the lobby and does not return within 8 hours, the lobby is automatically deleted. This efficiently utilizes system resources and prevents unnecessary lobby clutter.
 * **🎮 Game Control:** As the host, you have the authority to start the game, choose the game mode (e.g., for Bingo: draw speed, competition style; for Hangman: word category, difficulty), and guide your players for the best gaming experience.
 
