@@ -1,30 +1,27 @@
-// useFriendGroupDialog.js
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import axios from "axios";
 import { useSnackbar } from "../../../shared/context/SnackbarContext";
 
-export const useFriendGroupDialog = (friendGroups, setFriendGroups) => { 
-  
+export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
   const [createFriendGroupDialogOpen, setCreateFriendGroupDialogOpen] = useState(false);
   const [newFriendGroupName, setNewFriendGroupName] = useState("");
   const [newFriendGroupDescription, setNewFriendGroupDescription] = useState("");
   const [friendGroupPassword, setFriendGroupPassword] = useState("");
   const { showSnackbar } = useSnackbar();
-
   const [friendGroupsLoading, setFriendGroupsLoading] = useState(true);
 
-  const handleCreateFriendGroupDialogOpen = () => {
+  const handleCreateFriendGroupDialogOpen = useCallback(() => { 
     setCreateFriendGroupDialogOpen(true);
-  };
+  }, []);
 
-  const handleCreateFriendGroupDialogClose = () => {
+  const handleCreateFriendGroupDialogClose = useCallback(() => {
     setCreateFriendGroupDialogOpen(false);
     setNewFriendGroupName("");
     setNewFriendGroupDescription("");
     setFriendGroupPassword("");
-  };
+  }, []); 
 
-  const fetchFriendGroups = async () => {
+  const fetchFriendGroups = useCallback(async () => {
     setFriendGroupsLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -46,9 +43,9 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
       setFriendGroups([]);
     }
     setFriendGroupsLoading(false);
-  };
+  }, [setFriendGroups, setFriendGroupsLoading]);
 
-  const handleCreateFriendGroup = async ({ groupName, description, password, invitedFriends }) => {
+  const handleCreateFriendGroup = useCallback(async ({ groupName, description, password, invitedFriends }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -58,7 +55,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
           description,
           password,
           maxMembers: 8,
-          invitedFriends, 
+          invitedFriends,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -66,7 +63,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
       );
       if (response.status === 201) {
         showSnackbar({ message: "Friend Group created successfully!", severity: "success" });
-        handleCreateFriendGroupDialogClose();
+        handleCreateFriendGroupDialogClose(); 
         fetchFriendGroups();
       } else {
         showSnackbar("Failed to create Friend Group.", "error");
@@ -75,7 +72,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
       console.error("Friend Group creation error:", error);
       showSnackbar({ message: "Error creating Friend Group.", severity: "error" });
     }
-  };
+  }, [showSnackbar, fetchFriendGroups, handleCreateFriendGroupDialogClose]); 
 
   return {
     createFriendGroupDialogOpen,

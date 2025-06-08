@@ -30,9 +30,15 @@ const LobbyTypeChip = memo(function LobbyTypeChip({ lobbyType, isMobile, t }) {
       sx={{
         flexShrink: 0,
         fontWeight: 500,
-        borderRadius: "16px",
+        borderRadius: "20px",
+        height: { xs: 24, sm: 28 },
         "& .MuiChip-icon": {
-          color: "inherit"
+          color: "inherit",
+          fontSize: { xs: 14, sm: 16 }
+        },
+        "& .MuiChip-label": {
+          px: { xs: 0.5, sm: 1 },
+          fontSize: { xs: "0.7rem", sm: "0.8rem" }
         }
       }}
     />
@@ -44,14 +50,18 @@ const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobi
     <Chip
       size={isMobile ? "small" : "medium"}
       label={`${count || 0}${maxMembers ? ` / ${maxMembers}` : ''}`}
-      icon={<People sx={{ fontSize: isMobile ? 16 : 18 }} />}
+      icon={<People sx={{ fontSize: isMobile ? 14 : 16 }} />}
       sx={{
         backgroundColor: theme.palette.warning.main,
         color: theme.palette.warning.contrastText || "#fff",
         fontWeight: 600,
-        px: 0.5,
-        borderRadius: "16px",
-        flexShrink: 0, 
+        borderRadius: "20px",
+        flexShrink: 0,
+        height: { xs: 24, sm: 28 },
+        "& .MuiChip-label": {
+          px: { xs: 0.5, sm: 1 },
+          fontSize: { xs: "0.7rem", sm: "0.8rem" }
+        }
       }}
     />
   );
@@ -209,7 +219,6 @@ function LobbyItem({ lobby }) {
               lobbyCode: lobby.lobbyCode,
               lobbyName: lobby.lobbyName,
             }}
-            theme={theme}
           />
         )}
 
@@ -235,60 +244,55 @@ function LobbyItem({ lobby }) {
   return (
     <>
       <Paper
-        elevation={3}
+        elevation={2}
         sx={{
-          borderRadius: "10px",
-          m: 1,
+          borderRadius: "12px",
+          m: { xs: 0.5, sm: 1 },
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start",
-          gap: "12px",
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
-          p: { xs: 1, sm: 1.5 },
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          transition: "box-shadow 0.3s ease, background-color 0.3s ease",
+          p: { xs: 1, sm: 1.25 },
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          transition: "all 0.2s ease",
           "&:hover": {
             backgroundColor: theme.palette.background.default,
+            transform: "translateY(-1px)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
           },
           position: "relative",
           overflow: "hidden",
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-          },
-         
-          minHeight: { xs: "auto", sm: "140px" },
+          minHeight: { xs: "auto", sm: "120px" },
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Stack spacing={2} sx={{ height: "100%" }}>
-       
+        <Stack spacing={1} sx={{ height: "100%" }}>
+          {/* Header */}
           <Box
             sx={{
               display: "flex",
               flexDirection: isMobile ? "column" : "row",
               alignItems: isMobile ? "flex-start" : "center", 
               justifyContent: "space-between",
-              gap: 1.5,
+              gap: 1,
               minHeight: "fit-content",
             }}
           >
             <Typography
-              variant={isMobile ? "h6" : "h5"}
+              variant={isMobile ? "subtitle1" : "h3"}
               sx={{
                 fontSize: {
-                  xs: "1rem",
-                  sm: "1.1rem",
-                  md: "1.2rem",
+                  xs: "0.95rem",
+                  sm: "1.05rem",
+                  md: "1.1rem",
                 },
                 color: theme.palette.text.primary,
                 flexGrow: 1,
                 wordBreak: "break-word", 
-                lineHeight: 1.2,
-                maxWidth: isMobile ? "100%" : "70%", 
+                lineHeight: 1.3,
+                maxWidth: isMobile ? "100%" : "70%",
+                fontWeight: 500,
+                mb: isMobile ? 0.5 : 0,
               }}
             >
               {lobby.lobbyName || t('unnamedLobby')}
@@ -296,21 +300,22 @@ function LobbyItem({ lobby }) {
             <LobbyTypeChip lobbyType={lobby.lobbyType} isMobile={isMobile} t={t} />
           </Box>
 
+          {/* Content */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 2,
+              gap: 1,
               flexGrow: 1,
             }}
           >
-           
+            {/* Info Row */}
             <Box
               sx={{
                 display: "flex",
                 flexDirection: isMobile ? "column" : "row",
                 alignItems: isMobile ? "flex-start" : "center",
-                gap: 1.5,
+                gap: 1,
                 flexWrap: "wrap", 
                 minHeight: "fit-content",
               }}
@@ -328,7 +333,7 @@ function LobbyItem({ lobby }) {
                   sx={{ 
                     flexGrow: 1, 
                     maxWidth: isMobile ? "100%" : "auto",
-                    minWidth: isMobile ? "100%" : "280px" 
+                    minWidth: isMobile ? "100%" : "250px" 
                   }}
                 >
                   <LobbyInfo
@@ -343,15 +348,15 @@ function LobbyItem({ lobby }) {
               )}
             </Box>
 
-           
+            {/* Actions */}
             <Box
               sx={{
                 display: "flex",
                 justifyContent: isMobile ? "center" : "flex-end",
                 alignItems: "center",
-                gap: 1,
+                gap: 0.75,
                 mt: "auto", 
-                minHeight: "40px", 
+                minHeight: "36px", 
                 flexShrink: 0, 
               }}
             >

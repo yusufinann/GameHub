@@ -9,13 +9,14 @@ import {
   Fade,
   InputAdornment,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Lock, Public } from "@mui/icons-material";
 import MessageModal from "./MessageModal";
 import JoiningLobbyAnimation from "./JoiningLobbyAnimation";
 import { useTranslation } from "react-i18next";
 
-const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme }) => {
+const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
   const [internalModalConfig, setInternalModalConfig] = useState({ message: "", severity: "error", title: undefined });
 
   const { t } = useTranslation();
-
+  const theme=useTheme();
   const handleInternalMessageModalClose = useCallback(() => {
     setIsInternalMessageModalOpen(false);
   }, []);
@@ -203,10 +204,7 @@ const LobbyPasswordModal = memo(({ open, onClose, onSubmit, lobbyDetails, theme 
                   component="h2"
                   fontWeight="bold"
                   sx={{
-                    backgroundImage: palette.text?.title || 'linear-gradient(45deg, #ff6b6b, #ff8e53)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
+                  color:"text.primary",
                     textAlign: 'center',
                   }}
                 >

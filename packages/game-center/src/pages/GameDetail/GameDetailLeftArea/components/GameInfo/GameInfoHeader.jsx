@@ -255,7 +255,7 @@ const headerImage =
                     overflow: "hidden",
                     transition: "all 0.3s",
                     "&:hover": {
-                      transform: "translateY(-8px) scale(1.02)",
+                      transform: "translateY(-1px) scale(1.02)",
                       boxShadow: "0 12px 20px rgba(0,0,0,0.25)",
                     },
                     border: `3px solid ${theme.palette.secondary.gold}`,
@@ -289,7 +289,7 @@ const headerImage =
                     </Typography>
                   </Box>
 
-                  <Box sx={{ padding: 1.5 }}>
+                  <Box sx={{ padding: 0.5 }}>
                     <Typography
                       sx={{
                         fontWeight: "bold",

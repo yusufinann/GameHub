@@ -999,8 +999,8 @@
     }
   },
    "passwordModal": {
-      "titleProtected": "Lobi Şifresini Girin",
-      "titlePublic": "Herkese Açık Lobiye Katıl",
+      "titleProtected": "LOBİ ŞİFRESİNİ GİRİN",
+      "titlePublic": "HERKESE AÇIK LOBİYE KATIL",
       "descriptionProtected": "Bu lobi şifre korumalıdır. Katılmak için lütfen şifreyi girin.",
       "passwordLabel": "Şifre",
       "joinButton": "Katıl",

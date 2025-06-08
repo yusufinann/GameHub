@@ -1,5 +1,4 @@
-// ConversationList.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Paper,
   Typography,
@@ -17,7 +16,7 @@ import {
   Badge,
   IconButton,
   Toolbar,
-  ListItemButton, 
+  ListItemButton,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -47,42 +46,31 @@ const ConversationList = ({
 }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(initialTabValue);
-  const [selectedFriend, setSelectedFriend] = useState(null); 
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (tabValue === 2) {
+    if (tabValue === 2 && typeof fetchFriendGroups === 'function') {
       fetchFriendGroups();
     }
-  }, [tabValue]);
+  }, [tabValue, fetchFriendGroups]);
 
   useEffect(() => {
     setTabValue(initialTabValue);
   }, [initialTabValue]);
 
-  useEffect(() => {
-    if (selectedConversation && selectedConversation.type === "private") {
-      const friend = friends.find(f => f.id === selectedConversation.id);
-      if (friend) {
-        setSelectedFriend(friend); 
-      }
-    }
-  }, [selectedConversation, friends]);
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = useCallback((event, newValue) => {
     setTabValue(newValue);
-
     let path = "/conversation/all";
     if (newValue === 1) {
       path += "/friend";
     } else if (newValue === 2) {
       path += "/friend-group";
     }
-
     navigate(path);
-  };
+  }, [navigate, setTabValue]);
 
   useEffect(() => {
     const path = location.pathname;
@@ -97,22 +85,26 @@ const ConversationList = ({
     } else if (path.endsWith("/conversation/all/friend-group")) {
       setTabValue(2);
     } else if (path.endsWith("/conversation")) {
-      setTabValue(initialTabValue); 
+      setTabValue(initialTabValue);
     }
   }, [location.pathname, initialTabValue]);
 
-  const handleFriendSelect = (friend) => {
-    onFriendSelect(friend); 
+  const handleFriendSelect = useCallback((friend) => {
+    if (typeof onFriendSelect === 'function') {
+      onFriendSelect(friend);
+    }
     navigate(`/conversation/all/friend/${friend.id}`);
-  };
+  }, [onFriendSelect, navigate]);
 
-  const handleFriendGroupSelect = (friendGroup) => {
-    onFriendSelect({
-      ...friendGroup,
-      type: "friendGroup",
-    });
+  const handleFriendGroupSelect = useCallback((friendGroup) => {
+    if (typeof onFriendSelect === 'function') {
+      onFriendSelect({
+        ...friendGroup,
+        type: "friendGroup",
+      });
+    }
     navigate(`/conversation/all/friend-group/${friendGroup._id}`);
-  };
+  }, [onFriendSelect, navigate]);
 
   const tabColors = {
     all: theme.palette.primary.main,
@@ -120,9 +112,8 @@ const ConversationList = ({
     friendGroups: theme.palette.warning.main,
   };
 
-  const renderFriendStatus = (friend) => {
+  const renderFriendStatus = useCallback((friend) => {
     const isOnline = friend.isOnline;
-
     return (
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <StatusIcon
@@ -134,12 +125,12 @@ const ConversationList = ({
               : theme.palette.grey[500],
           }}
         />
-        <Typography variant="body2" component="span"> 
+        <Typography variant="body2" component="span">
           {isOnline ? t("statusOnline") : t("statusOffline")}
         </Typography>
       </Box>
     );
-  };
+  }, [theme.palette.success.main, theme.palette.grey, t]);
 
   return (
     <Box
@@ -153,14 +144,23 @@ const ConversationList = ({
     >
       <Paper
         elevation={3}
-        sx={{ p: 2, height: "100%", display: "flex", flexDirection: "column" }}
+        sx={{
+          p: 2,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.spacing(2),
+        }}
       >
-        <Toolbar sx={{ justifyContent: "space-between", p: 2 }}>
+        <Toolbar sx={{ justifyContent: "space-between", p: { xs: 1, sm: 2 } }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: "bold",
-              color: theme.palette.text.primary,
+              color: tabValue === 0 ? tabColors.all :
+                     tabValue === 1 ? tabColors.friends :
+                     tabColors.friendGroups,
             }}
           >
             {tabValue === 0 && t("toolbarTitleAll")}
@@ -173,7 +173,7 @@ const ConversationList = ({
               variant="contained"
               color="warning"
               startIcon={<AddIcon />}
-              sx={{ borderRadius: 20 }}
+              sx={{ borderRadius: "20px", textTransform: "none", px: 1.5, py: 0.5, fontSize: '0.875rem' }}
               onClick={onCreateFriendGroupDialogOpen}
             >
               {t("createGroupButton")}
@@ -185,7 +185,7 @@ const ConversationList = ({
               sx={{ mr: 1 }}
             >
               <IconButton
-                sx={{ color: theme.palette.text.primary }} 
+                sx={{ color: theme.palette.text.primary }}
                 aria-label={t("friendRequestsAriaLabel")}
               >
                 <MailIcon />
@@ -196,31 +196,30 @@ const ConversationList = ({
 
         <Divider sx={{ my: 2 }} />
 
-        <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2 }}>
+        <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2, pr:0.5 }}>
           {tabValue === 1 && (
             <List>
               {friends.map((friend) => (
                 <ListItem
                   key={friend.id}
-                  disablePadding 
-                  sx={{ mb: 1 }} 
+                  disablePadding
+                  sx={{ mb: 1 }}
                 >
                   <ListItemButton
-                    selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
+                    selected={selectedConversation?.type === "private" && selectedConversation?.id === friend.id}
                     onClick={() => handleFriendSelect(friend)}
                     sx={{
-                      borderRadius: 2,
-                      transition: "all 0.2s",
+                      borderRadius: theme.shape.borderRadius * 1.5,
+                      transition: "all 0.2s ease-in-out",
                       "&:hover": {
                         backgroundColor: theme.palette.action.hover,
                         transform: "translateY(-2px)",
-                        boxShadow: 1,
+                        boxShadow: theme.shadows[2],
                       },
                       "&.Mui-selected": {
-                        backgroundColor: theme.palette.success.lighter || theme.palette.success.light, 
-                        "&:hover": {
-                          backgroundColor: theme.palette.success.light || theme.palette.success.main, 
-                        },
+                        backgroundColor: theme.palette.success.lighter || theme.palette.action.selected,
+                        borderLeft: `4px solid ${theme.palette.success.main}`,
+                        pl: 1.5,
                       },
                     }}
                   >
@@ -253,12 +252,12 @@ const ConversationList = ({
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Typography variant="subtitle1" fontWeight="medium">
+                        <Typography variant="body1" fontWeight="bold" sx={{ color: 'secondary.main', fontSize:"1.1rem"}}>
                           {friend.username || friend.name || `User-${friend.id}`}
                         </Typography>
                       }
                       secondary={renderFriendStatus(friend)}
-                      secondaryTypographyProps={{ component: 'div' }} 
+                      secondaryTypographyProps={{ component: 'div' }}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -273,15 +272,16 @@ const ConversationList = ({
                     justifyContent: "center",
                     p: 3,
                     color: theme.palette.text.secondary,
+                    textAlign: 'center',
                   }}
                 >
                   <PersonIcon
                     sx={{ fontSize: 48, color: theme.palette.grey[400], mb: 2 }}
                   />
-                  <Typography variant="body1" align="center">
+                  <Typography variant="body1">
                     {t("noFriendsYetMessage")}
                   </Typography>
-                  <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
                     {t("addFriendsPromptMessage")}
                   </Typography>
                 </Box>
@@ -305,11 +305,11 @@ const ConversationList = ({
           {tabValue === 0 && (
             <List>
               <Typography
-                variant="subtitle2"
+                variant="subtitle1"
                 sx={{
                   pl: 2,
                   mb: 1,
-                  color: theme.palette.warning.main,
+                  color: theme.palette.warning.dark,
                   fontWeight: "bold",
                 }}
               >
@@ -328,11 +328,11 @@ const ConversationList = ({
               <Divider sx={{ my: 2 }} />
 
               <Typography
-                variant="subtitle2"
+                variant="subtitle1"
                 sx={{
                   pl: 2,
                   mb: 1,
-                  color: theme.palette.success.main,
+                  color: theme.palette.success.dark,
                   fontWeight: "bold",
                 }}
               >
@@ -346,18 +346,25 @@ const ConversationList = ({
                   sx={{ mb: 1 }}
                 >
                   <ListItemButton
-                    selected={selectedConversation && selectedConversation.type === "private" && selectedConversation.id === friend.id}
+                    selected={selectedConversation?.type === "private" && selectedConversation?.id === friend.id}
                     onClick={() => handleFriendSelect(friend)}
-                    sx={{
-                      borderRadius: 2,
-                      transition: "all 0.2s", 
+                     sx={{
+                      borderRadius: theme.shape.borderRadius * 1.5,
+                      transition: "all 0.2s ease-in-out",
                       "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
-                        transform: "translateY(-2px)",
-                        boxShadow: 1,
+                        backgroundColor: `${theme.palette.action.hover}50`,
+                        boxShadow: theme.shadows[2],
                       },
                       "&.Mui-selected": {
-                        backgroundColor: theme.palette.success.lighter || theme.palette.success.light, 
+                        backgroundColor: theme.palette.primary.main,
+                        borderLeft: `4px solid ${theme.palette.success.main}`,
+                        pl: 1.5,
+                        "&:hover": {
+                          backgroundColor: theme.palette.success.light || theme.palette.action.selectedHover,
+                        },
+                         ".MuiListItemText-primary .MuiTypography-root": {
+                           color: theme.palette.success.contrastText || theme.palette.common.white,
+                        },
                       },
                     }}
                   >
@@ -381,6 +388,7 @@ const ConversationList = ({
                             bgcolor: friend.isOnline
                               ? theme.palette.success.main
                               : theme.palette.grey[400],
+                            boxShadow: 1,
                           }}
                         >
                           {!friend.avatar && <PersonIcon />}
@@ -389,10 +397,12 @@ const ConversationList = ({
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        friend.username || friend.name || `User-${friend.id}`
+                        <Typography variant="body1" fontWeight="bold" sx={{ color: 'secondary.main', fontSize:"1.1rem"}}>
+                          {friend.username || friend.name || `User-${friend.id}`}
+                        </Typography>
                       }
                       secondary={renderFriendStatus(friend)}
-                      secondaryTypographyProps={{ component: 'div' }} // FIX: Prevent p > div
+                      secondaryTypographyProps={{ component: 'div' }}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -410,46 +420,60 @@ const ConversationList = ({
 
         <Divider />
 
-        <Box sx={{ mt: "auto" }}>
+        <Box sx={{ mt: "auto", borderTop: `1px solid ${theme.palette.divider}`}}>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
             variant="fullWidth"
             indicatorColor="primary"
-            textColor="primary"
+            textColor="inherit"
             sx={{
               "& .MuiTab-root": {
-                minHeight: 64,
+                minHeight: 60,
+                textTransform: 'none',
+                fontWeight: 500,
+                opacity: 0.7,
+                transition: "all 0.3s",
+                "&.Mui-selected": {
+                  opacity: 1,
+                  color: (tabValue === 0 && tabColors.all) ||
+                         (tabValue === 1 && tabColors.friends) ||
+                         (tabValue === 2 && tabColors.friendGroups),
+                  fontWeight: 600,
+                },
+                "&:hover": {
+                  opacity: 1,
+                  backgroundColor: theme.palette.action.hover,
+                }
               },
+              "& .MuiTabs-indicator": {
+                height: 3,
+                backgroundColor: (tabValue === 0 && tabColors.all) ||
+                                 (tabValue === 1 && tabColors.friends) ||
+                                 (tabValue === 2 && tabColors.friendGroups),
+              }
             }}
           >
             <Tab
-              icon={<DashboardIcon sx={{ color: tabColors.all }} />}
+              icon={<DashboardIcon />}
               label={t("tabLabelAll")}
-              sx={{
-                ...theme.typography.tabSubtitle,
-                transition: "all 0.3s",
-              }}
+              sx={{ ...theme.typography.body2, color: tabValue === 0 ? tabColors.all : theme.palette.text.secondary }}
             />
             <Tab
               icon={
-                <Badge badgeContent={incomingRequests.length} color="error">
-                  <PersonIcon sx={{ color: tabColors.friends }} />
+                <Badge badgeContent={incomingRequests.length} color="error"
+                  sx={{ "& .MuiBadge-badge": { top: 2, right: -3 } }}
+                >
+                  <PersonIcon />
                 </Badge>
               }
               label={t("tabLabelFriends")}
-              sx={{
-                ...theme.typography.tabSubtitle,
-                transition: "all 0.3s",
-              }}
+              sx={{ ...theme.typography.body2, color: tabValue === 1 ? tabColors.friends : theme.palette.text.secondary }}
             />
             <Tab
-              icon={<PeopleIcon sx={{ color: tabColors.friendGroups }} />}
+              icon={<PeopleIcon />}
               label={t("tabLabelFriendGroups")}
-              sx={{
-                ...theme.typography.tabSubtitle,
-                transition: "all 0.3s",
-              }}
+              sx={{ ...theme.typography.body2, color: tabValue === 2 ? tabColors.friendGroups : theme.palette.text.secondary }}
             />
           </Tabs>
         </Box>

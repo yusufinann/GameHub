@@ -17,9 +17,11 @@
     ·
     <a href="#technology-stack"><strong>Technology Stack</strong></a>
     ·
+    <a href="#advanced-resilience--performance-with-redis"><strong>Advanced Resilience & Performance</strong></a>
+    ·
     <a href="#application-features-screen-based"><strong>Application Features</strong></a>
     ·
-    <a href="#coming-soon"><strong>Coming Soon</strong></a>
+    <a href="#installation-and-setup"><strong>Installation and Setup</strong></a>
   </p>
 </div>
 
@@ -27,23 +29,25 @@
 
 <h2 id="project-summary">✨ Project Summary</h2>
 
-Game Center Game Platform is a **web-based dynamic game center** that offers players the opportunity to experience various games and socialize with friends from the comfort of their homes. Our platform now offers both **Bingo** and the classic word-guessing game, **Hangman**, as foundational experiences, with plans to incorporate **various new and exciting games** in the future. Our goal is to provide our users not only with a platform to play games but also a place where they can **socialize in a live, interactive, and enjoyable digital environment**. With our user-friendly interface, real-time gaming experience, rich social features, multi-language support, and customizable themes, we promise players a **unique entertainment and community experience**.
+Game Center Game Platform is a **web-based dynamic game center** that offers players the opportunity to experience various games and socialize with friends from the comfort of their homes. Our platform now offers both **Bingo** and the classic word-guessing game, **Hangman**, as foundational experiences, with plans to incorporate **various new and exciting games** in the future. Our goal is to provide our users not only with a platform to play games but also a place where they can **socialize in a live, interactive, and enjoyable digital environment**. With our user-friendly interface, real-time gaming experience, rich social features, multi-language support, customizable themes, and robust backend, we promise players a **unique entertainment and community experience**.
 
 ---
 
 <h2 id="key-features">🚀 Key Features</h2>
 
-* **🕹️ Various Games on a Single Platform:** Easy access to a game collection catering to different tastes, now featuring Bingo and Hangman.
-* **👥 Social Interaction Focused:** Setting up lobbies with friends, chatting, and enjoying games together.
-* **⚡ Real-Time Live Gaming Experience:** Instant updates, synchronized gameplay, and real-time competition with WebSocket.
-* **🎨 User-Friendly and Stylish Interface:** Modern and intuitive design with React and Material UI.
+* **🕹️ Diverse Game Library:** Easy access to a growing collection of games, currently featuring Bingo and Hangman, designed to cater to various tastes.
+* **👥 Social Interaction Focused:** Set up lobbies with friends, chat, and enjoy games together.
+* **⚡ Real-Time Live Gaming Experience:** Instant updates, synchronized gameplay, and real-time competition powered by WebSocket.
+* **🎨 User-Friendly and Stylish Interface:** Modern and intuitive design built with React and Material UI.
 * **📱 Fully Responsive Design:** Seamless experience on desktop, tablet, and mobile devices.
 * **🌈 Customizable Theme Options:** Personalize your experience with theme choices including Light, Dark, and an attractive modern **Neon-Ocean** theme.
 * **🌐 Multi-Language Support:** Reaching a wide audience with English and Turkish language options.
-* **🔔 Smart Notification System:** Instant notifications for events, invitations, and updates.
+* **🔔 Smart Notification System:** Instant notifications for events, invitations, game turns, and updates.
 * **📊 Detailed Player Profile:** Personal development tracking with statistics, game history, friends, and achievements.
-* **💬 Community and Chat Areas:** Building a player community with global and private group chats.
+* **💬 Community and Chat Areas:** Building a player community with global and private group chats, optimized for performance.
 * **🔠 Interactive Hangman Multiplayer:** Guess words together or competitively, see opponents' progress in real-time, and chat within the game lobby.
+* **🔄 Concurrent Gameplay & Turn Notifications:** Engage in multiple games across different lobbies simultaneously. Receive timely notifications for your turn in turn-based games, even when you're not in the active lobby.
+* **🛡️ Uninterrupted Gameplay with Redis:** Active games persist through backend restarts or temporary disruptions, allowing players to resume exactly where they left off.
 
 ---
 
@@ -58,15 +62,17 @@ Our application is built on modern and powerful web technologies:
 * **📡 Axios:** HTTP client for reliable and fast Backend API communication.
 * **🎨 Material UI:** Aesthetics and functionality with a rich, modern, and customizable UI components library (supports theming like Light/Dark/Neon-Ocean modes).
 * **📦 React Context:** Efficient and easy state management throughout the application.
+* **🚀 React-Window:** High-performance list virtualization for smooth scrolling in large chat histories.
 
 ### Backend
 
 * **<img src="https://nodejs.org/static/images/logos/nodejs-new-pantone-black.svg" alt="Node.js" width="20" style="vertical-align: middle;"> NodeJS:** High performance, event-driven, and scalable server-side development.
 * **🚄 Express:** Fast, flexible, and minimalist web application and API development framework.
-* **<img src="https://webassets.mongodb.com/_com_assets-prod/assets/favicons/favicon-32x32.75907fb9d898814747a8cef5df4bf684.png" alt="MongoDB" width="20" style="vertical-align: middle;"> MongoDB:** NoSQL database offering flexible schema, high performance, and scalability.
+* **<img src="https://webassets.mongodb.com/_com_assets-prod/assets/favicons/favicon-32x32.75907fb9d898814747a8cef5df4bf684.png" alt="MongoDB" width="20" style="vertical-align: middle;"> MongoDB:** NoSQL database offering flexible schema, high performance, and scalability for persistent data.
 * **🌱 Mongoose:** Elegant and powerful Object Data Modeling (ODM) library for MongoDB.
 * **🔑 Jsonwebtoken:** Secure authentication and authorization with industry-standard JWT (JSON Web Token).
-* **🔒 express-session & Memorystore:** Secure and efficient session management solutions.
+* **🔒 express-session & connect-redis & Memorystore:** Secure and efficient session management solutions, with Redis enhancing session persistence.
+* **<img src="https://raw.githubusercontent.com/redis/redis-io/master/public/images/επίσημο%20λογότυπο/Redis-μόνο-κόκκινο.png" alt="Redis" width="20" style="vertical-align: middle;"> Redis:** In-memory data store used for caching, session management, and ensuring active game state persistence and resilience.
 * **🛡️ bcrypt:** Security of sensitive data with one-way encryption.
 * **📦 body-parser & cookie-parser:** Easily processing HTTP request data and cookies.
 * **🔄 Cors:** Secure Cross-Origin Request Management.
@@ -81,18 +87,68 @@ Our application is built on modern and powerful web technologies:
 
 ---
 
+<h2 id="advanced-resilience--performance-with-redis">🚀 Advanced Resilience & Performance with Redis</h2>
+
+Our platform leverages Redis to deliver an exceptionally stable and responsive gaming experience, ensuring that active game sessions are shielded from backend disruptions and UI inconsistencies.
+
+*   **🛡️ Hybrid Cache for Active Game Continuity:**
+    *   Critical in-game data, such as player moves and current scores, are stored in Redis Hashes. This provides instantaneous access and decouples active gameplay from direct backend dependencies.
+    *   While final game outcomes are persisted to MongoDB for long-term storage, interim final scores are also cached in Redis with a 15-minute TTL. This strategy ensures quick access to recent results and automatic cleanup of stale data, with the TTL resetting upon new game starts.
+
+*   **⏱️ Resilient Timers (e.g., Bingo Auto-Draw):**
+    *   Game-critical timers, like the 3s/5s/10s auto-draw intervals in Bingo, are meticulously managed and persisted in Redis.
+    *   Should the backend restart, these timer states are recovered, allowing games to resume seamlessly from their exact point of interruption, preventing frustrating "game freezes."
+
+*   **💻 Durable UI State Management:**
+    *   Key UI states, such as active modals or game-specific interface elements, are temporarily cached in Redis with a short TTL (e.g., 15 minutes).
+    *   This overcomes the inherent fragility of React's local state/useRef against page refreshes or unexpected UI crashes, preventing data loss and ensuring a consistent user experience.
+
+*   **🧠 Smart Cache & Performance Optimization:**
+    *   Utilizing Redis's `maxmemory-policy allkeys-lru` (Least Recently Used) eviction policy ensures efficient memory management.
+    *   This architecture has been proven to maintain state consistency and deliver low latency, even under stress tests with 150+ concurrent users and simulated server restarts.
+
+🎯 **Key Outcomes of Redis Integration:**
+
+*   💥 **Maximum Durability:** Near-complete immunity to backend issues affecting live gameplay.
+*   ⚡ **High Performance:** Lightning-fast responses for in-game interactions.
+*   🧠 **Optimized Resource Usage:** Intelligent TTL management prevents unnecessary memory overhead, keeping the system lean and efficient.
+
+---
+
 <h2 id="application-features-screen-based">🎮 Application Features (Screen-Based)</h2>
 
-### 🚪 Login Screen
+<div align="center">
+  <p><strong>✨ QUICK JUMP: DISCOVER OUR SCREENS ✨</strong></p>
+  <p>
+    <a href="#login-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">🚪 Login Screen</a>
+    <a href="#main-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">🏠 Main Screen</a>
+    <a href="#settings-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">⚙️ Settings Screen</a>
+  </p>
+  <p>
+    <a href="#game-detail-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">ℹ️ Game Detail</a>
+    <a href="#game-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">🎮 Game Screen</a>
+    <a href="#profile-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">👤 Profile Screen</a>
+  </p>
+  <p>
+    <a href="#community-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">🏘️ Community</a>
+    <a href="#conversation-screen-page" style="display: inline-block; text-decoration: none; margin: 5px; padding: 10px 18px; border-radius: 25px; background-color: #1a2533; color: #87CEEB; border: 1px solid #87CEEB; font-weight: 500;">💬 Conversation</a>
+  </p>
+  <p><em>(Note: "Game Screen" covers specifics for Bingo, Hangman, etc.)</em></p>
+</div>
+<br/>
+
+---
+
+<h3 id="login-screen-page">🚪 Login Screen</h3>
 
 * **🔑 Secure Login with Email & Password:** Standard and reliable user authentication.
 * **🍪 "Remember Me" Option:** Fast and automatic login with cookies.
 * **❓ "Forgot Password" Function:** Easy password reset via email.
-* **🔒 Secure Session Management with JWT:** Securely storing user information and session in LocalStorage.
+* **🔒 Secure Session Management with JWT & Redis:** Securely storing user information and session in LocalStorage, with Redis enhancing session persistence across server instances.
 * **🔄 Automatic Token Check:** Seamless login experience every time the page loads.
 * **👤 Quick Login Avatar:** Personalized quick login with the "Remember Me" option.
 
-### 🏠 Main Screen
+<h3 id="main-screen-page">🏠 Main Screen</h3>
 
 * **🚪 Lobby Listing:** Dynamically listing active game lobbies (game type like Bingo or Hangman, status, encryption).
 * **🎨 Animations and Visual Richness:** Interactive elements that make the interface lively and user-friendly.
@@ -176,7 +232,7 @@ Lobby creators can keep their lobbies under full control:
 * **🗑️ Lobby Deletion:** Delete your created lobby completely at any time.
     * Permanently remove the lobby with the delete icon in the lobby list.
 * **⏳ Automatic Lobby Deletion (Normal Lobbies):** In normal lobbies, if the host leaves the lobby and does not return within 8 hours, the lobby is automatically deleted. This efficiently utilizes system resources and prevents unnecessary lobby clutter.
-* **🎮 Game Control:** As the host, you have the authority to start the game, choose the game mode (if applicable to the game, e.g. for Hangman: word category, difficulty), and competition style. Guide your players for the best gaming experience.
+* **🎮 Game Control:** As the host, you have the authority to start the game, choose the game mode (e.g., for Bingo: draw speed, competition style; for Hangman: word category, difficulty), and guide your players for the best gaming experience.
 
 #### 🚪 Player Lobby Management
 
@@ -196,7 +252,7 @@ Our platform supports your lobby management operations with instant notification
 * **⏰ Event Start Notification:** Instant notification to members when event lobbies start.
 * **⏳ Event Lobby Approaching End Warning:** Warning notification to players 5 minutes before the event time expires.
 
-### ℹ️ Game Detail Page
+<h3 id="game-detail-page">ℹ️ Game Detail Page</h3>
 
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446827.png" alt="Mode" width="20" style="vertical-align: middle;"> Game Modes and Rules:** Detailed descriptions for each game (e.g., Bingo: Classic, Extended, Super Fast; Hangman: Single Player, Multiplayer, Word Categories).
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446861.png" alt="Competition" width="20" style="vertical-align: middle;"> Competition Styles:** Information about competitive and relaxed game styles.
@@ -206,14 +262,20 @@ Our platform supports your lobby management operations with instant notification
 * **➕ "Create Lobby" Button (Game Page):** Quick lobby creation shortcut for this game type.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446822.png" alt="Animation" width="20" style="vertical-align: middle;"> Animated Page Transition:** Smooth and visually rich user experience.
 
-### 🎲 Game Screen (Bingo Game)
+<h3 id="game-screen-page">🎲 Game Screen (Bingo Game)</h3>
 
-**Bingo in Normal Lobby:**
+Experience the thrill of Bingo with enhanced flexibility and visual appeal!
 
 * **👑 Host Control:** Lobby creator's authority over game settings and starting.
+* **⚙️ Flexible Draw Modes & Multiple Competition Styles (Min. 2 Players):**
+    * **Draw Mechanics:** Choose between automatic number drawing or designate a player (often the host) to manually draw numbers.
+    * **Speed Options:** Set the pace with 3s, 5s, or 10s drawing intervals for automatic draws.
+    * **Competition Modes:**
+        * **"Competitive":** Players earn points based on their ranking (1st to call Bingo, 2nd, etc.).
+        * **"Contestant":** The first player to correctly call Bingo wins the round.
+* **🎨 Dynamic Tickets & Visual Variety:** Each player automatically receives uniquely colored and laid-out Bingo tickets for every game, ensuring a fresh visual experience each time.
 * **🚪 Easy User Participation:** Quick participation via lobby link, main screen, or game detail page.
 * **🏁 Game Start:** Start by host and 5-second countdown timer.
-* **⚙️ Game Mode and Style Selection (Host):** Flexibility to adjust mode and style before game starts.
 * **⚡ Real-Time Gaming Experience:** Real-time and synchronized game flow.
 * **🔊 In-Game Sound Control:** Option to turn sound effects on/off.
 * **💬 In-Game Messaging (Chat):** Communication with animated chat area and emoji support.
@@ -227,8 +289,8 @@ Our platform supports your lobby management operations with instant notification
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446823.png" alt="Card" width="20" style="vertical-align: middle;"> Card Selection:** Switching between multiple tickets.
 * **🏆 Completing Players List:** Real-time list of players who have achieved Bingo.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446854png" alt="Ranking" width="20" style="vertical-align: middle;"> Game Over and Ranking Table:** Game results, ranking, and "Play Again" options.
-* **💾 Game History Recording (Database):** Permanently storing game results.
-* **⏳ If Host Leaves Lobby:** Lobby automatically closes if they do not return within 8 hours.
+* **💾 Game History Recording (Database & Redis Cache):** Game results are persisted in MongoDB, with recent final scores cached in Redis for quick access.
+* **⏳ If Host Leaves Lobby (Normal Lobbies):** Lobby automatically closes if they do not return within 8 hours.
 
 **Bingo in Event Lobby:**
 
@@ -249,12 +311,15 @@ Our platform supports your lobby management operations with instant notification
 
 ### 🔠 Game Screen (Hangman Game)
 
-Engage in a classic word-guessing challenge with a modern, interactive twist!
+Engage in a classic word-guessing challenge with a modern, interactive twist and customizable gameplay!
 
-**Hangman in Normal/Event Lobbies:**
-
-* **👑 Host Control:** Lobby creator (host) can set game parameters (e.g., word category, difficulty if applicable) and initiate the game.
-* **👤 Single Player or Multiplayer Mode:** Enjoy Hangman solo or compete/collaborate with friends in the same lobby.
+* **👑 Host Control:** Lobby creator (host) can set game parameters and initiate the game.
+* **🕹️ Multiple Game Modes:**
+    * **Single Player:** Challenge yourself and aim for a high score or personal best.
+    * **Turn-Based Multiplayer:** Compete against friends or collaborate in the same lobby, taking turns to guess letters.
+* **📝 Dynamic Word Management:**
+    * **Automatic Pool (TR/EN):** Words are randomly selected from a predefined pool supporting both Turkish and English.
+    * **Host-Defined Custom Words:** The host can personalize the game by inputting their own custom words for an extra layer of fun and challenge.
 * **🚪 Easy User Participation:** Join Hangman lobbies via lobby link, main screen, or game detail page.
 * **🏁 Game Start & Countdown:** Game begins after host initiation, often with a short countdown for anticipation.
 * **⚡ Real-Time Synchronized Experience:** All players see the game state (word progression, guessed letters) update simultaneously.
@@ -268,15 +333,16 @@ Engage in a classic word-guessing challenge with a modern, interactive twist!
 * **🔊 In-Game Sound Control:** Option to turn sound effects for guesses and game events on/off.
 * **🏆 Win/Loss Conditions:** Clear indication of winning (guessing the word) or losing (completing the Hangman figure).
 * **📊 Game Over and Results:** Display of the correct word, individual/team scores (if applicable), and options to "Play Again."
-* **💾 Game History Recording (Database):** Game outcomes and relevant stats are saved to player profiles.
+* **💾 Game History Recording (Database & Redis Cache):** Game outcomes and relevant stats are saved to player profiles, with recent scores cached in Redis.
 * **⏳ Host Departure (Normal Lobbies):** If the host leaves a normal lobby, it may automatically close after a certain period (e.g., 8 hours) if they don't return.
 * **🔔 In-Game Notifications:**
     * **User Joined/Left Lobby:** Audible and/or visual cues.
     * **Correct/Incorrect Guess:** Visual feedback and optional sound.
     * **Game Won/Lost:** Clear notifications for game end-states.
+    * **Your Turn Notification:** In turn-based multiplayer, players are notified when it's their turn to guess, even if not actively in the lobby.
     * **Event Lobby Specifics:** Timers and start/end notifications similar to Bingo event lobbies.
 
-### 👤 Profile Screen
+<h3 id="profile-screen-page">👤 Profile Screen</h3>
 
 * **👤 User Profile Information:** Basic information such as name, level, location, membership date, level progress.
 * **📊 Game General Statistics:** Total games, wins, average score, win rate, longest streak (summary and graphs) for each game played (e.g., Bingo, Hangman).
@@ -287,7 +353,7 @@ Engage in a classic word-guessing challenge with a modern, interactive twist!
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446845.png" alt="Requests" width="20" style="vertical-align: middle;"> Manage Friend Requests:** Accept/reject with "Friend Requests" modal.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446843.png" alt="Remove" width="20" style="vertical-align: middle;"> Remove Friend:** "REMOVE FRIEND" button and confirmation modal.
 
-### 🏘️ Community Screen
+<h3 id="community-screen-page">🏘️ Community Screen</h3>
 
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446863.png" alt="Global" width="20" style="vertical-align: middle;"> Global Community (Common Message Area):** General chat channel where all players can participate.
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446839.png" alt="Groups" width="20" style="vertical-align: middle;"> Community Groups (Private Groups):** Area where users can create private chat groups.
@@ -299,7 +365,15 @@ Engage in a classic word-guessing challenge with a modern, interactive twist!
 * **🚪 Leave Group:** "Leave Group" option from "..." menu in "MY GROUPS" section.
 * **🗑️ Delete Group:** "Delete Group" option from "..." menu in "MY GROUPS" section (host only).
 * **⚡ Real-Time Chat (WebSocket):** Instant messaging experience.
-* **<img src="https://cdn-icons-png.flaticon.com/512/446/446853.png" alt="History" width="20" style="vertical-align: middle;"> Last 12 Hours Chat History (Global Community):** Chat history is stored in Community Groups.
+* **💬 Optimized Chat Performance with Virtualization (React-Window & Pagination):**
+    *   **React-Window for Efficient Rendering:** In long message lists, only the currently visible message components are rendered in the DOM. Off-screen items are removed, significantly reducing browser load and ensuring exceptionally smooth scrolling.
+    *   **Backend Skip/Limit Pagination:** Messages are initially fetched in batches (e.g., `limit=30`, `skip=0`). As the user scrolls upwards, new batches are requested with an incremented `skip` value (`skip += 30`). This minimizes network traffic and initial load times by avoiding fetching all messages at once.
+    *   **Synchronized Virtualization & Pagination:** React-Window's "virtual windowing" displays only visible items. When the scroll position reaches the top (scrollTop = 0), a backend call fetches the next batch of older messages, which are then prepended to the list and dynamically integrated into the virtualized view.
+    *   ⚡ **Performance Gains:**
+        *   **Reduced DOM Node Count:** Keeps the number of active DOM elements low (typically 30-50), freeing up browser resources.
+        *   **Minimized Network Load:** Step-by-step loading of message batches prevents network congestion.
+        *   **Fluid Scroll & Superior UX:** Millisecond-level addition/removal of messages eliminates jank and provides a seamless user experience.
+* **<img src="https://cdn-icons-png.flaticon.com/512/446/446853.png" alt="History" width="20" style="vertical-align: middle;"> Last 12 Hours Chat History (Global Community):** Full chat history is stored and accessible in Community Groups.
 * **♻️ Reusable ChatBox Component:** Reusable chat box.
 * **⏱️ Timing Indicator (ChatBox):** Displaying message times in a user-friendly format.
 * **😄 Emoji Support:** Emoji usage in chats.
@@ -310,7 +384,7 @@ Engage in a classic word-guessing challenge with a modern, interactive twist!
 * **🗑️ Group Automatic Deletion:** Automatic deletion of the group when no members remain.
 * **💬 Group Operations Notifications (Snackbar):** Instant notifications about group operations.
 
-### 💬 Conversation Screen
+<h3 id="conversation-screen-page">💬 Conversation Screen</h3>
 
 * **<img src="https://cdn-icons-png.flaticon.com/512/446/446865.png" alt="Tabs" width="20" style="vertical-align: middle;"> "All, Friends, Friend Groups" Tabs:** Categorizing chat types and easy access.
     * **<img src="https://cdn-icons-png.flaticon.com/512/446/446820.png" alt="All" width="20" style="vertical-align: middle;"> "All":** Combined view of all chats.
@@ -325,21 +399,15 @@ Engage in a classic word-guessing challenge with a modern, interactive twist!
 * **🚪 Leave Group:** "Leave Group" option from "..." menu in "Friend Groups" tab.
 * **🗑️ Delete Group:** "Delete Group" option from "..." menu in "Friend Groups" tab (host only).
 * **👉 Guidance to Start Chatting:** Guide message on initial opening.
+* **🚀 Chat Performance:** Benefits from the same React-Window virtualization and backend pagination as the Community Screen for fluid conversations.
 
-### ⚙️ Settings Screen
+<h3 id="settings-screen-page">⚙️ Settings Screen</h3>
 
 *   **<img src="https://cdn-icons-png.flaticon.com/512/606/606788.png" alt="Theme" width="20" style="vertical-align: middle;"> In-App Theme Selection (Light/Dark/Neon-Ocean):** Easily switch between Light, Dark, and a stylish Neon-Ocean theme to suit your preference.
 *   **<img src="https://cdn-icons-png.flaticon.com/512/2037/2037790.png" alt="Language" width="20" style="vertical-align: middle;"> In-App Language Selection:** Choose your preferred language (English/Turkish) for the application interface.
 *   **<img src="https://cdn-icons-png.flaticon.com/512/878/878439.png" alt="Sound" width="20" style="vertical-align: middle;"> Game Sound Management:** Control and adjust game sound effects volume or mute them entirely.
 *   **<img src="https://cdn-icons-png.flaticon.com/512/929/929679.png" alt="Sidebar" width="20" style="vertical-align: middle;"> Sidebar Theme Control:** The theme can also be conveniently controlled directly from the sidebar.
   
----
-
-<h2 id="coming-soon">⏳ Coming Soon</h2>
-
-* **🎲 More New Games:** Expanding our library with different game types (e.g., poker, okey, etc.) beyond Bingo and Hangman.
-* **🚀 Mobile Applications:** Mobile applications for iOS and Android platforms.
-
 ---
 
 <h2 id="installation-and-setup">🔧 Installation and Setup</h2>
@@ -351,6 +419,7 @@ Follow these steps to get the Game Center running on your local machine:
 *   **Node.js:** Ensure you have Node.js (v16 or higher recommended) and Yarn installed.
 *   **Git:** Required for cloning the repository.
 *   **MongoDB:** You need a running instance of MongoDB (local or cloud).
+*   **Redis:** You need a running instance of Redis (local or cloud).
 *   **(Optional) API Client:** A tool like [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/), or familiarity with `curl` command line tool to create initial users.
 
 ### Steps
@@ -362,39 +431,61 @@ Follow these steps to get the Game Center running on your local machine:
     ```
 
 2.  **Install Dependencies:**
-    Install dependencies for the entire project from the root directory using Yarn.
+    Install dependencies for the entire project from the root directory using Yarn. This command will install dependencies for all packages within the monorepo (including backend and frontend).
     ```bash
     yarn install
     ```
 
 3.  **Configure Backend Environment Variables:**
-    *   Navigate to the backend directory: `cd backend`
+    *   Navigate to the backend package directory: `cd backend`.
     *   **Create a `.env` file** in this `backend` directory.
     *   Copy the structure below and **replace values with your own configuration**:
 
         ```dotenv
-        # .env file in backend directory
         PORT=3001
         FRONTEND_URL=http://localhost:3000
-        MONGO_DB_URI=YOUR_MONGO_DB_CONNECTION_STRING_HERE # Replace with your MongoDB connection string
-        SESSION_SECRET=your_strong_random_session_secret_key # Replace with a unique random string
-        JWT_SECRET=your_different_strong_random_jwt_secret_key # Replace with a different unique random string
+        MONGO_DB_URI=YOUR_MONGO_DB_CONNECTION_STRING_HERE
+        REDIS_HOST=localhost
+        REDIS_PORT=6379
+        REDIS_PASSWORD=
+        SESSION_SECRET=your_strong_random_session_secret_key 
+        JWT_SECRET=your_different_strong_random_jwt_secret_key
         ```
-    *   **Crucially, set your `MONGO_DB_URI`, `SESSION_SECRET`, and `JWT_SECRET`.** Use `3001` for `PORT` unless that port is taken.
+    *   Set your `MONGO_DB_URI`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (if applicable), `SESSION_SECRET`, and `JWT_SECRET`.
+    *   Return to the root directory: `cd ..`.
 
-4.  **Ensure MongoDB is Running:**
-    Make sure your MongoDB server instance (specified in your `MONGO_DB_URI`) is running and accessible.
+4.  **Configure Frontend Environment Variables:**
+    *   **If your backend is running on `http://localhost:3001` (default `PORT` in backend's `.env`), you might not need to create a separate `.env` file for the frontend if it defaults to this.**
+    *   **If you changed the backend `PORT`** or need to specify it explicitly for the frontend:
+        *   Navigate to your frontend package directory: `cd packages/game-center`
+        *   Create a file named `.env` in this `packages/game-center` directory.
+        *   Add the following line, replacing `http://localhost:3001` with your actual backend URL if different:
+            ```dotenv
+            REACT_APP_API_BASE_URL=http://localhost:3001
+            ```
+        *   Return to the root directory: `cd ../..`.
 
-5.  **Run the Backend Server:**
-    *   While in the `backend` directory:
+5.  **Ensure MongoDB and Redis are Running:**
+    Make sure your MongoDB server instance (specified in `backend/.env`) and Redis server instance (specified in `backend/.env`) are running and accessible.
+
+6.  **Run the Development Servers (from Root Directory):**
+
+    *   **To run the Backend Server:**
+        Open a terminal in the **root directory** (`GameHub/`).
         ```bash
-        yarn start
+        yarn workspace backend start 
         ```
-    *   The backend server should now be running (e.g., on `http://localhost:3001`). **Keep this terminal window open.**
+        The backend server should now be running (e.g., on `http://localhost:3001`). **Keep this terminal window open.**
 
-6.  **(IMPORTANT) Create Sample Users:**
-    *   Since there is no registration screen, manually create users using an API client (like Postman) or `curl`.
-    *   Send **POST** requests to your running backend: `http://localhost:3001/api/users/` (use the port set in `backend/.env`).
+    *   **To run the Frontend Application (game-center):**
+        Open a **new terminal window** in the **root directory** (`GameHub/`).
+        ```bash
+        yarn workspace game-center start
+        ```
+        The application should open automatically in your browser, typically at `http://localhost:3000`. If you created/modified `packages/game-center/.env`, you might need to stop and restart this command.
+
+7.  **(IMPORTANT) Create Sample Users:**
+    *   Send **POST** requests to your running backend (e.g., `http://localhost:3001/api/users/`).
     *   Set `Content-Type` header to `application/json`.
     *   Use the following JSON data in the request body for each user:
 
@@ -450,30 +541,9 @@ Follow these steps to get the Game Center running on your local machine:
         ```
     *   Ensure you get a successful response (e.g., 201 Created) for each user.
 
-7.  **Configure Frontend API Connection (If Necessary):**
-    *   The frontend connects to the backend API at the address specified by the `REACT_APP_API_BASE_URL` environment variable, defaulting to `http://localhost:3001`.
-    *   **If you kept the backend `PORT` as `3001` in `backend/.env`, you don't need to do anything here.**
-    *   **If you changed the backend `PORT`** (e.g., to `5000`), you **must** tell the frontend the new address:
-        *   Create a file named `.env` in the **project root directory** (the main `GameHub` folder, where the top-level `package.json` is).
-        *   Add the following line to this **root** `.env` file, replacing `5000` with the actual port you set for the backend:
-            ```dotenv
-            # .env file in the project ROOT directory
-            REACT_APP_API_BASE_URL=http://localhost:5000
-            ```
-
-8.  **Run the Frontend Application:**
-    *   Open a **new terminal window** or tab.
-    *   Navigate to the **root** directory of the project (`cd ..` if you're in `backend`, otherwise navigate to `GameHub`).
-    *   Start the React development server **from the root directory**:
-        ```bash
-        yarn start
-        ```
-    *   **(If you created/modified a root `.env` file in the previous step, you might need to stop and restart this `yarn start` command for the changes to take effect).**
-    *   The application should open automatically in your browser, typically at `http://localhost:3000`.
-
 ### Logging In
 
-Once the frontend application is running (and the backend server is also running with users created in your database via **Step 6**), you can log in using the credentials of the users you created:
+Once both the frontend and backend applications are running, and you have created users in your database (via Step 7), you can log in using the credentials:
 
 *   **Email:** `user1@example.com` / **Password:** `password1`
 *   **Email:** `user2@example.com` / **Password:** `password2`
@@ -481,7 +551,7 @@ Once the frontend application is running (and the backend server is also running
 *   **Email:** `user4@example.com` / **Password:** `password4`
 *   **Email:** `user5@example.com` / **Password:** `password5`
 
-*(Note: Ensure the backend server is running, accessible, and you have successfully created users via the API before attempting to log in.)*
+*(Note: Ensure the backend server is running, accessible, connected to MongoDB and Redis, and you have successfully created users via the API before attempting to log in.)*
 
 ---
 
@@ -499,15 +569,18 @@ Once the frontend application is running (and the backend server is also running
     <a href="#">
       <img src="https://img.shields.io/badge/Database-MongoDB-orange.svg?style=for-the-badge&logo=mongodb" alt="Database">
     </a>
+     <a href="#">
+      <img src="https://img.shields.io/badge/Cache-Redis-red.svg?style=for-the-badge&logo=redis" alt="Cache">
+    </a>
   </p>
   <p>
     <a href="#">
       <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge&logo=mit" alt="License">
     </a>
-    <a href="https://github.com/your-username/your-repo-name/issues">
+    <a href="https://github.com/yusufinann/GameHub/issues">
       <img src="https://img.shields.io/badge/Issues-Open-red.svg?style=for-the-badge&logo=github" alt="Issues">
     </a>
-    <a href="https://github.com/your-username/your-repo-name/pulls">
+    <a href="https://github.com/yusufinann/GameHub/pulls">
       <img src="https://img.shields.io/badge/Pull%20Requests-Welcome-brightgreen.svg?style=for-the-badge&logo=github" alt="Pull Requests">
     </a>
   </p>
