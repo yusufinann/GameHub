@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/game-center", "packages/bingo-game"],
+  "packages": ["packages/game-center", "packages/bingo-game","backend"],
    "version": "independent",
    "npmClient":"yarn",
    "useWorksapaces":true
