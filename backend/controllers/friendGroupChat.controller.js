@@ -69,7 +69,7 @@ export const createFriendGroup = async (req, res) => {
       invitedFriends &&
       Array.isArray(invitedFriends) &&
       invitedFriends.length > 0 &&
-      _broadcastFriendEvent 
+      _broadcastFriendEvent
     ) {
       invitedFriends.forEach((friendId) => {
         _broadcastFriendEvent(friendId, {
@@ -81,20 +81,7 @@ export const createFriendGroup = async (req, res) => {
           inviterUsername: req.user.username,
           invitationLink: newGroup.invitationLink,
         });
-        console.log(`Arkadaş grubu daveti WebSocket üzerinden gönderildi: ${friendId}`);
       });
-    } else {
-     
-      if (!_broadcastFriendEvent) {
-        console.log(
-          "createFriendGroup içinde arkadaş davetleri için WebSocket servisi (_broadcastFriendEvent) mevcut değil."
-        );
-      } else {
-        
-        console.log(
-          "WebSocket daveti için davet edilecek arkadaş yok veya koşullar sağlanmadı."
-        );
-      }
     }
 
     res.status(201).json({
@@ -174,7 +161,6 @@ export const joinFriendGroupWebSocket = async (ws, data) => {
       .populate({ path: "hostId", select: "username name avatar" })
       .populate({ path: "members", select: "username name avatar" });
 
-   
     if (_broadcastFriendGroupEvent) {
       _broadcastFriendGroupEvent(groupId, "USER_JOINED_FRIEND_GROUP", {
         groupId: groupId,
@@ -187,7 +173,7 @@ export const joinFriendGroupWebSocket = async (ws, data) => {
         },
       });
     }
- 
+
     if (_broadcastToAll) {
       _broadcastToAll({
         type: "FRIEND_GROUP_UPDATED",
@@ -377,7 +363,7 @@ export const updateFriendGroup = async (ws, data) => {
       updatedGroupRaw._id
     )
       .populate("hostId", "username name avatar")
-      .populate("members", "username name avatar"); 
+      .populate("members", "username name avatar");
     const groupDataForBroadcast = {
       _id: updatedGroupPopulated._id,
       groupName: updatedGroupPopulated.groupName,
@@ -403,14 +389,9 @@ export const updateFriendGroup = async (ws, data) => {
     if (_broadcastFriendGroupEvent) {
       _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_UPDATED", {
         groupId: groupId,
-        updatedBy: userId, 
-        group: groupDataForBroadcast, 
+        updatedBy: userId,
+        group: groupDataForBroadcast,
       });
-      console.log(`Arkadaş grubu güncellemesi (${groupId}) üyelere yayınlandı.`);
-    } else {
-      console.log(
-        "Grup üyelerine yayın için _broadcastFriendGroupEvent mevcut değil."
-      );
     }
 
     const formattedResponseForRequester =
@@ -433,7 +414,6 @@ export const updateFriendGroup = async (ws, data) => {
     );
   }
 };
-
 
 export const sendFriendGroupMessage = async (ws, data) => {
   try {
@@ -488,6 +468,7 @@ export const sendFriendGroupMessage = async (ws, data) => {
     );
   }
 };
+
 export const deleteFriendGroup = async (ws, data) => {
   try {
     const { groupId } = data;
@@ -598,6 +579,7 @@ export const getFriendGroupChatHistory = async (req, res) => {
       });
   }
 };
+
 export const getFriendGroupById = async (req, res) => {
   try {
     const { groupId } = req.params;

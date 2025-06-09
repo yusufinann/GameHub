@@ -25,7 +25,6 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     if (!currentUser?.id) {
-      console.log('Kullanıcı ID bulunamadı, WebSocket bağlantısı kurulamıyor. 1 saniye sonra tekrar denenecek.');
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = setTimeout(connectWebSocket, 1000);
       return;
@@ -41,7 +40,6 @@ export const WebSocketProvider = ({ children }) => {
     socketInstanceRef.current = ws;
 
     ws.onopen = () => {
-      console.log(`WebSocket bağlantısı kuruldu: ${wsUrl}`);
       setIsConnected(true);
       setSocket(ws);
       reconnectAttemptsRef.current = 0;
@@ -52,7 +50,6 @@ export const WebSocketProvider = ({ children }) => {
     };
 
     ws.onclose = (event) => {
-      console.log('WebSocket bağlantısı kapatıldı. Kod:', event.code);
       setIsConnected(false);
       setSocket(null);
       socketInstanceRef.current = null;
@@ -60,7 +57,6 @@ export const WebSocketProvider = ({ children }) => {
       if (event.code !== 1000 && event.code !== 1005) {
         const delay = Math.min(30000, 1000 * (2 ** reconnectAttemptsRef.current));
         reconnectAttemptsRef.current += 1;
-        console.log(`WebSocket ${delay / 1000} saniye sonra yeniden bağlanıyor... (Deneme: ${reconnectAttemptsRef.current})`);
         if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = setTimeout(connectWebSocket, delay);
       } else {
@@ -78,7 +74,6 @@ export const WebSocketProvider = ({ children }) => {
       connectWebSocket();
     } else {
       if (socketInstanceRef.current) {
-        console.log("Kullanıcı yok, mevcut WebSocket bağlantısı kapatılıyor.");
         socketInstanceRef.current.close(1000);
       }
     }
@@ -89,7 +84,6 @@ export const WebSocketProvider = ({ children }) => {
         reconnectTimerRef.current = null;
       }
       if (socketInstanceRef.current) {
-        console.log("WebSocketProvider unmount ediliyor, bağlantı kapatılıyor.");
         socketInstanceRef.current.onopen = null;
         socketInstanceRef.current.onclose = null;
         socketInstanceRef.current.onerror = null;

@@ -6,8 +6,6 @@ const MessageDialog = memo(({ open, handleClose, friend }) => {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {
-    // Handle sending message logic here
-    console.log(`Sending message to ${friend?.name}: ${message}`);
     handleClose();
     setMessage('');
   };

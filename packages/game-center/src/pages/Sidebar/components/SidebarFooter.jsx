@@ -4,7 +4,6 @@ import { styled } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import LanguageIcon from "@mui/icons-material/Language";
 import PaletteIcon from "@mui/icons-material/Palette";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import { ThemeContext } from "../../../theme/context";
 import { useTranslation } from "react-i18next";
 
@@ -128,12 +127,7 @@ function SidebarFooter() {
       icon: <PaletteIcon />,
       action: (event) => handleOpen(event, setThemeAnchorEl, themeButtonRef),
       popoverId: 'theme-popover',
-    },
-    {
-      name: t('sidebarFooter.aiMagic', "AI Magic"),
-      icon: <AutoFixHighIcon />,
-      action: () => { console.log("AI Magic clicked"); }
-    },
+    }
   ];
 
   const popoverPaperSlotProps = {

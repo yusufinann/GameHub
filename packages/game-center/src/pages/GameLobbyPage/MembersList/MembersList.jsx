@@ -15,7 +15,6 @@ function MembersList({ members, t, lobbyCode, currentLobbyCreatorId }) {
 
   const handleKickPlayer = (playerIdToKick) => {
     if (socket && lobbyCode && currentUser && currentLobbyCreatorId === currentUser.id) {
-      console.log(`Kicking player ${playerIdToKick} from lobby ${lobbyCode}`);
       socket.send(JSON.stringify({
         type: 'KICK_PLAYER',
         lobbyCode: lobbyCode,

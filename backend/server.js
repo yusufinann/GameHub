@@ -8,7 +8,6 @@ import dotenv from 'dotenv';
 import {RedisStore} from "connect-redis"; 
 
 import setupWebSocket from "./websocket/webSocketServer.js";
-import connectToMongoDB from './db/connectToMongoDB.js';
 import redisClient from './redisClient.js';
 
 import authRoutes from './routes/auth.routes.js';
@@ -24,6 +23,7 @@ import gamesRouter from './routes/dummyGames.routes.js';
 import { initializeWebSocket as initializeLobbyWebSocket } from "./controllers/lobby.controller.js";
 import { initializeFriendWebSocket } from "./controllers/friend.controller.js";
 import { restoreActiveBingoTimers } from "./controllers/bingo.game.controller.js";
+import connectToMongoDB from "./db/connectToMongoDb.js";
 
 dotenv.config();
 
@@ -89,16 +89,15 @@ async function initializeApp() {
 
     if (!redisClient.isOpen) {
         await redisClient.connect();
-        console.log("Redis istemcisi initializeApp içinde başarıyla bağlandı.");
+        console.log("The Redis client successfully connected in initializeApp.");
     } else {
-        console.log("Redis istemcisi zaten bağlı.");
+        console.log("The Redis client is already connected.");
     }
-    console.log("MongoDB ve Redis bağlantıları (veya bağlantı durumu) kontrol edildi.");
 
 
     const PORT = process.env.PORT || 3001;
     server.listen(PORT, () => {
-      console.log(`Sunucu ${PORT} portunda çalışıyor.`);
+      console.log(`The server is running on port ${PORT}.`);
       console.log(`Frontend URL: ${FRONTEND_URL}`);
     });
     restoreActiveBingoTimers(redisClient).catch(err => {
@@ -106,9 +105,9 @@ async function initializeApp() {
       });
 
   } catch (err) {
-    console.error("Uygulama başlatılırken kritik hata:", err);
+    console.error("Critical error while starting the application:", err);
     if (err.message.toLowerCase().includes('redis') || err.message.toLowerCase().includes('mongo')) {
-        console.error("Veritabanı bağlantı hatası nedeniyle uygulama sonlandırılıyor.");
+        console.error("The application is being terminated due to a database connection error.");
         process.exit(1);
     }
   }

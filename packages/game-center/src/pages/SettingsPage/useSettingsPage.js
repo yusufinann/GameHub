@@ -39,7 +39,6 @@ const useSettingsPage = () => {
     if ((newTheme === 'light' && !isDarkMode && !isNeonOceanMode) ||
         (newTheme === 'dark' && isDarkMode) ||
         (newTheme === 'neonOcean' && isNeonOceanMode)) {
-      console.log("Theme already set to", newTheme);
       return;
     }
     setSpecificTheme(newTheme);

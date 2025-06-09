@@ -224,7 +224,6 @@ async function startNextTurn(lobbyCode) {
     if (activePlayersInOrder.length > 1) {
         const currentPlayerForTimer = game.currentPlayerId;
         timerManager.setTimerWithCallback(lobbyCode, async () => {
-            console.log(`[TIMER_CALLBACK_CTRL] Timer for player ${currentPlayerForTimer} in lobby ${lobbyCode} EXPIRED. Calling handleTurnTimeout.`);
             await handleTurnTimeout(lobbyCode, currentPlayerForTimer);
         }, 12000);
     } else {
@@ -242,7 +241,6 @@ async function handleTurnTimeout(lobbyCode, timedOutPlayerIdFromTimer) {
 
     let game = await getGameFromRedis(lobbyCode);
     if (!game || game.gameEnded || !game.gameStarted) {
-        console.log(`[TIMER_CTRL] handleTurnTimeout: Game ${lobbyCode} not active or ended. Aborting.`);
         return;
     }
 
@@ -667,7 +665,7 @@ export const startGame = async (ws, data) => {
 };
 
 export const guessLetter = async (ws, data) => {
-  const { lobbyCode, letter: rawLetter } = data; 
+  const { lobbyCode, letter: rawLetter } = data;
   let game = await getGameFromRedis(lobbyCode);
 
   if (!game || !game.gameStarted || game.gameEnded) {
@@ -686,15 +684,14 @@ export const guessLetter = async (ws, data) => {
     let intermediateLetter = rawLetter.toLocaleLowerCase('tr-TR');
 
     const combiningDotAbove = String.fromCharCode(0x0307);
-    const problematicSequence = 'i' + combiningDotAbove; 
+    const problematicSequence = 'i' + combiningDotAbove;
 
     if (intermediateLetter === problematicSequence) {
-      processedLetter = 'i'; 
-     
-    } else if (intermediateLetter.length === 2 && intermediateLetter.charCodeAt(0) === 0x0069 && intermediateLetter.charCodeAt(1) === 0x0307) {
-
       processedLetter = 'i';
-    
+
+    } else if (intermediateLetter.length === 2 && intermediateLetter.charCodeAt(0) === 0x0069 && intermediateLetter.charCodeAt(1) === 0x0307) {
+      processedLetter = 'i';
+
     }
     else {
       processedLetter = intermediateLetter;
@@ -703,18 +700,13 @@ export const guessLetter = async (ws, data) => {
     processedLetter = rawLetter.toLowerCase();
   }
 
-
-  const normalizedLetter = processedLetter; 
+  const normalizedLetter = processedLetter;
 
   const validLetterRegex = game.languageMode === 'tr' ? /^[a-zçğıöşü]$/ : /^[a-z]$/;
 
- if (game.languageMode === 'tr' && typeof intermediateLetter !== 'undefined') {
-    console.log(`[guessLetter DEBUG] Intermediate Letter (after toLocaleLowerCase('tr-TR')): '${intermediateLetter}', Length: ${intermediateLetter.length}, CharCodes: ${Array.from(intermediateLetter).map(c => c.charCodeAt(0).toString(16)).join(',')}`);
-  }
   const regexTestResult = validLetterRegex.test(normalizedLetter);
 
   if (!regexTestResult) {
-    console.error(`Invalid letter: OriginalRaw='${rawLetter}', NormalizedForRegex='${normalizedLetter}' (length: ${normalizedLetter.length}, charCodes: [${Array.from(normalizedLetter).map(c => c.charCodeAt(0).toString(16)).join(',')}]), LangMode='${game.languageMode}'. Regex test failed.`);
     return ws.send(JSON.stringify({ type: "HANGMAN_ERROR", message: "Invalid letter entered." }));
   }
 
@@ -738,7 +730,7 @@ export const guessLetter = async (ws, data) => {
   ws.send(JSON.stringify({
     type: "HANGMAN_MY_GUESS_RESULT",
     correct: correctGuess,
-    letter: normalizedLetter, 
+    letter: normalizedLetter,
     playerSpecificGameState: getPlayerSpecificGameState(game, ws.userId),
     sharedMaskedWord: getSharedGameState(game).maskedWord
   }));
@@ -752,7 +744,7 @@ export const guessLetter = async (ws, data) => {
       type: "HANGMAN_GUESS_MADE",
       playerId: ws.userId,
       userName: player.userName,
-      letter: normalizedLetter, 
+      letter: normalizedLetter,
       correct: correctGuess,
     });
     if (player.eliminated) {

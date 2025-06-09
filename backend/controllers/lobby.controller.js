@@ -415,7 +415,6 @@ export const joinLobby = async (req, res) => {
       if (existingTimer) {
         clearTimeout(existingTimer);
         lobbyTimers.delete(hostReturnTimerKey);
-        console.log(`Host ${user.name} returned to lobby ${lobbyCode}. Deletion timer cancelled.`);
 
         const hostMemberIndex = lobby.members.findIndex(
           (member) => member.id.toString() === user.id.toString()
@@ -677,12 +676,10 @@ export const leaveLobby = async (req, res) => {
         lobbyTimers.delete(timerKey);
       }
 
-      console.log(`Host ${user.name} left lobby ${lobbyCode}. Starting 8-hour deletion timer.`);
       const deletionTimer = setTimeout(async () => {
         try {
           const currentLobby = await Lobby.findOne({ lobbyCode: lobbyCode }).lean();
           if (currentLobby) {
-            console.log(`8-hour timer expired for lobby ${lobbyCode}. Deleting lobby.`);
             broadcastLobbyEvent(
                 null,
                 "LOBBY_DELETED",
@@ -1064,10 +1061,8 @@ export const updateLobby = async (req, res) => {
       if (lobby.game !== game) {
          if (oldGameType === "1") {
           await cleanupAndRemoveBingoGame(lobbyCode); 
-          console.log(`[LobbyUpdate-${lobbyCode}] Eski Bingo (${oldGameType}) durumu Redis'ten silindi.`);
         } else if (oldGameType === "2") {
           await deleteHangmanGameFromRedis(lobbyCode);
-          console.log(`[LobbyUpdate-${lobbyCode}] Eski Hangman (${oldGameType}) durumu Redis'ten silindi.`);
         }
         lobby.game = game;
         detailsChanged = true;

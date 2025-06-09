@@ -72,13 +72,10 @@ export const userLogin = async (req, res) => {
 };
 
 
-// Çıkış endpoint'i
 export const userLogout = async (req, res) => {
-    console.log("Logout isteği alındı. req.user._id:", req.user._id);
     if (req.user) {
         try {
             const user = await User.findById(req.user._id);
-            console.log("User found:", user.email);
             if (user) {
                 user.isOnline = false;
                 await user.save();

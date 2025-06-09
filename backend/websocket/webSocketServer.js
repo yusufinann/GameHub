@@ -11,7 +11,6 @@ import * as friendGroupChatController from "../controllers/friendGroupChat.contr
 export const connectedClients = new Map(); 
 
 const setupWebSocket = (server) => {
-    console.log("Initializing WebSocket server...");
     const wss = new WebSocketServer({ server });
 
     const broadcasters = createBroadcasters(connectedClients);
@@ -32,7 +31,6 @@ const setupWebSocket = (server) => {
         });
 
         ws.on("close", (code, reason) => {
-            console.log(`Connection closed for ${ws.userId || 'unknown'}. Code: ${code}, Reason: ${reason?.toString()}`);
             handleClientDisconnect(ws, connectedClients);
         });
 
@@ -46,7 +44,6 @@ const setupWebSocket = (server) => {
     });
 
     wss.on("close", () => {
-        console.log("WebSocket Server closing. Clearing ping interval.");
         clearInterval(pingInterval);
         connectedClients.clear();
     });
@@ -77,8 +74,6 @@ const setupWebSocket = (server) => {
     });
 
     authController.initializeFriendWebSocket(broadcasters.broadcastFriendEvent); 
-
-    console.log("WebSocket server setup complete and listening.");
 
     return {
         broadcastLobbyEvent: broadcasters.broadcastLobbyEvent,

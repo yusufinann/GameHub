@@ -6,7 +6,6 @@ export const handleNewClient = (ws, request, connectedClients) => {
         if (userId) {
             const existingWs = connectedClients.get(userId);
             if (existingWs && existingWs !== ws) {
-                console.log(`User ${userId} reconnected, terminating old connection.`);
                 existingWs.terminate();
             }
 
@@ -16,7 +15,6 @@ export const handleNewClient = (ws, request, connectedClients) => {
             console.log(`Client connected: ${userId} (Total: ${connectedClients.size})`);
             return true; 
         } else {
-            console.log("Connection attempt without userId. Closing connection.");
             ws.close(1008, "User ID is required"); 
             return false;
         }
@@ -44,7 +42,6 @@ export const setupPing = (connectedClients) => {
     const interval = setInterval(() => {
         connectedClients.forEach((clientWs, userId) => {
             if (!clientWs.isAlive) {
-                console.log(`No pong from ${userId}, terminating connection.`);
                 clientWs.terminate(); 
                 return; 
             }

@@ -7,13 +7,11 @@ export function setTimerWithCallback(lobbyCode, callback, delay) {
     const oldTimerId = activeTurnTimers.get(lobbyCode);
     clearTimeout(oldTimerId);
     activeTurnTimers.delete(lobbyCode);
-    console.log(`[TIMER_MGR] Cleared existing timer ${oldTimerId} for lobby ${lobbyCode} before setting a new one.`);
   }
 
   const newTimerId = setTimeout(async () => {
     if (activeTurnTimers.get(lobbyCode) === newTimerId) {
       activeTurnTimers.delete(lobbyCode);
-      console.log(`[TIMER_MGR] Timer ${newTimerId} for lobby ${lobbyCode} EXPIRED. Executing callback.`);
       try {
         await callback();
       } catch (error) {
@@ -25,7 +23,6 @@ export function setTimerWithCallback(lobbyCode, callback, delay) {
   }, delay);
 
   activeTurnTimers.set(lobbyCode, newTimerId);
-  console.log(`[TIMER_MGR] New timer SET with ID ${newTimerId} for lobby ${lobbyCode}. Ends at: ${new Date(Date.now() + delay).toISOString()}`);
 }
 
 export function hasTimer(lobbyCode) {

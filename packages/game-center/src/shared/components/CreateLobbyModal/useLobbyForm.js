@@ -51,7 +51,6 @@ export const useLobbyForm = () => {
       };
 
       await createLobby(lobbyData);
-console.log(lobbyData)
       setSnackbar({
         open: true,
         message: t("lobby.success.created"),

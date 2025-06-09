@@ -18,7 +18,7 @@ import * as hangmanGameController from "../controllers/hangman.controller.js";
 export const routeMessage = async (ws, message, broadcasters) => {
   try {
     const data = JSON.parse(message);
-    console.log("İstemciden gelen mesaj:", data); // For debugging
+  //console.log("İstemciden gelen mesaj:", data); // For debugging
 
     const {
       sendToSpecificUser,
@@ -362,9 +362,6 @@ export const routeMessage = async (ws, message, broadcasters) => {
         );
         break;
       case "REJECT_FRIEND_GROUP_INVITATION_WS":
-        console.log(
-          `User ${ws.userId} rejected invitation to group ${data.rejectedGroupId}`
-        );
         break;
 
       case "HANGMAN_JOIN":
@@ -405,7 +402,7 @@ export const routeMessage = async (ws, message, broadcasters) => {
         }
         break;
       default:
-        console.log("Bilinmeyen mesaj tipi:", data.type);
+       // console.log("Bilinmeyen mesaj tipi:", data.type);
     }
 
     sendAcknowledgement(ws, data);

@@ -61,7 +61,7 @@ export async function saveGameToRedis(game) {
       {
         EX: expirySeconds,
       }
-    );console.log(`[HangmanStateManager] Hangman game ${game.lobbyCode} saved to Redis with expiry ${expirySeconds}s. Game ended: ${gameToSave.gameEnded}`);
+    );
   }  catch (error) {
     console.error(`Error stringifying or saving game ${game.lobbyCode} to Redis:`, error);
   }
