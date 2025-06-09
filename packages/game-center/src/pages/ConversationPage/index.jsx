@@ -26,7 +26,7 @@ function ConversationPage() {
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const [selectedConversation, setSelectedConversation] = useState(null);
-  const [friendGroups, setFriendGroups] = useState([]);
+  const [friendGroups, setFriendGroups] = useState(null);
   
   const { friends, incomingRequests} = useFriendsContext();
   const navigate = useNavigate(); 

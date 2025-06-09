@@ -472,13 +472,13 @@ export const sendFriendGroupMessage = async (ws, data) => {
 export const deleteFriendGroup = async (ws, data) => {
   try {
     const { groupId } = data;
-    const userId = ws.userId;
+    const userId = ws.userId; 
 
     if (!groupId) {
       throw new Error("Grup ID'si gerekli.");
     }
 
-    const group = await FriendGroupChat.findById(groupId);
+    const group = await FriendGroupChat.findById(groupId).select("hostId members"); 
     if (!group) {
       return ws.send(
         JSON.stringify({ type: "ERROR", message: "Arkadaş Grubu bulunamadı." })
@@ -493,19 +493,17 @@ export const deleteFriendGroup = async (ws, data) => {
       );
     }
 
+    const memberIdsToNotify = group.members.map(memberId => memberId.toString());
+
     await FriendGroupChat.findByIdAndDelete(groupId);
 
     if (_broadcastFriendGroupEvent) {
-      _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", {
+      const eventDataForDeleted = {
         groupId: groupId,
         deletedBy: userId,
-      });
-    }
-    if (_broadcastToAll) {
-      _broadcastToAll({
-        type: "FRIEND_GROUP_DELETED",
-        groupId: groupId,
-      });
+      };
+    
+      _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", eventDataForDeleted, memberIdsToNotify);
     }
     ws.send(
       JSON.stringify({

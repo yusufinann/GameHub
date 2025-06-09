@@ -46,7 +46,8 @@
     "yourTurn": "It's Your Turn!",
     "playerCompletedBingo": "{{playerName}} completed Bingo!",
     "connectedToGame": "Connected to the game successfully.",
-    "playerKickedFromGameMidGame": "{{playerName}} was kicked from the game."
+    "playerKickedFromGameMidGame": "{{playerName}} was kicked from the game.",
+    "groupDeletedByHost":"Group deleted by the host"
     
   },
   "error": {
@@ -112,7 +113,7 @@
   "friendGroups": {
     "createSuccess": "Friend group '{groupName}' created successfully.",
     "createError": "Failed to create friend group: {error}",
-    "updateSuccess": "Friend group '{groupName}' updated successfully.",
+    "joinedGroup": "joined the friend group successfuly!",
     "updateError": "Failed to update friend group: {error}",
     "deleteSuccess": "Friend group deleted successfully.",
     "deleteError": "Failed to delete friend group: {error}",

@@ -1,29 +1,52 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+
+const SNACKBAR_DISPLAY_DELAY = 3000;
 
 const SnackbarContext = createContext();
 
 export const SnackbarProvider = ({ children }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("info"); // info, success, warning, error
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info"); 
 
-  // useCallback kullanarak showSnackbar fonksiyonunu optimize ediyoruz.
-  // Bağımlılık dizisi boş olduğu için fonksiyon referansı sabit kalacak.
+ 
+  const timeoutIdRef = useRef(null);
+
+ 
   const showSnackbar = useCallback(
     ({ message, severity = "info" }) => {
-      setSnackbarMessage(message);
-      setSnackbarSeverity(severity);
-      setSnackbarOpen(true);
-    },
-    []
-  );
+ 
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
 
-  // useCallback kullanarak handleSnackbarClose fonksiyonunu optimize ediyoruz.
+ 
+      timeoutIdRef.current = setTimeout(() => {
+        setSnackbarMessage(message);
+        setSnackbarSeverity(severity);
+        setSnackbarOpen(true);
+        timeoutIdRef.current = null; 
+      }, SNACKBAR_DISPLAY_DELAY);
+    },
+    [] 
+  );
   const handleSnackbarClose = useCallback((event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
     setSnackbarOpen(false);
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
+    };
   }, []);
 
   const contextValue = {

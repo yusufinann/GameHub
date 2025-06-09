@@ -22,6 +22,7 @@ export const useFriendGroupDialog = (setFriendGroupsExternally) => {
   }, []);
 
   const fetchFriendGroups = useCallback(async () => {
+    
     setFriendGroupsLoading(true);
     const token = localStorage.getItem("token");
     if (!token) {
@@ -66,7 +67,6 @@ export const useFriendGroupDialog = (setFriendGroupsExternally) => {
         invitedFriends,
       });
       if (response.status === 201) {
-        showSnackbar({ message: "Friend Group created successfully!", severity: "success" });
         handleCreateFriendGroupDialogClose();
         fetchFriendGroups();
       } else {

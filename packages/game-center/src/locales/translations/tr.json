@@ -46,7 +46,8 @@
     "yourTurn": "Sıra Sende!",
      "playerCompletedBingo": "{{playerName}} Tombala yaptı!",
      "connectedToGame": "Oyun sunucusuna başarıyla bağland.",
-      "playerKickedFromGameMidGame": "{{playerName}} oyundan atıldı."
+      "playerKickedFromGameMidGame": "{{playerName}} oyundan atıldı.",
+      "groupDeletedByHost":"Grup kurucu tarafından silindi"
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",
@@ -111,7 +112,7 @@
   "friendGroups": {
     "createSuccess": "Arkadaş grubu '{groupName}' başarıyla oluşturuldu.",
     "createError": "Arkadaş grubu oluşturulamadı: {error}",
-    "updateSuccess": "Arkadaş grubu '{groupName}' başarıyla güncellendi.",
+    "joinedGroup": "Arkadaş grubuna başarıyla katıldınız!",
     "updateError": "Arkadaş grubu güncellenemedi: {error}",
     "deleteSuccess": "Arkadaş grubu başarıyla silindi.",
     "deleteError": "Arkadaş grubu silinemedi: {error}",

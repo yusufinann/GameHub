@@ -82,30 +82,41 @@ export const createBroadcasters = (connectedClients) => {
             });
     };
 
-    const broadcastFriendGroupEvent = (groupId, eventType, data) => {
+   const broadcastFriendGroupEvent = (groupId, eventType, data, memberIds = null) => {
+    const message = {
+        type: eventType,
+        groupId: groupId,
+        data: data, 
+    };
+
+    if (memberIds && Array.isArray(memberIds) && memberIds.length > 0) {
+      
+        memberIds.forEach((memberId) => {
+            sendToSpecificUser(memberId.toString(), message);
+        });
+    } else {
         FriendGroupChat.findById(groupId)
             .populate("members", "_id")
-            .then(async (group) => {
+            .then((group) => {
                 if (!group) {
-                    console.log(`broadcastFriendGroupEvent: Friend Grup bulunamadı: ${groupId}`);
+                    console.warn(`broadcastFriendGroupEvent (fallback): Friend Grup bulunamadı: ${groupId}`);
                     return;
                 }
-                const populatedGroup = await FriendGroupChat.findById(groupId).populate(
-                    { path: "members", select: "_id username name avatar" }
-                );
-                const message = {
+                const finalMessage = {
                     type: eventType,
                     groupId: groupId,
-                    data: { ...data, group: formatFriendGroupResponse(populatedGroup) },
+                    data: data 
                 };
+
                 group.members.forEach((member) => {
-                    sendToSpecificUser(member._id.toString(), message);
+                    sendToSpecificUser(member._id.toString(), finalMessage);
                 });
             })
             .catch((err) => {
-                console.error(`broadcastFriendGroupEvent: Friend Grup üyelerini alırken hata (${groupId}):`, err);
+                console.error(`broadcastFriendGroupEvent (fallback): Friend Grup üyelerini alırken hata (${groupId}):`, err);
             });
-    };
+    }
+};
 
     const broadcastFriendGroupMessage = (groupId, eventType, data, senderId) => {
         FriendGroupChat.findById(groupId)

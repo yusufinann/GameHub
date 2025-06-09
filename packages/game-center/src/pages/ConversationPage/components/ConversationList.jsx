@@ -50,22 +50,14 @@ const ConversationList = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ConversationList.js
 
 useEffect(() => {
-  // Aktif sekme "Arkadaş Grupları" (tabValue === 2) ise
-  // ve fetchFriendGroups fonksiyonu tanımlıysa devam et.
   if (tabValue === 2 && typeof fetchFriendGroups === 'function') {
-    // SADECE VE SADECE:
-    // 1. friendGroups dizisi boş veya henüz tanımlanmamışsa (yani veri yoksa)
-    // 2. VE friendGroupsLoading durumu false ise (yani zaten bir yükleme işlemi devam etmiyorsa)
-    // fetchFriendGroups fonksiyonunu çağır.
-    if ((!friendGroups || friendGroups.length === 0) && !friendGroupsLoading) {
+   if (friendGroups === null && !friendGroupsLoading) {
+    console.log("fetchFriendGroups CALLED - tabValue:", tabValue);
       fetchFriendGroups();
     }
   }
-  // Bu effect'in çalışmasını tetikleyecek bağımlılıklar:
-  // tabValue, fetchFriendGroups, friendGroups, veya friendGroupsLoading değiştiğinde.
 }, [tabValue, fetchFriendGroups, friendGroups, friendGroupsLoading]);
 
   useEffect(() => {

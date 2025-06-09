@@ -55,7 +55,7 @@ export const useConversationsPage = (
         if (page > 1) setIsLoadingMore(false);
       }
     },
-    [showSnackbar, token, t] // Added t to dependencies
+    [showSnackbar, token, t] 
   );
 
   const fetchFriendGroupChatHistory = useCallback(
@@ -330,7 +330,6 @@ export const useConversationsPage = (
         return;
       }
       socket.send(JSON.stringify({ type: "UPDATE_FRIEND_GROUP_WS", groupId: groupToUpdate._id, ...updates }));
-      showSnackbar({ message: t("notifications.groupUpdateRequestSent", { groupName: groupToUpdate.groupName }), severity: "info" });
       closeUpdateDialog();
     },
     [socket, groupToUpdate, closeUpdateDialog, showSnackbar, t] 

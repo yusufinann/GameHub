@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
@@ -39,14 +39,15 @@ export function useConversationSocket({
               groupId: joinedGroupId,
             } = data.data;
             setFriendGroups((prevGroups) => {
-              const groupExists = prevGroups.some(
+              const currentGroups = prevGroups || [];
+              const groupExists = currentGroups.some(
                 (g) => g._id === joinedGroupId
               );
               return groupExists
-                ? prevGroups.map((g) =>
+                ? currentGroups.map((g) =>
                     g._id === joinedGroupId ? { ...joinedGroupData, type: "friendGroup" } : g
                   )
-                : [...prevGroups, { ...joinedGroupData, type: "friendGroup" }];
+                : [...currentGroups, { ...joinedGroupData, type: "friendGroup" }];
             });
             if (
               selectedConversation &&
@@ -69,36 +70,32 @@ export function useConversationSocket({
             updatedGroupData = data.group;
             eventGroupId = data.groupId;
             eventUserIdLeft = data.userIdLeft;
-          } else if (data.data && data.data.group && data.groupId) {
+          } else if (data.data && data.data.group && data.data.groupId) {
             updatedGroupData = data.data.group;
-            eventGroupId = data.groupId;
+            eventGroupId = data.data.groupId;
             eventUserIdLeft = data.data.userIdLeft || data.userIdLeft;
           }
 
+
           if (updatedGroupData && eventGroupId) {
             if (eventUserIdLeft && eventUserIdLeft === currentUser.id) {
-              const groupBeforeRemoval = friendGroups.find(g => g._id === eventGroupId);
-              showSnackbar({
-                message: t("notifications.youLeftOrWereRemoved", {
-                  groupName: groupBeforeRemoval?.groupName || updatedGroupData.groupName || eventGroupId,
-                }),
-                severity: "warning",
+              setFriendGroups((prevGroups) => {
+                const currentGroups = prevGroups || [];
+                return currentGroups.filter((g) => g._id !== eventGroupId);
               });
-              setFriendGroups((prevGroups) =>
-                prevGroups.filter((g) => g._id !== eventGroupId)
-              );
               if (selectedConversation && selectedConversation._id === eventGroupId) {
                 setSelectedConversation(null);
                 navigate("/conversation/all/friend-group");
               }
             } else {
-              setFriendGroups((prevGroups) =>
-                prevGroups.map((g) =>
+              setFriendGroups((prevGroups) => {
+                const currentGroups = prevGroups || [];
+                return currentGroups.map((g) =>
                   g._id === eventGroupId
                     ? { ...updatedGroupData, type: "friendGroup" }
                     : g
-                )
-              );
+                );
+              });
 
               if (selectedConversation && selectedConversation._id === eventGroupId) {
                 setSelectedConversation((prev) => {
@@ -109,33 +106,17 @@ export function useConversationSocket({
                     type: "friendGroup",
                   };
                 });
-                if (eventUserIdLeft) {
-                } else {
-                  showSnackbar({
-                    message: t("notifications.updateSuccess", {
-                      groupName: updatedGroupData.groupName,
-                    }),
-                    severity: "info",
-                  });
-                }
-              } else if (!eventUserIdLeft) {
-                showSnackbar({
-                  message: t("notifications.updateSuccess", {
-                    groupName: updatedGroupData.groupName,
-                  }),
-                  severity: "info",
-                });
               }
             }
-          } else {
-            // Incomplete or unexpected data structure, handled by higher level error logging if needed
           }
           break;
 
         case "USER_LEFT_FRIEND_GROUP":
           if (data.data && data.data.groupId && data.data.userId) {
             const { groupId: leftGroupId, userId: leftUserId } = data.data;
-            const leftGroup = friendGroups.find((g) => g._id === leftGroupId);
+            const leftGroup = (friendGroups && Array.isArray(friendGroups))
+              ? friendGroups.find((g) => g._id === leftGroupId)
+              : null;
             const groupNameForNotification = leftGroup
               ? leftGroup.groupName
               : leftGroupId;
@@ -147,50 +128,65 @@ export function useConversationSocket({
                 }),
                 severity: "warning",
               });
-              setFriendGroups((prevGroups) =>
-                prevGroups.filter((g) => g._id !== leftGroupId)
-              );
+              setFriendGroups((prevGroups) => {
+                const currentGroups = prevGroups || [];
+                return currentGroups.filter((g) => g._id !== leftGroupId);
+              });
               if (selectedConversation && selectedConversation._id === leftGroupId) {
                 setSelectedConversation(null);
                 navigate("/conversation/all/friend-group");
               }
             } else {
-              setFriendGroups((prevGroups) =>
-                prevGroups.map((g) =>
+              setFriendGroups((prevGroups) => {
+                const currentGroups = prevGroups || [];
+                return currentGroups.map((g) =>
                   g._id === leftGroupId
                     ? {
                         ...g,
                         members: g.members.filter((m) => m._id !== leftUserId),
                       }
                     : g
-                )
-              );
+                );
+              });
               if (selectedConversation && selectedConversation._id === leftGroupId) {
                 setSelectedConversation((prev) => ({
                   ...prev,
                   members: prev.members.filter((m) => m._id !== leftUserId),
                 }));
               }
-              const leftUser =
-                friends.find((f) => f.id === leftUserId) ||
-                leftGroup?.members.find((m) => m._id === leftUserId);
-              showSnackbar({
-                message: t("notifications.userLeftGroup", {
-                  userName: leftUser?.username || "Bir kullanıcı",
-                  groupName: groupNameForNotification,
-                }),
-                severity: "info",
-              });
             }
           }
           break;
 
-        case "FRIEND_GROUP_DELETED":
-          if (data.groupId) {
-            const deletedGroupId = data.groupId;
-            setFriendGroups((prevGroups) =>
-              prevGroups.filter((g) => g._id !== deletedGroupId)
-            );
+        case "FRIEND_GROUP_DELETED": 
+          if (data.data && data.data.groupId) {
+            const deletedGroupId = data.data.groupId;
+            const deletedGroup = (friendGroups && Array.isArray(friendGroups))
+              ? friendGroups.find((g) => g._id === deletedGroupId)
+              : null;
+
+            setFriendGroups((prevGroups) => {
+              const currentGroups = prevGroups || [];
+              return currentGroups.filter((g) => g._id !== deletedGroupId);
+            });
+
+            if (deletedGroup && data.data.deletedBy !== currentUser.id) {
+                 showSnackbar({
+                    message: t("notifications.groupDeletedByHost", { 
+                    groupName: deletedGroup.groupName,
+                    }),
+                    severity: "error",
+                });
+            } else if (deletedGroup && data.data.reason === "Üye kalmadı") {
+                 showSnackbar({
+                    message: t("notifications.groupDeletedNoMembers", { 
+                    groupName: deletedGroup.groupName,
+                    }),
+                    severity: "warning",
+                });
+            }
+
+
             if (
               selectedConversation &&
               selectedConversation._id === deletedGroupId
@@ -201,19 +197,46 @@ export function useConversationSocket({
           }
           break;
 
-        case "LEAVE_FRIEND_GROUP_SUCCESS":
+        case "FRIEND_GROUP_DELETED_SUCCESS":
+          if (data.groupId) {
+            const deletedGroupId = data.groupId;
+
+           
+            if (data.message) {
+              showSnackbar({
+                message: data.message, 
+                severity: "success",
+              });
+            }
+            
+            setFriendGroups((prevGroups) => {
+              const currentGroups = prevGroups || [];
+              return currentGroups.filter((g) => g._id !== deletedGroupId);
+            });
+            
+            if (
+              selectedConversation &&
+              selectedConversation._id === deletedGroupId
+            ) {
+              setSelectedConversation(null);
+              navigate("/conversation/all/friend-group");
+            }
+          }
+          break;
+
+        case "LEAVE_FRIEND_GROUP_SUCCESS": 
           if (data.groupId) {
             const leftGroupId = data.groupId;
-            const group = friendGroups.find((g) => g._id === leftGroupId);
-            showSnackbar({
-              message: t("notifications.leftGroupSuccess", {
-                groupName: group?.groupName || leftGroupId,
-              }),
-              severity: "success",
+             if (data.message) { 
+                showSnackbar({
+                    message: data.message,
+                    severity: "success",
+                });
+            }
+            setFriendGroups((prevGroups) => {
+              const currentGroups = prevGroups || [];
+              return currentGroups.filter((g) => g._id !== leftGroupId);
             });
-            setFriendGroups((prevGroups) =>
-              prevGroups.filter((g) => g._id !== leftGroupId)
-            );
             if (
               selectedConversation &&
               selectedConversation._id === leftGroupId
@@ -258,6 +281,9 @@ export function useConversationSocket({
             severity: "warning",
           });
           break;
+        
+        case "ACKNOWLEDGEMENT": 
+            break;
 
         default:
           break;
@@ -274,7 +300,7 @@ export function useConversationSocket({
     selectedConversation,
     setSelectedConversation,
     navigate,
-    friendGroups,
+    friendGroups, 
     friends,
     fetchFriends,
   ]);
@@ -286,7 +312,6 @@ export function useConversationUrlHandler({
   setSelectedConversation,
   setSelectedFriend,
   setFriendGroups,
-  showMessageModal,
 }) {
   const { friendId, groupId: groupIdFromParams } = useParams();
   const location = useLocation();
@@ -320,78 +345,69 @@ export function useConversationUrlHandler({
           const conversationToSelect = { ...groupData, type: "friendGroup" };
           setSelectedConversation(conversationToSelect);
           setFriendGroups((prevGroups) => {
-            const existingGroupIndex = prevGroups.findIndex(
+            const currentGroups = prevGroups || [];
+            const existingGroupIndex = currentGroups.findIndex(
               (g) => g._id === groupData._id
             );
             if (existingGroupIndex > -1) {
-              return prevGroups.map((g, i) =>
+              return currentGroups.map((g, i) =>
                 i === existingGroupIndex ? conversationToSelect : g
               );
             } else {
-              return [...prevGroups, conversationToSelect];
+              return [...currentGroups, conversationToSelect];
             }
           });
         } else {
-          showMessageModal(
-            t("error.couldNotFetchGroupDetails", { groupId: currentGroupId }),
-            "error",
-            t("Error")
-          );
-          navigate("/conversation/all");
+          navigate("/conversation/all/friend-group");
         }
       } catch (error) {
-        showMessageModal(
-          t("error.couldNotFetchGroupDetails", { groupId: currentGroupId }),
-          "error",
-          t("Error")
-        );
-        navigate("/conversation/all");
+        navigate("/conversation/all/friend-group");
       }
     };
 
     if (friendId) {
-      const friendToSelect = friends.find((f) => f.id === friendId);
+      let friendToSelect = null;
+      if (friends && Array.isArray(friends)) {
+        friendToSelect = friends.find((f) => f.id === friendId);
+      }
+
       if (friendToSelect) {
         setSelectedConversation({ ...friendToSelect, type: "private" });
         setSelectedFriend(friendToSelect);
-      } else if (friends.length > 0 || location.state?.friend) {
-        const friendFromState = location.state?.friend;
+      } else if (location.state?.friend) {
+        const friendFromState = location.state.friend;
         if (friendFromState && friendFromState.id === friendId) {
           setSelectedConversation({ ...friendFromState, type: "private" });
           setSelectedFriend(friendFromState);
         }
       }
     } else if (groupIdFromParams) {
-      const groupConversation = friendGroups.find(
-        (g) => g._id === groupIdFromParams
-      );
+      let groupConversation = null;
+      if (friendGroups && Array.isArray(friendGroups)) {
+        groupConversation = friendGroups.find(
+          (g) => g._id === groupIdFromParams
+        );
+      }
+
       if (groupConversation) {
         setSelectedConversation({ ...groupConversation, type: "friendGroup" });
         setSelectedFriend(null);
       } else {
-        if (
-          friendGroups.length > 0 ||
-          location.pathname.includes(groupIdFromParams)
-        ) {
-          fetchGroupDetailsAndSelect(groupIdFromParams);
+        if (friendGroups) { 
+             fetchGroupDetailsAndSelect(groupIdFromParams);
         }
       }
-    } else {
-      setSelectedConversation(null);
-      setSelectedFriend(null);
-    }
+    } 
   }, [
     friendId,
     groupIdFromParams,
     friends,
     friendGroups,
     navigate,
-    t,
     setSelectedConversation,
     setSelectedFriend,
     location.state,
     location.pathname,
-    showMessageModal,
     setFriendGroups,
   ]);
 
