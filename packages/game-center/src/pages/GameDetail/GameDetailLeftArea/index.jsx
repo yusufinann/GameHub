@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
 import GameInfo from './components/GameInfo/GameInfo';
-import BingoGameDetails from './components/BingoGameDetail';
+import BingoGameDetail from './components/BingoGameDetail';
 import HangmanGameDetails from './components/HangmanGameDetail';
 
 function GameDetailLeftArea({ game, filteredLobbies }) {
@@ -12,7 +12,7 @@ function GameDetailLeftArea({ game, filteredLobbies }) {
   const getGameDetail = (id) => {
     switch (id) {
       case 1:
-        return <BingoGameDetails />;
+        return <BingoGameDetail />;
       case 2:
         return <HangmanGameDetails />;
       default:

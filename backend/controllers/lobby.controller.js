@@ -142,14 +142,20 @@ export const createLobby = async (req, res) => {
   const user = req.user;
 
   try {
+    const now = new Date();
     const existingLobby = await Lobby.findOne({
       createdBy: user.id,
       isActive: true,
+      $or: [
+        { lobbyType: "normal" },
+        { lobbyType: "event", endTime: { $gt: now } },
+      ],
     });
+
     if (existingLobby) {
       return res.status(400).json({
         message:
-          "Zaten aktif bir lobiniz var. Aynı anda birden fazla lobi oluşturamazsınız.",
+          "Zaten devam eden aktif bir lobiniz veya etkinliğiniz var. Aynı anda birden fazla oluşturamazsınız.",
       });
     }
 
@@ -188,8 +194,8 @@ export const createLobby = async (req, res) => {
         });
       }
 
-      const now = new Date();
-      if (startTimeDate < now) {
+      const currentDate = new Date();
+      if (startTimeDate < currentDate) {
         return res.status(400).json({
           message: "Başlangıç zamanı gelecekte olmalıdır.",
         });
@@ -198,8 +204,10 @@ export const createLobby = async (req, res) => {
 
     const hashedPassword = password ? bcrypt.hashSync(password, 10) : null;
 
-    const lobbyId = generateLobbyId();
-    const lobbyCode = generateLobbyCode();
+    const lobbyId =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    const lobbyCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const newLobby = new Lobby({
       id: lobbyId,
@@ -227,18 +235,17 @@ export const createLobby = async (req, res) => {
     if (lobbyType === "event") {
       const startTimeMs = new Date(startTime).getTime();
       const endTimeMs = new Date(endTime).getTime();
-      const now = Date.now();
+      const currentTimeMs = Date.now();
 
-      if (startTimeMs > now) {
+      if (startTimeMs > currentTimeMs) {
         const startTimer = setTimeout(async () => {
           try {
             const currentLobby = await Lobby.findOne({
               id: lobbyId,
               isActive: true,
             }).lean();
-            if (currentLobby) {
+            if (currentLobby && broadcastLobbyEvent) {
               const memberIds = currentLobby.members.map((member) => member.id);
-
               broadcastLobbyEvent(
                 lobbyCode,
                 "EVENT_START_NOTIFICATION",
@@ -257,8 +264,7 @@ export const createLobby = async (req, res) => {
           } catch (error) {
             console.error("Etkinlik başlangıç zamanlayıcı hatası:", error);
           }
-        }, startTimeMs - now);
-
+        }, startTimeMs - currentTimeMs);
         lobbyTimers.set(`start_${lobbyId}`, startTimer);
       }
 
@@ -269,29 +275,36 @@ export const createLobby = async (req, res) => {
             isActive: true,
           }).lean();
           if (currentLobby) {
-            broadcastLobbyEvent(
-              lobbyCode,
-              "LOBBY_REMOVED",
-              {
-                lobbyCode: lobbyCode,
-                reason: "Etkinlik sona erdi",
-                lobbyId: currentLobby.id,
-              },
-              null
-            );
+            if (broadcastLobbyEvent) {
+                broadcastLobbyEvent(
+                  lobbyCode,
+                  "LOBBY_REMOVED",
+                  {
+                    lobbyCode: lobbyCode,
+                    reason: "Etkinlik sona erdi",
+                    lobbyId: currentLobby.id,
+                  },
+                  null
+                );
+            }
             await Lobby.deleteOne({ id: currentLobby.id });
           }
         } catch (error) {
           console.error("Etkinlik bitiş zamanlayıcı hatası:", error);
+        } finally {
+            lobbyTimers.delete(`start_${lobbyId}`);
+            lobbyTimers.delete(`end_${lobbyId}`);
         }
-      }, endTimeMs - now);
-
+      }, endTimeMs - currentTimeMs);
       lobbyTimers.set(`end_${lobbyId}`, endTimer);
     }
 
     await newLobby.save();
 
-    broadcastLobbyEvent(lobbyCode, "LOBBY_CREATED", newLobby.toObject());
+    if (broadcastLobbyEvent) {
+        broadcastLobbyEvent(lobbyCode, "LOBBY_CREATED", newLobby.toObject());
+    }
+
 
     res.status(201).json({
       message: "Lobi başarıyla oluşturuldu.",

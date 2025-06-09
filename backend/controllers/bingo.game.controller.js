@@ -261,7 +261,7 @@ export async function autoDrawNumber(lobbyCode) {
 }
 
 export async function restoreActiveBingoTimers(redisClientInstance) {
-  console.log("[BingoController] Restoring active Bingo game timers (SLOW CONTINUE STRATEGY)...");
+  console.log("[BingoController] Restoring active Bingo game timers");
   try {
     const keyPattern = "bingo:game:*"; 
     const gameKeys = await redisClientInstance.keys(keyPattern);

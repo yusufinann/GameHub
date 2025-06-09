@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Table,
   TableBody,
@@ -30,6 +29,7 @@ import {
   Cancel as IncorrectIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { fetchHangmanStatsApi } from "./api"; 
 
 const HangmanGameDetails = () => {
   const [userStats, setUserStats] = useState([]);
@@ -44,24 +44,22 @@ const HangmanGameDetails = () => {
     const fetchUserStats = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          "http://localhost:3001/api/hangman/stats",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        setError(null);
+        const data = await fetchHangmanStatsApi();
         
-        const statsWithRank = response.data.map((stat, index) => ({
+        const statsWithRank = data.map((stat, index) => ({
           ...stat,
-          rank: index + 1
+          rank: index + 1 
         }));
         
         setUserStats(statsWithRank);
       } catch (err) {
         console.error("Error fetching user stats:", err);
-        setError(err.response?.data?.message || "An error occurred.");
+        setError(
+          err.response?.data?.message ||
+          err.message ||
+          "An error occurred while fetching Hangman statistics."
+        );
       } finally {
         setLoading(false);
       }
@@ -160,140 +158,148 @@ const HangmanGameDetails = () => {
 
         <Divider />
 
-        <TableContainer component={Paper} elevation={0}>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Player")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Games Played")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Wins")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Accuracy")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Correct Guesses")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Incorrect Guesses")}</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>{t("Rank")}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedStats.map((stat, idx) => (
-                <TableRow
-                  key={stat.playerId}
-                  sx={{
-                    "&:nth-of-type(odd)": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.03),
-                    },
-                    "&:hover": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    },
-                  }}
-                >
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <Avatar
-                        sx={{
-                          bgcolor:
-                            stat.rank <= 3
-                              ? getRankColor(stat.rank)
-                              : theme.palette.grey[400],
-                          color: stat.rank <= 3 ? "black" : "white",
-                          width: 36,
-                          height: 36,
-                        }}
-                      >
-                        {stat.userName.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Typography
-                        sx={{
-                          ml: 2,
-                          fontWeight: stat.rank <= 3 ? "bold" : "normal",
-                        }}
-                      >
-                        {stat.userName}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <GameIcon sx={{ mr: 1, color: theme.palette.info.main }} />
-                      <Typography>{stat.totalGamesPlayed}</Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <TrophyIcon
-                        sx={{ color: "goldenrod", mr: 1, fontSize: 20 }}
-                      />
-                      <Typography>{stat.totalWins}</Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Tooltip title={`${(stat.accuracy * 100).toFixed(1)}% correct guesses`}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Box sx={{ width: '100%', mr: 1 }}>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={stat.accuracy * 100} 
-                            sx={{ 
-                              height: 8, 
-                              borderRadius: 1,
-                              backgroundColor: alpha(getAccuracyColor(stat.accuracy), 0.2),
-                              '& .MuiLinearProgress-bar': {
-                                backgroundColor: getAccuracyColor(stat.accuracy)
-                              }
+        {paginatedStats.length === 0 && !loading ? (
+           <Typography sx={{ textAlign: 'center', p: 3 }}>
+            {t("No Hangman statistics available at the moment.")}
+          </Typography>
+        ) : (
+          <>
+            <TableContainer component={Paper} elevation={0}>
+              <Table sx={{ minWidth: 650 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Player")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Games Played")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Wins")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Accuracy")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Correct Guesses")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Incorrect Guesses")}</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>{t("Rank")}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedStats.map((stat, idx) => (
+                    <TableRow
+                      key={stat.playerId || idx}
+                      sx={{
+                        "&:nth-of-type(odd)": {
+                          bgcolor: alpha(theme.palette.primary.main, 0.03),
+                        },
+                        "&:hover": {
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                        },
+                      }}
+                    >
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <Avatar
+                            sx={{
+                              bgcolor:
+                                stat.rank <= 3
+                                  ? getRankColor(stat.rank)
+                                  : theme.palette.grey[400],
+                              color: stat.rank <= 3 ? "black" : "white",
+                              width: 36,
+                              height: 36,
                             }}
-                          />
-                        </Box>
-                        <Box sx={{ minWidth: 35 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {`${(stat.accuracy * 100).toFixed(0)}%`}
+                          >
+                            {stat.userName ? stat.userName.charAt(0).toUpperCase() : 'P'}
+                          </Avatar>
+                          <Typography
+                            sx={{
+                              ml: 2,
+                              fontWeight: stat.rank <= 3 ? "bold" : "normal",
+                            }}
+                          >
+                            {stat.userName || t("Unknown Player")}
                           </Typography>
                         </Box>
-                      </Box>
-                    </Tooltip>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <CorrectIcon sx={{ color: theme.palette.success.main, mr: 1 }} />
-                      <Typography>{stat.totalCorrectGuesses}</Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <IncorrectIcon sx={{ color: theme.palette.error.main, mr: 1 }} />
-                      <Typography>{stat.totalIncorrectGuesses}</Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <Chip
-                      label={`#${stat.rank}`}
-                      size="small"
-                      sx={{
-                        bgcolor: getRankColor(stat.rank),
-                        color: stat.rank <= 3 ? "black" : "white",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <GameIcon sx={{ mr: 1, color: theme.palette.info.main }} />
+                          <Typography>{stat.totalGamesPlayed}</Typography>
+                        </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <TrophyIcon
+                            sx={{ color: "goldenrod", mr: 1, fontSize: 20 }}
+                          />
+                          <Typography>{stat.totalWins}</Typography>
+                        </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Tooltip title={`${((stat.accuracy || 0) * 100).toFixed(1)}% ${t("correct guesses")}`}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Box sx={{ width: '100%', mr: 1 }}>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={(stat.accuracy || 0) * 100}
+                                sx={{ 
+                                  height: 8, 
+                                  borderRadius: 1,
+                                  backgroundColor: alpha(getAccuracyColor(stat.accuracy || 0), 0.2),
+                                  '& .MuiLinearProgress-bar': {
+                                    backgroundColor: getAccuracyColor(stat.accuracy || 0)
+                                  }
+                                }}
+                              />
+                            </Box>
+                            <Box sx={{ minWidth: 35 }}>
+                              <Typography variant="body2" color="text.secondary">
+                                {`${((stat.accuracy || 0) * 100).toFixed(0)}%`}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Tooltip>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <CorrectIcon sx={{ color: theme.palette.success.main, mr: 1 }} />
+                          <Typography>{stat.totalCorrectGuesses}</Typography>
+                        </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <IncorrectIcon sx={{ color: theme.palette.error.main, mr: 1 }} />
+                          <Typography>{stat.totalIncorrectGuesses}</Typography>
+                        </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Chip
+                          label={`#${stat.rank}`}
+                          size="small"
+                          sx={{
+                            bgcolor: getRankColor(stat.rank),
+                            color: stat.rank <= 3 ? "black" : "white",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={userStats.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={userStats.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </>
+        )}
       </CardContent>
     </Card>
   );

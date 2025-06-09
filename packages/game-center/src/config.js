@@ -1,20 +1,25 @@
 const config = {
   apiBaseUrl: process.env.REACT_APP_API_BASE_URL || "http://localhost:3001",
+  wsBaseUrl: process.env.REACT_APP_WS_BASE_URL || "ws://localhost:3001",
   apiEndpoints: {
     login: "/api/auth/login",
     logout: "/api/auth/logout",
 
     user: "/api/users/profile",
     userProfile: "/api/users",
+    userSearch: "/api/users/search",
+
     bingoStats: "/api/bingo/stats",
     hangmanStats: "/api/hangman/stats",
     generalGameStats: "/api/users/stats/overall",
+    bingoPlayerStats: "/api/bingo/players-stats",
+    bingoGameStats: "/api/bingo/stats",
 
     friendRequest: "/api/friends/request",
     friendAccept: "/api/friends/accept",
     friendReject: "/api/friends/reject",
     friendRemove: "/api/friends",
-    friendList: "/api/friends/list",
+    friendList: "/api/friendlist",
     friendRequests: "/api/friends/requests",
 
     lobbies: "/api/lobbies",

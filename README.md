@@ -455,16 +455,19 @@ Follow these steps to get the Game Center running on your local machine:
     *   Set your `MONGO_DB_URI`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (if applicable), `SESSION_SECRET`, and `JWT_SECRET`.
     *   Return to the root directory: `cd ..`.
 
-4.  **Configure Frontend Environment Variables:**
-    *   **If your backend is running on `http://localhost:3001` (default `PORT` in backend's `.env`), you might not need to create a separate `.env` file for the frontend if it defaults to this.**
-    *   **If you changed the backend `PORT`** or need to specify it explicitly for the frontend:
-        *   Navigate to your frontend package directory: `cd packages/game-center`
-        *   Create a file named `.env` in this `packages/game-center` directory.
-        *   Add the following line, replacing `http://localhost:3001` with your actual backend URL if different:
-            ```dotenv
-            REACT_APP_API_BASE_URL=http://localhost:3001
-            ```
-        *   Return to the root directory: `cd ../..`.
+4.  **Configure Frontend (game-center) Environment Variables:**
+    To customize the API and WebSocket endpoints for the `game-center` application, create a `.env` file in the `packages/game-center/` directory.
+
+    **Example `packages/game-center/.env` file:**
+    ```dotenv
+    REACT_APP_API_BASE_URL=http://your-backend-api-url:port
+    REACT_APP_WS_BASE_URL=ws://your-backend-ws-url:port
+    ```
+    If this `.env` file is not created, or if these variables are not set within it, the `game-center` application will use the following default URLs:
+    *   Default API Base URL: `http://localhost:3001`
+    *   Default WebSocket Base URL: `ws://localhost:3001`
+
+    **Note:** After creating or modifying this `.env` file, you may need to restart the frontend development server (e.g., `yarn workspace game-center start`) for the changes to take effect.
 
 5.  **Ensure MongoDB and Redis are Running:**
     Make sure your MongoDB server instance (specified in `backend/.env`) and Redis server instance (specified in `backend/.env`) are running and accessible.

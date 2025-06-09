@@ -6,22 +6,23 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import axios from 'axios';
 import { useWebSocket } from "../WebSocketContext/context";
 import { useAuthContext } from "../AuthContext";
 import { useParams } from "react-router-dom";
+import config from "../../../config";
 
 const FriendsContext = createContext();
 
 export const FriendsProvider = ({ children }) => {
   const { socket } = useWebSocket();
   const { currentUser } = useAuthContext();
-  const { userId } = useParams(); // Profil veya görüntülenen kullanıcı ID'si
+  const { userId } = useParams();
 
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [outgoingRequests, setOutgoingRequests] = useState([]);
   const [friends, setFriends] = useState([]);
 
-  // WebSocket üzerinden mesaj göndermek için yardımcı fonksiyon
   const sendMessage = useCallback(
     (message) => {
       if (socket && socket.readyState === WebSocket.OPEN) {
@@ -33,27 +34,28 @@ export const FriendsProvider = ({ children }) => {
     [socket]
   );
 
-  // HTTP üzerinden arkadaş listesini çekme fonksiyonu
   const fetchFriendListHTTP = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/friendlist', {
+      const url = `${config.apiBaseUrl}${config.apiEndpoints.friendList}`;
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setFriends(data.friends || []);
+      setFriends(response.data.friends || []);
     } catch (error) {
-      console.error("Arkadaş listesi alınırken hata oluştu (HTTP):", error);
+      if (error.response) {
+        console.error("Arkadaş listesi alınırken hata oluştu (HTTP):", error.response.data, error.response.status);
+      } else if (error.request) {
+        console.error("Arkadaş listesi alınırken hata oluştu (HTTP) - No response:", error.request);
+      } else {
+        console.error("Arkadaş listesi alınırken hata oluştu (HTTP) - Error:", error.message);
+      }
     }
   }, []);
 
 
-  // Arkadaşlık isteği gönderme
   const sendFriendRequest = (targetUserId) => {
     setOutgoingRequests((prev) => {
       const newRequest = {
@@ -70,31 +72,26 @@ export const FriendsProvider = ({ children }) => {
     });
   };
 
-  // Arkadaşlık isteğini kabul etme
   const acceptFriendRequest = (requesterId) => {
     setIncomingRequests((prev) =>
       prev.filter((req) => req.id.toString() !== requesterId.toString())
     );
-    console.log("requesterId", requesterId);
     sendMessage({
       type: "FRIEND_REQUEST_ACCEPT",
       requesterId: requesterId.toString(),
     });
   };
 
-  // Arkadaşlık isteğini reddetme
   const rejectFriendRequest = (requesterId) => {
     setIncomingRequests((prev) =>
       prev.filter((req) => req.id.toString() !== requesterId.toString())
     );
-
     sendMessage({
       type: "FRIEND_REQUEST_REJECT",
       requesterId: requesterId.toString(),
     });
   };
 
-  // Arkadaşı listeden çıkarma
   const removeFriend = (friendId) => {
     setFriends((prev) =>
       prev.filter((friend) => friend.id.toString() !== friendId.toString())
@@ -115,7 +112,6 @@ export const FriendsProvider = ({ children }) => {
     sendMessage({ type: "GET_FRIEND_REQUESTS" });
   }, [sendMessage]);
 
-  // WebSocket mesajlarını dinleyerek state güncellemesi yapıyoruz
   const handleSocketMessage = useCallback(
     (event) => {
       try {
@@ -160,13 +156,11 @@ export const FriendsProvider = ({ children }) => {
             case "FRIEND_REQUEST_ACCEPTED":
               if (data.receiverId && currentUser.id.toString() === data.receiverId.toString()) {
                 setFriends((prev) => {
-                  // Create a new friend object with isOnline property explicitly set
                   const newFriend = {
                     ...data.acceptedBy,
-                    isOnline: data.acceptedBy.isOnline || false // Default to false if not provided
+                    isOnline: data.acceptedBy.isOnline || false
                   };
                   
-                  // Check if friend already exists
                   if (!prev.some((f) => f.id.toString() === newFriend.id.toString())) {
                     return [...prev, newFriend];
                   }

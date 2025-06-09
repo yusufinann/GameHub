@@ -14,7 +14,6 @@ export const initializeFriendGroupChatWebSocket = (broadcasters) => {
   _broadcastToAll = broadcasters.broadcastToAll;
   _sendToSpecificUser = broadcasters.sendToSpecificUser;
   _broadcastFriendGroupMessage = broadcasters.broadcastFriendGroupMessage;
-  console.log("FriendGroupChat WebSocket yayıncıları controller içinde başlatıldı.");
 };
 
 export const formatFriendGroupResponse = (group) => {
