@@ -479,21 +479,22 @@ Follow these steps to get the Game Center running on your local machine:
 6.  **Ensure MongoDB and Redis are Running:**
     Make sure your MongoDB server instance (specified in `backend/.env`) and Redis server instance (specified in `backend/.env`) are running and accessible.
 
-7.  **Run the Development Servers (from Root Directory):**
+7.  **Run the Development Servers:**
 
     *   **To run the Backend Server:**
-        Open a terminal in the **root directory** (`GameHub/`).
+        Open a terminal, navigate to the `backend` directory, and start the development server:
         ```bash
-        yarn workspace backend start 
+        cd backend
+        npm run dev
         ```
-        The backend server should now be running (e.g., on `http://localhost:3001`). **Keep this terminal window open.**
+        The backend server should now be running (e.g., on `http://localhost:3001`). **Keep this terminal window open and running.**
 
     *   **To run the Frontend Application (game-center):**
-        Open a **new terminal window** in the **root directory** (`GameHub/`).
+        Open a **new terminal window**. Ensure you are in the **root directory** (`GameHub/`). Then run the following command:
         ```bash
-        yarn workspace game-center start
+        yarn start
         ```
-        The application should open automatically in your browser, typically at `http://localhost:3000`. If you created/modified `packages/game-center/.env`, you might need to stop and restart this command.
+        The application (your frontend project) should open automatically in your browser, typically at `http://localhost:3000`. If you created/modified `packages/game-center/.env` (or any frontend-specific .env file if `game-center` isn't the direct frontend package name), you might need to stop and restart this command.
 
 8.  **(IMPORTANT) Create Sample Users:**
     *   Send **POST** requests to your running backend (e.g., `http://localhost:3001/api/users/`).
