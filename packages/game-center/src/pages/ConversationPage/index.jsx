@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useCallback } from "react";
 import { Box, Snackbar, Alert, Typography } from "@mui/material";
 import { Group as GroupIcon } from "@mui/icons-material";
 import ConversationList from "./components/ConversationList";
@@ -7,14 +6,14 @@ import CreateFriendGroupDialog from "./components/CreateFriendGroupDialog";
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useFriendGroupDialog } from "./components/useFriendGroupDialog";
 import { useConversationsPage } from "./useConversationPage";
-import { useParams, useLocation } from "react-router-dom";
-import { useWebSocket } from "../../shared/context/WebSocketContext/context";
-import { useSnackbar } from "../../shared/context/SnackbarContext";
+import { useNavigate } from "react-router-dom";
+import { useSnackbar as useAppSnackbar } from "../../shared/context/SnackbarContext";
 import ChatBox from "../../shared/components/ChatBox/ChatBox";
 import { useFriendsContext } from "../../shared/context/FriendsContext/context";
 import MessageModal from "../../shared/components/MessageModal";
 import UpdateFriendGroupDialog from "./components/UpdateFriendGroup";
 import { useTranslation } from "react-i18next";
+import { useConversationSocket, useConversationUrlHandler } from "./useConversationSocket";
 
 function ConversationPage() {
   const {
@@ -23,16 +22,14 @@ function ConversationPage() {
     snackbarSeverity,
     handleSnackbarClose,
     showSnackbar,
-  } = useSnackbar();
+  } = useAppSnackbar();
   const { t } = useTranslation();
   const { currentUser } = useAuthContext();
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [friendGroups, setFriendGroups] = useState([]);
-  const { friendId, groupId } = useParams();
-  const { socket } = useWebSocket();
-  const { friends, incomingRequests } = useFriendsContext();
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState(2);
+  
+  const { friends, incomingRequests} = useFriendsContext();
+  const navigate = useNavigate(); 
 
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState({
@@ -54,7 +51,7 @@ function ConversationPage() {
     setFriendGroupPassword,
     fetchFriendGroups,
     friendGroupsLoading,
-  } = useFriendGroupDialog(friendGroups, setFriendGroups);
+  } = useFriendGroupDialog(setFriendGroups, showSnackbar, t);
 
   const {
     messages,
@@ -63,11 +60,7 @@ function ConversationPage() {
     selectedFriend,
     setSelectedFriend,
     handleSendFriendMessage,
-    handleFriendSelection,
     setNewMessage,
-    handleFriendGroupSelection,
-    handleDeleteFriendGroup,
-    handleLeaveFriendGroup,
     loadMoreMessages,
     hasMoreFriend,
     hasMorePrivate,
@@ -78,137 +71,46 @@ function ConversationPage() {
     openUpdateDialog,
     closeUpdateDialog,
     handleUpdateFriendGroup,
+    handleDeleteFriendGroup: hookHandleDeleteFriendGroup,
+    handleLeaveFriendGroup: hookHandleLeaveFriendGroup,
   } = useConversationsPage(
     friendGroups,
-    setFriendGroups,
-    selectedConversation,
-    setSelectedConversation
+    selectedConversation
   );
 
-  const showMessageModal = (message, severity = "error", title = undefined) => {
-    setModalConfig({ message, severity, title });
-    setIsMessageModalOpen(true);
-  };
+  const showMessageModal = useCallback(
+    (message, severity = "error", title = undefined) => {
+      setModalConfig({ message, severity, title });
+      setIsMessageModalOpen(true);
+    },
+    []
+  );
 
   const handleMessageModalClose = () => {
     setIsMessageModalOpen(false);
   };
 
-  useEffect(() => {
-    const path = location.pathname;
-    if (path.includes('/friend/')) {
-      setActiveTab(1);
-    } else if (path.includes('/friend-group/')) {
-      setActiveTab(2);
-    } else if (path.endsWith('/conversation/all')) {
-      setActiveTab(0);
-    }
-  }, [location.pathname]);
+
+  useConversationSocket({
+    setFriendGroups,
+    selectedConversation,
+    setSelectedConversation,
+    friendGroups,
+  });
+
+
+  const { activeTab } = useConversationUrlHandler({
+    friends,
+    friendGroups,
+    setSelectedConversation,
+    setSelectedFriend,
+    setFriendGroups,
+    showMessageModal,
+  });
 
   useEffect(() => {
-    if (!socket || !currentUser) return;
-
-    const handleMessage = (event) => {
-      let data;
-      try {
-        data = JSON.parse(event.data);
-      } catch (err) {
-        console.error("WebSocket mesajı parse edilirken hata:", err);
-        return;
-      }
-
-      if (data.type === "USER_JOINED_FRIEND_GROUP") {
-        const { groupId: joinedGroupId, group } = data.data;
-        setFriendGroups((prevGroups) => {
-          const existingGroups = prevGroups.filter(
-            (g) => g._id !== joinedGroupId
-          );
-          return [...existingGroups, group];
-        });
-        showSnackbar(
-          t('notifications.groupJoinedSuccess', { groupName: group.groupName }),
-          "success"
-        );
-      }
-    };
-
-    socket.addEventListener("message", handleMessage);
-    return () => socket.removeEventListener("message", handleMessage);
-  }, [socket, currentUser, setFriendGroups, showSnackbar, t]);
-
-  useEffect(() => {
-    const fetchGroupDetails = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `http://localhost:3001/api/chat/friendgroup/${groupId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = response.data;
-        if (data.group) {
-          setSelectedConversation({
-            ...data.group,
-            type: "friendGroup",
-          });
-        } else {
-          console.warn("Grup bilgisi alınamadı:", groupId);
-        }
-      } catch (error) {
-        console.error(
-          `Grup bilgisi alınamadı (ID: ${groupId})`,
-          error.response?.data || error.message
-        );
-        showMessageModal(
-            t('error.couldNotFetchGroupDetails', { groupId }),
-            "error",
-            t('Error')
-        );
-      }
-    };
-
-    if (friendId) {
-      const friendConversation = friends.find((f) => f.id === friendId);
-      if (friendConversation) {
-        setSelectedConversation({
-          ...friendConversation,
-          type: "private",
-        });
-        setSelectedFriend(friendConversation);
-      } else {
-        console.warn("Arkadaş bilgisi bulunamadı:", friendId);
-         showMessageModal(
-            t('error.friendNotFound', { friendId }),
-            "warning",
-            t('common.warningTitle')
-        );
-      }
-    } else if (groupId) {
-      const groupConversation = friendGroups.find((g) => g._id === groupId);
-      if (groupConversation) {
-        setSelectedConversation({
-          ...groupConversation,
-          type: "friendGroup",
-        });
-      } else {
-        fetchGroupDetails();
-      }
-    } else {
-      setSelectedConversation(null);
-    }
-  }, [friendId, groupId, friendGroups, friends, setSelectedConversation, setSelectedFriend, t]);
-
-  useEffect(() => {
-    if (selectedFriend) {
-      const updatedFriend = friends.find((f) => f.id === selectedFriend.id);
-      if (updatedFriend) {
-        setSelectedFriend(updatedFriend);
-      }
-    }
-  }, [friends, selectedFriend, setSelectedFriend]);
+    fetchFriendGroups();
+  }, [fetchFriendGroups]);
 
   return (
     <Box
@@ -222,7 +124,7 @@ function ConversationPage() {
     >
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
@@ -284,7 +186,7 @@ function ConversationPage() {
           sx={{
             p: 0,
             display: "flex",
-            height: "calc(100% - 65px)", // Adjust height considering header
+            height: "calc(100% - 65px)",
             overflow: "hidden",
             gap: 1,
             flexDirection: "row",
@@ -295,18 +197,18 @@ function ConversationPage() {
             selectedConversation={selectedConversation}
             initialTabValue={activeTab}
             onFriendSelect={(item) => {
-              if (item?.type === "friendGroup") {
-                handleFriendGroupSelection(item);
-              } else {
-                handleFriendSelection(item);
+              if (item?.type === "friendGroup" && item._id) {
+                navigate(`/conversation/all/friend-group/${item._id}`);
+              } else if (item && item.id) {
+                navigate(`/conversation/all/friend/${item.id}`);
               }
             }}
             onCreateFriendGroupDialogOpen={handleCreateFriendGroupDialogOpen}
             friendGroupsLoading={friendGroupsLoading}
             friendGroups={friendGroups}
             fetchFriendGroups={fetchFriendGroups}
-            onDeleteFriendGroup={handleDeleteFriendGroup}
-            handleLeaveFriendGroup={handleLeaveFriendGroup}
+            onDeleteFriendGroup={hookHandleDeleteFriendGroup}
+            handleLeaveFriendGroup={hookHandleLeaveFriendGroup}
             friends={friends}
             incomingRequests={incomingRequests}
             onEditFriendGroup={openUpdateDialog}
@@ -321,15 +223,12 @@ function ConversationPage() {
                 : "conversation"
             }
             selectedConversation={selectedConversation}
-            setSelectedConversation={setSelectedConversation}
             chatTitle={
               selectedConversation
                 ? selectedConversation.type === "friendGroup"
                   ? selectedConversation.groupName
-                  : selectedFriend
-                  ? selectedFriend.name
-                  : t('chat.selectFriend')
-                : t('chat.selectFriendOrGroup')
+                  : selectedConversation.name
+                : t("chat.selectConversationToChat")
             }
             messages={messages}
             newMessage={newMessage}
@@ -339,7 +238,6 @@ function ConversationPage() {
             selectedFriend={selectedFriend}
             isLoadingHistory={isLoadingChat}
             currentUser={currentUser}
-            setFriendGroups={setFriendGroups}
             loadMoreMessages={loadMoreMessages}
             hasMore={
               selectedConversation?.type === "friendGroup"
@@ -350,11 +248,11 @@ function ConversationPage() {
           />
         </Box>
         <UpdateFriendGroupDialog
-            open={isUpdateDialogOpen}
-            onClose={closeUpdateDialog}
-            group={groupToUpdate}
-            onUpdate={handleUpdateFriendGroup}
-            t={t}
+          open={isUpdateDialogOpen}
+          onClose={closeUpdateDialog}
+          group={groupToUpdate}
+          onUpdate={handleUpdateFriendGroup}
+          t={t}
         />
       </Box>
     </Box>

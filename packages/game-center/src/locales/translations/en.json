@@ -114,7 +114,7 @@
     "createError": "Failed to create friend group: {error}",
     "updateSuccess": "Friend group '{groupName}' updated successfully.",
     "updateError": "Failed to update friend group: {error}",
-    "deleteSuccess": "Friend group '{groupName}' deleted successfully.",
+    "deleteSuccess": "Friend group deleted successfully.",
     "deleteError": "Failed to delete friend group: {error}",
     "leaveSuccess": "Successfully left friend group '{groupName}'.",
     "leaveError": "Failed to leave friend group: {error}",

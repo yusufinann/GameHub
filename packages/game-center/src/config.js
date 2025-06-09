@@ -1,42 +1,42 @@
 const config = {
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || "http://localhost:3001",
   apiEndpoints: {
-    // Auth Endpoints
-    login: '/api/auth/login',
-    logout: '/api/auth/logout',
-    
-    // User Endpoints
-    user: '/api/users/profile',
-    userProfile: '/api/users', 
-    bingoStats: '/api/bingo/stats',
-    hangmanStats: '/api/hangman/stats',
-    generalGameStats:'/api/users/stats/overall',
-    
-    // Friends Endpoints
-    friendRequest: '/api/friends/request',
-    friendAccept: '/api/friends/accept',
-    friendReject: '/api/friends/reject',
-    friendRemove: '/api/friends',
-    friendList: '/api/friends/list',
-    friendRequests: '/api/friends/requests',
-    
-    // Lobby Endpoints
-    lobbies: '/api/lobbies',
-    createLobby: '/api/lobbies/create',
-    deleteLobby: '/api/lobbies/delete',
-    joinLobby: '/api/lobbies/join',
-    leaveLobby: '/api/lobbies/leave',
-    updateLobby: '/api/lobbies/update',
-    
-    // Game Endpoints
-    mockGames: '/api/games',
+    login: "/api/auth/login",
+    logout: "/api/auth/logout",
 
-    // Chat Endpoints 
-    allChatGroups: '/api/chat/groups',
-    userChatGroups: '/api/chat/user-groups',
-    communityChatHistory: '/api/chat/community', 
-    groupChatHistory: '/api/chat/groups/:groupId/history', 
-  }
+    user: "/api/users/profile",
+    userProfile: "/api/users",
+    bingoStats: "/api/bingo/stats",
+    hangmanStats: "/api/hangman/stats",
+    generalGameStats: "/api/users/stats/overall",
+
+    friendRequest: "/api/friends/request",
+    friendAccept: "/api/friends/accept",
+    friendReject: "/api/friends/reject",
+    friendRemove: "/api/friends",
+    friendList: "/api/friends/list",
+    friendRequests: "/api/friends/requests",
+
+    lobbies: "/api/lobbies",
+    createLobby: "/api/lobbies/create",
+    deleteLobby: "/api/lobbies/delete",
+    joinLobby: "/api/lobbies/join",
+    leaveLobby: "/api/lobbies/leave",
+    updateLobby: "/api/lobbies/update",
+
+    mockGames: "/api/games",
+
+    allChatGroups: "/api/chat/groups",
+    userChatGroups: "/api/chat/user-groups",
+    communityChatHistory: "/api/chat/community",
+    groupChatHistory: "/api/chat/groups/:groupId/history",
+
+    privateChatHistory: "/api/chat/private-chat-history",
+    friendGroupHistory: "/api/chat/friendgroup/:groupId/history",
+    myFriendGroups: "/api/chat/friendgroups/me",
+    createFriendGroup: "/api/chat/friendgroup",
+    friendGroupDetails: "/api/chat/friendgroup/:groupId",
+  },
 };
 
 export default config;

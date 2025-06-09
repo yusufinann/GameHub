@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react"; // Added useMemo
 import {
   List,
   ListItem,
-  ListItemButton, 
+  ListItemButton,
   ListItemAvatar,
   Avatar,
   Box,
@@ -46,6 +46,26 @@ const FriendGroupListComponent = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedGroupForMenu, setSelectedGroupForMenu] = useState(null);
 
+  // --- START OF MODIFICATION ---
+  const memberFriendGroups = useMemo(() => {
+    if (!currentUser || !currentUser.id || !friendGroups) {
+      return [];
+    }
+    return friendGroups.filter((group) => {
+      if (!group.members || !Array.isArray(group.members)) {
+        return false; // If group has no members array or it's not an array
+      }
+      // Assuming group.members is an array of objects, each with an _id property
+      // Or if group.members is an array of strings (user IDs)
+      return group.members.some(
+        (member) =>
+          (typeof member === "string" && member === currentUser.id) ||
+          (typeof member === "object" && member !== null && member._id === currentUser.id)
+      );
+    });
+  }, [friendGroups, currentUser]); // Re-calculate when friendGroups or currentUser changes
+  // --- END OF MODIFICATION ---
+
   const handleMenuOpen = useCallback((event, group) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
@@ -79,8 +99,23 @@ const FriendGroupListComponent = ({
   }, [selectedGroupForMenu, onEditFriendGroup, handleMenuClose]);
 
   const isHost = useCallback(
-      (group) => group && group.host === currentUser?.id,
-      [currentUser?.id]
+    (group) => {
+      if (!group || !group.host || !currentUser || !currentUser.id) {
+        return false;
+      }
+      if (typeof group.host === "string") {
+        return group.host === currentUser.id;
+      }
+      if (
+        typeof group.host === "object" &&
+        group.host !== null &&
+        typeof group.host._id === "string"
+      ) {
+        return group.host._id === currentUser.id;
+      }
+      return false;
+    },
+    [currentUser?.id]
   );
 
   const getGroupColor = (name) => {
@@ -126,11 +161,12 @@ const FriendGroupListComponent = ({
           </Box>
         )}
 
+        {/* --- MODIFICATION: Use memberFriendGroups instead of friendGroups --- */}
         {!friendGroupsLoading &&
-          friendGroups.map((friendGroup, index) => (
+          memberFriendGroups.map((friendGroup, index) => (
             <Fade in={true} timeout={300 + index * 100} key={friendGroup._id}>
               <ListItem
-                disablePadding // ListItemButton iç padding'i yönetecek
+                disablePadding
                 secondaryAction={
                   <IconButton
                     edge="end"
@@ -139,7 +175,7 @@ const FriendGroupListComponent = ({
                     sx={{
                       opacity: 0.6,
                       "&:hover": { opacity: 1 },
-                      mr: 0.5, // Sağdan biraz boşluk ayarlandı
+                      mr: 0.5,
                     }}
                   >
                     <MoreVertIcon fontSize="small" />
@@ -147,8 +183,8 @@ const FriendGroupListComponent = ({
                 }
                 sx={{
                   mb: 0.75,
-                  borderRadius: 2, // Dış ListItem için genel border radius
-                  position: 'relative', // &:before için
+                  borderRadius: 2,
+                  position: "relative",
                   "&:before": isHost(friendGroup)
                     ? {
                         content: '""',
@@ -170,7 +206,7 @@ const FriendGroupListComponent = ({
                   }
                   onClick={() => onFriendGroupSelect(friendGroup)}
                   sx={{
-                    borderRadius: 2, // İç tıklanabilir alan için border radius
+                    borderRadius: 2,
                     transition: "all 0.25s ease",
                     px: 2,
                     py: 1,
@@ -202,7 +238,10 @@ const FriendGroupListComponent = ({
                       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                       badgeContent={
                         isHost(friendGroup) ? (
-                          <Tooltip title={t("groupAdminTooltip")} placement="top">
+                          <Tooltip
+                            title={t("groupAdminTooltip")}
+                            placement="top"
+                          >
                             <StarIcon
                               sx={{
                                 color: theme.palette.warning.main,
@@ -249,7 +288,11 @@ const FriendGroupListComponent = ({
                     }
                     secondary={
                       <Box
-                        sx={{ display: "flex", alignItems: "center", mt: 0.5 }}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          mt: 0.5,
+                        }}
                       >
                         <GroupsIcon
                           sx={{
@@ -272,14 +315,15 @@ const FriendGroupListComponent = ({
                         </Typography>
                       </Box>
                     }
-                    secondaryTypographyProps={{ component: 'div' }}
+                    secondaryTypographyProps={{ component: "div" }}
                   />
                 </ListItemButton>
               </ListItem>
             </Fade>
           ))}
 
-        {!friendGroupsLoading && friendGroups.length === 0 && (
+        {/* --- MODIFICATION: Use memberFriendGroups.length for the empty state check --- */}
+        {!friendGroupsLoading && memberFriendGroups.length === 0 && (
           <Box
             sx={{
               display: "flex",
@@ -370,9 +414,8 @@ const FriendGroupListComponent = ({
         )}
 
         {isHost(selectedGroupForMenu) && selectedGroupForMenu && (
-           <Divider sx={{ my: 0.5 }} />
+          <Divider sx={{ my: 0.5 }} />
         )}
-
 
         {!isHost(selectedGroupForMenu) && selectedGroupForMenu && (
           <MenuItem onClick={handleLeaveGroupClick} sx={{ py: 1.2 }}>

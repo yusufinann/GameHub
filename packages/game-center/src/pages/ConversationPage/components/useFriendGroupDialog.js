@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
-import axios from "axios";
 import { useSnackbar } from "../../../shared/context/SnackbarContext";
+import { fetchMyFriendGroupsAPI, createFriendGroupAPI } from "../api"; 
 
-export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
+export const useFriendGroupDialog = (setFriendGroupsExternally) => {
   const [createFriendGroupDialogOpen, setCreateFriendGroupDialogOpen] = useState(false);
   const [newFriendGroupName, setNewFriendGroupName] = useState("");
   const [newFriendGroupDescription, setNewFriendGroupDescription] = useState("");
@@ -10,7 +10,7 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
   const { showSnackbar } = useSnackbar();
   const [friendGroupsLoading, setFriendGroupsLoading] = useState(true);
 
-  const handleCreateFriendGroupDialogOpen = useCallback(() => { 
+  const handleCreateFriendGroupDialogOpen = useCallback(() => {
     setCreateFriendGroupDialogOpen(true);
   }, []);
 
@@ -19,60 +19,65 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
     setNewFriendGroupName("");
     setNewFriendGroupDescription("");
     setFriendGroupPassword("");
-  }, []); 
+  }, []);
 
   const fetchFriendGroups = useCallback(async () => {
     setFriendGroupsLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+        showSnackbar({ message: "Authentication token not found. Please log in.", severity: "error" });
+        setFriendGroupsLoading(false);
+        setFriendGroupsExternally([]);
+        return;
+    }
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3001/api/chat/friendgroups/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetchMyFriendGroupsAPI(token);
       const fetchedGroups = response.data.groups.map((g) => ({
         _id: g._id,
         groupName: g.groupName,
         description: g.description,
-        host: g.host._id,
+        host: g.host?._id || g.host, 
         members: g.members,
         invitationLink: g.invitationLink,
         type: "friendGroup",
       }));
-      setFriendGroups(fetchedGroups);
+      setFriendGroupsExternally(fetchedGroups);
     } catch (error) {
-      console.error("Friend Groups yüklenirken hata:", error);
-      setFriendGroups([]);
+      console.error("Friend Groups yüklenirken hata:", error.response?.data || error.message);
+      showSnackbar({ message: "Failed to load friend groups.", severity: "error" });
+      setFriendGroupsExternally([]); 
+    } finally {
+      setFriendGroupsLoading(false);
     }
-    setFriendGroupsLoading(false);
-  }, [setFriendGroups, setFriendGroupsLoading]);
+  }, [setFriendGroupsExternally, showSnackbar]); 
 
   const handleCreateFriendGroup = useCallback(async ({ groupName, description, password, invitedFriends }) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        showSnackbar({ message: "Authentication token not found. Please log in.", severity: "error" });
+        return;
+    }
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://localhost:3001/api/chat/friendgroup",
-        {
-          groupName,
-          description,
-          password,
-          maxMembers: 8,
-          invitedFriends,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await createFriendGroupAPI(token, {
+        groupName,
+        description,
+        password,
+        maxMembers: 8, 
+        invitedFriends,
+      });
       if (response.status === 201) {
         showSnackbar({ message: "Friend Group created successfully!", severity: "success" });
-        handleCreateFriendGroupDialogClose(); 
+        handleCreateFriendGroupDialogClose();
         fetchFriendGroups();
       } else {
-        showSnackbar("Failed to create Friend Group.", "error");
+        
+        showSnackbar({ message: response.data?.message || "Failed to create Friend Group.", severity: "error" });
       }
     } catch (error) {
-      console.error("Friend Group creation error:", error);
-      showSnackbar({ message: "Error creating Friend Group.", severity: "error" });
+      console.error("Friend Group creation error:", error.response?.data || error.message);
+      showSnackbar({ message: error.response?.data?.message || "Error creating Friend Group.", severity: "error" });
     }
-  }, [showSnackbar, fetchFriendGroups, handleCreateFriendGroupDialogClose]); 
+  }, [showSnackbar, fetchFriendGroups, handleCreateFriendGroupDialogClose]);
 
   return {
     createFriendGroupDialogOpen,
@@ -86,8 +91,6 @@ export const useFriendGroupDialog = (friendGroups, setFriendGroups) => {
     setNewFriendGroupDescription,
     setFriendGroupPassword,
     friendGroupsLoading,
-    friendGroups,
-    setFriendGroupsLoading,
     fetchFriendGroups,
   };
 };

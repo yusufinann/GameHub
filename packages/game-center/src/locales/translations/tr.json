@@ -113,7 +113,7 @@
     "createError": "Arkadaş grubu oluşturulamadı: {error}",
     "updateSuccess": "Arkadaş grubu '{groupName}' başarıyla güncellendi.",
     "updateError": "Arkadaş grubu güncellenemedi: {error}",
-    "deleteSuccess": "Arkadaş grubu '{groupName}' başarıyla silindi.",
+    "deleteSuccess": "Arkadaş grubu başarıyla silindi.",
     "deleteError": "Arkadaş grubu silinemedi: {error}",
     "leaveSuccess": "Arkadaş grubu '{groupName}'ndan başarıyla ayrıldınız.",
     "leaveError": "Arkadaş grubundan ayrılamadınız: {error}",

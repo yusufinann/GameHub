@@ -2,6 +2,21 @@ import FriendGroupChat from "../models/friendGroupChat.model.js";
 import User from "../models/user.model.js";
 import FriendGroupChatMessage from "../models/friendGroupChatMessage.model.js";
 
+let _broadcastFriendEvent;
+let _broadcastFriendGroupEvent;
+let _broadcastToAll;
+let _sendToSpecificUser;
+let _broadcastFriendGroupMessage;
+
+export const initializeFriendGroupChatWebSocket = (broadcasters) => {
+  _broadcastFriendEvent = broadcasters.broadcastFriendEvent;
+  _broadcastFriendGroupEvent = broadcasters.broadcastFriendGroupEvent;
+  _broadcastToAll = broadcasters.broadcastToAll;
+  _sendToSpecificUser = broadcasters.sendToSpecificUser;
+  _broadcastFriendGroupMessage = broadcasters.broadcastFriendGroupMessage;
+  console.log("FriendGroupChat WebSocket yayıncıları controller içinde başlatıldı.");
+};
+
 export const formatFriendGroupResponse = (group) => {
   return {
     _id: group._id,
@@ -26,7 +41,7 @@ export const formatFriendGroupResponse = (group) => {
   };
 };
 
-export const createFriendGroup = async (req, res, broadcastFriendEvent) => {
+export const createFriendGroup = async (req, res) => {
   try {
     const { groupName, description, password, maxMembers, invitedFriends } =
       req.body;
@@ -55,11 +70,10 @@ export const createFriendGroup = async (req, res, broadcastFriendEvent) => {
       invitedFriends &&
       Array.isArray(invitedFriends) &&
       invitedFriends.length > 0 &&
-      broadcastFriendEvent
+      _broadcastFriendEvent 
     ) {
-      // Check if broadcastFriendEvent is available
       invitedFriends.forEach((friendId) => {
-        broadcastFriendEvent(friendId, {
+        _broadcastFriendEvent(friendId, {
           type: "FRIEND_GROUP_INVITATION_RECEIVED",
           groupId: populatedGroup._id.toString(),
           groupName: populatedGroup.groupName,
@@ -68,32 +82,36 @@ export const createFriendGroup = async (req, res, broadcastFriendEvent) => {
           inviterUsername: req.user.username,
           invitationLink: newGroup.invitationLink,
         });
-        console.log(`Friend group invitation sent to: ${friendId}`);
+        console.log(`Arkadaş grubu daveti WebSocket üzerinden gönderildi: ${friendId}`);
       });
     } else {
-      console.log("WebSocket service not available for friend invitations");
+     
+      if (!_broadcastFriendEvent) {
+        console.log(
+          "createFriendGroup içinde arkadaş davetleri için WebSocket servisi (_broadcastFriendEvent) mevcut değil."
+        );
+      } else {
+        
+        console.log(
+          "WebSocket daveti için davet edilecek arkadaş yok veya koşullar sağlanmadı."
+        );
+      }
     }
 
     res.status(201).json({
-      message: "Friend Group created successfully",
+      message: "Arkadaş Grubu başarıyla oluşturuldu",
       group: formatFriendGroupResponse(populatedGroup),
       invitationLink: newGroup.invitationLink,
     });
   } catch (error) {
-    console.error("Friend Grup oluşturma hatası:", error);
+    console.error("Arkadaş Grubu oluşturma hatası:", error);
     res
       .status(500)
-      .json({ message: "Friend Grup oluşturulurken bir hata oluştu." });
+      .json({ message: "Arkadaş Grubu oluşturulurken bir hata oluştu." });
   }
 };
 
-export const joinFriendGroupWebSocket = async (
-  ws,
-  data,
-  broadcastFriendGroupEvent,
-  broadcastToAll,
-  sendToSpecificUser
-) => {
+export const joinFriendGroupWebSocket = async (ws, data) => {
   try {
     const { groupId, password } = data;
     const userId = ws.userId;
@@ -106,7 +124,7 @@ export const joinFriendGroupWebSocket = async (
     const group = await FriendGroupChat.findById(groupId).populate("members");
     if (!group) {
       return ws.send(
-        JSON.stringify({ type: "ERROR", message: "Friend Grup bulunamadı." })
+        JSON.stringify({ type: "ERROR", message: "Arkadaş Grubu bulunamadı." })
       );
     }
 
@@ -114,7 +132,7 @@ export const joinFriendGroupWebSocket = async (
       return ws.send(
         JSON.stringify({
           type: "ERROR",
-          message: "Friend Grup maksimum üye sayısına ulaştı.",
+          message: "Arkadaş Grubu maksimum üye sayısına ulaştı.",
         })
       );
     }
@@ -135,7 +153,7 @@ export const joinFriendGroupWebSocket = async (
           JSON.stringify({
             type: "ERROR",
             message:
-              "you must be friends with the founder of the group to join the group",
+              "Gruba katılmak için grup kurucusu ile arkadaş olmalısınız.",
           })
         );
       }
@@ -145,7 +163,7 @@ export const joinFriendGroupWebSocket = async (
       return ws.send(
         JSON.stringify({
           type: "ERROR",
-          message: "Zaten bu Friend grubun üyesisiniz.",
+          message: "Zaten bu Arkadaş grubunun üyesisiniz.",
         })
       );
     }
@@ -157,8 +175,9 @@ export const joinFriendGroupWebSocket = async (
       .populate({ path: "hostId", select: "username name avatar" })
       .populate({ path: "members", select: "username name avatar" });
 
-    if (broadcastFriendGroupEvent) {
-      broadcastFriendGroupEvent(groupId, "USER_JOINED_FRIEND_GROUP", {
+   
+    if (_broadcastFriendGroupEvent) {
+      _broadcastFriendGroupEvent(groupId, "USER_JOINED_FRIEND_GROUP", {
         groupId: groupId,
         userId: userId,
         userInfo: {
@@ -169,8 +188,9 @@ export const joinFriendGroupWebSocket = async (
         },
       });
     }
-    if (broadcastToAll) {
-      broadcastToAll({
+ 
+    if (_broadcastToAll) {
+      _broadcastToAll({
         type: "FRIEND_GROUP_UPDATED",
         group: formatFriendGroupResponse(populatedGroup),
         groupId: groupId,
@@ -180,27 +200,22 @@ export const joinFriendGroupWebSocket = async (
     ws.send(
       JSON.stringify({
         type: "JOIN_FRIEND_GROUP_SUCCESS",
-        message: "Friend Gruba başarıyla katıldınız.",
+        message: "Arkadaş Grubuna başarıyla katıldınız.",
         group: formatFriendGroupResponse(populatedGroup),
       })
     );
   } catch (error) {
-    console.error("Friend Gruba katılma hatası (WebSocket):", error);
+    console.error("Arkadaş Grubuna katılma hatası (WebSocket):", error);
     ws.send(
       JSON.stringify({
         type: "ERROR",
-        message: "Friend Gruba katılırken bir hata oluştu.",
+        message: "Arkadaş Grubuna katılırken bir hata oluştu.",
       })
     );
   }
 };
 
-export const leaveFriendGroupWebSocket = async (
-  ws,
-  data,
-  broadcastFriendGroupEvent,
-  broadcastToAll
-) => {
+export const leaveFriendGroupWebSocket = async (ws, data) => {
   try {
     const { groupId } = data;
     const userId = ws.userId;
@@ -214,7 +229,7 @@ export const leaveFriendGroupWebSocket = async (
     const group = await FriendGroupChat.findById(groupId);
     if (!group) {
       return ws.send(
-        JSON.stringify({ type: "ERROR", message: "Friend Grup bulunamadı." })
+        JSON.stringify({ type: "ERROR", message: "Arkadaş Grubu bulunamadı." })
       );
     }
 
@@ -222,7 +237,7 @@ export const leaveFriendGroupWebSocket = async (
       return ws.send(
         JSON.stringify({
           type: "ERROR",
-          message: "Bu Friend grubun üyesi değilsiniz.",
+          message: "Bu Arkadaş grubunun üyesi değilsiniz.",
         })
       );
     }
@@ -233,14 +248,14 @@ export const leaveFriendGroupWebSocket = async (
 
     if (group.members.length === 0) {
       await FriendGroupChat.findByIdAndDelete(groupId);
-      if (broadcastFriendGroupEvent) {
-        broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", {
+      if (_broadcastFriendGroupEvent) {
+        _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", {
           groupId: groupId,
-          reason: "No members left",
+          reason: "Üye kalmadı",
         });
       }
-      if (broadcastToAll) {
-        broadcastToAll({
+      if (_broadcastToAll) {
+        _broadcastToAll({
           type: "FRIEND_GROUP_DELETED",
           groupId: groupId,
         });
@@ -251,14 +266,14 @@ export const leaveFriendGroupWebSocket = async (
         .populate({ path: "hostId", select: "username name avatar" })
         .populate({ path: "members", select: "username name avatar" });
 
-      if (broadcastFriendGroupEvent) {
-        broadcastFriendGroupEvent(groupId, "USER_LEFT_FRIEND_GROUP", {
+      if (_broadcastFriendGroupEvent) {
+        _broadcastFriendGroupEvent(groupId, "USER_LEFT_FRIEND_GROUP", {
           groupId: groupId,
           userId: userId,
         });
       }
-      if (broadcastToAll) {
-        broadcastToAll({
+      if (_broadcastToAll) {
+        _broadcastToAll({
           type: "FRIEND_GROUP_UPDATED",
           group: formatFriendGroupResponse(populatedGroup),
           groupId: groupId,
@@ -269,17 +284,17 @@ export const leaveFriendGroupWebSocket = async (
 
     ws.send(
       JSON.stringify({
-        message: "Friend Gruptan başarıyla ayrıldınız.",
+        message: "Arkadaş Grubundan başarıyla ayrıldınız.",
         groupId: groupId,
         type: "LEAVE_FRIEND_GROUP_SUCCESS",
       })
     );
   } catch (error) {
-    console.error("Friend Gruptan ayrılma hatası (WebSocket):", error);
+    console.error("Arkadaş Grubundan ayrılma hatası (WebSocket):", error);
     ws.send(
       JSON.stringify({
         type: "ERROR",
-        message: "Friend Gruptan ayrılırken bir hata oluştu.",
+        message: "Arkadaş Grubundan ayrılırken bir hata oluştu.",
       })
     );
   }
@@ -296,21 +311,16 @@ export const getUserFriendGroups = async (req, res) => {
 
     res.status(200).json({ groups: groups.map(formatFriendGroupResponse) });
   } catch (error) {
-    console.error("Kullanıcı Friend gruplarını listeleme hatası:", error);
+    console.error("Kullanıcı Arkadaş gruplarını listeleme hatası:", error);
     res
       .status(500)
       .json({
-        message: "Kullanıcı Friend grupları listelenirken bir hata oluştu.",
+        message: "Kullanıcı Arkadaş grupları listelenirken bir hata oluştu.",
       });
   }
 };
 
-export const updateFriendGroup = async (
-  ws,
-  data,
-  broadcastFriendGroupEvent,
-  broadcastToAll
-) => {
+export const updateFriendGroup = async (ws, data) => {
   try {
     const { groupId, groupName, description, password, maxMembers } = data;
     const userId = ws.userId;
@@ -321,7 +331,6 @@ export const updateFriendGroup = async (
       );
     }
 
-    // Grubu bul
     const group = await FriendGroupChat.findById(groupId);
     if (!group) {
       return ws.send(
@@ -369,12 +378,17 @@ export const updateFriendGroup = async (
       updatedGroupRaw._id
     )
       .populate("hostId", "username name avatar")
-      .populate("members", "username name avatar");
+      .populate("members", "username name avatar"); 
     const groupDataForBroadcast = {
       _id: updatedGroupPopulated._id,
       groupName: updatedGroupPopulated.groupName,
       description: updatedGroupPopulated.description,
-      host: updatedGroupPopulated.hostId._id.toString(),
+      host: {
+        _id: updatedGroupPopulated.hostId._id.toString(),
+        username: updatedGroupPopulated.hostId.username,
+        name: updatedGroupPopulated.hostId.name,
+        avatar: updatedGroupPopulated.hostId.avatar,
+      },
       members: updatedGroupPopulated.members.map((member) => ({
         _id: member._id.toString(),
         username: member.username,
@@ -387,28 +401,21 @@ export const updateFriendGroup = async (
       updatedAt: updatedGroupPopulated.updatedAt,
     };
 
-    if (broadcastToAll) {
-      broadcastToAll({
-        type: "FRIEND_GROUP_UPDATED",
+    if (_broadcastFriendGroupEvent) {
+      _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_UPDATED", {
         groupId: groupId,
-        data: {
-          groupId: groupId,
-          updatedBy: userId,
-          updates: updates,
-          group: groupDataForBroadcast,
-        },
+        updatedBy: userId, 
+        group: groupDataForBroadcast, 
       });
+      console.log(`Arkadaş grubu güncellemesi (${groupId}) üyelere yayınlandı.`);
+    } else {
+      console.log(
+        "Grup üyelerine yayın için _broadcastFriendGroupEvent mevcut değil."
+      );
     }
 
-    // Güncellemeyi sadece grup üyelerine özel yayınlamak için (opsiyonel)
-    if (broadcastFriendGroupEvent) {
-      // Bu event'e hangi datayı göndereceğinize karar verin, belki sadece 'updates' yeterlidir.
-      // broadcastFriendGroupEvent(groupId, 'FRIEND_GROUP_UPDATED', { groupId, updatedBy: userId, updates });
-    }
-
-    const formattedResponseForRequester = formatFriendGroupResponse
-      ? formatFriendGroupResponse(updatedGroupPopulated)
-      : groupDataForBroadcast; // Requester'a populate edilmiş hali gönderebiliriz
+    const formattedResponseForRequester =
+      formatFriendGroupResponse(updatedGroupPopulated);
 
     ws.send(
       JSON.stringify({
@@ -428,11 +435,8 @@ export const updateFriendGroup = async (
   }
 };
 
-export const sendFriendGroupMessage = async (
-  ws,
-  data,
-  broadcastFriendGroupMessage
-) => {
+
+export const sendFriendGroupMessage = async (ws, data) => {
   try {
     const { groupId, message } = data;
     const userId = ws.userId;
@@ -467,8 +471,8 @@ export const sendFriendGroupMessage = async (
       timestamp: populatedMessage.timestamp,
     };
 
-    if (broadcastFriendGroupMessage) {
-      broadcastFriendGroupMessage(
+    if (_broadcastFriendGroupMessage) {
+      _broadcastFriendGroupMessage(
         groupId,
         "RECEIVE_FRIEND_GROUP_MESSAGE",
         formattedMessage,
@@ -476,7 +480,7 @@ export const sendFriendGroupMessage = async (
       );
     }
   } catch (error) {
-    console.error("Friend grup mesajı gönderme hatası:", error);
+    console.error("Arkadaş grubu mesajı gönderme hatası:", error);
     ws.send(
       JSON.stringify({
         type: "ERROR",
@@ -485,13 +489,7 @@ export const sendFriendGroupMessage = async (
     );
   }
 };
-
-export const deleteFriendGroup = async (
-  ws,
-  data,
-  broadcastFriendGroupEvent,
-  broadcastToAll
-) => {
+export const deleteFriendGroup = async (ws, data) => {
   try {
     const { groupId } = data;
     const userId = ws.userId;
@@ -503,28 +501,28 @@ export const deleteFriendGroup = async (
     const group = await FriendGroupChat.findById(groupId);
     if (!group) {
       return ws.send(
-        JSON.stringify({ type: "ERROR", message: "Friend Grup bulunamadı." })
+        JSON.stringify({ type: "ERROR", message: "Arkadaş Grubu bulunamadı." })
       );
     }
     if (group.hostId.toString() !== userId) {
       return ws.send(
         JSON.stringify({
           type: "ERROR",
-          message: "Friend Grubu silme yetkiniz yok. Yalnızca host silebilir.",
+          message: "Arkadaş Grubunu silme yetkiniz yok. Yalnızca kurucu silebilir.",
         })
       );
     }
 
     await FriendGroupChat.findByIdAndDelete(groupId);
 
-    if (broadcastFriendGroupEvent) {
-      broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", {
+    if (_broadcastFriendGroupEvent) {
+      _broadcastFriendGroupEvent(groupId, "FRIEND_GROUP_DELETED", {
         groupId: groupId,
         deletedBy: userId,
       });
     }
-    if (broadcastToAll) {
-      broadcastToAll({
+    if (_broadcastToAll) {
+      _broadcastToAll({
         type: "FRIEND_GROUP_DELETED",
         groupId: groupId,
       });
@@ -533,15 +531,15 @@ export const deleteFriendGroup = async (
       JSON.stringify({
         type: "FRIEND_GROUP_DELETED_SUCCESS",
         groupId: groupId,
-        message: "Friend Grup başarıyla silindi.",
+        message: "Arkadaş Grubu başarıyla silindi.",
       })
     );
   } catch (error) {
-    console.error("Friend Grup silme hatası (WebSocket):", error);
+    console.error("Arkadaş Grubu silme hatası (WebSocket):", error);
     ws.send(
       JSON.stringify({
         type: "ERROR",
-        message: "Friend Grup silinirken bir hata oluştu.",
+        message: "Arkadaş Grubu silinirken bir hata oluştu.",
       })
     );
   }
@@ -555,22 +553,19 @@ export const getFriendGroupChatHistory = async (req, res) => {
     const skip = (page - 1) * limit;
 
     if (!groupId) {
-      return res.status(400).json({ message: "Friend Group ID is required" });
+      return res.status(400).json({ message: "Arkadaş Grubu ID'si gerekli" });
     }
 
-    // Get total count for pagination info
     const totalMessages = await FriendGroupChatMessage.countDocuments({
       groupId,
     });
 
-    // Fetch messages with pagination and sort in reverse chronological order
     const messages = await FriendGroupChatMessage.find({ groupId })
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
       .populate({ path: "senderId", select: "username name avatar" });
 
-    // Format and reverse back to chronological order for display
     const formattedHistory = messages
       .map((chatMessage) => ({
         _id: chatMessage._id,
@@ -596,11 +591,11 @@ export const getFriendGroupChatHistory = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Friend Grup mesaj geçmişi alınırken hata:", error);
+    console.error("Arkadaş Grubu mesaj geçmişi alınırken hata:", error);
     res
       .status(500)
       .json({
-        message: "Friend Grup mesaj geçmişi alınırken bir hata oluştu.",
+        message: "Arkadaş Grubu mesaj geçmişi alınırken bir hata oluştu.",
       });
   }
 };
@@ -613,22 +608,14 @@ export const getFriendGroupById = async (req, res) => {
       .populate({ path: "members", select: "username name avatar" });
 
     if (!group) {
-      return res.status(404).json({ message: "Friend Grup bulunamadı." });
+      return res.status(404).json({ message: "Arkadaş Grubu bulunamadı." });
     }
 
     res.status(200).json({ group: formatFriendGroupResponse(group) });
   } catch (error) {
-    console.error("Friend Grubu ID'ye göre getirme hatası:", error);
+    console.error("Arkadaş Grubunu ID'ye göre getirme hatası:", error);
     res
       .status(500)
-      .json({ message: "Friend Grubu getirilirken bir hata oluştu." });
+      .json({ message: "Arkadaş Grubu getirilirken bir hata oluştu." });
   }
 };
-
-export const initializeFriendGroupChatWebSocket = ({
-  broadcastFriendGroupEvent,
-  broadcastToAll,
-  sendToSpecificUser,
-  broadcastFriendGroupMessage,
-  broadcastFriendEvent,
-}) => {};

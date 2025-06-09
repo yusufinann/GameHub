@@ -287,10 +287,6 @@ export const useCommunityPage = () => {
           if (selectedGroup && selectedGroup._id === message.group._id) {
             setSelectedGroup(message.group);
           }
-          showSnackbar({
-            message: t("success.groupUpdated", "Grup başarıyla güncellendi!"),
-            severity: "success",
-          });
           break;
 
         case "GROUP_UPDATED":

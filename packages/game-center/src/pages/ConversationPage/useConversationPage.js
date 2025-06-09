@@ -1,38 +1,34 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import axios from "axios";
+import { useTranslation } from "react-i18next"; // Added
 import { useAuthContext } from "../../shared/context/AuthContext";
 import { useWebSocket } from "../../shared/context/WebSocketContext/context";
 import { useSnackbar } from "../../shared/context/SnackbarContext";
+import { fetchPrivateChatHistoryAPI, fetchFriendGroupChatHistoryAPI } from "./api";
 
 export const useConversationsPage = (
-  friendGroups,
-  setFriendGroups,
+  friendGroups, 
   selectedConversation,
-  setSelectedConversation
 ) => {
   const { currentUser } = useAuthContext();
   const { socket } = useWebSocket();
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation(); 
 
-  // Messages and pagination state
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isMessagingLoading, setIsMessagingLoading] = useState(false); // while sending message
+  const [isMessagingLoading, setIsMessagingLoading] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const [isLoadingMore, setIsLoadingMore] = useState(false); // Added isLoadingMore state
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Pagination and "hasMore" flags
   const [privatePage, setPrivatePage] = useState(1);
   const [friendPage, setFriendPage] = useState(1);
   const [hasMorePrivate, setHasMorePrivate] = useState(false);
   const [hasMoreFriend, setHasMoreFriend] = useState(false);
 
-  // State for Update Dialog
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [groupToUpdate, setGroupToUpdate] = useState(null);
 
-  // Scroll container ref for infinite scroll
   const containerRef = useRef(null);
   const LIMIT = 30;
   const token = localStorage.getItem("token");
@@ -40,16 +36,10 @@ export const useConversationsPage = (
   const fetchPrivateChatHistory = useCallback(
     async (targetUserId, page = 1) => {
       if (!targetUserId) return;
-      if (page === 1) {
-        setIsLoadingChat(true);
-      } else {
-        setIsLoadingMore(true); // Set loading more state when loading additional pages
-      }
+      if (page === 1) setIsLoadingChat(true);
+      else setIsLoadingMore(true);
       try {
-        const response = await axios.get(
-          `http://localhost:3001/api/chat/private-chat-history?receiverId=${targetUserId}&page=${page}&limit=${LIMIT}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await fetchPrivateChatHistoryAPI(token, targetUserId, page, LIMIT);
         const { history, pagination } = response.data;
         setHasMorePrivate(pagination.hasMore);
         setPrivatePage(pagination.currentPage);
@@ -59,34 +49,22 @@ export const useConversationsPage = (
           setMessages((prevMessages) => [...history, ...prevMessages]);
         }
       } catch (error) {
-        console.error("Özel sohbet geçmişi alınırken hata:", error);
-        showSnackbar({
-          message: "Özel sohbet geçmişi yüklenirken hata oluştu.",
-          severity: "error",
-        });
+        showSnackbar({ message: t("error.fetchPrivateChatHistoryError"), severity: "error" });
       } finally {
         setIsLoadingChat(false);
-        if (page > 1) {
-          setIsLoadingMore(false);
-        }
+        if (page > 1) setIsLoadingMore(false);
       }
     },
-    [showSnackbar, token]
+    [showSnackbar, token, t] // Added t to dependencies
   );
 
   const fetchFriendGroupChatHistory = useCallback(
     async (groupId, page = 1) => {
       if (!groupId) return;
-      if (page === 1) {
-        setIsLoadingChat(true);
-      } else {
-        setIsLoadingMore(true); // Set loading more state when loading additional pages
-      }
+      if (page === 1) setIsLoadingChat(true);
+      else setIsLoadingMore(true);
       try {
-        const response = await axios.get(
-          `http://localhost:3001/api/chat/friendgroup/${groupId}/history?page=${page}&limit=${LIMIT}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await fetchFriendGroupChatHistoryAPI(token, groupId, page, LIMIT);
         const { history, pagination } = response.data;
         setHasMoreFriend(pagination.hasMore);
         setFriendPage(pagination.currentPage);
@@ -96,208 +74,193 @@ export const useConversationsPage = (
           setMessages((prevMessages) => [...history, ...prevMessages]);
         }
       } catch (error) {
-        console.error("Friend Group chat geçmişi alınırken hata:", error);
-        showSnackbar({
-          message: "Friend Group chat geçmişi yüklenirken hata oluştu.",
-          severity: "error",
-        });
+        showSnackbar({ message: t("error.fetchFriendGroupChatHistoryError"), severity: "error" });
       } finally {
         setIsLoadingChat(false);
-        if (page > 1) {
-          setIsLoadingMore(false); 
-        }
+        if (page > 1) setIsLoadingMore(false);
       }
     },
-    [showSnackbar, token]
+    [showSnackbar, token, t] // Added t to dependencies
   );
+
   useEffect(() => {
     if (selectedConversation) {
       if (selectedConversation.type === "private" && selectedConversation.id) {
-        fetchPrivateChatHistory(selectedConversation.id);
+        fetchPrivateChatHistory(selectedConversation.id, 1);
       } else if (selectedConversation.type === "friendGroup" && selectedConversation._id) {
-        fetchFriendGroupChatHistory(selectedConversation._id);
+        fetchFriendGroupChatHistory(selectedConversation._id, 1);
+      }
+    } else {
+      setMessages([]);
+    }
+  }, [selectedConversation, fetchPrivateChatHistory, fetchFriendGroupChatHistory]);
+
+  const loadMoreMessages = useCallback(() => {
+    if (isLoadingMore || !selectedConversation) return;
+    if (selectedConversation.type === "friendGroup" && hasMoreFriend) {
+      fetchFriendGroupChatHistory(selectedConversation._id, friendPage + 1);
+    } else if (selectedConversation.type === "private" && hasMorePrivate) {
+      fetchPrivateChatHistory(selectedConversation.id, privatePage + 1);
+    }
+  }, [selectedConversation, friendPage, privatePage, hasMoreFriend, hasMorePrivate, fetchFriendGroupChatHistory, fetchPrivateChatHistory, isLoadingMore]);
+
+  useEffect(() => {
+    if (selectedConversation) {
+      if (selectedConversation.type === "private") {
+        setPrivatePage(1);
+        setHasMorePrivate(true);
+      } else if (selectedConversation.type === "friendGroup") {
+        setFriendPage(1);
+        setHasMoreFriend(true);
       }
     }
-  }, [selectedConversation, fetchPrivateChatHistory,fetchFriendGroupChatHistory]);
-  const loadMoreMessages = useCallback(() => {
-    if (isLoadingMore) return; 
-    if (selectedConversation?.type === "friendGroup" && hasMoreFriend) {
-      fetchFriendGroupChatHistory(selectedConversation._id, friendPage + 1);
-    } else if (selectedConversation?.type === "private" && hasMorePrivate) {
-      fetchPrivateChatHistory(selectedFriend.id, privatePage + 1);
-    }
-  }, [
-    selectedConversation,
-    selectedFriend,
-    friendPage,
-    privatePage,
-    hasMoreFriend,
-    hasMorePrivate,
-    fetchFriendGroupChatHistory,
-    fetchPrivateChatHistory,
-    isLoadingMore,
-  ]);
+  }, [selectedConversation]);
 
   useEffect(() => {
-    if (
-      selectedFriend &&
-      socket &&
-      socket.readyState === WebSocket.OPEN &&
-      selectedConversation?.type !== "friendGroup"
-    ) {
-      setPrivatePage(1);
-    }
-    if (selectedConversation?.type === "friendGroup") {
-      setFriendPage(1);
-    }
-  }, [
-    selectedFriend,
-    socket,
-    fetchPrivateChatHistory,
-    selectedConversation,
-    fetchFriendGroupChatHistory,
-  ]);
+    if (!socket || !currentUser) return;
 
-  useEffect(() => {
-    if (!socket) return;
+    const handleWebSocketMessage = (event) => {
+      let parsedMessage;
+      try {
+        parsedMessage = JSON.parse(event.data);
+      } catch (error) {
+        return;
+      }
 
-    const handleMessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      switch (message.type) {
+      switch (parsedMessage.type) {
         case "RECEIVE_PRIVATE_MESSAGE":
-          if (selectedConversation?.type !== "friendGroup") {
-            setMessages((prevMessages) => [...prevMessages, message.message]);
-          }
-          break;
-        case "PRIVATE_CHAT_HISTORY":
-          if (selectedConversation?.type !== "friendGroup") {
-            setMessages(message.history);
-            setIsLoadingChat(false);
-          }
-          break;
-        case "RECEIVE_FRIEND_GROUP_MESSAGE":
-          if (selectedConversation?.type === "friendGroup") {
-            setMessages((prevMessages) => [...prevMessages, message.data]);
-          }
-          break;
-        case "USER_LEFT_FRIEND_GROUP":
-          showSnackbar({
-            message: `User "${message.data.userId}" left Friend Group "${message.groupId}".`,
-            severity: "info",
-          });
-          setFriendGroups((prevGroups) => {
-            return prevGroups.map((group) => {
-              if (group._id === message.groupId) {
-                return {
-                  ...group,
-                  members: group.members.filter(
-                    (member) => member._id !== message.data.userId
-                  ),
-                };
+          const receivedPrivateMsg = parsedMessage.message;
+          const senderIdFromMessage = typeof receivedPrivateMsg.senderId === 'object' ? receivedPrivateMsg.senderId?._id : receivedPrivateMsg.senderId;
+          const receiverIdFromMessage = typeof receivedPrivateMsg.receiverId === 'object' ? receivedPrivateMsg.receiverId?._id : receivedPrivateMsg.receiverId;
+          const isCorrectPrivateChat = selectedConversation &&
+            selectedConversation.type === "private" &&
+            currentUser &&
+            ((senderIdFromMessage === currentUser.id && receiverIdFromMessage === selectedConversation.id) ||
+             (receiverIdFromMessage === currentUser.id && senderIdFromMessage === selectedConversation.id));
+
+          if (isCorrectPrivateChat) {
+            setMessages((prevMessages) => {
+              const existingIndex = prevMessages.findIndex(m =>
+                (m._id === receivedPrivateMsg._id && !m._id?.startsWith('temp_')) ||
+                (m._id?.startsWith('temp_') && m.message === receivedPrivateMsg.message && senderIdFromMessage === (typeof m.senderId === 'object' ? m.senderId._id : m.senderId))
+              );
+              if (existingIndex > -1) {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[existingIndex] = { ...receivedPrivateMsg, status: 'SENT' };
+                return updatedMessages;
               }
-              return group;
+              return [...prevMessages, { ...receivedPrivateMsg, status: 'SENT' }];
             });
-          });
-          if (selectedConversation?._id === message.groupId) {
-            setSelectedConversation((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    members: prev.members.filter(
-                      (member) => member._id !== message.data.userId
-                    ),
-                  }
-                : null
-            );
           }
           break;
-        case "FRIEND_GROUP_DELETED":
-          const deletedGroup = friendGroups.find(
-            (group) => group._id === message.groupId
-          );
-          const deletedGroupName = deletedGroup
-            ? deletedGroup.groupName
-            : message.groupId;
 
-          showSnackbar({
-            message: `Friend Group "${deletedGroupName}" has been deleted by the host.`,
-            severity: "info",
-          });
-          setFriendGroups((prevGroups) =>
-            prevGroups.filter((group) => group._id !== message.groupId)
-          );
+        case "RECEIVE_FRIEND_GROUP_MESSAGE":
+          const receivedGroupMsg = parsedMessage.data;
+          if (!receivedGroupMsg || !receivedGroupMsg.senderId || !receivedGroupMsg.groupId) {
+            return;
+          }
+          const groupSenderId = typeof receivedGroupMsg.senderId === 'object' ? receivedGroupMsg.senderId?._id : receivedGroupMsg.senderId;
+          const isCorrectGroupChat = selectedConversation &&
+            selectedConversation.type === "friendGroup" &&
+            selectedConversation._id === receivedGroupMsg.groupId;
 
-          if (selectedConversation?._id === message.groupId) {
-            setSelectedConversation(null);
-            setMessages([]);
+          if (isCorrectGroupChat) {
+            setMessages((prevMessages) => {
+              const existingIndex = prevMessages.findIndex(m =>
+                (m._id === receivedGroupMsg._id && !m._id?.startsWith('temp_')) ||
+                (m._id?.startsWith('temp_') && m.message === receivedGroupMsg.message && groupSenderId === (typeof m.senderId === 'object' ? m.senderId._id : m.senderId))
+              );
+              if (existingIndex > -1) {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[existingIndex] = { ...receivedGroupMsg, status: 'SENT' };
+                return updatedMessages;
+              }
+              return [...prevMessages, { ...receivedGroupMsg, status: 'SENT' }];
+            });
           }
           break;
-        case "FRIEND_GROUP_UPDATED":
-          if (message.data && message.data.group && message.data.groupId) {
-            const updatedGroupData = message.data.group;
-            const groupId = message.data.groupId;
-            showSnackbar({
-              message: `Arkadaş Grubu "${
-                updatedGroupData.groupName || groupId
-              }" güncellendi.`,
-              severity: "info",
-            });
-            setFriendGroups(prevGroups => 
-              prevGroups.map(group => 
-                group._id === groupId ? { ...group, ...updatedGroupData } : group
+        
+        case "ACKNOWLEDGEMENT":
+          if (parsedMessage.data && parsedMessage.data.tempId && parsedMessage.data.actualMessage) {
+            const { tempId, actualMessage } = parsedMessage.data;
+            setMessages(prevMessages =>
+              prevMessages.map(msg =>
+                msg._id === tempId ? { ...actualMessage, status: 'SENT' } : msg
               )
             );
-          } else {
-            showSnackbar({
-              message: `Arkadaş Grubu güncelleme bilgisi alınamadı veya format hatalı.`,
-              severity: "warning",
-            });
+          } else if (parsedMessage.tempId && parsedMessage.messageId) {
+             setMessages(prevMessages =>
+              prevMessages.map(msg =>
+                msg._id === parsedMessage.tempId ? { ...msg, _id: parsedMessage.messageId, status: 'SENT' } : msg
+              )
+            );
           }
           break;
 
+        case "USER_LEFT_FRIEND_GROUP":
+            if (selectedConversation?._id === parsedMessage.groupId && parsedMessage.data?.userId === currentUser?.id) {
+                 setMessages([]);
+            }
+            break;
+        case "FRIEND_GROUP_DELETED":
+            if (selectedConversation?._id === parsedMessage.groupId) {
+                setMessages([]);
+            }
+            break;
         default:
-          console.log("Bilinmeyen mesaj tipi:", message.type);
+          break;
       }
     };
 
-    socket.addEventListener("message", handleMessage);
+    socket.addEventListener("message", handleWebSocketMessage);
     return () => {
-      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("message", handleWebSocketMessage);
     };
-  }, [
-    socket,
-    selectedConversation,
-    showSnackbar,
-    setFriendGroups,
-    setSelectedConversation,
-    friendGroups,
-  ]);
+  }, [socket, selectedConversation, currentUser, showSnackbar]);
 
   const handleSendFriendMessage = () => {
-    if (newMessage.trim()) {
+    if (newMessage.trim() && selectedConversation && currentUser) {
       setIsMessagingLoading(true);
       let messagePayload = {};
+      const timestamp = new Date().toISOString();
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      let tempMessageForUI = {
+        _id: tempId,
+        message: newMessage,
+        createdAt: timestamp,
+        status: 'PENDING',
+        senderId: currentUser.id,
+        sender: { _id: currentUser.id, username: currentUser.username, profileImage: currentUser.profileImage },
+      };
 
-      if (selectedConversation?.type === "friendGroup") {
+      if (selectedConversation.type === "friendGroup") {
         messagePayload = {
           type: "FRIEND_GROUP_MESSAGE_WS",
           groupId: selectedConversation._id,
           message: newMessage,
+          tempId: tempId,
         };
-      } else if (selectedFriend) {
+        tempMessageForUI.groupId = selectedConversation._id;
+      } else if (selectedConversation.type === "private" && selectedConversation.id) {
         messagePayload = {
           type: "PRIVATE_MESSAGE",
-          receiverId: selectedFriend.id,
+          receiverId: selectedConversation.id,
           message: newMessage,
+          tempId: tempId,
         };
+        tempMessageForUI.receiverId = selectedConversation.id;
       }
 
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (socket && socket.readyState === WebSocket.OPEN && Object.keys(messagePayload).length > 0) {
         socket.send(JSON.stringify(messagePayload));
+        setMessages((prevMessages) => [...prevMessages, tempMessageForUI]);
         setNewMessage("");
       } else {
-        console.error("WebSocket bağlantısı açık değil.");
+        if (Object.keys(messagePayload).length === 0) {
+           showSnackbar({ message: t("error.messageSendNoChatSelected"), severity: "error" });
+        } else {
+           showSnackbar({ message: t("error.messageSendConnectionIssue"), severity: "error" });
+        }
       }
       setIsMessagingLoading(false);
     }
@@ -305,90 +268,48 @@ export const useConversationsPage = (
 
   const handleFriendSelection = useCallback(
     (friend) => {
-      setSelectedFriend(friend);
-      setSelectedConversation(null);
-      // Reset pagination state when selecting a new friend
-      setPrivatePage(1);
-      setHasMorePrivate(false);
-      if (friend) {
-        setSelectedConversation({ type: "private", friendId: friend.id });
-        fetchPrivateChatHistory(friend.id);
+      if (friend && friend.id) {
+        setSelectedFriend(friend);
       } else {
-        setMessages([]);
+        setSelectedFriend(null);
       }
     },
-    [fetchPrivateChatHistory, setSelectedConversation]
+    []
   );
 
   const handleFriendGroupSelection = useCallback(
     (group) => {
-      setSelectedFriend(null);
-      // Reset pagination state when selecting a new group
-      setFriendPage(1);
-      setHasMoreFriend(false);
-      setSelectedConversation({
-        _id: group._id,
-        groupName: group.groupName,
-        description: group.description,
-        members: group.members,
-        invitationLink: group.invitationLink,
-        type: "friendGroup",
-      });
-      fetchFriendGroupChatHistory(group._id);
+      if (group && group._id) {
+        setSelectedFriend(null);
+      }
     },
-    [fetchFriendGroupChatHistory, setSelectedConversation]
+    []
   );
 
   const handleDeleteFriendGroup = async (groupId) => {
-    const groupToDelete = friendGroups.find((group) => group._id === groupId);
-    const groupName = groupToDelete ? groupToDelete.groupName : "Unknown group";
+    const group = friendGroups?.find((g) => g._id === groupId);
+    const groupName = group?.groupName || t("common.unknownGroupName", "Unknown Group"); 
 
     if (socket && socket.readyState === WebSocket.OPEN) {
-      const deletePayload = {
-        type: "DELETE_FRIEND_GROUP_WS",
-        groupId: groupId,
-      };
-      socket.send(JSON.stringify(deletePayload));
-      showSnackbar({
-        message: `Friend Group "${groupName}" has been deleted successfully.`,
-        severity: "success",
-      });
+      socket.send(JSON.stringify({ type: "DELETE_FRIEND_GROUP_WS", groupId }));
+      showSnackbar({ message: t("friendGroups.deleteSuccess", { groupName }), severity: "info" });
     } else {
-      console.error(
-        "WebSocket bağlantısı açık değil, Friend Group silinemiyor."
-      );
-      showSnackbar({
-        message: "WebSocket bağlantısı kurulamadı. Friend Group silinemiyor.",
-        severity: "error",
-      });
+      showSnackbar({ message: t("error.webSocketConnectionDeleteFailed", "WebSocket connection not available. Group cannot be deleted."), severity: "error" });
     }
   };
 
   const handleLeaveFriendGroup = async (groupId) => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      const leavePayload = {
-        type: "LEAVE_FRIEND_GROUP_WS",
-        groupId: groupId,
-      };
-      socket.send(JSON.stringify(leavePayload));
-      setSelectedConversation(null);
-      setMessages([]);
-      setFriendGroups((prevGroups) =>
-        prevGroups.filter((group) => group._id !== groupId)
-      );
-      showSnackbar({
-        message: "Friend Group left successfully.",
-        severity: "success",
-      });
+    const group = friendGroups?.find((g) => g._id === groupId);
+    const groupName = group?.groupName || t("common.unknownGroupName", "Unknown Group");
+
+    if (socket && socket.readyState === WebSocket.OPEN && currentUser) {
+      socket.send(JSON.stringify({ type: "LEAVE_FRIEND_GROUP_WS", groupId }));
+      showSnackbar({ message: t("notifications.leaveGroupRequestSent", { groupName }), severity: "info" });
+      if (selectedConversation?._id === groupId) {
+         setMessages([]);
+      }
     } else {
-      console.error(
-        "WebSocket bağlantısı açık değil, Friend Group dan ayrılamıyor."
-      );
-      showSnackbar({
-        message:
-          "WebSocket bağlantısı kurulamadı. Friend Group dan ayrılamıyor.",
-        severity: "error",
-      });
+      showSnackbar({ message: t("error.webSocketConnectionOrUserMissing", "WebSocket connection not available or user info missing."), severity: "error" });
     }
   };
 
@@ -405,31 +326,17 @@ export const useConversationsPage = (
   const handleUpdateFriendGroup = useCallback(
     (updates) => {
       if (!groupToUpdate || !socket || socket.readyState !== WebSocket.OPEN) {
-        console.error(
-          "Cannot update: No group selected or WebSocket not open."
-        );
-        showSnackbar({
-          message:
-            "Cannot update group. Connection issue or no group selected.",
-          severity: "error",
-        });
+        showSnackbar({ message: t("error.groupUpdateFailedConnectionOrGroup"), severity: "error" });
         return;
       }
-
-      const updatePayload = {
-        type: "UPDATE_FRIEND_GROUP_WS",
-        groupId: groupToUpdate._id,
-        ...updates,
-      };
-
-      socket.send(JSON.stringify(updatePayload));
+      socket.send(JSON.stringify({ type: "UPDATE_FRIEND_GROUP_WS", groupId: groupToUpdate._id, ...updates }));
+      showSnackbar({ message: t("notifications.groupUpdateRequestSent", { groupName: groupToUpdate.groupName }), severity: "info" });
       closeUpdateDialog();
     },
-    [socket, groupToUpdate, closeUpdateDialog, showSnackbar]
+    [socket, groupToUpdate, closeUpdateDialog, showSnackbar, t] 
   );
 
   return {
-    selectedConversation,
     messages,
     newMessage,
     setNewMessage,
@@ -447,8 +354,6 @@ export const useConversationsPage = (
     hasMoreFriend,
     containerRef,
     loadMoreMessages,
-    privatePage,
-    friendPage,
     isLoadingMore,
     isUpdateDialogOpen,
     groupToUpdate,
