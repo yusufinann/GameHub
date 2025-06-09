@@ -431,13 +431,20 @@ Follow these steps to get the Game Center running on your local machine:
     cd GameHub
     ```
 
-2.  **Install Dependencies:**
-    Install dependencies for the entire project from the root directory using Yarn. This command will install dependencies for all packages within the monorepo (including backend and frontend).
+2.  **Initialize and Update Submodules:**
+    This project uses Git submodules for the `bingo-game` and `hangman-game` packages, which are part of the frontend. After cloning the main repository, you need to initialize and fetch the content of these submodules:
+    ```bash
+    git submodule update --init --recursive
+    ```
+    This step ensures that the `packages/bingo-game` and `packages/hangman-game` directories are populated with their respective code.    
+
+3.  **Install Dependencies:**
+    Install dependencies for the entire project from the root directory using Yarn. This command will install dependencies for all packages within the monorepo (including backend, game-center, bingo-game, and hangman-game).
     ```bash
     yarn install
     ```
 
-3.  **Configure Backend Environment Variables:**
+4.  **Configure Backend Environment Variables:**
     *   Navigate to the backend package directory: `cd backend`.
     *   You will find a file named `.env.example` in this directory. **Copy this file and rename the copy to `.env`**.
     *   Open the newly created `backend/.env` file and **replace the placeholder values with your own configuration**:
@@ -455,7 +462,7 @@ Follow these steps to get the Game Center running on your local machine:
     *   Ensure you set your `MONGO_DB_URI`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (if applicable), `SESSION_SECRET`, and `JWT_SECRET`.
     *   Return to the root directory: `cd ..`
 
-4.  **Configure Frontend (game-center) Environment Variables:**
+5.  **Configure Frontend (game-center) Environment Variables:**
     To customize the API and WebSocket endpoints for the `game-center` application, create a `.env` file in the `packages/game-center/` directory.
 
     **Example `packages/game-center/.env` file:**
@@ -469,10 +476,10 @@ Follow these steps to get the Game Center running on your local machine:
 
     **Note:** After creating or modifying this `.env` file, you may need to restart the frontend development server (e.g., `yarn workspace game-center start`) for the changes to take effect.
 
-5.  **Ensure MongoDB and Redis are Running:**
+6.  **Ensure MongoDB and Redis are Running:**
     Make sure your MongoDB server instance (specified in `backend/.env`) and Redis server instance (specified in `backend/.env`) are running and accessible.
 
-6.  **Run the Development Servers (from Root Directory):**
+7.  **Run the Development Servers (from Root Directory):**
 
     *   **To run the Backend Server:**
         Open a terminal in the **root directory** (`GameHub/`).
@@ -488,7 +495,7 @@ Follow these steps to get the Game Center running on your local machine:
         ```
         The application should open automatically in your browser, typically at `http://localhost:3000`. If you created/modified `packages/game-center/.env`, you might need to stop and restart this command.
 
-7.  **(IMPORTANT) Create Sample Users:**
+8.  **(IMPORTANT) Create Sample Users:**
     *   Send **POST** requests to your running backend (e.g., `http://localhost:3001/api/users/`).
     *   Set `Content-Type` header to `application/json`.
     *   Use the following JSON data in the request body for each user:
