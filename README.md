@@ -439,8 +439,8 @@ Follow these steps to get the Game Center running on your local machine:
 
 3.  **Configure Backend Environment Variables:**
     *   Navigate to the backend package directory: `cd backend`.
-    *   **Create a `.env` file** in this `backend` directory.
-    *   Copy the structure below and **replace values with your own configuration**:
+    *   You will find a file named `.env.example` in this directory. **Copy this file and rename the copy to `.env`**.
+    *   Open the newly created `backend/.env` file and **replace the placeholder values with your own configuration**:
 
         ```dotenv
         PORT=3001
@@ -452,8 +452,8 @@ Follow these steps to get the Game Center running on your local machine:
         SESSION_SECRET=your_strong_random_session_secret_key 
         JWT_SECRET=your_different_strong_random_jwt_secret_key
         ```
-    *   Set your `MONGO_DB_URI`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (if applicable), `SESSION_SECRET`, and `JWT_SECRET`.
-    *   Return to the root directory: `cd ..`.
+    *   Ensure you set your `MONGO_DB_URI`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (if applicable), `SESSION_SECRET`, and `JWT_SECRET`.
+    *   Return to the root directory: `cd ..`
 
 4.  **Configure Frontend (game-center) Environment Variables:**
     To customize the API and WebSocket endpoints for the `game-center` application, create a `.env` file in the `packages/game-center/` directory.
