@@ -140,6 +140,7 @@ export async function autoDrawNumber(lobbyCode) {
   }
 
   const number = game.numberPool.shift();
+   game.currentNumber = number;
   game.drawnNumbers.push(number);
   game.lastDrawTime = new Date();
 
@@ -256,58 +257,104 @@ export async function autoDrawNumber(lobbyCode) {
 
 export async function restoreActiveBingoTimers(redisClientInstance) {
   try {
-    const keyPattern = "bingo:game:*"; 
+    const keyPattern = "bingo:game:*";
     const gameKeys = await redisClientInstance.keys(keyPattern);
 
     if (!gameKeys || gameKeys.length === 0) {
+      console.log("[RestoreTimers] No active bingo games found in Redis to restore.");
       return;
-    }
-
+    }   
 
     for (const fullKey of gameKeys) {
-      const lobbyCodePrefix = "bingo:game:"; 
+      const lobbyCodePrefix = "bingo:game:";
       const lobbyCode = fullKey.startsWith(lobbyCodePrefix) ? fullKey.substring(lobbyCodePrefix.length) : null;
-      
+
       if (!lobbyCode) {
         console.warn(`[RestoreTimers] Could not extract lobbyCode from key: ${fullKey}. Skipping.`);
         continue;
       }
 
+   
       let game = await getGameFromRedis(lobbyCode);
       if (!game) {
+        console.warn(`[RestoreTimers] No game data found in Redis for lobby: ${lobbyCode} (key: ${fullKey}). Skipping.`);
         continue;
       }
 
       const oldTimestampLog = game.nextDrawTimestamp ? new Date(game.nextDrawTimestamp).toISOString() : 'N/A';
      
+
       if (game.gameStarted && !game.gameEnded && game.drawMode === "auto") {
-        
-        let nextDrawDelayNormal = 5000; 
+     
+
+        let nextDrawDelayNormal = 5000;
         if (game.bingoMode === "superfast") nextDrawDelayNormal = 3000;
         else if (game.bingoMode === "extended") nextDrawDelayNormal = 10000;
 
         if (game.nextDrawTimestamp) {
-            delete game.nextDrawTimestamp;
-            await saveGameToRedis(lobbyCode, game); 
+          delete game.nextDrawTimestamp;
         }
-        
-        
-        if (gameIntervals[lobbyCode]) {
-            clearTimeout(gameIntervals[lobbyCode]);
-            delete gameIntervals[lobbyCode];
-        }
-        
-        gameIntervals[lobbyCode] = setTimeout(async () => {
-          autoDrawNumber(lobbyCode); 
-        }, nextDrawDelayNormal); 
 
+        if (gameIntervals[lobbyCode]) {
+          clearTimeout(gameIntervals[lobbyCode]);
+          delete gameIntervals[lobbyCode];
+        }
+
+        game.nextDrawTimestamp = Date.now() + nextDrawDelayNormal;
+        await saveGameToRedis(lobbyCode, game);
+        console.log(`[RestoreTimers] Game ${lobbyCode}: Set new nextDrawTimestamp to ${new Date(game.nextDrawTimestamp).toISOString()} and saved to Redis.`);
+
+        gameIntervals[lobbyCode] = setTimeout(async () => {
+          console.log(`[RestoreTimers] Game ${lobbyCode}: Restored timer fired. Calling autoDrawNumber.`);
+          autoDrawNumber(lobbyCode); 
+        }, nextDrawDelayNormal);
+        console.log(`[RestoreTimers] Game ${lobbyCode}: New timer scheduled in ${nextDrawDelayNormal}ms.`);
+
+        const currentGameStateForBroadcast = await getGameFromRedis(lobbyCode);
+        if (currentGameStateForBroadcast) {
+          console.log(`[RestoreTimers] Game ${lobbyCode}: Broadcasting BINGO_GAME_STATUS after timer restoration.`);
+          
+          const clientPlayers = Object.values(currentGameStateForBroadcast.players || {}).map(p => {
+            return {
+              id: p.userId,
+              userName: p.userName,
+              name: p.name,
+              avatar: p.avatar,
+              color: p.color,
+              completedBingo: p.completedBingo || !!p.completedAt,
+            };
+          });
+
+          broadcastToGame(currentGameStateForBroadcast, { 
+            type: "BINGO_GAME_STATUS",
+            lobbyCode: currentGameStateForBroadcast.lobbyCode,
+            gameId: currentGameStateForBroadcast.gameId ? currentGameStateForBroadcast.gameId.toString() : null,
+            drawnNumbers: currentGameStateForBroadcast.drawnNumbers || [],
+            activeNumbers: currentGameStateForBroadcast.activeNumbers || [],
+            currentNumber: currentGameStateForBroadcast.currentNumber || null,
+            gameStarted: currentGameStateForBroadcast.gameStarted,
+            gameEnded: currentGameStateForBroadcast.gameEnded,
+            players: clientPlayers,
+            message: "Oyun durumu sunucu yeniden başlatıldıktan sonra güncellendi.",
+            drawMode: currentGameStateForBroadcast.drawMode,
+            drawer: currentGameStateForBroadcast.drawer,
+            bingoMode: currentGameStateForBroadcast.bingoMode,
+            rankings: currentGameStateForBroadcast.rankings || [],
+            competitionMode: currentGameStateForBroadcast.competitionMode,
+            completedPlayers: getCompletedPlayersList(currentGameStateForBroadcast),
+            host: currentGameStateForBroadcast.host, 
+          });
+        }
       } else if (game.nextDrawTimestamp) {
+        console.log(`[RestoreTimers] Game ${lobbyCode}: Not eligible for timer restore, but has nextDrawTimestamp (${oldTimestampLog}). Clearing it.`);
         delete game.nextDrawTimestamp;
         await saveGameToRedis(lobbyCode, game);
+        console.log(`[RestoreTimers] Game ${lobbyCode}: Cleared nextDrawTimestamp from Redis.`);
       } else {
-        // console.log(`[RestoreTimers] Game ${lobbyCode}: Not eligible for timer restore or no timestamp to clear.`); 
+        console.log(`[RestoreTimers] Game ${lobbyCode}: Not eligible for timer restore and no timestamp to clear.`);
       }
     }
+    console.log("[RestoreTimers] Finished processing all game keys.");
   } catch (error) {
     console.error("[BingoController] Critical error during restoreActiveBingoTimers:", error);
   }
@@ -384,6 +431,7 @@ export const drawNumber = async (ws, data) => {
   }
 
   const number = game.numberPool.shift();
+  game.currentNumber = number; 
   game.drawnNumbers.push(number);
   game.lastDrawTime = new Date();
 
@@ -519,6 +567,7 @@ export const startGame = async (ws, data) => {
   game.players = activePlayersForGame;
   game.drawnNumbers = [];
   game.activeNumbers = [];
+   game.currentNumber = null; 
   game.numberPool = generateShuffledNumbers(1, 90);
   game.gameEnded = false;
   game.gameStarted = false;
@@ -740,6 +789,7 @@ export const joinGame = async (ws, data) => {
         gameEnded: game.gameEnded,
         drawnNumbers: game.drawnNumbers,
         activeNumbers: game.activeNumbers,
+         currentNumber: game.currentNumber || null,
         drawMode: game.drawMode,
         drawer: game.drawer,
         completedBingo: game.players[joiningPlayerId] ? (game.players[joiningPlayerId].completedBingo || !!game.players[joiningPlayerId].completedAt) : false,
@@ -801,6 +851,7 @@ export const joinGame = async (ws, data) => {
         gameEnded: game.gameEnded,
         drawnNumbers: game.drawnNumbers,
         activeNumbers: game.activeNumbers,
+         currentNumber: game.currentNumber || null,
         drawMode: game.drawMode,
         drawer: game.drawer,
         completedBingo: player.completedBingo || !!player.completedAt,
@@ -921,7 +972,7 @@ export const handleBingoPlayerLeavePreGame = async (lobbyCode, playerId) => {
   }
 
   if (Object.keys(game.players).length === 0 && playerWasFormallyInBingoPlayersList) {
-    console.log(`[Bingo Leave PreGame-${lobbyCode}] Last formal player ${playerNameForNotification} left. Deleting Bingo game state from Redis.`);
+   
     await deleteBingoGameStateFromRedis(lobbyCode);
   } else {
     await saveGameToRedis(lobbyCode, game);
