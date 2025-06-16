@@ -36,7 +36,7 @@ function CreateLobby({ existingLobby }) {
       ? DummyImage
       : gameId === '2'
       ? dummyHangman
-      : '';
+      : null;
 
   const showMessage = (message, severity = "error", title = undefined, onModalClose) => {
     setModalConfig({ message, severity, title, onModalClose });
@@ -119,7 +119,7 @@ function CreateLobby({ existingLobby }) {
       >
         <Box
           component="img"
-          src={dummyImage}
+          src={dummyImage || null}
           alt="Game Background Art"
           sx={{
             position: "absolute",
