@@ -4,23 +4,7 @@ import mongoose from 'mongoose';
 import { getUserDetails } from '../services/userService.js';
 import { deleteGameFromRedis, getGameFromRedis, getSharedGameState, hydrateGamePlayersWithWs, saveGameToRedis } from "../game_logic/hangman/hangmanStateManager.js";
 import * as timerManager from '../game_logic/hangman/hangmanTimerManager.js'; 
-
-const wordCategories = {
-  en: {
-    animals: ['elephant', 'giraffe', 'penguin', 'dolphin', 'kangaroo', 'cheetah', 'crocodile', 'butterfly'],
-    countries: ['united states', 'germany', 'japan', 'brazil', 'australia', 'canada', 'sweden', 'egypt'],
-    fruits: ['strawberry', 'pineapple', 'watermelon', 'blueberry', 'pomegranate', 'kiwi', 'apricot'],
-    sports: ['basketball', 'football', 'swimming', 'volleyball', 'gymnastics', 'skateboarding', 'tennis'],
-    movies: ['inception', 'avatar', 'titanic', 'interstellar', 'gladiator', 'frozen', 'jaws']
-  },
-  tr: {
-    hayvanlar: ['fil', 'zürafa', 'penguen', 'yunus', 'kanguru', 'çita', 'timsah', 'kelebek'],
-    ulkeler: ['türkiye', 'almanya', 'japonya', 'brezilya', 'avustralya', 'kanada', 'isveç', 'mısır'],
-    meyveler: ['çilek', 'ananas', 'karpuz', 'yabanmersini', 'nar', 'kivi', 'kayısı', 'şeftali'],
-    sporlar: ['basketbol', 'futbol', 'yüzme', 'voleybol', 'jimnastik', 'kaykay', 'tenis', 'güreş'],
-    filmler: ['başlangıç', 'avatar', 'titanik', 'yıldızlararası', 'gladyatör', 'karlarülkesi', 'yüzüklerinefendisi']
-  }
-};
+import { wordCategories } from '../datas/hangmanWords.js';
 
 export function broadcastToGame(gameWithWs, dataToSend) {
   if (!gameWithWs || !gameWithWs.players) {
