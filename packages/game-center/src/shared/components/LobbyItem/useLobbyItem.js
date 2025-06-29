@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useNavigate } from "react-router-dom";
 import { getLobbyDetails, joinLobby as apiJoinLobby } from "../../../pages/MainScreen/MainScreenMiddleArea/LobbiesArea/api";
@@ -23,12 +23,6 @@ export const useLobbyItem = (lobby, currentUser) => {
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
     (member) => member.id === currentUser?.id
   );
-
-  useEffect(() => {
-     if (typeof setIsJoined === 'function') {
-        setIsJoined(isMember);
-     }
-  }, [isMember, setIsJoined, lobby.lobbyCode]);
 
   const handleJoin = async (password = "") => {
     setError(null);
@@ -143,10 +137,7 @@ export const useLobbyItem = (lobby, currentUser) => {
     }
   };
 
-  const handleDelete = async (lobbyCode, event) => {
-    if (event) {
-      event.stopPropagation();
-    }
+  const handleDelete = async (lobbyCode) => {
     setIsDeleting(true);
     setError(null);
 

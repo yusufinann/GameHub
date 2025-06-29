@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { lobbyApi } from "../../../pages/MainScreen/api";
 import { useAuthContext } from "../AuthContext";
@@ -235,33 +236,51 @@ const { showTurnNotification } = useTurnNotification();
     setDeletedLobbyInfo(null);
   }, []);
   
+   const contextValue = useMemo(() => ({
+    existingLobby,
+    setExistingLobby,
+    lobbies,
+    setLobbies,
+    lobbyCode,
+    lobbyLink,
+    membersByLobby,
+    setMembersByLobby,
+    isJoined,
+    setIsJoined,
+    createLobby,
+    deleteLobby,
+    leaveLobby,
+    isLoading,
+    isCreatingLobby,
+    deletedLobbyInfo,
+    setDeletedLobbyInfo,
+    clearDeletedLobbyInfo,
+    userLeftInfo, 
+    setUserLeftInfo,
+  }), [
+    existingLobby,
+    lobbies,
+    lobbyCode,
+    lobbyLink,
+    membersByLobby,
+    isJoined,
+    isLoading,
+    isCreatingLobby,
+    deletedLobbyInfo,
+    userLeftInfo,
+    createLobby,
+    deleteLobby,
+    leaveLobby,
+    clearDeletedLobbyInfo
+  ]);
+
   return (
-    <LobbyContext.Provider
-      value={{
-        existingLobby,
-        setExistingLobby,
-        lobbies,
-        setLobbies,
-        lobbyCode,
-        lobbyLink,
-        membersByLobby,
-        setMembersByLobby,
-        isJoined,
-        setIsJoined,
-        createLobby,
-        deleteLobby,
-        leaveLobby,
-        isLoading,
-        isCreatingLobby,
-        deletedLobbyInfo,
-        setDeletedLobbyInfo,
-        clearDeletedLobbyInfo,userLeftInfo, setUserLeftInfo,
-      }}
-    >
+    <LobbyContext.Provider value={contextValue}>
       {children}
     </LobbyContext.Provider>
   );
 };
+
 
 export const useLobbyContext = () => {
   const context = useContext(LobbyContext);

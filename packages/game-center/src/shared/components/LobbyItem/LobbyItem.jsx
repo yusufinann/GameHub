@@ -69,7 +69,7 @@ const MembersChip = memo(function MembersChip({ count, maxMembers, theme, isMobi
 
 function LobbyItem({ lobby }) {
   const { t } = useTranslation();
-  const { membersByLobby, existingLobby, setIsJoined: setContextIsJoined } = useLobbyContext();
+  const { membersByLobby, existingLobby} = useLobbyContext();
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -95,12 +95,6 @@ function LobbyItem({ lobby }) {
   const isMember = membersByLobby[lobby.lobbyCode]?.some(
     (member) => member.id === currentUser?.id
   );
-
-  useEffect(() => {
-    if (typeof setContextIsJoined === 'function') {
-        setContextIsJoined(isMember);
-    }
-  }, [isMember, setContextIsJoined]);
 
   const [startDate, startTime] = lobby.startTime?.split("T") || [null, null];
   const [endDate, endTime] = lobby.endTime?.split("T") || [null, null];
@@ -267,7 +261,6 @@ function LobbyItem({ lobby }) {
         }}
       >
         <Stack spacing={1} sx={{ height: "100%" }}>
-          {/* Header */}
           <Box
             sx={{
               display: "flex",
@@ -280,6 +273,7 @@ function LobbyItem({ lobby }) {
           >
             <Typography
               variant={isMobile ? "subtitle1" : "h3"}
+              title={lobby.lobbyName || t('unnamedLobby')}
               sx={{
                 fontSize: {
                   xs: "0.95rem",
@@ -288,11 +282,12 @@ function LobbyItem({ lobby }) {
                 },
                 color: theme.palette.text.primary,
                 flexGrow: 1,
-                wordBreak: "break-word", 
                 lineHeight: 1.3,
-                maxWidth: isMobile ? "100%" : "70%",
                 fontWeight: 500,
                 mb: isMobile ? 0.5 : 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {lobby.lobbyName || t('unnamedLobby')}
@@ -300,7 +295,6 @@ function LobbyItem({ lobby }) {
             <LobbyTypeChip lobbyType={lobby.lobbyType} isMobile={isMobile} t={t} />
           </Box>
 
-          {/* Content */}
           <Box
             sx={{
               display: "flex",
@@ -309,7 +303,6 @@ function LobbyItem({ lobby }) {
               flexGrow: 1,
             }}
           >
-            {/* Info Row */}
             <Box
               sx={{
                 display: "flex",
@@ -348,7 +341,6 @@ function LobbyItem({ lobby }) {
               )}
             </Box>
 
-            {/* Actions */}
             <Box
               sx={{
                 display: "flex",

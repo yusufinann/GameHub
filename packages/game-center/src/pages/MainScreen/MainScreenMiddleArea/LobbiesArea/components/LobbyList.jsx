@@ -1,16 +1,56 @@
-import React, { useMemo } from "react";
-import { Box, Card, Divider, useTheme } from "@mui/material";
+import React, { useMemo, useCallback, memo } from "react";
+import { Box, Card, Divider, useTheme, useMediaQuery } from "@mui/material";
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import LobbyItem from "../../../../../shared/components/LobbyItem/LobbyItem";
 import NoActiveLobbies from "../../../../GameDetail/GameDetailRightArea/components/NoActiveLobbies";
 import { useAuthContext } from "../../../../../shared/context/AuthContext";
 import { useTranslation } from "react-i18next";
 
-export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
+const InnerRowContent = memo(({ lobby, isLastItem, dividerColor }) => {
+  return (
+    <>
+      <LobbyItem lobby={lobby} />
+      {!isLastItem && (
+        <Divider
+          sx={{
+            backgroundColor: dividerColor,
+            mx: 2,
+          }}
+        />
+      )}
+    </>
+  );
+});
+
+const Row = memo(({ index, style, data }) => {
+  const { lobbies, theme } = data;
+  const lobby = lobbies[index];
+  
+  if (!lobby) {
+    return null; 
+  }
+
+  const isLastItem = index === lobbies.length - 1;
+  const dividerColor = theme.palette.divider;
+
+  return (
+    <Box style={style}>
+      <InnerRowContent 
+        lobby={lobby} 
+        isLastItem={isLastItem} 
+        dividerColor={dividerColor}
+      />
+    </Box>
+  );
+});
+
+export const LobbyList = memo(({ lobbies = [], activeTab, searchTerm }) => {
   const { currentUser } = useAuthContext();
   const theme = useTheme();
   const { t } = useTranslation();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
- 
   const searchedLobbies = useMemo(() => {
     if (!searchTerm) {
       return lobbies; 
@@ -19,7 +59,6 @@ export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
       lobby.lobbyName && lobby.lobbyName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [lobbies, searchTerm]);
-
   
   const filteredByTabLobbies = useMemo(() => {
     let filtered = [...searchedLobbies]; 
@@ -33,18 +72,13 @@ export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
         currentUser && lobby.members && lobby.members.some(member => member.id === currentUser.id)
       );
     }
-
     return filtered;
   }, [searchedLobbies, activeTab, currentUser]);
-
-
   
   const sortedLobbies = useMemo(() => {
     return [...filteredByTabLobbies].sort((a, b) => {
-    
       if (a.lobbyType === "event" && b.lobbyType !== "event") return -1;
       if (a.lobbyType !== "event" && b.lobbyType === "event") return 1;
-
 
       if (a.lobbyType === "event" && b.lobbyType === "event") {
         const dateA = new Date(`${a.startDate}T${a.startTime}`);
@@ -61,31 +95,38 @@ export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
       return 0;
     });
   }, [filteredByTabLobbies]);
+  
+  const getItemSize = useCallback(index => {
+    const lobby = sortedLobbies[index];
+    const dividerHeight = 1;
+    
+    if (isMobile) {
+        return lobby.lobbyType === 'event' ? 200 + dividerHeight : 160 + dividerHeight;
+    } else {
+        return lobby.lobbyType === 'event' ? 175 + dividerHeight : 155 + dividerHeight;
+    }
+  }, [sortedLobbies, isMobile]);
 
-  const hasOriginalLobbies = lobbies && lobbies.length > 0;
-  const hasSearchedLobbies = searchedLobbies && searchedLobbies.length > 0;
+  const itemData = useMemo(() => ({
+    lobbies: sortedLobbies,
+    theme: theme,
+  }), [sortedLobbies, theme]);
+
   const hasFinalLobbies = sortedLobbies && sortedLobbies.length > 0;
-
+  
   let noLobbiesMessage = <NoActiveLobbies />;
-  if (hasOriginalLobbies && searchTerm && !hasSearchedLobbies) {
+  if (lobbies.length > 0 && searchTerm && searchedLobbies.length === 0) {
       noLobbiesMessage = <NoActiveLobbies message={t("No lobbies match your search criteria.")} />;
-  } else if (hasOriginalLobbies && hasSearchedLobbies && !hasFinalLobbies) {
+  } else if (lobbies.length > 0 && searchedLobbies.length > 0 && !hasFinalLobbies) {
       noLobbiesMessage = <NoActiveLobbies message={t("No lobbies match your current filter and search.")} />
   }
-
 
   return (
     <Box
       sx={{
-        [theme.breakpoints.up('md')]: {
-          width: '100%',
-        },
-        [theme.breakpoints.down('md')]: {
-          width: '100%'
-        },
+        width: '100%',
         position: 'relative',
-        height: '55vh', 
-        transition: 'width 0.3s ease',
+        height: '55vh',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: theme.palette.primary.main, 
@@ -96,38 +137,29 @@ export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
         sx={{
           background: theme.palette.background.stripeBg,
           height: "100%",
-          overflow: "auto", 
           position: "relative",
           boxShadow: theme.shadows[4],
-          transition: "all 0.3s ease",
-          "&:hover": {
-            boxShadow: theme.shadows[8],
-          },
           p: 0, 
           borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {hasFinalLobbies ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {sortedLobbies.map((lobby, index) => (
-              <React.Fragment key={lobby.lobbyCode || lobby.id || index}> 
-                <LobbyItem lobby={lobby} />
-                {index < sortedLobbies.length - 1 && (
-                  <Divider
-                    sx={{
-                      backgroundColor: `${theme.palette.divider}`, 
-                      mx: 2,
-                    }}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </Box>
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                height={height}
+                width={width}
+                itemCount={sortedLobbies.length}
+                itemSize={getItemSize}
+                itemData={itemData}
+                overscanCount={5}
+              >
+                {Row}
+              </List>
+            )}
+          </AutoSizer>
         ) : (
           <Box
             sx={{
@@ -146,6 +178,4 @@ export const LobbyList = ({ lobbies = [], activeTab, searchTerm }) => {
       </Card>
     </Box>
   );
-};
-
-export default LobbyList;
+});

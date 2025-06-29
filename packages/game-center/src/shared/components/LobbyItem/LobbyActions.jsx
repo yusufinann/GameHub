@@ -32,8 +32,14 @@ export const LobbyActions = ({
     setConfirmDeleteModalOpen(false);
   };
 
-  const handleConfirmDelete = () => {
-    onDeleteProp();
+  // GÜNCELLENMİŞ FONKSİYON
+  const handleConfirmDelete = async () => {
+    // Silme işlemini başlat ve bitmesini bekle.
+    // lobbyCode'u doğru şekilde iletiyoruz.
+    await onDeleteProp(lobby.lobbyCode);
+    
+    // İşlem bittikten sonra modalı kapat.
+    handleCloseDeleteConfirm();
   };
 
   return (

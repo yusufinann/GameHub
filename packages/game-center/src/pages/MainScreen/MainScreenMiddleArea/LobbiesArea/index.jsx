@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-import { LobbyList } from './components/LobbyList';
-import CreateLobbyArea from './components/CreateLobbyArea';
+import React from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { useLobbyContext } from '../../../../shared/context/LobbyContext/context';
+import LobbyManagement from './components/LobbyManagement'; // Yeni bileşeni import edin
 
 function LobbiesArea() {
   const { lobbies, isLoading, existingLobby } = useLobbyContext();
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchTerm, setSearchTerm] = useState(''); 
 
   if (isLoading) {
     return (
@@ -25,22 +22,6 @@ function LobbiesArea() {
     );
   }
 
-  return (
-    <>
-      <CreateLobbyArea
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        existingLobby={existingLobby}
-        searchTerm={searchTerm} 
-        onSearchTermChange={setSearchTerm} 
-      />
-      <LobbyList
-        lobbies={lobbies}
-        activeTab={activeTab}
-        searchTerm={searchTerm} 
-      />
-    </>
-  );
+  return <LobbyManagement lobbies={lobbies} existingLobby={existingLobby} />;
 }
-
-export default LobbiesArea;
+export default LobbiesArea; 

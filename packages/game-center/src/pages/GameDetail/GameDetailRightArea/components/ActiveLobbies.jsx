@@ -1,13 +1,42 @@
-import React from 'react';
-import { Card, CardContent, Typography, List, useTheme, Box, Divider } from '@mui/material';
+import React, { memo, useMemo } from 'react';
+import { Card, CardContent, Typography, useTheme, Box, Divider } from '@mui/material';
 import { People } from '@mui/icons-material';
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import NoActiveLobbies from './NoActiveLobbies';
 import LobbyItem from '../../../../shared/components/LobbyItem/LobbyItem';
 import { useTranslation } from 'react-i18next';
 
-function ActiveLobbies({ filteredLobbies }) {
+const Row = memo(({ index, style, data }) => {
+  const { lobbies, theme } = data;
+  const lobby = lobbies[index];
+  const isLastItem = index === lobbies.length - 1;
+
+  return (
+    <Box style={style}>
+      <LobbyItem lobby={lobby} isOpen={true} />
+      {!isLastItem && (
+        <Divider
+          sx={{
+            mx: 1,
+            backgroundColor: `${theme.palette.divider}80`,
+          }}
+        />
+      )}
+    </Box>
+  );
+});
+
+const ActiveLobbies = ({ filteredLobbies }) => {
   const theme = useTheme();
   const { t } = useTranslation();
+
+  const itemData = useMemo(() => ({
+    lobbies: filteredLobbies,
+    theme: theme,
+  }), [filteredLobbies, theme]);
+  
+  const ITEM_SIZE = 150;
 
   return (
     <Card
@@ -16,26 +45,21 @@ function ActiveLobbies({ filteredLobbies }) {
         boxShadow: theme.shadows[8],
         bgcolor: theme.palette.primary.main,
         position: 'relative',
-        transition: 'transform 0.3s, box-shadow 0.3s',
-        '&:hover': {
-          boxShadow: theme.shadows[12],
-        },
         display: 'flex', 
         flexDirection: 'column', 
-        maxHeight: '65vh', 
+        height: '65vh',
       }}
     >
       <CardContent
         sx={{
           background: theme.palette.background.stripeBg,
           pt: 2,
-          pb: filteredLobbies.length > 0 ? 0 : 2,
+          pb: 0,
           px: 2,
           display: 'flex',
           flexDirection: 'column',
           flexGrow: 1, 
           overflow: 'hidden', 
-          minHeight: 0, 
         }}
       >
         <Typography
@@ -53,42 +77,39 @@ function ActiveLobbies({ filteredLobbies }) {
           {t("Active Lobbies")}
         </Typography>
 
-        {filteredLobbies.length > 0 ? (
-          <List
-            sx={{
-              overflowY: 'auto', 
-              flexGrow: 1, 
-            }}
-          >
-            {filteredLobbies.map((lobby, index) => (
-              <React.Fragment key={lobby.id || lobby.lobbyCode}>
-                <LobbyItem lobby={lobby} isOpen={true} />
-                {index < filteredLobbies.length - 1 && (
-                  <Divider sx={{
-                      mx: 1,
-                      backgroundColor: `${theme.palette.divider}80`
-                    }}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </List>
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexGrow: 1, 
-            }}
-          >
-            <NoActiveLobbies />
-          </Box>
-        )}
+        <Box sx={{ flexGrow: 1, width: '100%' }}>
+          {filteredLobbies.length > 0 ? (
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  height={height}
+                  width={width}
+                  itemCount={filteredLobbies.length}
+                  itemSize={ITEM_SIZE}
+                  itemData={itemData}
+                  overscanCount={5}
+                >
+                  {Row}
+                </List>
+              )}
+            </AutoSizer>
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+              }}
+            >
+              <NoActiveLobbies />
+            </Box>
+          )}
+        </Box>
       </CardContent>
     </Card>
   );
 }
 
-export default ActiveLobbies;
+export default memo(ActiveLobbies);

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, memo } from "react"; // memo'yu import edin
 import { Box, CircularProgress } from "@mui/material";
 
 const ActiveGamesArea = lazy(() => import("./ActiveGamesArea"));
@@ -110,4 +110,4 @@ function MainScreenMiddleArea() {
   );
 }
 
-export default MainScreenMiddleArea;
+export default memo(MainScreenMiddleArea);
