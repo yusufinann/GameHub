@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuthContext } from "../../shared/context/AuthContext";
 
-// JWT token'ı decode eden yardımcı fonksiyon
 const parseJwt = (token) => {
   try {
     const base64Url = token.split(".")[1];
@@ -22,16 +21,16 @@ const parseJwt = (token) => {
 const ProtectedRoute = ({ children }) => {
   const { token, logout } = useAuthContext();
 
-  // Eğer token yoksa yönlendir
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  const decodedToken = token ? parseJwt(token) : null;
+  const isTokenExpired = !decodedToken || decodedToken.exp * 1000 < Date.now();
+  
+  useEffect(() => {
+    if (token && isTokenExpired) {
+      logout();
+    }
+  }, [token, isTokenExpired, logout]);
 
-  // Token'ı decode edip süresini kontrol et
-  const decoded = parseJwt(token);
-  if (!decoded || decoded.exp * 1000 < Date.now()) {
-    // Token süresi dolmuş veya hatalıysa oturumu kapat
-    logout();
+  if (!token || isTokenExpired) {
     return <Navigate to="/login" replace />;
   }
 
