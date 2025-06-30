@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import { login, validateToken } from "./api"; // "./api" yolunun doğru olduğundan emin olun
+import { login, validateToken } from "./api"; 
 import { useNavigate } from "react-router-dom";
 import crypto from 'crypto-js';
-import { useAuthContext } from "../../../../shared/context/AuthContext"; // Yolun doğruluğunu kontrol edin
+import { useAuthContext } from "../../../../shared/context/AuthContext"; 
 import { useTranslation } from "react-i18next";
 
 const useLoginForm = () => {
@@ -81,8 +81,6 @@ const useLoginForm = () => {
     setLoading(true);
     setError(null);
 
-    // Çeviri JSON yapınıza göre güncellendi:
-    // "login": { "EMAIL_PASSWORD_REQUIRED": "E-posta ve şifre zorunludur." }
     if (!email || !password) {
       setError(t("login.EMAIL_PASSWORD_REQUIRED"));
       setLoading(false);
@@ -97,7 +95,7 @@ const useLoginForm = () => {
       authLogin({ id: user.id, email: user.email, name: user.name, username: user.username, avatar: user.avatar, token });
       setIsNavigating(true);
 
-      if (rememberMe) {
+      if (rememberMe || savedUser) {
         const userInfoToSave = {
           email: user.email,
           id: user.id,
@@ -106,7 +104,7 @@ const useLoginForm = () => {
         };
         const encrypted = crypto.AES.encrypt(
           JSON.stringify(userInfoToSave),
-          'secret_key' // Güvenlik için 'secret_key'i daha güvenli bir yerden alın
+          'secret_key' 
         ).toString();
         localStorage.setItem("savedUser", encrypted);
       } else {
@@ -117,9 +115,7 @@ const useLoginForm = () => {
     } catch (err) {
       const errorCode = err?.response?.data?.code;
       let displayError;
-
-      // Çeviri JSON yapınıza göre güncellendi:
-      // "login": { "AUTH_INVALID_CREDENTIALS": "...", "error": { "generic": "..." } }
+      
       if (errorCode) {
         displayError = t(`login.${errorCode}`, { defaultValue: t("login.error.generic") });
       } else {
@@ -134,8 +130,6 @@ const useLoginForm = () => {
 
   const quickLogin = async (event) => {
     if (savedUser && savedUser.email) {
-      // Çeviri JSON yapınıza göre güncellendi:
-      // "login": { "PASSWORD_REQUIRED": "Lütfen şifrenizi girin." }
       if (password) {
         handleSubmit(event);
       } else {

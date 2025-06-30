@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Avatar, Box, IconButton, Tooltip, CircularProgress } from '@mui/material';
-import { styled} from '@mui/material/styles';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../../../shared/context/AuthContext';
-import { logout } from '../api'; 
-import { useTranslation } from 'react-i18next';
+import { Avatar, Box, IconButton, Tooltip, CircularProgress } from '@mui/material'
+import { styled } from '@mui/material/styles'
+import LogoutIcon from '@mui/icons-material/Logout'
+import { useNavigate } from 'react-router-dom'
+import { useAuthContext } from '../../../shared/context/AuthContext'
+import { logout } from '../api'
+import { useTranslation } from 'react-i18next'
 
 const StyledHeader = styled(Box)(({ theme }) => ({
   height: '25vh',
@@ -16,7 +16,7 @@ const StyledHeader = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   borderRadius: '10px',
-}));
+}))
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   width: '60px',
@@ -27,7 +27,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
   fontSize: '1.5rem',
   fontWeight: 'bold',
-}));
+}))
 
 const StyledLogoutButton = styled(IconButton)(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
@@ -41,34 +41,32 @@ const StyledLogoutButton = styled(IconButton)(({ theme }) => ({
   },
   '&.Mui-disabled': {
     backgroundColor: theme.palette.error.light,
-    cursor: 'not-allowed',
-    pointerEvents: 'auto',
-    transform: 'none',
     color: theme.palette.text.contrast,
   },
-}));
+}))
 
 function SidebarHeader() {
-  const navigate = useNavigate();
-  const { logout: authLogout, currentUser } = useAuthContext();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const{t}=useTranslation();
+  const navigate = useNavigate()
+  const { logout: authLogout, currentUser } = useAuthContext()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { t } = useTranslation()
+
   const handleLogout = async () => {
-    if (isLoggingOut) return;
+    if (isLoggingOut) return
 
-    setIsLoggingOut(true);
+    setIsLoggingOut(true)
     try {
-      await logout();
+      await logout()
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Error logging out:', error)
     } finally {
-      authLogout();
-      navigate('/login');
+      authLogout()
+      navigate('/login')
     }
-  };
+  }
 
-  const initial = currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : '';
-  const tooltipTitle = isLoggingOut ? t("Logging out...") : t("Logout");
+  const initial = currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : ''
+  const tooltipTitle = isLoggingOut ? t('Logging out...') : t('Logout')
 
   return (
     <StyledHeader>
@@ -77,20 +75,22 @@ function SidebarHeader() {
       </StyledAvatar>
 
       <Tooltip title={tooltipTitle} placement="right">
-        <StyledLogoutButton
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          aria-label={tooltipTitle}
-        >
-          {isLoggingOut ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            <LogoutIcon />
-          )}
-        </StyledLogoutButton>
+        <Box>
+          <StyledLogoutButton
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            aria-label={tooltipTitle}
+          >
+            {isLoggingOut ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <LogoutIcon />
+            )}
+          </StyledLogoutButton>
+        </Box>
       </Tooltip>
     </StyledHeader>
-  );
+  )
 }
 
-export default SidebarHeader;
+export default SidebarHeader

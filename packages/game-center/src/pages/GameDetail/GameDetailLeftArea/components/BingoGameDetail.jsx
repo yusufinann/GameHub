@@ -137,7 +137,7 @@ const BingoGameDetail = () => {
             p: 2,
             borderRadius: 2,
             background: theme.palette.primary.main,
-            color: "white",
+            color: theme.palette.secondary.contrastText
           }}
         >
           <StatsIcon sx={{ mr: 1, fontSize: 30 }} />

@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+
 function LoginFormView({
   email,
   password,
@@ -30,7 +31,8 @@ function LoginFormView({
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
-  // Define styles using theme tokens directly
+  
+  const isDarkTheme = theme.palette.mode === 'dark';
   const styles = {
     pageContainer: {
       display: "flex",
@@ -136,15 +138,29 @@ function LoginFormView({
       },
     },
     inputIcon: {
-      color: theme.palette.primary.main,
-      opacity: 0.8,
-    },
-    visibilityIcon: {
-      color: theme.palette.text.secondary,
-      opacity: 0.7,
-      transition: "opacity 0.2s ease",
+      color: isDarkTheme 
+        ? "rgba(255, 255, 255, 0.9)" 
+        : theme.palette.primary.main,
+      opacity: isDarkTheme ? 0.9 : 0.8,
+      transition: "all 0.3s ease",
       "&:hover": {
         opacity: 1,
+        color: isDarkTheme 
+          ? "#ffffff" 
+          : theme.palette.primary.dark,
+      }
+    },
+    visibilityIcon: {
+      color: isDarkTheme 
+        ? "rgba(255, 255, 255, 0.8)" 
+        : theme.palette.text.secondary,
+      opacity: isDarkTheme ? 0.8 : 0.7,
+      transition: "all 0.3s ease",
+      "&:hover": {
+        opacity: 1,
+        color: isDarkTheme 
+          ? "#ffffff" 
+          : theme.palette.text.primary,
       }
     },
     button: {
@@ -190,7 +206,14 @@ function LoginFormView({
     checkboxLabel: {
       color: theme.palette.text.secondary,
       "& .MuiCheckbox-root": {
-        color: theme.palette.primary.main,
+        color: isDarkTheme 
+          ? "rgba(255, 255, 255, 0.9)" 
+          : theme.palette.primary.main,
+        "&.Mui-checked": {
+          color: isDarkTheme 
+            ? "#ffffff" 
+            : theme.palette.primary.main,
+        }
       },
       marginY: theme.spacing(1),
     },
