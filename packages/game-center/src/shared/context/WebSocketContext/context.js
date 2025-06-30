@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useRef,
+  useMemo,
 } from 'react';
 import { useAuthContext } from '../AuthContext'; 
 import config from '../../../config';
@@ -81,7 +82,7 @@ export const WebSocketProvider = ({ children }) => {
     return () => {
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = null;
+        reconnectTimerRef.current = null; 
       }
       if (socketInstanceRef.current) {
         socketInstanceRef.current.onopen = null;
@@ -97,8 +98,13 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [currentUser, connectWebSocket]);
 
+  const contextValue = useMemo(() => ({
+    socket,
+    isConnected,
+  }), [socket, isConnected]);
+
   return (
-    <WebSocketContext.Provider value={{ socket, isConnected }}>
+    <WebSocketContext.Provider value={contextValue}>
       {children}
     </WebSocketContext.Provider>
   );

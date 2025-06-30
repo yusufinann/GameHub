@@ -1,12 +1,15 @@
 import React, { useState, memo } from 'react';
 import { LobbyList } from './LobbyList';
 import CreateLobbyArea from './CreateLobbyArea';
+import useDebounce from '../useDebounce';
 
 const LobbyManagement = memo(({ lobbies, existingLobby }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState(''); 
 
-  
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedActiveTab = useDebounce(activeTab, 200);
+
   return (
     <>
       <CreateLobbyArea
@@ -18,8 +21,8 @@ const LobbyManagement = memo(({ lobbies, existingLobby }) => {
       />
       <LobbyList
         lobbies={lobbies}
-        activeTab={activeTab}
-        searchTerm={searchTerm} 
+        activeTab={debouncedActiveTab}
+        searchTerm={debouncedSearchTerm} 
       />
     </>
   );

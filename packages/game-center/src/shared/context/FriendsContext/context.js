@@ -1,10 +1,10 @@
-// FriendsContext.js
 import React, {
   createContext,
   useContext,
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import axios from 'axios';
 import { useWebSocket } from "../WebSocketContext/context";
@@ -55,8 +55,7 @@ export const FriendsProvider = ({ children }) => {
     }
   }, []);
 
-
-  const sendFriendRequest = (targetUserId) => {
+  const sendFriendRequest = useCallback((targetUserId) => {
     setOutgoingRequests((prev) => {
       const newRequest = {
         id: targetUserId.toString(),
@@ -70,9 +69,9 @@ export const FriendsProvider = ({ children }) => {
       type: "FRIEND_REQUEST",
       targetUserId: targetUserId.toString(),
     });
-  };
+  }, [sendMessage]);
 
-  const acceptFriendRequest = (requesterId) => {
+  const acceptFriendRequest = useCallback((requesterId) => {
     setIncomingRequests((prev) =>
       prev.filter((req) => req.id.toString() !== requesterId.toString())
     );
@@ -80,9 +79,9 @@ export const FriendsProvider = ({ children }) => {
       type: "FRIEND_REQUEST_ACCEPT",
       requesterId: requesterId.toString(),
     });
-  };
+  }, [sendMessage]);
 
-  const rejectFriendRequest = (requesterId) => {
+  const rejectFriendRequest = useCallback((requesterId) => {
     setIncomingRequests((prev) =>
       prev.filter((req) => req.id.toString() !== requesterId.toString())
     );
@@ -90,9 +89,9 @@ export const FriendsProvider = ({ children }) => {
       type: "FRIEND_REQUEST_REJECT",
       requesterId: requesterId.toString(),
     });
-  };
+  }, [sendMessage]);
 
-  const removeFriend = (friendId) => {
+  const removeFriend = useCallback((friendId) => {
     setFriends((prev) =>
       prev.filter((friend) => friend.id.toString() !== friendId.toString())
     );
@@ -105,8 +104,7 @@ export const FriendsProvider = ({ children }) => {
       })
     );
     sendMessage({ type: "FRIEND_REMOVE", friendId: friendId.toString() });
-  };
-
+  }, [sendMessage]);
 
   const requestFriendRequests = useCallback(() => {
     sendMessage({ type: "GET_FRIEND_REQUESTS" });
@@ -256,26 +254,67 @@ export const FriendsProvider = ({ children }) => {
     };
   }, [socket, handleSocketMessage, requestFriendRequests, fetchFriendListHTTP]);
 
-  const isFriend = friends.some((friend) => friend.id.toString() === userId);
-  const isRequestSent = outgoingRequests
-    .map((request) => request.id?.toString())
-    .includes(userId?.toString());
+  const isFriend = useMemo(() => {
+    return friends.some((friend) => friend.id.toString() === userId);
+  }, [friends, userId]);
+
+  const isRequestSent = useMemo(() => {
+    return outgoingRequests
+      .map((request) => request.id?.toString())
+      .includes(userId?.toString());
+  }, [outgoingRequests, userId]);
+
+  const onlineFriends = useMemo(() => {
+    return friends.filter(friend => friend.isOnline);
+  }, [friends]);
+
+  const offlineFriends = useMemo(() => {
+    return friends.filter(friend => !friend.isOnline);
+  }, [friends]);
+
+  const friendsCount = useMemo(() => {
+    return friends.length;
+  }, [friends]);
+
+  const pendingRequestsCount = useMemo(() => {
+    return incomingRequests.length + outgoingRequests.length;
+  }, [incomingRequests, outgoingRequests]);
+
+  const contextValue = useMemo(() => ({
+    incomingRequests,
+    outgoingRequests,
+    friends,
+    onlineFriends,
+    offlineFriends,
+    friendsCount,
+    pendingRequestsCount,
+    setFriends, 
+    fetchFriendListHTTP, 
+    sendFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    removeFriend,
+    isFriend,
+    isRequestSent,
+  }), [
+    incomingRequests,
+    outgoingRequests,
+    friends,
+    onlineFriends,
+    offlineFriends,
+    friendsCount,
+    pendingRequestsCount,
+    fetchFriendListHTTP,
+    sendFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    removeFriend,
+    isFriend,
+    isRequestSent,
+  ]);
+
   return (
-    <FriendsContext.Provider
-      value={{
-        incomingRequests,
-        outgoingRequests,
-        friends,
-        setFriends, 
-        fetchFriendListHTTP, 
-        sendFriendRequest,
-        acceptFriendRequest,
-        rejectFriendRequest,
-        removeFriend,
-        isFriend,
-        isRequestSent,
-      }}
-    >
+    <FriendsContext.Provider value={contextValue}>
       {children}
     </FriendsContext.Provider>
   );
