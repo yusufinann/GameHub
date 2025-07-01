@@ -5,9 +5,11 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import { useLocation } from "react-router-dom";
-import notificationSound from '../../../assets/notification-sound.mp3'; 
+import notificationSound from '../../../assets/notification-sound.mp3';
+import GlobalTurnNotification from "./GlobalTurnNotification";
 
 const TurnNotificationContext = createContext();
 
@@ -29,43 +31,37 @@ export const TurnNotificationProvider = ({ children }) => {
   }, []);
 
   const showTurnNotification = useCallback((lobbyCodeParam, lobbyName, message) => {
-    const targetLobbyPath = `/lobby/${lobbyCodeParam}`;
-
-    if (location.pathname !== targetLobbyPath) {
-      setTurnNotification({
-        show: true,
-        lobbyCode: lobbyCodeParam,
-        lobbyName,
-        message,
-      });
-      if (turnAudioRef.current && typeof document !== "undefined" && document.hidden) {
-        turnAudioRef.current.play().catch(error => console.warn("Audio play failed (TurnNotificationContext):", error));
-      }
-    } else {
-      setTurnNotification(prev => ({ ...prev, show: false }));
+    setTurnNotification({
+      show: true,
+      lobbyCode: lobbyCodeParam,
+      lobbyName,
+      message,
+    });
+    if (turnAudioRef.current && typeof document !== "undefined" && document.hidden) {
+      turnAudioRef.current.play().catch(error => console.warn("Audio play failed (TurnNotificationContext):", error));
     }
-  }, [location.pathname]); 
+  }, []);
 
   const hideTurnNotification = useCallback(() => {
     setTurnNotification(prev => ({ ...prev, show: false }));
   }, []);
 
- 
   useEffect(() => {
     if (turnNotification.show && turnNotification.lobbyCode && location.pathname === `/lobby/${turnNotification.lobbyCode}`) {
       hideTurnNotification();
     }
   }, [location.pathname, turnNotification, hideTurnNotification]);
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     turnNotification,
     showTurnNotification,
     hideTurnNotification,
-  };
+  }), [turnNotification, showTurnNotification, hideTurnNotification]);
 
   return (
     <TurnNotificationContext.Provider value={contextValue}>
       {children}
+      <GlobalTurnNotification />
     </TurnNotificationContext.Provider>
   );
 };
