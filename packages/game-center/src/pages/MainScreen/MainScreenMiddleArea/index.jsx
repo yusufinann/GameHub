@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, memo } from "react"; // memo'yu import edin
+import React, { lazy, Suspense, memo } from "react";
 import { Box, CircularProgress } from "@mui/material";
 
 const ActiveGamesArea = lazy(() => import("./ActiveGamesArea"));
@@ -22,6 +22,76 @@ const LoadingSpinner = () => (
   </Box>
 );
 
+const TopRow = () => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: "20px",
+      width: "100%",
+    }}
+  >
+    <Box sx={{ width: { xs: '100%', md: '50%'} }}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <PopularGamesArea />
+      </Suspense>
+    </Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: { xs: '100%', md: '60%' },
+        height: { xs: '100%', md: '70vh' },
+      }}
+    >
+      <Suspense fallback={<LoadingSpinner />}>
+        <LobbiesArea />
+      </Suspense>
+    </Box>
+  </Box>
+);
+
+const BottomContent = () => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: "20px",
+      width: "100%",
+    }}
+  >
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+        width: { xs: '100%', md: '60%' },
+        height: 'auto',
+      }}
+    >
+      <Suspense fallback={<LoadingSpinner />}>
+        <ActiveGamesArea />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
+        <GameStories />
+      </Suspense>
+    </Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: { xs: '100%', md: '40%' },
+        height: 'auto',
+      }}
+    >
+      <Suspense fallback={<LoadingSpinner />}>
+        <BingoStatsSchema />
+      </Suspense>
+    </Box>
+  </Box>
+);
+
+
 function MainScreenMiddleArea() {
   return (
     <Box
@@ -34,78 +104,8 @@ function MainScreenMiddleArea() {
         gap: "20px",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: {
-            xs: "column",
-            md: "row",
-          },
-          gap: "20px",
-          width: "100%",
-        }}
-      >
-        <Box sx={{ width: { xs: '100%', md: '50%'} }}>
-          <Suspense fallback={<LoadingSpinner />}>
-            <PopularGamesArea />
-          </Suspense>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: { xs: '100%', md: '60%' },
-            height: { xs: '100%', md: '70vh' },
-          }}
-        >
-          <Suspense fallback={<LoadingSpinner />}>
-            <LobbiesArea />
-          </Suspense>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: {
-            xs: "column",
-            md: "row",
-          },
-          gap: "20px",
-          width: "100%",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-            width: { xs: '100%', md: '60%' },
-            height: 'auto',
-          }}
-        >
-          <Suspense fallback={<LoadingSpinner />}>
-            <ActiveGamesArea />
-          </Suspense>
-          <Suspense fallback={<LoadingSpinner />}>
-            <GameStories />
-          </Suspense>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: { xs: '100%', md: '40%' },
-            height: 'auto',
-          }}
-        >
-          <Suspense fallback={<LoadingSpinner />}>
-            <BingoStatsSchema />
-          </Suspense>
-        </Box>
-      </Box>
+      <TopRow />
+      <BottomContent />
     </Box>
   );
 }

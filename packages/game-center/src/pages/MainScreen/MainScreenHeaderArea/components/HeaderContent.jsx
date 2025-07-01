@@ -45,8 +45,8 @@ const HeaderContent = ({
         flex: 1,
         overflow: "hidden",
         background: "transparent",
-        boxShadow: "none", 
-        border: "none", 
+        boxShadow: "none",
+        border: "none",
       }}
       onMouseEnter={() => {
         setIsHovered(true);
@@ -57,180 +57,166 @@ const HeaderContent = ({
         if (onHoverStateChange) onHoverStateChange(false);
       }}
     >
-      {slides.map((slide, index) => (
-        <Fade key={slide.id} in={index === activeSlideIndex} timeout={800}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              display: index === activeSlideIndex ? "flex" : "none",
-              background: "transparent",
-              overflow: "hidden",
-            }}
-          >
+      {slides.map((slide, index) => {
+        const isActive = index === activeSlideIndex;
+        const isFirstSlide = index === 0;
+
+        return (
+          <Fade key={slide.id} in={isActive} timeout={800}>
             <Box
               sx={{
-                position: "relative",
-                width: "45%",
-                display: { xs: "none", md: "flex" },
-                alignItems: "flex-end",
-                justifyContent: "center",
-                zIndex: 2,
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                display: isActive ? "flex" : "none",
+                background: "transparent",
                 overflow: "hidden",
               }}
             >
               <Box
                 sx={{
                   position: "relative",
-                  height: "90%",
-                  width: "auto",
-                  maxWidth: "85%",
-                  display: "flex",
-                  justifyContent: "center",
+                  width: "45%",
+                  display: { xs: "none", md: "flex" },
                   alignItems: "flex-end",
-                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                  justifyContent: "center",
+                  zIndex: 2,
+                  overflow: "hidden",
                 }}
               >
                 <Box
-                  component="img"
-                  src={slide.characterImg}
-                  alt={t("alt.gameCharacter")}
                   sx={{
-                    height: "100%",
+                    position: "relative",
+                    height: "90%",
                     width: "auto",
-                    objectFit: "contain",
-                    filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.4))",
-                    transition: "filter 0.3s ease",
-                    "&:hover": {
-                      filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.5))",
-                    },
+                    maxWidth: "85%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-end",
+                    transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
-                />
+                >
+                  <Box
+                    component="img"
+                    src={slide.characterImg}
+                    alt={t("alt.gameCharacter")}
+                    loading={isActive || isFirstSlide ? "eager" : "lazy"}
+                    fetchPriority={isFirstSlide ? "high" : "auto"}
+                    decoding="async"
+                    sx={{
+                      height: "100%",
+                      width: "auto",
+                      objectFit: "contain",
+                      filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.4))",
+                      transition: "filter 0.3s ease",
+                      "&:hover": {
+                        filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.5))",
+                      },
+                    }}
+                  />
+                </Box>
               </Box>
-            </Box>
-
-     
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: { xs: "center", md: "flex-start" },
-                px: { xs: 3, sm: 4, md: 5 },
-                py: 4,
-                zIndex: 3,
-                position: "relative",
-              }}
-            >
-       
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "20%",
-                  right: { xs: "10%", md: "20%" },
-                  width: 60,
-                  height: 60,
-                  borderRadius: "50%",
-                  bgcolor: theme.palette.background.elevation[1],
-                  backdropFilter: "blur(10px)",
-                  border: `1px solid ${theme.palette.divider}`,
-                  display: { xs: "none", sm: "block" },
-                  boxShadow:
-                    theme.palette.mode === "neonOcean"
-                      ? `0 0 20px ${theme.palette.primary.main}40`
-                      : theme.shadows[4],
-                }}
-              />
-
-              <Typography
-                variant="h3"
-                component="h1"
-                sx={{
-                  fontWeight: 700,
-                  background:
-                    theme.palette.text.gradient ||
-                    `linear-gradient(45deg, ${slide.color}, ${theme.palette.text.primary})`,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontSize: {
-                    xs: "2rem",
-                    sm: "2.5rem",
-                    md: "3rem",
-                    lg: "3.5rem",
-                  },
-                  mb: 3,
-                  textAlign: { xs: "center", md: "left" },
-                  lineHeight: 1.1,
-                  textShadow:
-                    theme.palette.mode === "neonOcean"
-                      ? `0 0 20px ${slide.color}80, 0 4px 8px rgba(0,0,0,0.3)`
-                      : "0 4px 8px rgba(0,0,0,0.3)",
-                  transform:
-                    index === activeSlideIndex
-                      ? "translateY(0)"
-                      : "translateY(20px)",
-                  opacity: index === activeSlideIndex ? 1 : 0,
-                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {t(slide.titleKey)}
-              </Typography>
 
               <Box
                 sx={{
-                  display: { xs: "flex", md: "flex" },
-                  alignItems: "center",
-                  gap: 2,
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: { xs: "center", md: "flex-start" },
+                  px: { xs: 3, sm: 4, md: 5 },
+                  py: 4,
+                  zIndex: 3,
+                  position: "relative",
                 }}
               >
-                <IconButton
+                <Box
                   sx={{
-                    bgcolor: theme.palette.background.elevation[2],
+                    position: "absolute",
+                    top: "20%",
+                    right: { xs: "10%", md: "20%" },
+                    width: 60,
+                    height: 60,
+                    borderRadius: "50%",
+                    bgcolor: theme.palette.background.elevation[1],
                     backdropFilter: "blur(10px)",
                     border: `1px solid ${theme.palette.divider}`,
-                    color: theme.palette.text.primary,
-                    width: 56,
-                    height: 56,
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    display: { xs: "none", sm: "block" },
                     boxShadow:
                       theme.palette.mode === "neonOcean"
-                        ? `0 0 15px ${theme.palette.primary.main}60`
+                        ? `0 0 20px ${theme.palette.primary.main}40`
                         : theme.shadows[4],
-                    "&:hover": {
-                      bgcolor: theme.palette.background.elevation[3],
-                      transform: "scale(1.05)",
+                  }}
+                />
+                <Typography
+                  variant="h3"
+                  component="h1"
+                  sx={{
+                    fontWeight: 700,
+                    background:
+                      theme.palette.text.gradient ||
+                      `linear-gradient(45deg, ${slide.color}, ${theme.palette.text.primary})`,
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem", lg: "3.5rem" },
+                    mb: 3,
+                    textAlign: { xs: "center", md: "left" },
+                    lineHeight: 1.1,
+                    textShadow:
+                      theme.palette.mode === "neonOcean"
+                        ? `0 0 20px ${slide.color}80, 0 4px 8px rgba(0,0,0,0.3)`
+                        : "0 4px 8px rgba(0,0,0,0.3)",
+                    transform: isActive ? "translateY(0)" : "translateY(20px)",
+                    opacity: isActive ? 1 : 0,
+                    transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                  }}
+                >
+                  {t(slide.titleKey)}
+                </Typography>
+                <Box
+                  sx={{ display: { xs: "flex", md: "flex" }, alignItems: "center", gap: 2 }}
+                >
+                  <IconButton
+                    sx={{
+                      bgcolor: theme.palette.background.elevation[2],
+                      backdropFilter: "blur(10px)",
+                      border: `1px solid ${theme.palette.divider}`,
+                      color: theme.palette.text.primary,
+                      width: 56,
+                      height: 56,
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       boxShadow:
                         theme.palette.mode === "neonOcean"
-                          ? `0 0 25px ${theme.palette.primary.main}80, 0 8px 25px rgba(0,0,0,0.3)`
-                          : "0 8px 25px rgba(0,0,0,0.3)",
-                    },
-                  }}
-                >
-                  <PlayArrow sx={{ fontSize: 28 }} />
-                </IconButton>
-
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontWeight: 500,
-                    display: { xs: "none", sm: "block" },
-                  }}
-                >
-                  {t(slide.buttonTextKey)}
-                </Typography>
+                          ? `0 0 15px ${theme.palette.primary.main}60`
+                          : theme.shadows[4],
+                      "&:hover": {
+                        bgcolor: theme.palette.background.elevation[3],
+                        transform: "scale(1.05)",
+                        boxShadow:
+                          theme.palette.mode === "neonOcean"
+                            ? `0 0 25px ${theme.palette.primary.main}80, 0 8px 25px rgba(0,0,0,0.3)`
+                            : "0 8px 25px rgba(0,0,0,0.3)",
+                      },
+                    }}
+                  >
+                    <PlayArrow sx={{ fontSize: 28 }} />
+                  </IconButton>
+                  <Typography
+                    variant="body1"
+                    sx={{ color: theme.palette.text.secondary, fontWeight: 500, display: { xs: "none", sm: "block" } }}
+                  >
+                    {t(slide.buttonTextKey)}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        </Fade>
-      ))}
+          </Fade>
+        );
+      })}
 
-  
       <Box
         sx={{
           position: "absolute",
@@ -260,13 +246,14 @@ const HeaderContent = ({
               width: i === activeSlideIndex ? 24 : 12,
               height: 12,
               borderRadius: 6,
-              bgcolor: i === activeSlideIndex ? theme.palette.primary.main : theme.palette.action.disabled, 
+              bgcolor: i === activeSlideIndex ? theme.palette.primary.main : theme.palette.action.disabled,
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              cursor: "pointer",
               "&:hover": {
                 bgcolor:
                   i === activeSlideIndex
                     ? theme.palette.primary.light
-                    : theme.palette.text.secondary, 
+                    : theme.palette.text.secondary,
                 transform: "scale(1.1)",
               },
             }}
