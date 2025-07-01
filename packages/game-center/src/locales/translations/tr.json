@@ -893,7 +893,7 @@
   "backLobby": "Lobiye Dön",
   "Game Over!": "Oyun Bitti!",
   "Correct Word": "Doğru Kelime",
-  "End Game (Host)": "Oyunu Bitir (Sunucu)",
+  "End Game": "Oyunu Bitir",
   "hostSetupModal": {
     "title": "Adam Asmaca Oyunu Kurulumu",
     "description": "Başlamadan önce oyun ayarlarını yapılandırın.",

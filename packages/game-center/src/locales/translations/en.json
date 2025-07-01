@@ -895,7 +895,7 @@
   "backLobby": "Back to Lobby",
   "Game Over!": "Game Over!",
   "Correct Word": "Correct Word",
-  "End Game (Host)": "End Game (Host)",
+  "End Game": "End Game",
 "hostSetupModal": {
     "title": "Hangman Game Setup",
     "description": "Configure the game settings before starting.",
