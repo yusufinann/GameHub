@@ -51,12 +51,18 @@
     
   },
   "error": {
-    "couldNotFetchGroupDetails": "Could not fetch group details for ID: {groupId}.",
+   "couldNotFetchGroupDetails": "Could not fetch group details for ID: {groupId}.",
     "friendNotFound": "Friend with ID: {friendId} not found.",
     "generic": "An unexpected error occurred. Please try again.",
     "failedToSendMessage": "Failed to send message.",
     "failedToLoadMessages": "Failed to load messages.",
-    "failedToLoadMoreMessages": "Failed to load more messages."
+    "failedToLoadMoreMessages": "Failed to load more messages.",
+    "title": "An Error Occurred",
+    "message": "An unexpected error has occurred. Please try refreshing the page.",
+    "reloadButton": "Reload Page",
+    "goHomeButton": "Go to Home",
+    "errorDetails" : "Error Details",
+    "previousPage": "Go back to the previous page"
   },
   "chat": {
     "selectFriend": "Select a friend to chat",

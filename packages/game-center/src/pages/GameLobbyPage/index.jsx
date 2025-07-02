@@ -1,16 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
-  IconButton,
-  Tooltip,
   Snackbar,
   Alert,
 } from "@mui/material";
-import {
-  Fullscreen as FullscreenIcon,
-  FullscreenExit as FullscreenExitIcon,
-} from "@mui/icons-material";
 import MembersList from "./MembersList/MembersList";
 import GameArea from "./GameArea/GameArea";
 import { useGameLobbyPage } from "./useGameLobbyPage";
@@ -36,7 +30,6 @@ const GameLobbyPage = () => {
     setUserLeftInfo(null);
   };
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDeletingLobby, setIsDeletingLobby] = useState(false);
   const [isLeavingLobby, setIsLeavingLobby] = useState(false);
 
@@ -57,30 +50,6 @@ const GameLobbyPage = () => {
   const handleDeletedModalClose = () => {
     clearDeletedLobbyInfo();
     navigate("/");
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    const gameLobbyElement = document.getElementById("gameLobbyPage");
-
-    if (!document.fullscreenElement && gameLobbyElement) {
-      gameLobbyElement.requestFullscreen().catch((err) => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
   };
 
   const handleDeleteLobby = async () => {
@@ -166,41 +135,15 @@ const GameLobbyPage = () => {
   return (
     <>
       <Box
-        id="gameLobbyPage"
+        id="gameLobbyPage" 
         sx={{
           height: "calc(100vh - 20px)",
           display: "flex",
           position: "relative",
           borderTopRightRadius:'24px', 
           borderBottomRightRadius:'24px',
-          ...(isFullscreen && {
-            minHeight: "100vh",
-            maxHeight: "100vh",
-            overflow: "hidden", 
-            p: 2, 
-            bgcolor: "background.default", 
-          }),
         }}
       >
-        <Tooltip title={isFullscreen ? t("fullscreen.exit") : t("fullscreen.enter")}>
-          <IconButton
-            onClick={toggleFullscreen}
-            sx={{
-              position: "absolute",
-              top: { xs: 8, sm: 16 },
-              right: { xs: 8, sm: 16 },
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-              bgcolor: "rgba(255, 255, 255, 0.7)",
-              backdropFilter: "blur(4px)",
-              boxShadow: 3,
-              "&:hover": {
-                bgcolor: "rgba(255, 255, 255, 0.9)",
-              },
-            }}
-          >
-            {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-          </IconButton>
-        </Tooltip>
         <MembersList
           members={members}
           t={t}

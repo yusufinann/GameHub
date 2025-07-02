@@ -55,7 +55,13 @@
     "generic": "Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.",
     "failedToSendMessage": "Mesaj gönderilemedi.",
     "failedToLoadMessages": "Mesajlar yüklenemedi.",
-    "failedToLoadMoreMessages": "Daha fazla mesaj yüklenemedi."
+    "failedToLoadMoreMessages": "Daha fazla mesaj yüklenemedi.",
+     "pageTitle": "Bir Hata Oluştu",
+    "message": "Beklenmeyen bir hata meydana geldi. Lütfen sayfayı yenilemeyi deneyin.",
+    "reloadButton": "Sayfayı Yenile",
+    "goHomeButton": "Ana Sayfaya Dön",
+    "errorDetails": "Hata Detayları",
+    "previousPage": "Önceki sayfaya dön"
   },
   "chat": {
     "selectFriend": "Sohbet etmek için bir arkadaş seçin",
