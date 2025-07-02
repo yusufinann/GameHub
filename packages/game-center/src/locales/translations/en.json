@@ -47,8 +47,8 @@
     "playerCompletedBingo": "{{playerName}} completed Bingo!",
     "connectedToGame": "Connected to the game successfully.",
     "playerKickedFromGameMidGame": "{{playerName}} was kicked from the game.",
-    "groupDeletedByHost":"Group deleted by the host"
-    
+    "groupDeletedByHost":"Group deleted by the host",
+   "playerMadeCinko": "{{playerName}} completed their {{count, ordinal}} line!"
   },
   "error": {
    "couldNotFetchGroupDetails": "Could not fetch group details for ID: {groupId}.",

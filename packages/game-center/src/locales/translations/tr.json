@@ -47,7 +47,8 @@
      "playerCompletedBingo": "{{playerName}} Tombala yaptı!",
      "connectedToGame": "Oyun sunucusuna başarıyla bağland.",
       "playerKickedFromGameMidGame": "{{playerName}} oyundan atıldı.",
-      "groupDeletedByHost":"Grup kurucu tarafından silindi"
+      "groupDeletedByHost":"Grup kurucu tarafından silindi",
+         "playerMadeCinko": "{{playerName}}, {{count}}. çinkosunu yaptı!"
   },
   "error": {
     "couldNotFetchGroupDetails": "Grup detayları alınamadı (ID: {groupId}).",

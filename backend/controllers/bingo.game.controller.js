@@ -56,6 +56,22 @@ export async function cleanupAndRemoveBingoGame(lobbyCode) {
 
 }
 
+function checkCompletedRows(player) { 
+  if (!player.ticket || !player.ticket.numbersGrid || !Array.isArray(player.markedNumbers)) {
+    return [];
+  }
+  const completedRowIndexes = [];
+  player.ticket.numbersGrid.forEach((row, rowIndex) => {
+    const numbersInRow = row.filter(num => num !== null);
+    if (numbersInRow.length === 0) return; 
+    const isRowComplete = numbersInRow.every(num => player.markedNumbers.includes(num));
+    
+    if (isRowComplete) {
+      completedRowIndexes.push(rowIndex);
+    }
+  });
+  return completedRowIndexes;
+}
 export function broadcastToGame(game, data) {
   if (!game || !game.lobbyCode) {
     console.error(
@@ -322,6 +338,7 @@ export async function restoreActiveBingoTimers(redisClientInstance) {
               avatar: p.avatar,
               color: p.color,
               completedBingo: p.completedBingo || !!p.completedAt,
+              cinkoCount: p.completedRows ? p.completedRows.length : 0,
             };
           });
 
@@ -610,6 +627,7 @@ export const startGame = async (ws, data) => {
       player.ticket = ticketResult;
       delete player.completedAt;
       delete player.completedBingo;
+      player.completedRows = [];
     }
   }
 
@@ -662,6 +680,7 @@ export const startGame = async (ws, data) => {
           markedNumbers: p.markedNumbers || [],
           color: p.color,
           completedBingo: p.completedBingo || false,
+          cinkoCount: p.completedRows ? p.completedRows.length : 0,
         };
       });
 
@@ -774,12 +793,13 @@ export const joinGame = async (ws, data) => {
         avatar: player.avatar,
         completed: player.completedBingo || !!player.completedAt,
         color: player.color,
+        cinkoCount: player.completedRows ? player.completedRows.length : 0
     });
 
     ws.send(
       JSON.stringify({
         type: "BINGO_JOIN",
-        message: "Oyun bitti. Sonuçlar:",
+        message: "Oyun bitti.",
         lobbyCode,
         ticket: game.players[joiningPlayerId] ? game.players[joiningPlayerId].ticket : null,
         markedNumbers: game.players[joiningPlayerId] ? game.players[joiningPlayerId].markedNumbers || [] : [],
@@ -826,6 +846,7 @@ export const joinGame = async (ws, data) => {
     avatar: player.avatar,
     completed: player.completedBingo || !!player.completedAt,
     color: player.color,
+    cinkoCount: player.completedRows ? player.completedRows.length : 0
   });
 
   let playerColor;
@@ -898,6 +919,7 @@ export const joinGame = async (ws, data) => {
       completedBingo: false,
       completedAt: null,
       color: playerColor,
+      completedRows: [],
     };
     playerJustAdded = true;
 
@@ -1000,7 +1022,7 @@ export const handleBingoPlayerLeavePreGame = async (lobbyCode, playerId) => {
     bingoMode: game.bingoMode,
     competitionMode: game.competitionMode,
     kickedPlayerId: playerId,
-    messagePlayerName: playerNameForNotification, // Oyuncu adını da gönderelim
+    messagePlayerName: playerNameForNotification, 
   });
 };
 
@@ -1168,92 +1190,68 @@ export const markNumber = async (ws, data) => {
   const { lobbyCode, number } = data;
   let game = await getGameFromRedis(lobbyCode);
 
-  if (!game || !game.players[ws.userId]) {
+  if (!game || !game.players[ws.userId] || !game.gameStarted || game.gameEnded) {
     return ws.send(
       JSON.stringify({
         type: "BINGO_ERROR",
-        message: "Geçersiz oyun veya oyuncu.",
+        message: "İşlem yapılamıyor: Oyun aktif değil veya oyuncu bulunamadı.",
       })
-    );
-  }
-  if (!game.gameStarted) {
-    return ws.send(
-      JSON.stringify({ type: "BINGO_ERROR", message: "Oyun henüz başlamadı." })
-    );
-  }
-  if (game.gameEnded) {
-    return ws.send(
-      JSON.stringify({ type: "BINGO_ERROR", message: "Oyun zaten bitti." })
     );
   }
 
   const player = game.players[ws.userId];
+
   if (!player.ticket || !player.ticket.numbersGrid) {
-    return ws.send(
-      JSON.stringify({ type: "BINGO_ERROR", message: "Biletiniz bulunamadı." })
-    );
+    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Biletiniz bulunamadı." }));
   }
 
   if (player.completedBingo) {
-    ws.send(
-      JSON.stringify({
-        type: "BINGO_NUMBER_MARKED_CONFIRMED",
-        playerId: ws.userId,
-        number,
-        markedNumbers: player.markedNumbers,
-        completedBingo: true,
-        completedAt: player.completedAt
-          ? player.completedAt.toISOString()
-          : null,
-        message: "Zaten Bingo yaptınız, tekrar işaretleme yapılamaz.",
-      })
-    );
-    return;
+    return ws.send(JSON.stringify({ type: "BINGO_NUMBER_MARKED_CONFIRMED", playerId: ws.userId, number, markedNumbers: player.markedNumbers, completedBingo: true }));
   }
 
-  let numberFoundOnTicket = false;
-  player.ticket.numbersGrid.forEach((row) => {
-    if (row.includes(number)) numberFoundOnTicket = true;
-  });
-
+  const numberFoundOnTicket = player.ticket.numbersGrid.flat().includes(number);
   if (!numberFoundOnTicket) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Bu numara biletinizde yok.",
-      })
-    );
+    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bu numara biletinizde yok." }));
   }
 
-  const isNumberCurrentlyActive =
-    game.activeNumbers && game.activeNumbers.includes(number);
-  const isNumberDrawn = game.drawnNumbers.includes(number);
-
-  if (
-    game.competitionMode === "competitive" &&
-    !isNumberCurrentlyActive &&
-    !isNumberDrawn
-  ) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Bu numara henüz çekilmedi veya aktif değil.",
-      })
-    );
-  } else if (!isNumberDrawn) {
-    return ws.send(
-      JSON.stringify({
-        type: "BINGO_ERROR",
-        message: "Bu numara henüz çekilmedi.",
-      })
-    );
+  if (!game.drawnNumbers.includes(number)) {
+    return ws.send(JSON.stringify({ type: "BINGO_ERROR", message: "Bu numara henüz çekilmedi." }));
   }
+
+  if (!Array.isArray(player.completedRows)) {
+    player.completedRows = [];
+  }
+  const cinkoCountBeforeMarking = player.completedRows.length;
 
   if (!player.markedNumbers.includes(number)) {
     player.markedNumbers.push(number);
-    await saveGameToRedis(lobbyCode, game);
   }
 
+  const allCompletedRows = checkCompletedRows(player, game.drawnNumbers);
+  const newCinkoCount = allCompletedRows.length;
+
+
+  if (newCinkoCount > cinkoCountBeforeMarking) {
+    player.completedRows = allCompletedRows;
+
+    broadcastToGame(game, {
+      type: "BINGO_PLAYER_CINKO",
+      playerId: ws.userId,
+      playerName: player.name || player.userName,
+      avatar: player.avatar,
+      color: player.color,
+      cinkoCount: newCinkoCount,
+      notification: {
+        key: "notifications.playerMadeCinko",
+        params: {
+          playerName: player.name || player.userName,
+          count: newCinkoCount,
+        },
+      },
+    });
+  }
+  
+ 
   ws.send(
     JSON.stringify({
       type: "BINGO_NUMBER_MARKED_CONFIRMED",
@@ -1263,6 +1261,8 @@ export const markNumber = async (ws, data) => {
       completedBingo: player.completedBingo,
     })
   );
+ 
+  await saveGameToRedis(lobbyCode, game);
 };
 
 export const checkBingo = async (ws, data) => {
